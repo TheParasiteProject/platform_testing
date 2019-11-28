@@ -46,7 +46,6 @@ TestModuleMapping: dict[str, ModuleConfig] = {
     "CarSystemUITests": ModuleConfig(["packages/apps/Car/SystemUI/tests/"]),
     "CellBroadcastReceiverComplianceTests": ModuleConfig(["packages/apps/CellBroadcastReceiver/tests/"]),
     "CellBroadcastReceiverUnitTests": ModuleConfig(["packages/apps/CellBroadcastReceiver/tests/"]),
-    "ContactsTests": ModuleConfig(["packages/apps/Contacts/tests/"]),
     "DeskClockTests": ModuleConfig(["packages/apps/DeskClock/tests/"]),
     "DocumentsUITests": ModuleConfig(["packages/apps/DocumentsUI/app-perf-tests/"]),
     "DocumentsUITests": ModuleConfig(["packages/apps/DocumentsUI/tests/"]),
