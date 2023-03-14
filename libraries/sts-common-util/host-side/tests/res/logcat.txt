@@ -2724,3 +2724,19 @@
 11-08 17:31:00.084 22420 22420 F DEBUG   :       #08 pc 00000000001874f8  /data/data/avrc_poc
 11-08 17:31:00.084 22420 22420 F DEBUG   :       #09 pc 0000000000187178  /data/data/avrc_poc
 11-08 17:31:00.084 22420 22420 F DEBUG   :       #10 pc 0000000000051f9c  /apex/com.android.runtime/lib64/bionic/libc.so (__libc_init+136) (BuildId: 4e9eb0a9a3a51fd38c54515e3d4fdf99)
+01-04 15:28:42.566  7051  7051 F DEBUG   : *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** ***
+01-04 15:28:42.567  7051  7051 F DEBUG   : Build fingerprint: 'Realtek/RealtekThor/RealtekThor:11/RVC/12120ffa7ab:userdebug/release-keys'
+01-04 15:28:42.567  7051  7051 F DEBUG   : Revision: '0'
+01-04 15:28:42.567  7051  7051 F DEBUG   : ABI: 'arm'
+01-04 15:28:42.568  7051  7051 F DEBUG   : Timestamp: 2023-01-04 15:28:42+0800
+01-04 15:28:42.568  7051  7051 F DEBUG   : pid: 7043, tid: 7043, name: CVE-2020-0240  >>> /data/local/tmp/CVE-2020-0240 <<<
+01-04 15:28:42.568  7051  7051 F DEBUG   : uid: 2000
+01-04 15:28:42.568  7051  7051 F DEBUG   : signal 4 (SIGILL), code 1 (ILL_ILLOPC), fault addr 0xa7fc780a (*pc=0xb68defe)
+01-04 15:28:42.568  7051  7051 F DEBUG   :     r0  00000001  r1  410dc023  r2  410dc023  r3  00000000
+01-04 15:28:42.568  7051  7051 F DEBUG   :     r4  a709f1fa  r5  a709c7e8  r6  a7098030  r7  be850978
+01-04 15:28:42.568  7051  7051 F DEBUG   :     r8  be85099c  r9  00000001  r10 be850c48  r11 be850a40
+01-04 15:28:42.568  7051  7051 F DEBUG   :     ip  a8317398  sp  be84e788  lr  a7b8bc0d  pc  a7fc780a
+01-04 15:28:42.710  7051  7051 F DEBUG   : backtrace:
+01-04 15:28:42.710  7051  7051 F DEBUG   :       #00 pc 0050780a  /apex/com.android.art/lib/libpac.so (v8::base::OS::Abort()+14) (BuildId: b1ec1e3ff7cf26e92a2f475a0e47445c)
+01-04 15:28:42.710  7051  7051 F DEBUG   :       #01 pc 00000016  <unknown>
+

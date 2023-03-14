@@ -27,6 +27,7 @@ public class AutoSettingsConfigUtility implements IAutoConfigUtility {
     private static final String SETTINGS_TITLE_TEXT = "Settings";
     private static final String SETTING_APP_PACKAGE = "com.android.car.settings";
     private static final String SETTING_RRO_PACKAGE = "com.android.car.settings.googlecarui.rro";
+    private static final String SETTINGS_SHAREDLIBRARY_PACKAGE = "com.android.car.ui.sharedlibrary";
     private static final String SETTING_INTELLIGENCE_PACKAGE = "com.android.settings.intelligence";
     private static final String PERMISSIONS_PACKAGE = "com.android.permissioncontroller";
     private static final String OPEN_SETTINGS_COMMAND = "am start -a android.settings.SETTINGS";
@@ -276,7 +277,7 @@ public class AutoSettingsConfigUtility implements IAutoConfigUtility {
                 new AutoConfigResource(
                         AutoConfigConstants.RESOURCE_ID,
                         "car_ui_recycler_view",
-                        SETTING_INTELLIGENCE_PACKAGE));
+                        SETTINGS_SHAREDLIBRARY_PACKAGE));
         fullSettingsConfiguration.addResource(
                 AutoConfigConstants.UP_BUTTON,
                 new AutoConfigResource(AutoConfigConstants.DESCRIPTION, "Scroll up"));
@@ -385,6 +386,9 @@ public class AutoSettingsConfigUtility implements IAutoConfigUtility {
         appsAndNotificationsSettingsConfiguration.addResource(
                 AutoConfigConstants.DONT_ALLOW_ANYWAY_BUTTON,
                 new AutoConfigResource(AutoConfigConstants.TEXT, "Don’t allow anyway"));
+        appsAndNotificationsSettingsConfiguration.addResource(
+                AutoConfigConstants.ALLOWED_TEXT,
+                new AutoConfigResource(AutoConfigConstants.TEXT, "Allowed"));
         mSettingsConfigMap.put(
                 AutoConfigConstants.APPS_SETTINGS, appsAndNotificationsSettingsConfiguration);
     }

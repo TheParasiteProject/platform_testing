@@ -22,6 +22,7 @@ java_test_host {
 
     static_libs: [
         "sts-host-util",
+        "mockito-host",
     ],
 
     // tag this module as a test artifact

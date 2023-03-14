@@ -45,12 +45,17 @@ public class ArtifactSaver {
     }
 
     static File artifactFile(Description description, String prefix, String ext) {
+        String suffix = description.getMethodName();
+        if (suffix == null) {
+            // Can happen when the description is from a ClassRule
+            suffix = "EntireClassExecution";
+        }
         return artifactFile(
                 prefix
                         + "-"
                         + description.getTestClass().getSimpleName()
                         + "."
-                        + description.getMethodName()
+                        + suffix
                         + "."
                         + ext);
     }

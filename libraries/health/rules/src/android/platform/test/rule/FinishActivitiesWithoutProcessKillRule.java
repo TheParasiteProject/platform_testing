@@ -41,6 +41,7 @@ public class FinishActivitiesWithoutProcessKillRule extends TestWatcher {
     private String mPkgName;
     private Context mContext;
     private final Pattern mAppActivityRecordPattern;
+    private final boolean mEnableRule;
 
     @VisibleForTesting
     static final String FINISH_ACTIVITY_WITHOUT_PROCESS_KILL =
@@ -52,20 +53,28 @@ public class FinishActivitiesWithoutProcessKillRule extends TestWatcher {
     }
 
     public FinishActivitiesWithoutProcessKillRule(String appPackageName) {
+        this(appPackageName, false);
+    }
+
+    public FinishActivitiesWithoutProcessKillRule(String appPackageName,
+            boolean enableRule) {
         mPkgName = appPackageName;
         mContext = InstrumentationRegistry.getInstrumentation().getContext();
         mAppActivityRecordPattern = Pattern.compile(
                 "ActivityRecord\\{.*"
                         + appPackageName.replace(".", "\\.")
                         + "/.*\\st([0-9]+)\\}");
+        mEnableRule = enableRule;
     }
 
     @Override
     protected void starting(Description description) {
 
-        if (!Boolean.parseBoolean(
-                getArguments().getString(FINISH_ACTIVITY_WITHOUT_PROCESS_KILL, "true"))) {
-            return;
+        if(!mEnableRule) {
+            if (!Boolean.parseBoolean(
+                    getArguments().getString(FINISH_ACTIVITY_WITHOUT_PROCESS_KILL, "true"))) {
+                return;
+            }
         }
 
         if (!getAppActivityMatcher().find()) {

@@ -26,6 +26,8 @@ import android.car.Car;
 import android.car.drivingstate.CarDrivingStateEvent;
 import android.car.drivingstate.CarDrivingStateManager;
 import android.content.Context;
+import android.os.SystemClock;
+
 import androidx.test.InstrumentationRegistry;
 
 import java.util.regex.Matcher;
@@ -40,6 +42,7 @@ public class VehicleHardKeysHelperImpl extends AbstractAutoStandardAppHelper
             "cmd car_service " + "inject-vhal-event 0x11400400 4";
     private static final String SET_SPEED =
             "cmd car_service " + "inject-vhal-event 0x11600207 %s -t 2000";
+    private static final int UI_RESPONSE_WAIT_MS = 1000;
 
     private Car mCar;
     private Context mContext;
@@ -208,6 +211,7 @@ public class VehicleHardKeysHelperImpl extends AbstractAutoStandardAppHelper
             executeShellCommand(ENABLE_PARKING_MODE);
         } else {
             executeShellCommand(ENABLE_DRIVING_MODE);
+            SystemClock.sleep(UI_RESPONSE_WAIT_MS);
         }
     }
 

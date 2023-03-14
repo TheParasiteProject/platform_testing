@@ -17,5 +17,5 @@
 
 <resources>
     <string name="RESULT_KEY">result</string>
-    <string name="SHARED_PREFERENCE">CVE_2020_0215</string>
+    <string name="SHARED_PREFERENCE">sts_test_app_failure</string>
 </resources>

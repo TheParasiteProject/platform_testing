@@ -29,11 +29,23 @@ public interface ISettingsHomeHelper extends ISettingsIntelligenceHelper {
     /** This method opens Settings > Accessibility page */
     void goToAccessibility();
 
+    /** This method opens Settings > Apps page */
+    void goToApps();
+
+    /** This method opens Settings > Connected devices page */
+    void goToConnectedDevices();
+
     /** This method opens Settings > Display page */
     void goToDisplay();
 
     /** This method opens Settings > Network & internet page */
     void goToNetworkAndInternet();
+
+    /** This method opens Settings > Notifications page */
+    void goToNotifications();
+
+    /** This method opens Settings > Sound & vibration page */
+    void goToSoundAndVibration();
 
     /** This method opens Settings > Storage page */
     void goToStorage();

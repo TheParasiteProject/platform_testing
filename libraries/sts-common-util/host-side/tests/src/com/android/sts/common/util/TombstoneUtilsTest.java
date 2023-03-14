@@ -22,8 +22,11 @@ import static org.junit.Assert.fail;
 import static org.junit.Assume.assumeTrue;
 
 import com.android.server.os.TombstoneProtos.*;
+import com.android.sts.common.CommandUtil;
 import com.android.sts.common.ProcessUtil;
 import com.android.sts.common.util.TombstoneUtils.Config.BacktraceFilterPattern;
+import com.android.tradefed.device.DeviceNotAvailableException;
+import com.android.tradefed.device.ITestDevice;
 import com.android.tradefed.testtype.DeviceJUnit4ClassRunner;
 import com.android.tradefed.testtype.junit4.BaseHostJUnit4Test;
 
@@ -507,6 +510,7 @@ public class TombstoneUtilsTest extends BaseHostJUnit4Test {
         try {
             testWithAssertNoCrashesCatchesCrash();
         } finally {
+            CommandUtil.runAndCheck(getDevice(), "rm -f /data/tombstones/*");
             getDevice().disableAdbRoot();
         }
     }
@@ -518,20 +522,29 @@ public class TombstoneUtilsTest extends BaseHostJUnit4Test {
     }
 
     private void testWithAssertNoCrashesCatchesCrash() throws Exception {
-        String pgrepRegex = "media\\.codec";
-        ProcessUtil.waitProcessRunning(getDevice(), pgrepRegex);
+        String pgrepRegex = "sleep";
+        ProcessUtil.killAll(
+                getDevice(), pgrepRegex, /* timeoutMs */ 60_000, /* expectExist */ false);
         try (AutoCloseable a =
                 TombstoneUtils.withAssertNoSecurityCrashes(
                         getDevice(), new TombstoneUtils.Config().setIgnoreLowFaultAddress(false))) {
-            Optional<Map<Integer, String>> pidsMap = ProcessUtil.pidsOf(getDevice(), pgrepRegex);
-            // can't use Optional Truth checks in this branch
-            assertThat(pidsMap.isPresent()).isTrue();
-            Optional<Integer> pid = pidsMap.get().keySet().stream().findAny();
-            assertThat(pid.isPresent()).isTrue();
-
             // need root to execute kill
             boolean wasAdbRoot = getDevice().isAdbRoot();
             assumeTrue(getDevice().enableAdbRoot());
+
+            final ITestDevice device = getDevice();
+            new java.lang.Thread(
+                            () -> {
+                                try {
+                                    device.executeShellCommand("sleep 60");
+                                } catch (DeviceNotAvailableException e) {
+                                }
+                            })
+                    .start();
+            Map<Integer, String> pidsMap = ProcessUtil.waitProcessRunning(getDevice(), pgrepRegex);
+            Optional<Integer> pid = pidsMap.keySet().stream().findAny();
+            // can't use Optional Truth checks in this branch
+            assertThat(pid.isPresent()).isTrue();
             ProcessUtil.killPid(
                     getDevice(), pid.get(), /* SIGSEGV */ 11, ProcessUtil.PROCESS_WAIT_TIMEOUT_MS);
             if (!wasAdbRoot) {
@@ -540,9 +553,53 @@ public class TombstoneUtilsTest extends BaseHostJUnit4Test {
             }
         } catch (AssertionError e) {
             // expected
-            assertThat(e).hasMessageThat().contains("media.codec");
+            assertThat(e).hasMessageThat().contains("sleep");
             return;
         }
         fail("should have thrown an exception and detected the security crash");
+    }
+
+    @Test
+    public void testWithAssertNoCrashesForNoCrashPriorCrashes() throws Exception {
+        String pgrepRegex = "sleep";
+        assumeTrue(getDevice().enableAdbRoot());
+        ProcessUtil.killAll(
+                getDevice(), pgrepRegex, /* timeoutMs */ 60_000, /* expectExist */ false);
+        try {
+            final ITestDevice device = getDevice();
+            new java.lang.Thread(
+                            () -> {
+                                try {
+                                    device.executeShellCommand("sleep 60");
+                                } catch (DeviceNotAvailableException e) {
+                                }
+                            })
+                    .start();
+            Map<Integer, String> pidsMap = ProcessUtil.waitProcessRunning(getDevice(), pgrepRegex);
+            Optional<Integer> pid = pidsMap.keySet().stream().findAny();
+            assertThat(pid.isPresent()).isTrue();
+
+            ProcessUtil.killPid(
+                    getDevice(), pid.get(), /* SIGSEGV */ 11, ProcessUtil.PROCESS_WAIT_TIMEOUT_MS);
+
+            try (AutoCloseable a =
+                    TombstoneUtils.withAssertNoSecurityCrashes(
+                            getDevice(), new TombstoneUtils.Config())) {}
+        } finally {
+            CommandUtil.runAndCheck(getDevice(), "rm -f /data/tombstones/*");
+            getDevice().disableAdbRoot();
+        }
+    }
+
+    @Test
+    public void testWithAssertNoCrashesForNoCrashNoPriorCrashes() throws Exception {
+        assumeTrue(getDevice().enableAdbRoot());
+        CommandUtil.runAndCheck(getDevice(), "rm -f /data/tombstones/*");
+        try (AutoCloseable a =
+                TombstoneUtils.withAssertNoSecurityCrashes(
+                        getDevice(), new TombstoneUtils.Config())) {
+        } finally {
+            getDevice().disableAdbRoot();
+        }
     }
 }

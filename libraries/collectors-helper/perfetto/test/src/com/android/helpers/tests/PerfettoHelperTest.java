@@ -61,8 +61,9 @@ public class PerfettoHelperTest {
         if (isPerfettoStartSuccess) {
             mPerfettoHelper.setPerfettoConfigRootDir("/data/misc/perfetto-traces/");
             UiDevice uiDevice = UiDevice.getInstance(InstrumentationRegistry.getInstrumentation());
-            mPerfettoHelper.stopCollecting(1000, "data/local/tmp/out.pb");
-            uiDevice.executeShellCommand(String.format(REMOVE_CMD, "/data/local/tmp/out.pb"));
+            mPerfettoHelper.stopCollecting(1000, "data/local/tmp/out.perfetto-trace");
+            uiDevice.executeShellCommand(String.format(REMOVE_CMD,
+                "/data/local/tmp/out.perfetto-trace"));
         }
     }
 
@@ -121,7 +122,7 @@ public class PerfettoHelperTest {
     public void testPerfettoValidOutputPath() throws Exception {
         assertTrue(mPerfettoHelper.startCollecting("trace_config.textproto", true));
         isPerfettoStartSuccess = true;
-        assertTrue(mPerfettoHelper.stopCollecting(1000, "data/local/tmp/out.pb"));
+        assertTrue(mPerfettoHelper.stopCollecting(1000, "data/local/tmp/out.perfetto-trace"));
     }
 
     /**
@@ -132,7 +133,7 @@ public class PerfettoHelperTest {
         assertTrue(mPerfettoHelper.startCollecting("trace_config.textproto", true));
         isPerfettoStartSuccess = true;
         // Don't have permission to create new folder under /data
-        assertFalse(mPerfettoHelper.stopCollecting(1000, "/data/xxx/xyz/out.pb"));
+        assertFalse(mPerfettoHelper.stopCollecting(1000, "/data/xxx/xyz/out.perfetto-trace"));
     }
 
     /**
@@ -143,10 +144,10 @@ public class PerfettoHelperTest {
     public void testPerfettoSuccess() throws Exception {
         assertTrue(mPerfettoHelper.startCollecting("trace_config.textproto", true));
         isPerfettoStartSuccess = true;
-        assertTrue(mPerfettoHelper.stopCollecting(1000, "/data/local/tmp/out.pb"));
+        assertTrue(mPerfettoHelper.stopCollecting(1000, "/data/local/tmp/out.perfetto-trace"));
         UiDevice uiDevice = UiDevice.getInstance(InstrumentationRegistry.getInstrumentation());
         String[] fileStats = uiDevice.executeShellCommand(String.format(
-                FILE_SIZE_IN_BYTES, "/data/local/tmp/out.pb")).split(" ");
+                FILE_SIZE_IN_BYTES, "/data/local/tmp/out.perfetto-trace")).split(" ");
         int fileSize = Integer.parseInt(fileStats[0].trim());
         assertTrue(fileSize > 0);
     }

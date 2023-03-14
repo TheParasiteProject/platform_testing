@@ -21,12 +21,17 @@ import static junit.framework.Assert.assertTrue;
 import android.app.Instrumentation;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
+import android.os.SystemClock;
 import android.support.test.uiautomator.By;
 import android.support.test.uiautomator.BySelector;
+import android.support.test.uiautomator.Direction;
 import android.support.test.uiautomator.UiObject2;
 
 public class SettingsAppInfoHelperImpl extends AbstractAutoStandardAppHelper
         implements IAutoAppInfoSettingsHelper {
+
+    private static final int SHORT_UI_RESPONSE_TIME = 1000;
+
     public SettingsAppInfoHelperImpl(Instrumentation instr) {
         super(instr);
     }
@@ -152,9 +157,20 @@ public class SettingsAppInfoHelperImpl extends AbstractAutoStandardAppHelper
                 scrollAndFindUiObject(permissions_selector, getScrollScreenIndex());
         clickAndWaitForWindowUpdate(
                 getApplicationConfig(AutoConfigConstants.SETTINGS_PACKAGE), permissions_menu);
+
+        UiObject2 scroller_object =
+                findUiObject(
+                        getResourceFromConfig(
+                                AutoConfigConstants.SETTINGS,
+                                AutoConfigConstants.APPS_SETTINGS,
+                                AutoConfigConstants.ALLOWED_TEXT));
+        scroller_object.swipe(Direction.UP, 1.0f, 500);
         BySelector permission_selector = By.text(permission);
         UiObject2 permission_menu =
                 scrollAndFindUiObject(permission_selector, getScrollScreenIndex());
+        if (permission_menu == null) {
+            throw new RuntimeException("Cannot find the permission_selector" + permission);
+        }
         clickAndWaitForWindowUpdate(
                 getApplicationConfig(AutoConfigConstants.SETTINGS_PACKAGE), permission_menu);
         if (state == State.ENABLE) {
@@ -185,6 +201,8 @@ public class SettingsAppInfoHelperImpl extends AbstractAutoStandardAppHelper
                     getApplicationConfig(AutoConfigConstants.SETTINGS_PACKAGE),
                     dont_allow_anyway_btn);
         }
+
+        SystemClock.sleep(SHORT_UI_RESPONSE_TIME);
         pressBack();
         pressBack();
     }

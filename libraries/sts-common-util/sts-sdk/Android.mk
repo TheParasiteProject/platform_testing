@@ -20,7 +20,9 @@ $(LOCAL_BUILT_MODULE): $(sts_sdk_sample_files) $(SOONG_ZIP)
 		sed -i 's~{{PLATFORM_SDK_VERSION}}~$(PLATFORM_SDK_VERSION)~g' $${tmplfile}; \
 		mv $${tmplfile} $${tmplfile/.template/}; \
 	done
-	$(SOONG_ZIP) -o $@ -C $(STS_SDK_TMP_DIR) -D $(STS_SDK_TMP_DIR)
+	# Build system can't cleanly handle hidden files
+	mv $(STS_SDK_TMP_DIR)/dotidea $(STS_SDK_TMP_DIR)/.idea
+	$(SOONG_ZIP) -o $@ -C $(STS_SDK_TMP_DIR) -D $(STS_SDK_TMP_DIR) -D $(STS_SDK_TMP_DIR)/.idea
 
 sts_sdk_sample_files :=
 

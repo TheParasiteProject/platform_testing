@@ -26,6 +26,9 @@ public interface ISettingsDisplayHelper extends ISettingsHomeHelper {
      */
     void flingDisplay(Direction direction);
 
+    /** This method opens Settings > Display > Display size and text page */
+    void goToDisplaySizeAndText();
+
     /**
      * Setup expectations: Settings Display page is open
      *

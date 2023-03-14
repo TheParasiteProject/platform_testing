@@ -58,7 +58,8 @@ public class PlatinumRule implements TestRule {
             flavor =
                     UiDevice.getInstance(InstrumentationRegistry.getInstrumentation())
                             .executeShellCommand("getprop ro.build.flavor")
-                            .replaceAll("\\s", "");
+                            .replaceAll("\\s", "")
+                            .replace("-userdebug", "");
         } catch (IOException e) {
             throw new RuntimeException(e);
         }

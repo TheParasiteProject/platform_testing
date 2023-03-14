@@ -34,19 +34,21 @@ import java.nio.file.Paths;
 public class PerfettoHelper {
 
     private static final String LOG_TAG = PerfettoHelper.class.getSimpleName();
-    // Command to start the perfetto tracing in the background.
-    // perfetto -b -c /data/misc/perfetto-traces/trace_config.pb -o
-    // /data/misc/perfetto-traces/trace_output.pb
-    private static final String PERFETTO_START_CMD = "perfetto --background -c %s%s -o %s";
+    // Command to start the perfetto tracing in the background. The "perfetto" process will wait
+    // until tracing is fully started (i.e. all data sources are active) before backgrounding and
+    // returning from the original shell invocation.
+    //   perfetto --background-wait -c /data/misc/perfetto-traces/trace_config.pb -o
+    //   /data/misc/perfetto-traces/trace_output.perfetto-trace
+    private static final String PERFETTO_START_CMD = "perfetto --background-wait -c %s%s -o %s";
     private static final String PERFETTO_TMP_OUTPUT_FILE =
-            "/data/misc/perfetto-traces/trace_output.pb";
+            "/data/misc/perfetto-traces/trace_output.perfetto-trace";
     // Additional arg to indicate that the perfetto config file is text format.
     private static final String PERFETTO_TXT_PROTO_ARG = " --txt";
     // Command to stop (i.e kill) the perfetto tracing.
     private static final String PERFETTO_STOP_CMD = "kill %d";
     // Command to return the process details if it is still running otherwise returns empty string.
     private static final String PERFETTO_PROC_ID_EXIST_CHECK = "ls -l /proc/%d/exe";
-    // Remove the trace output file /data/misc/perfetto-traces/trace_output.pb
+    // Remove the trace output file /data/misc/perfetto-traces/trace_output.perfetto-trace
     private static final String REMOVE_CMD = "rm %s";
     // Command to move the perfetto output trace file to given folder.
     private static final String MOVE_CMD = "mv %s %s";
@@ -63,7 +65,7 @@ public class PerfettoHelper {
 
     /**
      * Start the perfetto tracing in background using the given config file and write the ouput to
-     * /data/misc/perfetto-traces/trace_output.pb. Perfetto has access only to
+     * /data/misc/perfetto-traces/trace_output.perfetto-trace. Perfetto has access only to
      * /data/misc/perfetto-traces/ folder. So the config file has to be under
      * /data/misc/perfetto-traces/ folder in the device.
      *
@@ -116,9 +118,9 @@ public class PerfettoHelper {
     }
 
     /**
-     * Stop the perfetto trace collection under /data/misc/perfetto-traces/trace_output.pb after
-     * waiting for given time in msecs and copy the output to the destination file.
-     *
+     * Stop the perfetto trace collection and redirect the output to
+     * /data/misc/perfetto-traces/trace_output.perfetto-trace after waiting for given time in msecs
+     * and copy the output to the destination file.
      * @param waitTimeInMsecs time to wait in msecs before stopping the trace collection.
      * @param destinationFile file to copy the perfetto output trace.
      * @return true if the trace collection is successfull otherwise false.
@@ -215,7 +217,7 @@ public class PerfettoHelper {
             }
         }
 
-        // Copy the collected trace from /data/misc/perfetto-traces/trace_output.pb to
+        // Copy the collected trace from /data/misc/perfetto-traces/trace_output.perfetto-trace to
         // destinationFile
         try {
             String moveResult = mUIDevice.executeShellCommand(String.format(

@@ -15,6 +15,13 @@ dependencyResolutionManagement {
 }
 
 rootProject.name = 'STS test'
-include ':native-poc'
-include ':test-app'
+
+if (new File('native-poc').isDirectory()) {
+    include ':native-poc'
+}
+
+if (new File('test-app').isDirectory()) {
+    include ':test-app'
+}
+
 include ':sts-test'

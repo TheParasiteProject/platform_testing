@@ -20,6 +20,8 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assume.assumeNoException;
+import static org.junit.Assume.assumeTrue;
 import static com.android.sts.common.CommandUtil.runAndCheck;
 
 import java.io.ByteArrayOutputStream;
@@ -90,11 +92,19 @@ public class RootcanalUtils extends TestWatcher {
             device.disableAdbRoot();
             // OverlayFsUtils' finished() will restart the device.
             overlayFsUtils.finished(d);
-            runAndCheck(device, "svc bluetooth enable");
+            device.waitForDeviceAvailable();
+            CommandResult res = device.executeShellV2Command("svc bluetooth enable");
+            if (res.getStatus() != CommandStatus.SUCCESS) {
+                CLog.e("Could not reenable Bluetooth during cleanup!");
+            }
         } catch (DeviceNotAvailableException e) {
             throw new AssertionError("Device unavailable when cleaning up", e);
         } catch (TimeoutException e) {
             CLog.w("Could not kill rootcanal HAL during cleanup");
+        } catch (ProcessUtil.KillException e) {
+            if (e.getReason() != ProcessUtil.KillException.Reason.NO_SUCH_PROCESS) {
+                CLog.w("Could not kill rootcanal HAL during cleanup: " + e.getMessage());
+            }
         }
     }
 
@@ -104,10 +114,13 @@ public class RootcanalUtils extends TestWatcher {
      * @return an instance of RootcanalController
      */
     public RootcanalController enableRootcanal()
-            throws DeviceNotAvailableException, IOException, InterruptedException,
-                    TimeoutException {
+            throws DeviceNotAvailableException, IOException, InterruptedException {
         ITestDevice device = test.getDevice();
         assertNotNull("Device not set", device);
+        assumeTrue(
+                "Device does not seem to have Bluetooth",
+                device.hasFeature("android.hardware.bluetooth")
+                        || device.hasFeature("android.hardware.bluetooth_le"));
         CompatibilityBuildHelper buildHelper = new CompatibilityBuildHelper(test.getBuild());
 
         // Check and made sure we're not calling this more than once for a device
@@ -174,33 +187,39 @@ public class RootcanalUtils extends TestWatcher {
                         + "/vendor/lib/hw/android.hardware.bluetooth@1.1-impl-sim.so "
                         + "/vendor/lib64/hw/android.hardware.bluetooth@1.1-impl-sim.so");
 
-        // Kill currently running BT HAL.
-        if (ProcessUtil.killAll(device, "android\\.hardware\\.bluetooth@.*", 10_000, false)) {
-            CLog.d("Killed existing BT HAL");
-        } else {
-            CLog.w("No existing BT HAL was found running");
+        try {
+            // Kill currently running BT HAL.
+            if (ProcessUtil.killAll(device, "android\\.hardware\\.bluetooth@.*", 10_000, false)) {
+                CLog.d("Killed existing BT HAL");
+            } else {
+                CLog.w("No existing BT HAL was found running");
+            }
+
+            // Kill hwservicemanager, wait for it to come back up on its own, and wait for it
+            // to finish initializing. This is needed to reload the VINTF and HAL rc information.
+            // Note that a userspace reboot would not work here because hwservicemanager starts
+            // before userdata is mounted.
+            device.setProperty("hwservicemanager.ready", "false");
+            ProcessUtil.killAll(device, "hwservicemanager$", 10_000);
+            waitPropertyValue(device, "hwservicemanager.ready", "true", 10_000);
+            TimeUnit.SECONDS.sleep(30);
+
+            // Launch the new HAL
+            List<String> cmd =
+                    List.of(
+                            "adb",
+                            "-s",
+                            device.getSerialNumber(),
+                            "shell",
+                            "/vendor/bin/hw/android.hardware.bluetooth@1.1-service.sim");
+            RunUtil.getDefault().runCmdInBackground(cmd);
+            ProcessUtil.waitProcessRunning(
+                    device, "android\\.hardware\\.bluetooth@1\\.1-service\\.sim", 10_000);
+        } catch (TimeoutException e) {
+            assumeNoException("Could not start virtual BT HAL", e);
+        } catch (ProcessUtil.KillException e) {
+            assumeNoException("Failed to kill process", e);
         }
-
-        // Kill hwservicemanager, wait for it to come back up on its own, and wait for it
-        // to finish initializing. This is needed to reload the VINTF and HAL rc information.
-        // Note that a userspace reboot would not work here because hwservicemanager starts
-        // before userdata is mounted.
-        device.setProperty("hwservicemanager.ready", "false");
-        ProcessUtil.killAll(device, "hwservicemanager$", 10_000);
-        waitPropertyValue(device, "hwservicemanager.ready", "true", 10_000);
-        TimeUnit.SECONDS.sleep(30);
-
-        // Launch the new HAL
-        List<String> cmd =
-                List.of(
-                        "adb",
-                        "-s",
-                        device.getSerialNumber(),
-                        "shell",
-                        "/vendor/bin/hw/android.hardware.bluetooth@1.1-service.sim");
-        RunUtil.getDefault().runCmdInBackground(cmd);
-        ProcessUtil.waitProcessRunning(
-                device, "android\\.hardware\\.bluetooth@1\\.1-service\\.sim", 10_000);
 
         // Reenable Bluetooth and enable RootCanal control channel
         String checkCmd = "netstat -l -t -n -W | grep '0\\.0\\.0\\.0:6111'";

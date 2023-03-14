@@ -31,4 +31,11 @@ public interface ISettingsInternetHelper extends ISettingsNetworkAndInternetHelp
      * <p>This method validates Settings Internet page.
      */
     void isInternetPage();
+
+    /**
+     * Setup expectations: Settings Internet page is open
+     *
+     * <p>This method waits the "Searching For Networks..." text gone.
+     */
+    void waitSearchingForNetworksGone();
 }

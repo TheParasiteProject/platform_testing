@@ -77,12 +77,8 @@ public class TombstoneUtils {
         }
         final Collection<IFileEntry> excludeTombstoneFiles = existingDeviceTombstoneFiles;
 
-        // track existing tombstones so we only check new ones
-        if (useTombstoneFiles) {
-            CLog.d("Using tombstone files");
-            CommandUtil.runAndCheck(device, String.format("rm %s/*", TOMBSTONES_PATH));
-        } else {
-            // fallback to logcat
+        if (!useTombstoneFiles) {
+            // clear existing tombstones so we only check new ones
             CLog.d("Using logcat");
             CommandUtil.runAndCheck(device, "logcat -c");
         }
@@ -103,7 +99,8 @@ public class TombstoneUtils {
                                                         try {
                                                             ProcessUtil.waitPidExited(device, pid);
                                                         } catch (TimeoutException
-                                                                | DeviceNotAvailableException e) {
+                                                                | DeviceNotAvailableException
+                                                                | ProcessUtil.KillException e) {
                                                             CLog.w(e);
                                                         }
                                                     });

@@ -24,11 +24,13 @@ java_library_host {
         "src/**/*.java",
     ],
     static_libs: [
+        "auto_value_annotations",
         "sts-common-util-lib",
         "sts-libtombstone_proto-java",
         "truth-prebuilt",
         "xz-java",
     ],
+    plugins: ["auto_value_plugin"],
     libs: [
         "compatibility-host-util",
         "compatibility-tradefed",
@@ -51,4 +53,43 @@ java_library_host {
     static_libs: [
         "libprotobuf-java-lite",
     ],
+}
+
+// Turn off various doclava warnings when generating
+// the docs. These are the same warnings that are
+// turned off in tools/tradefed/core
+tradefed_docs_only_args = " -hide 101 -hide 111 -hide 113 -hide 125 -hide 126 -hide 127 -hide 128 "
+
+droiddoc_host {
+    name: "sts-docs",
+    srcs: [
+        "src/**/*.java",
+    ],
+    libs: [
+        "auto_value_annotations",
+        "sts-common-util-lib",
+        "sts-libtombstone_proto-java",
+        "truth-prebuilt",
+        "xz-java",
+        "compatibility-host-util",
+        "compatibility-tradefed",
+        "guava",
+        "tradefed",
+    ],
+    custom_template: "droiddoc-templates-sdk",
+    // These settings are for integrating the javadoc with Devsite. See go/generate-tradefed-docs
+    hdf: [
+        "sac true",
+        "devices true",
+        "android.whichdoc online",
+        "css.path /reference/assets/css/doclava-devsite.css",
+        "book.root toc",
+        "book.path /_book.yaml",
+    ],
+    args: tradefed_docs_only_args +
+          "-yaml _toc.yaml " +
+          "-apidocsdir reference/sts/ " +
+          "-werror " +
+          "-package " +
+          "-devsite ",
 }

@@ -16,16 +16,8 @@
 
 package com.android.sts.common;
 
-import org.junit.runner.Description;
-
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.Set;
-import java.io.File;
-import java.io.FileNotFoundException;
-
-import org.junit.runner.Description;
-import org.junit.rules.TestWatcher;
+import static org.junit.Assert.*;
+import static org.junit.Assume.*;
 
 import com.android.compatibility.common.tradefed.build.CompatibilityBuildHelper;
 import com.android.tradefed.build.IBuildInfo;
@@ -34,9 +26,16 @@ import com.android.tradefed.device.ITestDevice;
 import com.android.tradefed.log.LogUtil.CLog;
 import com.android.tradefed.testtype.IAbi;
 
-import static org.junit.Assume.*;
-import static org.junit.Assert.*;
+import org.junit.rules.TestWatcher;
+import org.junit.runner.Description;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Set;
+
+/** Utilities to help push a native PoC executable to the device */
 public class PocPusher extends TestWatcher {
     private ITestDevice device = null;
     private CompatibilityBuildHelper buildHelper = null;

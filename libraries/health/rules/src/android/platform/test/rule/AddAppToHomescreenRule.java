@@ -42,7 +42,7 @@ public class AddAppToHomescreenRule extends TestWatcher {
 
     @Override
     protected void starting(Description description) {
-        if (!Boolean.parseBoolean(getArguments().getString(ADD_APP_TO_HOMESCREEN, "false"))) {
+        if (!Boolean.parseBoolean(getArguments().getString(ADD_APP_TO_HOMESCREEN, "true"))) {
             Log.d(LOG_TAG, "Adding the app icon to the homescreen is disabled.");
             return;
         }

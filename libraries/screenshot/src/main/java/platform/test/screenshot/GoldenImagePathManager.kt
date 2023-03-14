@@ -58,7 +58,7 @@ private const val ORIENTATION_TAG = "orientation"
  */
 open class GoldenImagePathManager @JvmOverloads constructor(
     open val appContext: Context,
-    open val assetsPathRelativeToRepo: String = "assets",
+    open val assetsPathRelativeToBuildRoot: String = "assets",
     open val deviceLocalPath: String = getDeviceOutputDirectory(appContext),
     open val pathConfig: PathConfig = getSimplePathConfig()
 ) {

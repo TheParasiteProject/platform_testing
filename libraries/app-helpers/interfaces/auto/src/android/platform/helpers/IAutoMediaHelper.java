@@ -18,7 +18,7 @@ package android.platform.helpers;
 
 import java.util.List;
 
-public interface IAutoMediaHelper extends IAppHelper {
+public interface IAutoMediaHelper extends IAppHelper, Scrollable {
     /**
      * Setup expectations: media app is open
      *
@@ -170,4 +170,18 @@ public interface IAutoMediaHelper extends IAppHelper {
      * @return Error message for no user login
      */
     String getMediaAppUserNotLoggedInErrorMessage();
+
+    /**
+     * Setup expectations: In Media.
+     *
+     * <p>Scroll up on page.
+     */
+    boolean scrollUpOnePage();
+
+    /**
+     * Setup expectations: In Media.
+     *
+     * <p>Scroll down on page.
+     */
+    boolean scrollDownOnePage();
 }

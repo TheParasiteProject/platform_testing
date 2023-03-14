@@ -59,7 +59,8 @@ public class TombstoneParser {
                     "signal (?<number>\\d+?) \\((?<name>.+?)\\), code (?<code>(?:-)?\\d+?)"
                             + " \\((?<codename>\\S+?)(?: from pid (?<senderpid>\\d+?), uid"
                             + " (?<senderuid>\\d+?))?\\), fault addr"
-                            + " (?:0x)?(?<faultaddress>\\p{XDigit}{1,16}|--------)");
+                            + " (?:0x)?(?<faultaddress>\\p{XDigit}{1,16}|--------)"
+                            + "( (?<register>\\(.+\\)))?");
     private static final Pattern CAUSE_PATTERN = Pattern.compile("Cause: (?<cause>.*?)");
     // Be greedy because some abort messages are multiple lines long
     private static final Pattern ABORT_PATTERN =

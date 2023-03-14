@@ -16,6 +16,7 @@
 
 package platform.test.screenshot
 
+import android.app.UiAutomation
 import android.app.UiModeManager
 import android.content.Context
 import android.os.UserHandle
@@ -41,6 +42,7 @@ import org.junit.runners.model.Statement
 class DeviceEmulationRule(private val spec: DeviceEmulationSpec) : TestRule {
 
     private val instrumentation = InstrumentationRegistry.getInstrumentation()
+    private val uiAutomation = instrumentation.uiAutomation
 
     override fun apply(base: Statement, description: Description): Statement {
         // The statement which calls beforeTest() before running the test and afterTest()
@@ -58,6 +60,9 @@ class DeviceEmulationRule(private val spec: DeviceEmulationSpec) : TestRule {
     }
 
     private fun beforeTest() {
+        // Make sure that we are in natural orientation (rotation 0) before we set the screen size
+        uiAutomation.setRotation(UiAutomation.ROTATION_FREEZE_0)
+
         // Emulate the display size and density.
         val display = spec.display
         val density = display.densityDpi
@@ -109,6 +114,9 @@ class DeviceEmulationRule(private val spec: DeviceEmulationSpec) : TestRule {
         uiModeManager.setApplicationNightMode(UiModeManager.MODE_NIGHT_AUTO)
 
         instrumentation.resetInTouchMode()
+
+        // Unfreeze locked rotation
+        uiAutomation.setRotation(UiAutomation.ROTATION_UNFREEZE);
     }
 }
 

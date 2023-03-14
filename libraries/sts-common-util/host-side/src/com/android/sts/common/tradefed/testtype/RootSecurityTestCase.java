@@ -19,8 +19,6 @@ package com.android.sts.common.tradefed.testtype;
 import static org.junit.Assume.assumeTrue;
 
 import com.android.tradefed.device.DeviceNotAvailableException;
-import com.android.tradefed.device.ITestDevice;
-import com.android.tradefed.log.LogUtil.CLog;
 
 import org.junit.Before;
 
@@ -36,23 +34,5 @@ public class RootSecurityTestCase extends SecurityTestCase {
     @Before
     public void setUpRoot() throws DeviceNotAvailableException {
         assumeTrue("Could not enable adb root on device.", getDevice().enableAdbRoot());
-    }
-
-    /**
-     * Try to enable adb root on device.
-     *
-     * <p>Use {@link NativeDevice#enableAdbRoot()} internally. The test methods calling this
-     * function should run even if enableAdbRoot fails, which is why the return value is ignored.
-     * However, we may want to act on that data point in the future.
-     */
-    protected static boolean enableAdbRoot(ITestDevice device) throws DeviceNotAvailableException {
-        if (device.enableAdbRoot()) {
-            return true;
-        } else {
-            CLog.e(
-                    "\"enable-root\" set to false! "
-                            + "Root is required to check if device is vulnerable.");
-            return false;
-        }
     }
 }

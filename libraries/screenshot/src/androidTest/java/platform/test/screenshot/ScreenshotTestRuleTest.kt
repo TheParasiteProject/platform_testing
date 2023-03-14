@@ -51,7 +51,7 @@ class CustomGoldenImagePathManager(
 @MediumTest
 class ScreenshotTestRuleTest {
 
-    val customizedAssetsPath = "libraries/screenshot/src/androidTest/assets"
+    val customizedAssetsPath = "platform_testing/libraries/screenshot/src/androidTest/assets"
 
     @get:Rule
     val rule = ScreenshotTestRule(
@@ -271,6 +271,41 @@ class ScreenshotTestRuleTest {
         assertThat(rule.getPathOnDeviceFor(IMAGE_DIFF, goldenIdentifier).exists()).isFalse()
         assertThat(rule.getPathOnDeviceFor(IMAGE_EXPECTED, goldenIdentifier).exists()).isFalse()
         assertThat(rule.getPathOnDeviceFor(RESULT_BIN_PROTO, goldenIdentifier).exists()).isTrue()
+    }
+
+    @Test
+    fun screenshotAsserterHooks_successfulRun() {
+        var preRan = false
+        var postRan = false
+        val bitmap = loadBitmap("round_rect_green")
+        val asserter = ScreenshotRuleAsserter.Builder(rule)
+            .setOnBeforeScreenshot {preRan = true}
+            .setOnAfterScreenshot {postRan = true}
+            .setScreenshotProvider {bitmap}
+            .build()
+        asserter.assertGoldenImage("round_rect_green")
+        assertThat(preRan).isTrue()
+        assertThat(postRan).isTrue()
+    }
+
+    @Test
+    fun screenshotAsserterHooks_assertionException() {
+        var preRan = false
+        var postRan = false
+        val bitmap = loadBitmap("round_rect_green")
+        val asserter = ScreenshotRuleAsserter.Builder(rule)
+            .setOnBeforeScreenshot {preRan = true}
+            .setOnAfterScreenshot {postRan = true}
+            .setScreenshotProvider {
+                throw RuntimeException()
+                bitmap
+            }
+            .build()
+        try {
+            asserter.assertGoldenImage("round_rect_green")
+        } catch (e: RuntimeException) {}
+        assertThat(preRan).isTrue()
+        assertThat(postRan).isTrue()
     }
 
     @After

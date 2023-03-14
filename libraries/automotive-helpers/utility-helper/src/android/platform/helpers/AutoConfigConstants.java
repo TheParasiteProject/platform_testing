@@ -95,6 +95,7 @@ public class AutoConfigConstants {
     public static final String ALLOW_BUTTON = "ALLOW_BUTTON";
     public static final String DONT_ALLOW_BUTTON = "DONT_ALLOW_BUTTON";
     public static final String DONT_ALLOW_ANYWAY_BUTTON = "DONT_ALLOW_ANYWAY_BUTTON";
+    public static final String ALLOWED_TEXT = "ALLOWED_TEXT";
     // Date and Time
     public static final String DATE_AND_TIME_SETTINGS = "DATE_AND_TIME";
     public static final String SET_TIME_AUTOMATICALLY = "SET_TIME_AUTOMATICALLY";

@@ -39,7 +39,7 @@ import org.junit.runner.notification.Failure;
 /**
  * A {@link PerfettoListener} that captures the perfetto trace during each test method
  * and save the perfetto trace files under
- * <root_folder>/<test_display_name>/PerfettoListener/<test_display_name>-<invocation_count>.pb
+ * <root>/<test_name>/PerfettoListener/<test_name>-<invocation_count>.perfetto-trace
  */
 @OptionClass(alias = "perfetto-collector")
 public class PerfettoListener extends BaseMetricListener {
@@ -225,14 +225,14 @@ public class PerfettoListener extends BaseMetricListener {
                     () -> {
                         Log.i(getTag(), "Stopping perfetto after test ended.");
                         // Construct test output directory in the below format
-                        // <root_folder>/<test_name>/PerfettoListener/<test_name>-<count>.pb
+                        // <root>/<test_name>/PerfettoListener/<test_name>-<count>.perfetto-trace
                         Path path =
                                 Paths.get(
                                         mTestOutputRoot,
                                         getTestFileName(description),
                                         this.getClass().getSimpleName(),
                                         String.format(
-                                                "%s%s-%d.pb",
+                                                "%s%s-%d.perfetto-trace",
                                                 PERFETTO_PREFIX,
                                                 getTestFileName(description),
                                                 mTestIdInvocationCount.get(
@@ -265,13 +265,13 @@ public class PerfettoListener extends BaseMetricListener {
                 () -> {
                     Log.i(getTag(), "Stopping perfetto after test run ended.");
                     // Construct test output directory in the below format
-                    // <root_folder>/PerfettoListener/<randomUUID>.pb
+                    // <root_folder>/PerfettoListener/<randomUUID>.perfetto-trace
                     Path path =
                             Paths.get(
                                     mTestOutputRoot,
                                     this.getClass().getSimpleName(),
                                     String.format(
-                                            "%s%d.pb",
+                                            "%s%d.perfetto-trace",
                                             PERFETTO_PREFIX, UUID.randomUUID().hashCode()));
                     stopPerfettoTracing(path, runData);
                 };

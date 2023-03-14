@@ -16,12 +16,10 @@
 
 package android.platform.test.util;
 
-import android.os.SystemClock;
+import android.platform.uiautomator_helpers.WaitUtils;
 import android.support.test.uiautomator.StaleObjectException;
 
-import org.junit.Assert;
-
-import java.util.Objects;
+import java.time.Duration;
 import java.util.Optional;
 import java.util.function.Supplier;
 
@@ -29,7 +27,6 @@ import java.util.function.Supplier;
 public class HealthTestingUtils {
 
     private static final String TAG = "HealthTestingUtils";
-    private static final int SLEEP_MS = 100;
     private static final int WAIT_TIME_MS = 10000;
     private static final int DEFAULT_SETTLE_TIME_MS = 3000;
 
@@ -99,7 +96,7 @@ public class HealthTestingUtils {
                 errorMessage,
                 () -> {
                     try {
-                        return Optional.of(resultProducer.get());
+                        return Optional.ofNullable(resultProducer.get());
                     } catch (StaleObjectException e) {
                         return Optional.empty();
                     }
@@ -125,28 +122,18 @@ public class HealthTestingUtils {
      */
     public static void waitForCondition(
             Supplier<String> message, Condition condition, long timeoutMs) {
-        final long startTime = SystemClock.uptimeMillis();
-        while (SystemClock.uptimeMillis() < startTime + timeoutMs) {
-            try {
-                if (condition.isTrue()) {
-                    return;
-                }
-            } catch (Throwable t) {
-                throw new RuntimeException(t);
-            }
-            SystemClock.sleep(SLEEP_MS);
-        }
 
-        // Check once more before failing.
-        try {
-            if (condition.isTrue()) {
-                return;
-            }
-        } catch (Throwable t) {
-            throw new RuntimeException(t);
-        }
-
-        Assert.fail(message.get());
+        WaitUtils.ensureThat(
+                "waitForCondition",
+                /* timeout= */ Duration.ofMillis(timeoutMs),
+                /* errorProvider= */ message::get,
+                /* condition= */ () -> {
+                    try {
+                        return condition.isTrue();
+                    } catch (Throwable t) {
+                        throw new RuntimeException(t);
+                    }
+                });
     }
 
     /** @see HealthTestingUtils#waitForValueToSettle */
@@ -170,26 +157,11 @@ public class HealthTestingUtils {
             Supplier<T> supplier,
             long minimumSettleTime,
             long timeoutMs) {
-        final long startTime = SystemClock.uptimeMillis();
-        long settledSince = startTime;
-        T previousValue = null;
-
-        while (SystemClock.uptimeMillis() < startTime + timeoutMs) {
-            T newValue = supplier.get();
-            final long currentTime = SystemClock.uptimeMillis();
-
-            if (!Objects.equals(previousValue, newValue)) {
-                settledSince = currentTime;
-                previousValue = newValue;
-            } else if (currentTime >= settledSince + minimumSettleTime) {
-                return previousValue;
-            }
-
-            SystemClock.sleep(SLEEP_MS);
-        }
-
-        Assert.fail(errorMessage.get());
-
-        return null;
+        return WaitUtils.waitForNullableValueToSettle(
+                "waitForValueToSettle",
+                /* minimumSettleTime= */ Duration.ofMillis(minimumSettleTime),
+                /* timeout= */ Duration.ofMillis(timeoutMs),
+                /* errorProvider= */ errorMessage::get,
+                /* supplier */ supplier::get);
     }
 }

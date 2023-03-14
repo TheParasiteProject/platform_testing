@@ -16,16 +16,17 @@ android {
     }
 }
 
-task copyArm32(type: Copy) {
-    dependsOn 'externalNativeBuildDebug'
-    from layout.buildDirectory.file('intermediates/cmake/debug/obj/armeabi-v7a/nativepoc')
-    rename ('nativepoc', "${project.name.replaceFirst(/-native/, '')}_sts32")
-    into layout.buildDirectory.dir('testcases')
+ext.copyArtifact = { arch, suffix, outputDir ->
+    tasks.register("copy${arch}", Copy) {
+        dependsOn 'externalNativeBuildDebug'
+        from layout.buildDirectory.file("intermediates/cmake/debug/obj/${arch}/nativepoc")
+        rename ('nativepoc', "${project.name.replaceFirst(/-native/, '')}${suffix}")
+        into layout.buildDirectory.dir(outputDir)
+    }
 }
 
-task copyArm64(type: Copy) {
-    dependsOn 'externalNativeBuildDebug'
-    from layout.buildDirectory.file('intermediates/cmake/debug/obj/arm64-v8a/nativepoc')
-    rename ('nativepoc', "${project.name.replaceFirst(/-native/, '')}_sts64")
-    into layout.buildDirectory.dir('testcases')
-}
+copyArtifact('armeabi-v7a', '_sts32', 'testcases_arm')
+copyArtifact('arm64-v8a', '_sts64', 'testcases_arm')
+copyArtifact('x86', '_sts32', 'testcases_x86')
+copyArtifact('x86_64', '_sts64', 'testcases_x86')
+

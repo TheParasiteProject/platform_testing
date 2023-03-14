@@ -63,7 +63,7 @@ class GoldenImagePathManagerTest {
 
         val pc2 = getSimplePathConfig()
         val pcResolvedRelativePath2 = pc2.resolveRelativePath(context)
-        assertThat(pcResolvedRelativePath2).isEqualTo("cuttlefish/")
+        assertThat(pcResolvedRelativePath2).startsWith("cuttlefish")
     }
 
     @Test

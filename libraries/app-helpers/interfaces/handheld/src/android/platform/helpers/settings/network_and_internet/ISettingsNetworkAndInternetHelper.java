@@ -26,6 +26,9 @@ public interface ISettingsNetworkAndInternetHelper extends ISettingsHomeHelper {
      */
     void flingNetworkAndInternet(Direction direction);
 
+    /** This method opens Settings > Network & internet > Hotspot & tethering page */
+    void goToHotspotAndTethering();
+
     /** This method opens Settings > Network & internet > Internet page */
     void goToInternet();
 

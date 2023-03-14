@@ -29,13 +29,14 @@ import org.junit.runner.Description
 import org.junit.runners.model.Statement
 
 /**
- * Rule that allow some tests to be executed only on [FoldableOnly], [LargeScreenOnly] or
- * [SmallScreenOnly] devices.
+ * Rule that allow some tests to be executed only on [FoldableOnly], [LargeScreenOnly], [TabletOnly]
+ * or [SmallScreenOnly] devices.
  */
 class DeviceTypeRule : TestRule {
 
     private val isFoldable = isFoldable()
     private val isLargeScreen = isLargeScreen()
+    private val isTablet = isTablet()
 
     override fun apply(base: Statement, description: Description): Statement {
         val smallScreenAnnotation = description.getAnnotation(SmallScreenOnly::class.java)
@@ -59,11 +60,17 @@ class DeviceTypeRule : TestRule {
             )
         }
 
+        if (description.getAnnotation(TabletOnly::class.java) != null && !isTablet) {
+            return createAssumptionViolatedStatement(
+                "Skipping test on ${Build.PRODUCT} as it is not a tablet."
+            )
+        }
+
         return base
     }
 }
 
-private fun isFoldable(): Boolean {
+internal fun isFoldable(): Boolean {
     return getInstrumentation()
         .targetContext
         .resources
@@ -71,9 +78,14 @@ private fun isFoldable(): Boolean {
         .isNotEmpty()
 }
 
-private fun isLargeScreen(): Boolean {
+/** Returns whether the device default display is currently considered large screen. */
+fun isLargeScreen(): Boolean {
     val sizeDp = getUiDevice().displaySizeDp
     return sizeDp.x >= LARGE_SCREEN_DP_THRESHOLD && sizeDp.y >= LARGE_SCREEN_DP_THRESHOLD
+}
+
+internal fun isTablet(): Boolean {
+    return (isLargeScreen() && !isFoldable())
 }
 
 private fun createAssumptionViolatedStatement(message: String) =
@@ -102,3 +114,6 @@ annotation class SmallScreenOnly(val reason: String)
 
 /** The test will run only on foldables. */
 @Retention(RUNTIME) @Target(ANNOTATION_CLASS, CLASS) annotation class FoldableOnly
+
+/** The test will run only on tablets. */
+@Retention(RUNTIME) @Target(ANNOTATION_CLASS, CLASS) annotation class TabletOnly

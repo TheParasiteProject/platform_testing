@@ -16,12 +16,12 @@
   -->
 
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="android.security.sts.CVE_2020_0215"
+    package="android.security.sts.sts_test_app_package"
     android:versionCode="1"
     android:versionName="1.0">
     <instrumentation
         android:name="androidx.test.runner.AndroidJUnitRunner"
-        android:targetPackage="android.security.sts.CVE_2020_0215" />
+        android:targetPackage="android.security.sts.sts_test_app_package" />
     <application
         android:supportsRtl="true">
         <activity
