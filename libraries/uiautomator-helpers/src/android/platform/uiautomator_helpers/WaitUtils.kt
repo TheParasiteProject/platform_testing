@@ -189,7 +189,7 @@ object WaitUtils {
                         if (previousValueSet) {
                             Trace.endSection()
                         }
-                        Trace.beginSection("New value: $newValue")
+                        TracingUtils.beginSectionSafe("New value: $newValue")
                         previousValue = newValue
                         previousValueSet = true
                     } else if (now().isAfter(settledSince + minimumSettleTime)) {

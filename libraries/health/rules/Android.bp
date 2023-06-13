@@ -20,7 +20,7 @@ java_library {
     name: "platform-test-rules",
     static_libs: [
         "androidx.test.runner",
-        "androidx.test.uiautomator",
+        "androidx.test.uiautomator_uiautomator",
         "app-helpers-handheld-interfaces",
         "collector-device-lib",
         "collector-device-lib-platform",
@@ -45,7 +45,7 @@ java_library {
     sdk_version: "test_current",
     static_libs: [
         "androidx.test.runner",
-        "androidx.test.uiautomator",
+        "androidx.test.uiautomator_uiautomator",
         "app-helpers-handheld-interfaces",
         "collector-device-lib",
         "collector-device-lib-platform",

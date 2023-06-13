@@ -16,8 +16,11 @@
 
 package android.platform.test.rule;
 
+import static androidx.test.platform.app.InstrumentationRegistry.getInstrumentation;
+
 import android.os.ParcelFileDescriptor;
 
+import androidx.annotation.NonNull;
 import androidx.test.InstrumentationRegistry;
 import androidx.test.uiautomator.UiDevice;
 
@@ -50,10 +53,15 @@ public class ArtifactSaver {
             // Can happen when the description is from a ClassRule
             suffix = "EntireClassExecution";
         }
+        Class<?> testClass = description.getTestClass();
+
+        // Can have null class if this is a synthetic suite
+        String className = testClass != null ? testClass.getSimpleName() : "SUITE";
         return artifactFile(
-                prefix
+                "TestScreenshot-"
+                        + prefix
                         + "-"
-                        + description.getTestClass().getSimpleName()
+                        + className
                         + "."
                         + suffix
                         + "."
@@ -61,11 +69,10 @@ public class ArtifactSaver {
     }
 
     public static void onError(Description description, Throwable e) {
-        final UiDevice device = UiDevice.getInstance(InstrumentationRegistry.getInstrumentation());
-        final File screenshot = artifactFile(description, "TestScreenshot", "png");
+        final UiDevice device = getUiDevice();
         final File hierarchy = artifactFile(description, "Hierarchy", "zip");
 
-        device.takeScreenshot(screenshot);
+        final File screenshot = takeDebugScreenshot(description, device, "OnFailure");
 
         // Dump accessibility hierarchy
         try {
@@ -104,6 +111,28 @@ public class ArtifactSaver {
             sShouldTakeBugreport = false;
             dumpCommandOutput("bugreportz -s", artifactFile(description, "Bugreport", "zip"));
         }
+    }
+
+    private static UiDevice getUiDevice() {
+        return UiDevice.getInstance(getInstrumentation());
+    }
+
+    @NonNull
+    private static File takeDebugScreenshot(Description description, UiDevice device,
+            String prefix) {
+        final File screenshot = artifactFile(description, prefix, "png");
+        device.takeScreenshot(screenshot);
+        return screenshot;
+    }
+
+    public static void takeDebugScreenshot(Description description, String prefix) {
+        File screenshotFile = takeDebugScreenshot(description, getUiDevice(), prefix);
+        android.util.Log.e(
+                TAG,
+                "Screenshot taken in test: "
+                        + description.getMethodName()
+                        + ",\nscreenshot will be saved to "
+                        + screenshotFile);
     }
 
     private static void dumpCommandAndOutput(String cmd, OutputStream out) throws IOException {

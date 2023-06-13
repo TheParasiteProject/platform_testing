@@ -38,53 +38,65 @@ import org.junit.runners.JUnit4;
 import java.io.IOException;
 import java.util.concurrent.TimeUnit;
 
-/**
- * Swipe up to home to close the required application
- */
+/** Swipe up to home to close the required application */
 @Scenario
 @RunWith(JUnit4.class)
 public class CloseAppsToHome {
 
-  // Class-level rules
-  @ClassRule public static UnlockScreenRule unlockScreenRule = new UnlockScreenRule();
+    // Class-level rules
+    @ClassRule public static UnlockScreenRule unlockScreenRule = new UnlockScreenRule();
 
-  @ClassRule public static NaturalOrientationRule orientationRule = new NaturalOrientationRule();
+    @ClassRule public static NaturalOrientationRule orientationRule = new NaturalOrientationRule();
 
-  private static LauncherInstrumentation sLauncher;
-  private static AppIcon sAppIcon;
+    private static LauncherInstrumentation sLauncher;
+    private static AppIcon sAppIcon;
+    private static int sCellX;
+    private static int sCellY;
 
-  @ClassRule
-  public static StringOption sNameOption = new StringOption("app-name").setRequired(true);
+    // Starting from the left of the screen to set the column number for the target position
+    @ClassRule
+    public static IntegerOption sCellXOption =
+            new IntegerOption("column-number").setRequired(false).setDefault(2);
 
-  @ClassRule
-  public static StringOption sPkgOption = new StringOption("app-package-name").setRequired(true);
+    // Starting from the top of the screen to set the row number for target position
+    @ClassRule
+    public static IntegerOption sCellYOption =
+            new IntegerOption("row-number").setRequired(false).setDefault(2);
 
-  @ClassRule
-  public static IntegerOption delayTimeOption =
-      new IntegerOption("delay-after-touching-sec").setRequired(false).setDefault(1);
+    @ClassRule
+    public static StringOption sNameOption = new StringOption("app-name").setRequired(true);
 
-  @BeforeClass
-  public static void setup() throws IOException {
-    sLauncher = new LauncherInstrumentation();
-    final HomeAllApps allApps = sLauncher.goHome().switchToAllApps();
-    allApps.getAppIcon(sNameOption.get()).dragToWorkspace(false, false);
-    sAppIcon = sLauncher.getWorkspace().getWorkspaceAppIcon(sNameOption.get());
-  }
+    @ClassRule
+    public static StringOption sPkgOption = new StringOption("app-package-name").setRequired(true);
 
-  @NoMetricBefore
-  public void OpenApps() {
-    sAppIcon.launch(sPkgOption.get());
-  }
+    @ClassRule
+    public static IntegerOption delayTimeOption =
+            new IntegerOption("delay-after-touching-sec").setRequired(false).setDefault(1);
 
-  @Test
-  public void testCloseApps() {
-    SystemClock.sleep(TimeUnit.SECONDS.toMillis(delayTimeOption.get()));
-    sLauncher.goHome();
-  }
+    @BeforeClass
+    public static void setup() throws IOException {
+        sLauncher = new LauncherInstrumentation();
+        sCellX = sCellXOption.get();
+        sCellY = sCellYOption.get();
+        final HomeAllApps allApps = sLauncher.goHome().switchToAllApps();
+        allApps.getAppIcon(sNameOption.get()).dragToWorkspace(sCellX, sCellY);
+        sAppIcon = sLauncher.getWorkspace().getWorkspaceAppIcon(sNameOption.get());
+    }
 
-  @AfterClass
-  public static void closeAppAndRemoveIcon() throws IOException {
-    sLauncher.getDevice().executeShellCommand("pm clear com.google.android.apps.nexuslauncher");
-    sLauncher.goHome();
-  }
+    @NoMetricBefore
+    public void openApps() {
+        sAppIcon.launch(sPkgOption.get());
+    }
+
+    @Test
+    public void testCloseApps() {
+        SystemClock.sleep(TimeUnit.SECONDS.toMillis(delayTimeOption.get()));
+        sLauncher.goHome();
+    }
+
+    @AfterClass
+    public static void closeAppAndRemoveIcon() throws IOException {
+        sLauncher.getDevice().executeShellCommand("pm clear com.google.android.apps.nexuslauncher");
+        sLauncher.goHome();
+    }
 }

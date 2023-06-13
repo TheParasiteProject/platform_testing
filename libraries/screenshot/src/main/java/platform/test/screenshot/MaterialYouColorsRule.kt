@@ -75,7 +75,7 @@ class MaterialYouColors(
          * Create a [MaterialYouColors] from [colors], where:
          * - `colors[i]` should be the value of `FIRST_RESOURCE_COLOR_ID + i`.
          * - [colors] must contain all values of all system colors, i.e. `colors.size` should be
-         * `LAST_RESOURCE_COLOR_ID - FIRST_RESOURCE_COLOR_ID + 1`.
+         *   `LAST_RESOURCE_COLOR_ID - FIRST_RESOURCE_COLOR_ID + 1`.
          */
         private fun fromColors(colors: IntArray): MaterialYouColors {
             val expectedSize = LAST_RESOURCE_COLOR_ID - FIRST_RESOURCE_COLOR_ID + 1

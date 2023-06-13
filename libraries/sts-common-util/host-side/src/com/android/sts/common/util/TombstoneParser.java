@@ -34,9 +34,12 @@ public class TombstoneParser {
             "*** *** *** *** *** *** *** *** *** *** *** *** *** *** *** ***";
     private static final Pattern TOMBSTONE_HEADER_PATTERN =
             Pattern.compile(TOMBSTONE_HEADER.replace("*", "\\*"));
+    private static final Pattern NATIVE_CRASH_TIME_PATTERN =
+            Pattern.compile("Native Crash TIME: (?<time>\\d+)");
     private static final Pattern FINGERPRINT_PATTERN =
             Pattern.compile("Build fingerprint: '(?<fingerprint>.*)'");
-    private static final Pattern REVISION_PATTERN = Pattern.compile("Revision: '(?<revision>.*)'");
+    private static final Pattern REVISION_PATTERN =
+            Pattern.compile("Revision: '(?<revision>.*)'\\s*");
     private static final Pattern ABI_PATTERN = Pattern.compile("ABI: '(?<abi>.*)'");
     private static final Pattern TIMESTAMP_PATTERN = Pattern.compile("Timestamp: (?<timestamp>.*)");
     private static final Pattern UPTIME_PATTERN =
@@ -48,7 +51,7 @@ public class TombstoneParser {
     // "    fd %d: %s (%s)"
     private static final Pattern OPEN_FILE_ROW_PATTERN =
             Pattern.compile(
-                    "    fd (?<fd>\\d+?): (?<path>.*?) \\((?:(?<unowned>unowned)|(?:owned by"
+                    " *fd (?<fd>\\d+?): (?<path>.*?) \\((?:(?<unowned>unowned)|(?:owned by"
                             + " (?<owner>\\S+) 0x(?<tag>\\p{XDigit}{1,16})))\\)");
     private static final Pattern SIGNAL_MISSING_PATTERN =
             Pattern.compile("signal information missing");
@@ -86,7 +89,7 @@ public class TombstoneParser {
     // (BuildId: %s)")? + (" (load bias 0x%" PRIx64 ")")?
     private static final Pattern MEMORY_MAP_LINE_PATTERN =
             Pattern.compile(
-                    "    (?:--->)?(?<beginaddresshigh>\\p{XDigit}{4,8})'(?<beginaddresslow>\\p{XDigit}{4,8})-(?<endaddresshigh>\\p{XDigit}{4,8})'(?<endaddresslow>\\p{XDigit}{4,8})"
+                    " *(?:--->)?(?<beginaddresshigh>\\p{XDigit}{4,8})'(?<beginaddresslow>\\p{XDigit}{4,8})-(?<endaddresshigh>\\p{XDigit}{4,8})'(?<endaddresslow>\\p{XDigit}{4,8})"
                         + " (?<read>\\S)(?<write>\\S)(?<execute>\\S)  "
                         + " {0,7}(?<offset>\\p{XDigit}{1,8})   {0,7}(?<length>\\p{XDigit}{1,8})(?:"
                         + "  (?<mappingname>.+?))?(?: \\(BuildId: (?<buildid>\\d+)\\))?(?: \\(load"
@@ -101,7 +104,7 @@ public class TombstoneParser {
             Pattern.compile(
                     "pid: (?<pid>\\d+), tid: (?<tid>\\d+), name: (?<threadname>.+?)  >>>"
                             + " (?<processname>.+?) <<<");
-    private static final Pattern THREAD_HEADER_2_PATTERN = Pattern.compile("uid: (?<uid>\\d+)");
+    private static final Pattern THREAD_HEADER_2_PATTERN = Pattern.compile("uid: (?<uid>\\d+)\\s*");
     private static final Pattern TAGGED_ADDR_CTRL_PATTERN =
             Pattern.compile(
                     "tagged_addr_ctrl: (?<taggedaddrctrl>\\p{XDigit}{16})(?<description>.+)?");
@@ -111,12 +114,12 @@ public class TombstoneParser {
                     "pac_enabled_keys: (?<pacenabledkeys>\\p{XDigit}{16})(?<description>.+)?");
     private static final Pattern REGISTER_ROW_PATTERN = Pattern.compile("  .*");
     private static final Pattern BACKTRACE_HEADER_PATTERN = Pattern.compile("backtrace:");
-    private static final Pattern BACKTRACE_NOTE_PATTERN = Pattern.compile("  NOTE: (?<note>.*)");
+    private static final Pattern BACKTRACE_NOTE_PATTERN = Pattern.compile(" *NOTE: (?<note>.*)");
     // "      #05 pc 000000000004faf6  /apex/com.android.runtime/lib64/bionic/libc.so
     // (__libc_init+86) (BuildId: 284d864ffe434d73dc722b84a1d3d9ca)"
     private static final Pattern BACKTRACE_PATTERN =
             Pattern.compile(
-                    " {2,8}#(?<index>\\d{2}) pc (?<programcounter>\\p{XDigit}{8,16}) "
+                    " *#(?<index>\\d{2}) pc (?<programcounter>\\p{XDigit}{8,16}) "
                         + " (?<filename>.+?)(?:"
                         + " \\((?<functionname>.*?)\\+(?<functionoffset>\\d+)\\))?(?: \\(BuildId:"
                         + " (?<buildid>.*?)\\))?");
@@ -125,7 +128,7 @@ public class TombstoneParser {
     // "    0000006f0bb2a8a0 6f735c65646f635c 6d61675c65637275  \code\source\gam"
     private static final Pattern MEMORY_DUMP_ROW_PATTERN =
             Pattern.compile(
-                    "    (?<address>\\p{XDigit}{8,16}) (?<memory1>(?:\\p{XDigit}{8,16}|-{8,16}))(?:"
+                    " *(?<address>\\p{XDigit}{8,16}) (?<memory1>(?:\\p{XDigit}{8,16}|-{8,16}))(?:"
                             + " (?<memory2>(?:\\p{XDigit}{8,16}|-{8,16})))?(?:"
                             + " (?<memory3>(?:\\p{XDigit}{8,16}|-{8,16})))?(?:"
                             + " (?<memory4>(?:\\p{XDigit}{8,16}|-{8,16})))?  (?<ascii>.{1,16})");
@@ -177,6 +180,11 @@ public class TombstoneParser {
             if (!lines.get(0).contains(TOMBSTONE_HEADER)) {
                 continue;
             }
+            if (NATIVE_CRASH_TIME_PATTERN.matcher(lines.get(1)).find()) {
+                CLog.d("ignoring crash time");
+                continue;
+            }
+
             String tombstoneBlob =
                     lines.stream()
                             .filter(line -> line.contains("DEBUG   :"))
@@ -197,7 +205,7 @@ public class TombstoneParser {
                             .toString();
 
             if (!parseTombstone(tombstoneBlob, tombstoneBuilder)) {
-                CLog.w("parsing tombstone failed");
+                CLog.w("parsing tombstone failed: \n" + tombstoneBlob);
             }
             Tombstone tombstone = tombstoneBuilder.build();
             tombstones.add(tombstone);
@@ -243,7 +251,7 @@ public class TombstoneParser {
                     CLog.i(fingerprint);
                     tombstoneBuilder.setBuildFingerprint(fingerprint);
                 })) {
-            CLog.i("fingerprint failed");
+            CLog.w("fingerprint failed");
             return false;
         }
 
@@ -254,7 +262,7 @@ public class TombstoneParser {
                 m -> {
                     tombstoneBuilder.setRevision(m.group("revision"));
                 })) {
-            CLog.i("revision failed");
+            CLog.w("revision failed");
             return false;
         }
 
@@ -282,10 +290,10 @@ public class TombstoneParser {
                             CLog.i("unknown arch");
                             return;
                     }
-                    CLog.i("set arch to: " + arch);
+                    CLog.d("set arch to: " + arch);
                     tombstoneBuilder.setArch(arch);
                 })) {
-            CLog.i("abi failed");
+            CLog.w("abi failed");
             return false;
         }
 
@@ -314,13 +322,13 @@ public class TombstoneParser {
 
         // get main thread
         if (!parseMainThread(headerAndMainThreadBlob, tombstoneBuilder)) {
-            CLog.i("main thread failed");
+            CLog.w("main thread failed");
             return false;
         }
 
         // get logs
         if (!parseLogs(headerAndMainThreadBlob, tombstoneBuilder)) {
-            CLog.i("logs failed");
+            CLog.w("logs failed");
             return false;
         }
 
@@ -330,7 +338,7 @@ public class TombstoneParser {
             com.android.server.os.TombstoneProtos.Thread.Builder threadBuilder =
                     com.android.server.os.TombstoneProtos.Thread.newBuilder();
             if (!parseThread(threadBlob, tombstoneBuilder, threadBuilder)) {
-                CLog.i("thread failed");
+                CLog.w("thread failed");
                 return false;
             }
             tombstoneBuilder.putThreads(threadBuilder.getId(), threadBuilder.build());
@@ -360,7 +368,7 @@ public class TombstoneParser {
                 });
 
         if (!parseLogs(tailBlob, tombstoneBuilder)) {
-            CLog.i("logs failed");
+            CLog.w("logs failed");
             return false;
         }
 
@@ -381,7 +389,7 @@ public class TombstoneParser {
 
         try {
             if (!parseThreadHeader(headerLines, tombstoneBuilder, mainThreadBuilder)) {
-                CLog.i("main thread get header failed");
+                CLog.w("main thread get header failed");
                 return false;
             }
 
@@ -421,7 +429,7 @@ public class TombstoneParser {
                             });
             if (!matchedSignal) {
                 // must match one or the other
-                CLog.i("couldn't match signal messages");
+                CLog.w("couldn't match signal messages");
                 return false;
             }
 
@@ -436,12 +444,12 @@ public class TombstoneParser {
             }
 
             if (!parseThreadRegisters(headerAndMainThreadLines, mainThreadBuilder)) {
-                CLog.i("main thread get thread registers failed");
+                CLog.w("main thread get thread registers failed");
                 return false;
             }
 
             if (!parseThreadBacktrace(headerAndMainThreadBlob, mainThreadBuilder)) {
-                CLog.i("main thread get thread backtrace failed");
+                CLog.w("main thread get thread backtrace failed");
                 return false;
             }
 
@@ -455,7 +463,7 @@ public class TombstoneParser {
                         CAUSE_PATTERN,
                         m -> {
                             // must delay adding cause because the memory error is printed later
-                            CLog.i("cause message matched");
+                            CLog.d("cause message matched");
                             causeBuilder.setHumanReadable(m.group("cause"));
                         })) {
                     // not a cause
@@ -471,7 +479,7 @@ public class TombstoneParser {
                     if (deallocBlobMatcher.find()) {
                         List<String> deallocLines = lines(deallocBlobMatcher.group(0));
                         hasMemoryError = true;
-                        CLog.i("dealloc matched");
+                        CLog.d("dealloc matched");
                         List<BacktraceFrame> backtraceFrames = new ArrayList<>();
                         if (!parseBacktrace(deallocLines, backtraceFrames)) {
                             return false;
@@ -485,7 +493,7 @@ public class TombstoneParser {
                     if (allocBlobMatcher.find()) {
                         List<String> allocLines = lines(allocBlobMatcher.group(0));
                         hasMemoryError = true;
-                        CLog.i("alloc matched");
+                        CLog.d("alloc matched");
                         List<BacktraceFrame> backtraceFrames = new ArrayList<>();
                         if (!parseBacktrace(allocLines, backtraceFrames)) {
                             return false;
@@ -498,18 +506,18 @@ public class TombstoneParser {
                     memoryErrorBuilder.setHeap(heapObjectBuilder.build());
                     causeBuilder.setMemoryError(memoryErrorBuilder.build());
                 } else {
-                    CLog.i("no memory errors");
+                    CLog.d("no memory errors");
                 }
                 tombstoneBuilder.addCauses(causeBuilder.build());
             }
 
             if (!parseTagDump(tailLines, tombstoneBuilder)) {
-                CLog.i("tag dump failed");
+                CLog.w("tag dump failed");
                 return false;
             }
 
             if (!parseThreadMemoryDump(tailBlob, mainThreadBuilder)) {
-                CLog.i("memory dump failed");
+                CLog.w("memory dump failed");
                 return false;
             }
         } finally {
@@ -534,7 +542,7 @@ public class TombstoneParser {
                     memoryMapLines.iterator(),
                     MEMORY_MAP_FAULT_ADDRESS_BETWEEN_PATTERN,
                     m -> {
-                        CLog.i("got fault address between");
+                        CLog.d("got fault address between");
                         // TODO: put fault address in memoryMappingBuilder
                     });
 
@@ -543,7 +551,7 @@ public class TombstoneParser {
                     MEMORY_MAP_HEADER_PATTERN,
                     m -> {
                         int count = Integer.valueOf(m.group("count"));
-                        CLog.i("got memory map entries count: " + count);
+                        CLog.d("got memory map entries count: " + count);
                         matchLines(
                                 memoryMapLines.iterator(),
                                 MEMORY_MAP_LINE_PATTERN,
@@ -558,7 +566,7 @@ public class TombstoneParser {
                     memoryMapLines.iterator(),
                     MEMORY_MAP_FAULT_ADDRESS_AFTER_PATTERN,
                     m -> {
-                        CLog.i("got fault address after");
+                        CLog.d("got fault address after");
                         // TODO: put fault address in memoryMappingBuilder
                     });
         }

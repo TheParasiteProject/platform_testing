@@ -25,8 +25,9 @@ java_library {
     static_libs: [
         "androidx.annotation_annotation",
         "androidx.test.runner",
-        "androidx.test.uiautomator",
+        "androidx.test.uiautomator_uiautomator",
         "app-collector-helper",
+        "generic-helper",
         "jank-helper",
         "junit",
         "lyric-metric-helper",

@@ -15,11 +15,8 @@
  */
 package android.platform.test.scenario.tapl_common
 
-import androidx.test.platform.app.InstrumentationRegistry
+import android.platform.uiautomator_helpers.DeviceHelpers.waitForObj
 import androidx.test.uiautomator.BySelector
-import androidx.test.uiautomator.UiDevice
-import androidx.test.uiautomator.Until
-import java.time.Duration
 
 /** Wrapper of UiDevice for finding TAPL UI objects and performing flake-free gestures. */
 object TaplUiDevice {
@@ -32,15 +29,7 @@ object TaplUiDevice {
      */
     @JvmStatic
     fun waitForObject(selector: BySelector, objectName: String): TaplUiObject {
-        val uiObject =
-            device.wait(Until.findObject(selector), WAIT_TIME.toMillis())
-                ?: throw AssertionError(
-                    "UI object '$objectName' is not visible; selector: $selector."
-                )
+        val uiObject = waitForObj(selector)
         return TaplUiObject(uiObject, objectName)
     }
-
-    internal val WAIT_TIME = Duration.ofSeconds(10)
-    private val device: UiDevice
-        get() = UiDevice.getInstance(InstrumentationRegistry.getInstrumentation())
 }

@@ -42,6 +42,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
 
+/** Media instrumentation for testing. */
 public final class MediaInstrumentation {
 
     private static final int WAIT_TIME_MILLIS = 5000;
@@ -114,6 +115,11 @@ public final class MediaInstrumentation {
 
     public void createNotification() {
         mManager.notify(mNotificationId, buildNotification().build());
+    }
+
+    /** Cancel the Media notification */
+    public void cancelNotification() {
+        mManager.cancel(mNotificationId);
     }
 
     UiObject2 scrollToMediaNotification(MediaMetadata meta) {

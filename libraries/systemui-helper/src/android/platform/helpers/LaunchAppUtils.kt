@@ -46,7 +46,9 @@ object LaunchAppUtils {
     fun assertAppInForeground(app: App) {
         check(
             device.wait(Until.hasObject(By.pkg(app.packageName).depth(0)), MAX_TIMEOUT.toMillis())
-        ) { "$app not in the foreground after ${MAX_TIMEOUT.toSeconds()} seconds" }
+        ) {
+            "$app not in the foreground after ${MAX_TIMEOUT.toSeconds()} seconds"
+        }
     }
 
     private val device: UiDevice

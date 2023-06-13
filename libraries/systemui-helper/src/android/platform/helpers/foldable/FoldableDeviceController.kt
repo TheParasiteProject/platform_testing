@@ -22,6 +22,7 @@ import android.platform.test.rule.isLargeScreen
 import android.platform.uiautomator_helpers.DeviceHelpers.isScreenOnSettled
 import android.platform.uiautomator_helpers.DeviceHelpers.printInstrumentationStatus
 import android.platform.uiautomator_helpers.DeviceHelpers.uiDevice
+import android.platform.uiautomator_helpers.TracingUtils.trace
 import android.platform.uiautomator_helpers.WaitUtils.ensureThat
 import android.util.Log
 import androidx.annotation.FloatRange
@@ -52,14 +53,18 @@ internal class FoldableDeviceController {
 
     /** Sets device state to folded. */
     fun fold() {
-        printInstrumentationStatus(TAG, "Folding")
-        setDeviceState(foldedState)
+        trace("FoldableDeviceController#fold") {
+            printInstrumentationStatus(TAG, "Folding")
+            setDeviceState(foldedState)
+        }
     }
 
     /** Sets device state to an unfolded state. */
     fun unfold() {
-        printInstrumentationStatus(TAG, "Unfolding")
-        setDeviceState(unfoldedState)
+        trace("FoldableDeviceController#unfold") {
+            printInstrumentationStatus(TAG, "Unfolding")
+            setDeviceState(unfoldedState)
+        }
     }
 
     /** Removes the override on the device state. */
@@ -115,14 +120,15 @@ internal class FoldableDeviceController {
         deviceStateLatch = CountDownLatch(1)
         val request = DeviceStateRequest.newBuilder(state).build()
         pendingRequest = request
-        Log.d(TAG, "Requesting base state override to ${state.desc()}")
-        deviceStateManager.requestBaseStateOverride(
-            request,
-            context.mainExecutor,
-            deviceStateRequestCallback
-        )
-        deviceStateLatch.await { "Device state didn't change within the timeout" }
-        ensureStateSet(state)
+        trace("Requesting base state override to ${state.desc()}") {
+            deviceStateManager.requestBaseStateOverride(
+                request,
+                context.mainExecutor,
+                deviceStateRequestCallback
+            )
+            deviceStateLatch.await { "Device state didn't change within the timeout" }
+            ensureStateSet(state)
+        }
         Log.d(TAG, "Device state set to ${state.desc()}")
     }
 

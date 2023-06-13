@@ -55,7 +55,7 @@ object SysuiRestarter {
         uiDevice.assertVisibility(
             PAGE_TITLE_SELECTOR,
             visible,
-            customMessageProvider = errorMessageProvider
+            errorProvider = errorMessageProvider
         )
     }
 }

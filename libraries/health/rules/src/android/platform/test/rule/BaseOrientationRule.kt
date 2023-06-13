@@ -17,6 +17,7 @@ package android.platform.test.rule
 
 import android.graphics.Rect
 import android.platform.test.rule.Orientation.LANDSCAPE
+import android.platform.test.rule.Orientation.NATURAL
 import android.platform.test.rule.Orientation.PORTRAIT
 import android.platform.test.rule.RotationUtils.clearOrientationOverride
 import android.platform.test.rule.RotationUtils.setOrientationOverride
@@ -34,6 +35,8 @@ internal class LandscapeOrientationRule : BaseOrientationRule(LANDSCAPE)
 /** Locks the orientation in Portrait before starting the test, and goes back to natural after. */
 internal class PortraitOrientationRule : BaseOrientationRule(PORTRAIT)
 
+class NaturalOrientationRule : BaseOrientationRule(NATURAL)
+
 /**
  * Possible device orientations.
  *
@@ -42,6 +45,7 @@ internal class PortraitOrientationRule : BaseOrientationRule(PORTRAIT)
 enum class Orientation {
     LANDSCAPE,
     PORTRAIT,
+    NATURAL
 }
 
 /** Returns whether the device is landscape or portrait , based on display dimensions. */
@@ -52,6 +56,18 @@ val UiDevice.orientation: Orientation
         } else {
             PORTRAIT
         }
+
+val UiDevice.naturalOrientation: Orientation
+    get() {
+        if (isNaturalOrientation) {
+            return stableOrientation
+        }
+        return when (stableOrientation) {
+            LANDSCAPE -> PORTRAIT
+            PORTRAIT -> LANDSCAPE
+            else -> throw RuntimeException("Unexpected orientation: $stableOrientation.")
+        }
+    }
 
 // This makes sure that the orientation stabilised before returning it.
 private val UiDevice.stableOrientation: Orientation
@@ -64,7 +80,7 @@ private val UiDevice.stableOrientation: Orientation
         )
 
 /** Uses launcher rect to decide which rotation to apply to match [expectedOrientation]. */
-sealed class BaseOrientationRule private constructor(private val expectedOrientation: Orientation) :
+sealed class BaseOrientationRule constructor(private val expectedOrientation: Orientation) :
     TestWatcher() {
 
     override fun starting(description: Description) {
@@ -92,7 +108,9 @@ object RotationUtils {
      * takes care of cleaning the override. Those should be called only when the test needs to
      * change orientation in the middle.
      */
-    fun setOrientationOverride(expectedOrientation: Orientation) {
+    fun setOrientationOverride(orientation: Orientation) {
+        val expectedOrientation =
+            if (orientation == NATURAL) device.naturalOrientation else orientation
         launcher.setEnableRotation(true)
         if (device.stableOrientation == expectedOrientation) {
             return
@@ -112,10 +130,16 @@ object RotationUtils {
         }
     }
 
+    /** returns stable orientation, doesn't necessarily mean orientation needs to happen */
+    fun waitForOrientationToSettle(): Orientation {
+        return device.stableOrientation
+    }
+
     fun clearOrientationOverride() {
         device.setOrientationNatural()
         launcher.setEnableRotation(false)
         device.unfreezeRotation()
+        waitForOrientationToSettle()
         log("Rotation override cleared.")
     }
 

@@ -2739,4 +2739,162 @@
 01-04 15:28:42.710  7051  7051 F DEBUG   : backtrace:
 01-04 15:28:42.710  7051  7051 F DEBUG   :       #00 pc 0050780a  /apex/com.android.art/lib/libpac.so (v8::base::OS::Abort()+14) (BuildId: b1ec1e3ff7cf26e92a2f475a0e47445c)
 01-04 15:28:42.710  7051  7051 F DEBUG   :       #01 pc 00000016  <unknown>
-
+01-11 14:37:45.687 21184 21184 F DEBUG   : *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** ***
+01-11 14:37:45.687 21184 21184 F DEBUG   : Native Crash TIME: 2166877 
+01-11 14:37:45.687 21184 21184 F DEBUG   : *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** ***
+01-11 14:37:45.687 21184 21184 F DEBUG   : Build fingerprint: 'oem/fingerprint/device:11/build/00000:userdebug/test-keys'
+01-11 14:37:45.687 21184 21184 F DEBUG   : Revision: '0'
+01-11 14:37:45.688 21184 21184 F DEBUG   : ABI: 'arm64'
+01-11 14:37:45.689 21184 21184 F DEBUG   : Timestamp: 2023-01-11 14:37:45+0800
+01-11 14:37:45.689 21184 21184 F DEBUG   : pid: 21180, tid: 21180, name: CVE-2017-0415  >>> /data/local/tmp/CVE-2017-0415 <<<
+01-11 14:37:45.690 21184 21184 F DEBUG   : uid: 2000
+01-11 14:37:45.690 21184 21184 F DEBUG   : signal 11 (SIGSEGV), code 1 (SEGV_MAPERR), fault addr 0x0
+01-11 14:37:45.690 21184 21184 F DEBUG   : Cause: null pointer dereference
+01-11 14:37:45.690 21184 21184 F DEBUG   :     x0  b4000076baeb3f28  x1  0000005e619697e7  x2  0000000000000010  x3  0000000000000010
+01-11 14:37:45.690 21184 21184 F DEBUG   :     x4  0000005e619697f7  x5  b4000076baeb3f38  x6  6464646464646464  x7  6464646464646464
+01-11 14:37:45.690 21184 21184 F DEBUG   :     x8  0000000000000001  x9  000000008b240ed4  x10 0000000000000000  x11 00000000baeb3f39
+01-11 14:37:45.691 21184 21184 F DEBUG   :     x12 0000000016ca70e8  x13 ffffffffffffffff  x14 0000000000000004  x15 ffffffffffffffff
+01-11 14:37:45.691 21184 21184 F DEBUG   :     x16 000000791aff0b38  x17 000000791af2c180  x18 000000791d566000  x19 0000000000000000
+01-11 14:37:45.691 21184 21184 F DEBUG   :     x20 0000005e619697e7  x21 0000005e619697d8  x22 0000000000000000  x23 000000791d3c1000
+01-11 14:37:45.691 21184 21184 F DEBUG   :     x24 0000005e6196c000  x25 0000000000001388  x26 0000000000000000  x27 0000000000000000
+01-11 14:37:45.691 21184 21184 F DEBUG   :     x28 0000000000000000  x29 0000007fde3deab0  
+01-11 14:37:45.691 21184 21184 F DEBUG   :     lr  0000005e6196a0c4  sp  0000007fde3dea80  pc  0000005e6196a0c4  pst 0000000020000000
+01-11 14:37:45.693 21184 21184 F DEBUG   : backtrace:
+01-11 14:37:45.693 21184 21184 F DEBUG   :     NOTE: Function names and BuildId information is missing for some frames due
+01-11 14:37:45.693 21184 21184 F DEBUG   :     NOTE: to unreadable libraries. For unwinds of apps, only shared libraries
+01-11 14:37:45.693 21184 21184 F DEBUG   :     NOTE: found under the lib/ directory are readable.
+01-11 14:37:45.693 21184 21184 F DEBUG   :     NOTE: On this device, run setenforce 0 to make the libraries readable.
+01-11 14:37:45.693 21184 21184 F DEBUG   :       #00 pc 00000000000010c4  /data/local/tmp/CVE-2017-0415
+01-11 14:37:45.693 21184 21184 F DEBUG   :       #01 pc 000000000004973c  /apex/com.android.runtime/lib64/bionic/libc.so (__libc_init+108) (BuildId: ddedea5a1d1071f97c5321841b6be985)
+01-11 14:38:21.110   868   868 I DEBUG   : Crash thread undumpable
+01-11 17:12:57.117 shell 13764 13764 E DEBUG   : failed to read /proc/uptime: Permission denied
+01-11 17:12:57.256 shell 13764 13764 F DEBUG   : *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** ***
+01-11 17:12:57.256 shell 13764 13764 F DEBUG   : Native Crash TIME: 1613613
+01-11 17:12:57.256 shell 13764 13764 F DEBUG   : *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** ***
+01-11 17:12:57.256 shell 13764 13764 F DEBUG   : Build fingerprint: 'oem/fingerprint/device:12/build/00000:userdebug/test-keys'
+01-11 17:12:57.256 shell 13764 13764 F DEBUG   : Revision: '0'
+01-11 17:12:57.256 shell 13764 13764 F DEBUG   : ABI: 'arm64'
+01-11 17:12:57.256 shell 13764 13764 F DEBUG   : Timestamp: 2023-01-11 17:12:57.116776918+0800
+01-11 17:12:57.256 shell 13764 13764 F DEBUG   : Process uptime: 0s
+01-11 17:12:57.256 shell 13764 13764 F DEBUG   : Cmdline: /data/local/tmp/CVE-2017-0415
+01-11 17:12:57.256 shell 13764 13764 F DEBUG   : pid: 13760, tid: 13760, name: CVE-2017-0415  >>> /data/local/tmp/CVE-2017-0415 <<<
+01-11 17:12:57.256 shell 13764 13764 F DEBUG   : uid: 2000 
+01-11 17:12:57.256 shell 13764 13764 F DEBUG   : signal 11 (SIGSEGV), code 1 (SEGV_MAPERR), fault addr 0x0
+01-11 17:12:57.256 shell 13764 13764 F DEBUG   : Cause: null pointer dereference
+01-11 17:12:57.256 shell 13764 13764 F DEBUG   :     x0  b400007275b326a8  x1  0000005de63387ff  x2  0000000000000010  x3  0000000000000010
+01-11 17:12:57.257 shell 13764 13764 F DEBUG   :     x4  0000005de633880f  x5  b400007275b326b8  x6  6464646464646464  x7  6464646464646464
+01-11 17:12:57.257 shell 13764 13764 F DEBUG   :     x8  0000000000000001  x9  0000000000000000  x10 000000007d95448d  x11 0000000075b326b9
+01-11 17:12:57.257 shell 13764 13764 F DEBUG   :     x12 0000ffff00000eff  x13 000000000c377120  x14 0000000000000004  x15 ffffffffffffffff
+01-11 17:12:57.257 shell 13764 13764 F DEBUG   :     x16 00000074e139eae0  x17 00000074e38268e0  x18 00000074ea4de000  x19 0000000000000000
+01-11 17:12:57.257 shell 13764 13764 F DEBUG   :     x20 0000005de63387ff  x21 0000005de63387f0  x22 0000000000000000  x23 00000074ea05e000
+01-11 17:12:57.257 shell 13764 13764 F DEBUG   :     x24 0000005de633b000  x25 0000000000001388  x26 0000000000000000  x27 0000000000000000 
+01-11 17:12:57.257 shell 13764 13764 F DEBUG   :     x28 0000000000000000  x29 0000007fc059f3b0
+01-11 17:12:57.257 shell 13764 13764 F DEBUG   :     lr  0000005de63390d0  sp  0000007fc059f380  pc  0000005de63390d0  pst 0000000020000000 
+01-11 17:12:57.257 shell 13764 13764 F DEBUG   : backtrace:
+01-11 17:12:57.257 shell 13764 13764 F DEBUG   :   NOTE: Function names and BuildId information is missing for some frames due
+01-11 17:12:57.257 shell 13764 13764 F DEBUG   :   NOTE: to unreadable libraries. For unwinds of apps, only shared libraries
+01-11 17:12:57.257 shell 13764 13764 F DEBUG   :   NOTE: found under the lib/ directory are readable.
+01-11 17:12:57.257 shell 13764 13764 F DEBUG   :   NOTE: On this device, run setenforce 0 to make the libraries readable.
+01-11 17:12:57.257 shell 13764 13764 F DEBUG   :       #00 pc 00000000000010d0  /data/local/tmp/CVE-2017-0415
+01-11 17:12:57.257 shell 13764 13764 F DEBUG   :       #01 pc 00000000000485a0  /apex/com.android.runtime/lib64/bionic/libc.so (__libc_init+96) (BuildId: 5d21548447ff2f9aab8359665aaabf4f)
+01-11 17:20:37.116 media 22990 22990 E DEBUG   : failed to read /proc/uptime: Permission denied
+01-11 17:18:01.184 shell 18802 18802 E DEBUG   : failed to read /proc/uptime: Permission denied
+01-11 17:18:01.225 shell 18802 18802 F DEBUG   : *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** ***
+01-11 17:18:01.225 shell 18802 18802 F DEBUG   : Native Crash TIME: 1917582
+01-11 17:18:01.225 shell 18802 18802 F DEBUG   : *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** ***
+01-11 17:18:01.225 shell 18802 18802 F DEBUG   : Build fingerprint: 'oem/fingerprint/device:12/build/00000:userdebug/test-keys'
+01-11 17:18:01.225 shell 18802 18802 F DEBUG   : Revision: '0'
+01-11 17:18:01.225 shell 18802 18802 F DEBUG   : ABI: 'arm64'
+01-11 17:18:01.225 shell 18802 18802 F DEBUG   : Timestamp: 2023-01-11 17:18:01.183586586+0800
+01-11 17:18:01.225 shell 18802 18802 F DEBUG   : Process uptime: 0s
+01-11 17:18:01.225 shell 18802 18802 F DEBUG   : Cmdline: /data/local/tmp/CVE-2018-9424
+01-11 17:18:01.225 shell 18802 18802 F DEBUG   : pid: 18796, tid: 18796, name: CVE-2018-9424  >>> /data/local/tmp/CVE-2018-9424 <<<
+01-11 17:18:01.225 shell 18802 18802 F DEBUG   : uid: 2000
+01-11 17:18:01.225 shell 18802 18802 F DEBUG   : signal 11 (SIGSEGV), code 1 (SEGV_MAPERR), fault addr 0x0
+01-11 17:18:01.225 shell 18802 18802 F DEBUG   : Cause: null pointer dereference
+01-11 17:18:01.225 shell 18802 18802 F DEBUG   :     x0  0000000000000000  x1  0000000000000001  x2  0000007fceda6510  x3  0000007fceda6490
+01-11 17:18:01.225 shell 18802 18802 F DEBUG   :     x4  0000000000000056  x5  b4000070a09ef91c  x6  00720064006e0061  x7  002e00640069006f
+01-11 17:18:01.225 shell 18802 18802 F DEBUG   :     x8  0000000000000001  x9  0000000000000015  x10 00000070909ef000  x11 0000000000000070
+01-11 17:18:01.225 shell 18802 18802 F DEBUG   :     x12 000000000000000b  x13 0065006300690076  x14 0000000000000001  x15 0000000000000065
+01-11 17:18:01.225 shell 18802 18802 F DEBUG   :     x16 00000072418ddaf0  x17 0000007240ae5b40  x18 00000072424de000  x19 b4000070509fc880
+01-11 17:18:01.225 shell 18802 18802 F DEBUG   :     x20 00000072419f0000  x21 0000007fceda6510  x22 0000000000000001  x23 0000000000000000
+01-11 17:18:01.225 shell 18802 18802 F DEBUG   :     x24 0000000000000000  x25 0000000000000000  x26 0000000000000000  x27 0000000000000000
+01-11 17:18:01.225 shell 18802 18802 F DEBUG   :     x28 0000000000000000  x29 0000007fceda65a0
+01-11 17:18:01.226 shell 18802 18802 F DEBUG   :     lr  0000006320539140  sp  0000007fceda6480  pc  0000006320539150  pst 0000000060000000
+01-11 17:18:01.226 shell 18802 18802 F DEBUG   : backtrace:
+01-11 17:18:01.226 shell 18802 18802 F DEBUG   :   NOTE: Function names and BuildId information is missing for some frames due
+01-11 17:18:01.226 shell 18802 18802 F DEBUG   :   NOTE: to unreadable libraries. For unwinds of apps, only shared libraries
+01-11 17:18:01.226 shell 18802 18802 F DEBUG   :   NOTE: found under the lib/ directory are readable.
+01-11 17:18:01.226 shell 18802 18802 F DEBUG   :   NOTE: On this device, run setenforce 0 to make the libraries readable.
+01-11 17:18:01.226 shell 18802 18802 F DEBUG   :       #00 pc 0000000000003150  /data/local/tmp/CVE-2018-9424
+01-11 17:18:01.226 shell 18802 18802 F DEBUG   :       #01 pc 000000000000382c  /data/local/tmp/CVE-2018-9424
+01-11 17:18:01.226 shell 18802 18802 F DEBUG   :       #02 pc 00000000000485a0  /apex/com.android.runtime/lib64/bionic/libc.so (__libc_init+96) (BuildId: 5d21548447ff2f9aab8359665aaabf4f)
+01-11 14:42:12.872 25314 25314 F DEBUG   : *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** ***
+01-11 14:42:12.872 25314 25314 F DEBUG   : Native Crash TIME: 2434062
+01-11 14:42:12.872 25314 25314 F DEBUG   : *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** ***
+01-11 14:42:12.872 25314 25314 F DEBUG   : Build fingerprint: 'oem/fingerprint/device:11/build/00000:userdebug/test-keys'
+01-11 14:42:12.872 25314 25314 F DEBUG   : Revision: '0'
+01-11 14:42:12.872 25314 25314 F DEBUG   : ABI: 'arm64'
+01-11 14:42:12.873 25314 25314 F DEBUG   : Timestamp: 2023-01-11 14:42:12+0800
+01-11 14:42:12.873 25314 25314 F DEBUG   : pid: 25293, tid: 25293, name: CVE-2018-9424  >>> /data/local/tmp/CVE-2018-9424 <<<
+01-11 14:42:12.873 25314 25314 F DEBUG   : uid: 2000
+01-11 14:42:12.873 25314 25314 F DEBUG   : signal 11 (SIGSEGV), code 1 (SEGV_MAPERR), fault addr 0x0
+01-11 14:42:12.873 25314 25314 F DEBUG   : Cause: null pointer dereference
+01-11 14:42:12.873 25314 25314 F DEBUG   :     x0  0000000000000000  x1  0000000000000001  x2  0000007ff77c6940  x3  0000007ff77c68c0
+01-11 14:42:12.873 25314 25314 F DEBUG   :     x4  0000000000000010  x5  b400007bb3d3febc  x6  00720064006e0061  x7  002e00640069006f
+01-11 14:42:12.873 25314 25314 F DEBUG   :     x8  0000000000000001  x9  0000000000000070  x10 0000000000001f44  x11 f494000000056106
+01-11 14:42:12.873 25314 25314 F DEBUG   :     x12 00000000b8f4b05f  x13 f494000000056106  x14 0000000000000065  x15 0000007d53e3482c
+01-11 14:42:12.873 25314 25314 F DEBUG   :     x16 0000007d53e3ab48  x17 0000007d53e97ab8  x18 0000007d54750000  x19 b400007b63d387c0
+01-11 14:42:12.873 25314 25314 F DEBUG   :     x20 0000007d54493000  x21 0000007ff77c6940  x22 0000000000000001  x23 0000000000000000
+01-11 14:42:12.873 25314 25314 F DEBUG   :     x24 0000000000000000  x25 0000000000000000  x26 0000000000000000  x27 0000000000000000
+01-11 14:42:12.874 25314 25314 F DEBUG   :     x28 0000000000000000  x29 0000007ff77c69d0
+01-11 14:42:12.874 25314 25314 F DEBUG   :     lr  0000005f258fb134  sp  0000007ff77c68b0  pc  0000005f258fb144  pst 0000000060000000
+01-11 14:42:12.874 25314 25314 F DEBUG   : backtrace:
+01-11 14:42:12.875 25314 25314 F DEBUG   :     NOTE: Function names and BuildId information is missing for some frames due
+01-11 14:42:12.875 25314 25314 F DEBUG   :     NOTE: to unreadable libraries. For unwinds of apps, only shared libraries
+01-11 14:42:12.875 25314 25314 F DEBUG   :     NOTE: found under the lib/ directory are readable.
+01-11 14:42:12.875 25314 25314 F DEBUG   :     NOTE: On this device, run setenforce 0 to make the libraries readable.
+01-11 14:42:12.875 25314 25314 F DEBUG   :       #00 pc 0000000000003144  /data/local/tmp/CVE-2018-9424
+01-11 14:42:12.875 25314 25314 F DEBUG   :       #01 pc 0000000000003818  /data/local/tmp/CVE-2018-9424
+01-11 14:42:12.875 25314 25314 F DEBUG   :       #02 pc 000000000004973c  /apex/com.android.runtime/lib64/bionic/libc.so (__libc_init+108) (BuildId: ddedea5a1d1071f97c5321841b6be985)
+01-11 14:42:16.854   514   514 I DEBUG   : Crash thread undumpable
+01-11 14:42:16.886   516   516 I DEBUG   : Crash thread undumpable
+01-11 14:42:16.931   517   517 I DEBUG   : Crash thread undumpable
+01-11 14:42:17.017   530   530 I DEBUG   : Crash thread undumpable
+01-11 14:42:17.076   543   543 I DEBUG   : Crash thread undumpable
+01-11 14:42:17.154   550   550 I DEBUG   : Crash thread dumpable
+01-11 14:42:17.271   563   563 I DEBUG   : Crash thread dumpable
+01-11 14:42:17.365   749   749 I DEBUG   : Crash thread dumpable
+01-11 14:42:17.433   752   752 I DEBUG   : Crash thread dumpable
+01-11 14:42:17.559   775   775 I DEBUG   : Crash thread dumpable
+01-11 14:42:17.638   778   778 I DEBUG   : Crash thread dumpable
+01-11 14:42:47.993   868   868 I DEBUG   : Crash thread undumpable
+01-11 17:20:37.800 media 22990 22990 F DEBUG   : *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** ***
+01-11 17:20:37.800 media 22990 22990 F DEBUG   : Native Crash TIME: 2074157
+01-11 17:20:37.800 media 22990 22990 F DEBUG   : *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** ***
+01-11 17:20:37.800 media 22990 22990 F DEBUG   : Build fingerprint: 'oem/fingerprint/device:12/build/00000:userdebug/test-keys'
+01-11 17:20:37.800 media 22990 22990 F DEBUG   : Revision: '0'
+01-11 17:20:37.800 media 22990 22990 F DEBUG   : ABI: 'arm'
+01-11 17:20:37.801 media 22990 22990 F DEBUG   : Timestamp: 2023-01-11 17:20:37.114034474+0800
+01-11 17:20:37.801 media 22990 22990 F DEBUG   : Process uptime: 0s
+01-11 17:20:37.801 media 22990 22990 F DEBUG   : Cmdline: /system/bin/mediaserver
+01-11 17:20:37.801 media 22990 22990 F DEBUG   : pid: 903, tid: 903, name: mediaserver  >>> /system/bin/mediaserver <<<
+01-11 17:20:37.801 media 22990 22990 F DEBUG   : uid: 1013
+01-11 17:20:37.801 media 22990 22990 F DEBUG   : signal 6 (SIGABRT), code -1 (SI_QUEUE), fault addr --------
+01-11 17:20:37.801 media 22990 22990 F DEBUG   :     r0  00000000  r1  00000387  r2  00000006  r3  ffcc8648
+01-11 17:20:37.801 media 22990 22990 F DEBUG   :     r4  ffcc865c  r5  ffcc8640  r6  00000387  r7  0000016b
+01-11 17:20:37.801 media 22990 22990 F DEBUG   :     r8  ffcc8648  r9  ffcc8658  r10 ffcc8678  r11 ffcc8668
+01-11 17:20:37.801 media 22990 22990 F DEBUG   :     ip  00000387  sp  ffcc8618  lr  edd3b9a9  pc  edd3b9bc
+01-11 17:20:37.801 media 22990 22990 F DEBUG   : backtrace:
+01-11 17:20:37.801 media 22990 22990 F DEBUG   :       #00 pc 000389bc  /apex/com.android.runtime/lib/bionic/libc.so (abort+172) (BuildId: 633776572ed73d0e36cc218f0bfce445)
+01-11 17:20:37.801 media 22990 22990 F DEBUG   :       #01 pc 00024857  /system/lib/libmedia.so (__cfi_check_fail+14) (BuildId: da5a263ec5bf21a7732d21e0bf23bd13)
+01-11 17:20:37.801 media 22990 22990 F DEBUG   :       #02 pc 0002a71f  /system/lib/libmedia.so (__cfi_check+14110) (BuildId: da5a263ec5bf21a7732d21e0bf23bd13)
+01-11 17:20:37.801 media 22990 22990 F DEBUG   :       #03 pc 00064ea1  /system/lib/libmediaplayerservice.so (android::MediaPlayerService::Client::setNextPlayer(android::sp<android::IMediaPlayer> const&)+960) (BuildId: be9de599d107df75a053c8fe9a425c52)
+01-11 17:20:37.802 media 22990 22990 F DEBUG   :       #04 pc 0003ea29  /system/lib/libmedia.so (android::BnMediaPlayer::onTransact(unsigned int, android::Parcel const&, android::Parcel*, unsigned int)+1120) (BuildId: da5a263ec5bf21a7732d21e0bf23bd13)
+01-11 17:20:37.802 media 22990 22990 F DEBUG   :       #05 pc 00028d8b  /system/lib/libbinder.so (android::BBinder::transact(unsigned int, android::Parcel const&, android::Parcel*, unsigned int)+162) (BuildId: a22ef9c872d9f9e76cb7a0b3746317b2)
+01-11 17:20:37.802 media 22990 22990 F DEBUG   :       #06 pc 0002f371  /system/lib/libbinder.so (android::IPCThreadState::executeCommand(int)+624) (BuildId: a22ef9c872d9f9e76cb7a0b3746317b2)
+01-11 17:20:37.802 media 22990 22990 F DEBUG   :       #07 pc 0002f037  /system/lib/libbinder.so (android::IPCThreadState::getAndExecuteCommand()+98) (BuildId: a22ef9c872d9f9e76cb7a0b3746317b2)
+01-11 17:20:37.802 media 22990 22990 F DEBUG   :       #08 pc 0002f709  /system/lib/libbinder.so (android::IPCThreadState::joinThreadPool(bool)+44) (BuildId: a22ef9c872d9f9e76cb7a0b3746317b2)
+01-11 17:20:37.802 media 22990 22990 F DEBUG   :       #09 pc 00001851  /system/bin/mediaserver (main+136) (BuildId: e608157c30d8e0e4c2a30ba182258251)
+01-11 17:20:37.802 media 22990 22990 F DEBUG   :       #10 pc 0003205b  /apex/com.android.runtime/lib/bionic/libc.so (__libc_init+54) (BuildId: 633776572ed73d0e36cc218f0bfce445)
+01-11 17:20:37.985 shell 23005 23005 E DEBUG   : failed to open directory /proc/22984/fd: No such file or directory

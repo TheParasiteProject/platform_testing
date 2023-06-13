@@ -28,6 +28,8 @@ import android.support.test.uiautomator.UiObject2;
 import android.support.test.uiautomator.UiObjectNotFoundException;
 import android.support.test.uiautomator.UiScrollable;
 import android.support.test.uiautomator.UiSelector;
+import android.util.Log;
+
 import androidx.test.InstrumentationRegistry;
 
 import java.util.List;
@@ -42,6 +44,7 @@ public class SettingHelperImpl extends AbstractAutoStandardAppHelper implements 
 
     private UiModeManager mUiModeManager;
     private Context mContext;
+    private boolean mUseCommandToOpenSettings = true;
 
     public SettingHelperImpl(Instrumentation instr) {
         super(instr);
@@ -50,12 +53,22 @@ public class SettingHelperImpl extends AbstractAutoStandardAppHelper implements 
                         .getContext()
                         .getSystemService(UiModeManager.class);
         mContext = InstrumentationRegistry.getContext();
+        mUseCommandToOpenSettings =
+                Boolean.valueOf(
+                        InstrumentationRegistry.getArguments()
+                                .getString("use_command_to_open_settings", "true"));
     }
 
     /** {@inheritDoc} */
     @Override
     public void open() {
-        openFullSettings();
+        if (mUseCommandToOpenSettings) {
+            Log.i(LOG_TAG, "Using Command to open Settings.");
+            openFullSettings();
+        } else {
+            Log.i(LOG_TAG, "Using Intent to open Settings.");
+            super.open();
+        }
     }
 
     /** {@inheritDoc} */

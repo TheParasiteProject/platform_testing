@@ -39,6 +39,10 @@ ext.copyArtifacts = { nativeDir ->
         from project('sts-test').layout.projectDirectory.file('libs')
         into layout.buildDirectory.dir('android-sts/tools')
     }
+    copy {
+        from project('sts-test').layout.projectDirectory.dir('jdk')
+        into layout.buildDirectory.dir('android-sts/jdk')
+    }
 }
 
 task assembleStsARM {
@@ -87,6 +91,7 @@ task zipForSubmission(type: Zip) {
         exclude '.gradle'
         exclude 'test-app/libs'
         exclude 'sts-test/libs'
+        exclude 'sts-test/jdk'
         exclude 'sts-test/utils'
         exclude "**/.cxx"
     }

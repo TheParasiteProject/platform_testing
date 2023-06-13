@@ -375,7 +375,8 @@ public final class ProcessUtil {
     }
 
     /**
-     * Returns the currently open file names of the specified process.
+     * Returns the currently open file names of the specified process. This does not include shared
+     * libraries linked by the linker.
      *
      * @param device device to be run on
      * @param pid the id of the process to search
@@ -403,7 +404,8 @@ public final class ProcessUtil {
     }
 
     /**
-     * Returns file names of the specified file, loaded by the specified process.
+     * Returns file names of the specified file, loaded by the specified process. This does not
+     * include shared libraries linked.
      *
      * @param device device to be run on
      * @param pid the id of the process to search
@@ -425,7 +427,8 @@ public final class ProcessUtil {
     }
 
     /**
-     * Returns file entry of the first file loaded by the specified process with specified name
+     * Returns file entry of the first file loaded by the specified process with specified name.
+     * This includes shared libraries linked.
      *
      * @param device device to be run on
      * @param process pgrep pattern of process to look for

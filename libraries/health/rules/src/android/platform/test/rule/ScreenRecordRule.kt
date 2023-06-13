@@ -18,11 +18,14 @@ package android.platform.test.rule
 import android.app.UiAutomation
 import android.os.ParcelFileDescriptor
 import android.os.ParcelFileDescriptor.AutoCloseInputStream
+import android.platform.test.rule.ScreenRecordRule.Companion.SCREEN_RECORDING_CLASS_LEVEL_OVERRIDE_KEY
 import android.platform.test.rule.ScreenRecordRule.Companion.SCREEN_RECORDING_TEST_LEVEL_OVERRIDE_KEY
+import android.platform.test.rule.ScreenRecordRule.ScreenRecord
 import android.platform.uiautomator_helpers.DeviceHelpers.shell
 import android.platform.uiautomator_helpers.DeviceHelpers.uiDevice
 import android.platform.uiautomator_helpers.FailedEnsureException
 import android.platform.uiautomator_helpers.WaitUtils.ensureThat
+import android.platform.uiautomator_helpers.WaitUtils.waitForValueToSettle
 import android.util.Log
 import androidx.test.InstrumentationRegistry.getInstrumentation
 import androidx.test.platform.app.InstrumentationRegistry
@@ -30,6 +33,7 @@ import java.io.File
 import java.lang.annotation.Retention
 import java.lang.annotation.RetentionPolicy
 import java.nio.file.Files
+import java.time.Duration
 import kotlin.annotation.AnnotationTarget.CLASS
 import kotlin.annotation.AnnotationTarget.FUNCTION
 import kotlin.annotation.AnnotationTarget.PROPERTY_GETTER
@@ -44,8 +48,8 @@ import org.junit.runners.model.Statement
  * After adding this rule to the test class either:
  * - apply the annotation [ScreenRecord] to individual tests or classes
  * - pass the [SCREEN_RECORDING_TEST_LEVEL_OVERRIDE_KEY] or
- * [SCREEN_RECORDING_CLASS_LEVEL_OVERRIDE_KEY] instrumentation argument. e.g. `adb shell am
- * instrument -w -e <key> true <test>`).
+ *   [SCREEN_RECORDING_CLASS_LEVEL_OVERRIDE_KEY] instrumentation argument. e.g. `adb shell am
+ *   instrument -w -e <key> true <test>`).
  */
 class ScreenRecordRule : TestRule {
 
@@ -112,7 +116,11 @@ class ScreenRecordRule : TestRule {
             // Doesn't crash if the file doesn't exist, as we want the command output to be logged.
             outputFile.tryWaitingForFileToExists()
 
+            // temporary measure to see if b/266186795 is fixed
+            Thread.sleep(3000)
             val killOutput = uiDevice.shell("kill -INT $screenRecordPid")
+
+            outputFile.tryWaitingForFileSizeToSettle()
 
             val screenRecordOutput = screenRecordingFileDescriptor.readAllAndClose()
             log(
@@ -122,8 +130,8 @@ class ScreenRecordRule : TestRule {
                 File size: ${Files.size(outputFile.toPath()) / 1024} KB
                 screenrecord command output:
 
-                """.trimIndent() +
-                    screenRecordOutput.prependIndent("   ")
+                """
+                    .trimIndent() + screenRecordOutput.prependIndent("   ")
             )
         }
 
@@ -141,6 +149,19 @@ class ScreenRecordRule : TestRule {
             ensureThat("Recording output created") { exists() }
         } catch (e: FailedEnsureException) {
             Log.e(TAG, "Recording not created successfully.", e)
+        }
+    }
+
+    private fun File.tryWaitingForFileSizeToSettle() {
+        try {
+            waitForValueToSettle(
+                "Screen recording output size",
+                minimumSettleTime = Duration.ofSeconds(5)
+            ) {
+                length()
+            }
+        } catch (e: FailedEnsureException) {
+            Log.e(TAG, "Recording size didn't settle.", e)
         }
     }
 

@@ -55,12 +55,25 @@ object DeviceHelpers {
      * Waits for an object to be visible and returns it.
      *
      * Throws an error with message provided by [errorProvider] if the object is not found.
+     *
+     * @deprecated Use [DeviceHelpers.waitForObj] instead.
      */
     fun UiDevice.waitForObj(
         selector: BySelector,
-        timeout: Duration = SHORT_WAIT,
+        timeout: Duration = LONG_WAIT,
         errorProvider: () -> String = { "Object $selector not found" },
     ): UiObject2 = waitFor("$selector object", timeout, errorProvider) { findObject(selector) }
+
+    /**
+     * Waits for an object to be visible and returns it.
+     *
+     * Throws an error with message provided by [errorProvider] if the object is not found.
+     */
+    fun waitForObj(
+        selector: BySelector,
+        timeout: Duration = LONG_WAIT,
+        errorProvider: () -> String = { "Object $selector not found" },
+    ): UiObject2 = uiDevice.waitForObj(selector, timeout, errorProvider)
 
     /**
      * Waits for an object to be visible and returns it.
@@ -75,11 +88,21 @@ object DeviceHelpers {
 
     /**
      * Waits for an object to be visible and returns it. Returns `null` if the object is not found.
+     *
+     * @deprecated use [DeviceHelpers.waitForNullableObj] instead.
      */
     fun UiDevice.waitForNullableObj(
         selector: BySelector,
         timeout: Duration = SHORT_WAIT,
     ): UiObject2? = waitForNullable("nullable $selector objects", timeout) { findObject(selector) }
+
+    /**
+     * Waits for an object to be visible and returns it. Returns `null` if the object is not found.
+     */
+    fun waitForNullableObj(
+        selector: BySelector,
+        timeout: Duration = SHORT_WAIT,
+    ): UiObject2? = uiDevice.waitForNullableObj(selector, timeout)
 
     /**
      * Waits for objects matched by [selector] to be visible and returns them. Returns `null` if no
@@ -102,13 +125,11 @@ object DeviceHelpers {
         selector: BySelector,
         visible: Boolean = true,
         timeout: Duration = LONG_WAIT,
-        customMessageProvider: (() -> String)? = null,
+        errorProvider: (() -> String)? = null,
     ) {
-        ensureThat(
-            "$selector is ${visible.asVisibilityBoolean()}",
-            timeout,
-            customMessageProvider
-        ) { hasObject(selector) == visible }
+        ensureThat("$selector is ${visible.asVisibilityBoolean()}", timeout, errorProvider) {
+            hasObject(selector) == visible
+        }
     }
 
     private fun Boolean.asVisibilityBoolean(): String =
@@ -125,37 +146,39 @@ object DeviceHelpers {
         selector: BySelector,
         visible: Boolean,
         timeout: Duration = LONG_WAIT,
-        customMessageProvider: (() -> String)? = null,
+        errorProvider: (() -> String)? = null,
     ) {
         ensureThat(
             "$selector is ${visible.asVisibilityBoolean()} inside $this",
             timeout,
-            customMessageProvider
-        ) { hasObject(selector) == visible }
+            errorProvider
+        ) {
+            hasObject(selector) == visible
+        }
     }
 
     /** Asserts that a this selector is visible. Throws otherwise. */
     fun BySelector.assertVisible(
         timeout: Duration = LONG_WAIT,
-        customMessageProvider: (() -> String)? = null
+        errorProvider: (() -> String)? = null
     ) {
         uiDevice.assertVisibility(
             selector = this,
             visible = true,
             timeout = timeout,
-            customMessageProvider = customMessageProvider
+            errorProvider = errorProvider
         )
     }
     /** Asserts that a this selector is invisible. Throws otherwise. */
     fun BySelector.assertInvisible(
         timeout: Duration = LONG_WAIT,
-        customMessageProvider: (() -> String)? = null
+        errorProvider: (() -> String)? = null
     ) {
         uiDevice.assertVisibility(
             selector = this,
             visible = false,
             timeout = timeout,
-            customMessageProvider = customMessageProvider
+            errorProvider = errorProvider
         )
     }
 

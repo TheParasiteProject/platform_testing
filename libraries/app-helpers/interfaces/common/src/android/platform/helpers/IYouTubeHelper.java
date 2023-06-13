@@ -264,4 +264,13 @@ public interface IYouTubeHelper extends IAppHelper {
      * <p>Clicks the floaty bar's close button to close video player.
      */
     public void closeFloatyPlayer();
+
+    /**
+     * Setup expectation: YouTube is on the video player page.
+     *
+     * @return YouTube player object.
+     */
+    public default UiObject2 getYouTubePlayer() {
+        throw new UnsupportedOperationException("Not yet implemented.");
+    }
 }

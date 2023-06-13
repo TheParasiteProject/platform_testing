@@ -85,6 +85,12 @@ public abstract class NativePoc {
                 .assumePocExitSuccess(true);
     }
 
+    public static enum Bitness {
+        AUTO, // push 32 or 64 bit version of PoC depending on device arch
+        ONLY32, // push only 32bit version of PoC
+        ONLY64 // push only 64bit version of PoC; raises error when running on 32bit-only device
+    }
+
     @AutoValue.Builder
     public abstract static class Builder {
         /** Name of executable to be uploaded and run. Do not include "_sts??" suffix. */
@@ -145,6 +151,17 @@ public abstract class NativePoc {
         }
 
         abstract Builder only64(boolean value);
+
+        /** Force using 32bit or 64bit version of the native poc */
+        public Builder bitness(Bitness bitness) {
+            if (bitness == Bitness.ONLY32) {
+                return only32(true).only64(false);
+            }
+            if (bitness == Bitness.ONLY64) {
+                return only32(false).only64(true);
+            }
+            return only32(false).only64(false);
+        }
 
         /**
          * Function to run after the PoC finishes executing but before assertion or cleanups.

@@ -27,7 +27,9 @@ import platform.test.screenshot.proto.ScreenshotResultProto
  * The relaxed threshold allows for low quality png storage
  * TODO(b/238758872): replace after b/238758872 is closed
  */
-class AlmostPerfectMatcher : BitmapMatcher() {
+class AlmostPerfectMatcher(
+    private val acceptableThreshold: Double = 0.0,
+) : BitmapMatcher() {
     override fun compareBitmaps(
             expected: IntArray,
             given: IntArray,
@@ -74,7 +76,7 @@ class AlmostPerfectMatcher : BitmapMatcher() {
                 .setNumberPixelsIgnored(ignored)
                 .build()
 
-        if (different > 0) {
+        if (different > (acceptableThreshold * width * height)) {
             val diff = Bitmap.createBitmap(diffArray, width, height, Bitmap.Config.ARGB_8888)
             return MatchResult(matches = false, diff = diff, comparisonStatistics = stats)
         }

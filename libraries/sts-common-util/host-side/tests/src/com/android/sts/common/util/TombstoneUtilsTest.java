@@ -18,6 +18,7 @@ package com.android.sts.common.util;
 
 import static com.google.common.truth.Truth.assertThat;
 
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.fail;
 import static org.junit.Assume.assumeTrue;
 
@@ -601,5 +602,12 @@ public class TombstoneUtilsTest extends BaseHostJUnit4Test {
         } finally {
             getDevice().disableAdbRoot();
         }
+    }
+
+    @Test
+    public void testEmptyTombstoneProtoNotSecurityCrash() throws Exception {
+        assertFalse(
+                TombstoneUtils.isSecurityCrash(
+                        Tombstone.newBuilder().build(), new TombstoneUtils.Config()));
     }
 }

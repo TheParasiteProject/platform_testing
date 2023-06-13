@@ -1,5 +1,7 @@
 package android.platform.test.rule
 
+import android.platform.uiautomator_helpers.DeviceHelpers.context
+import android.provider.Settings
 import org.junit.runner.Description
 
 /**
@@ -8,13 +10,18 @@ import org.junit.runner.Description
  *
  * Setting value is bit-based with 4 bits responsible for different types of charging. So the value
  * is device-dependent but non-zero value means the settings is on.
- * See [Settings.STAY_ON_WHILE_PLUGGED_IN] for more information.
+ * See [Settings.Global.STAY_ON_WHILE_PLUGGED_IN] for more information.
  */
-class KeepScreenAwakeRule : TestWatcher() {
+class EnsureKeepScreenAwakeSetRule : TestWatcher() {
 
     override fun starting(description: Description?) {
-        val result = executeShellCommand("settings get global stay_on_while_plugged_in").trim()
-        if (result == "0") {
+
+        val result =
+            Settings.Global.getInt(
+                context.contentResolver,
+                Settings.Global.STAY_ON_WHILE_PLUGGED_IN
+            )
+        if (result == 0) {
             throw AssertionError("'Stay awake' option in developer settings should be enabled")
         }
     }

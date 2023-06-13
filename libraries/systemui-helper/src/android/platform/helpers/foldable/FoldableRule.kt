@@ -18,6 +18,7 @@ package android.platform.helpers.foldable
 
 import android.os.SystemClock
 import android.platform.test.rule.TestWatcher
+import android.platform.uiautomator_helpers.TracingUtils.trace
 import android.platform.uiautomator_helpers.WaitUtils.ensureThat
 import androidx.annotation.FloatRange
 import java.util.concurrent.TimeUnit
@@ -31,7 +32,6 @@ import org.junit.runner.Description
  * [unfoldBeforeTestRule].
  *
  * Example:
- *
  * ```
  *  companion object {
  *      @get:ClassRule val foldable = FoldableRule()
@@ -57,39 +57,50 @@ class FoldableRule(private val ensureScreenOn: Boolean = false) : TestWatcher() 
     }
 
     fun fold() {
-        check(!controller.isFolded) { "Trying to fold when already folded" }
-        if (ensureScreenOn) {
-            ensureThat("screen is on before folding") { screenOn }
-        }
-        val initialScreenSurface = displaySurface
+        trace("FoldableRule#fold") {
+            check(!controller.isFolded) { "Trying to fold when already folded" }
+            if (ensureScreenOn) {
+                ensureThat("screen is on before folding") { screenOn }
+            }
+            val initialScreenSurface = displaySurface
 
-        controller.fold()
-        SystemClock.sleep(ANIMATION_TIMEOUT) // Let's wait for the unfold animation to finish.
+            controller.fold()
+            SystemClock.sleep(ANIMATION_TIMEOUT) // Let's wait for the unfold animation to finish.
 
-        ensureThat("screen is off after folding") { !screenOn }
-        ensureThat("screen surface decreases after folding") {
-            displaySurface < initialScreenSurface
+            // As per requirement, the behaviour has been changed to keep the outer display ON when
+            // the device is folded with an active wakelock.
+            // We send the sleep command to make the fold deterministic.
+            // If needed in the future this class can be changed to make this behaviour configured,
+            // but for now tests assume the screen being off after folding.
+            uiDevice.sleep()
+
+            ensureThat("screen is off after folding") { !screenOn }
+            ensureThat("screen surface decreases after folding") {
+                displaySurface < initialScreenSurface
+            }
         }
     }
 
     fun unfold() {
-        check(controller.isFolded) { "Trying to unfold when already unfolded" }
-        if (ensureScreenOn) {
-            ensureThat("screen is on before unfolding") { screenOn }
-        }
-        val initialScreenSurface = displaySurface
+        trace("FoldableRule#unfold") {
+            check(controller.isFolded) { "Trying to unfold when already unfolded" }
+            if (ensureScreenOn) {
+                ensureThat("screen is on before unfolding") { screenOn }
+            }
+            val initialScreenSurface = displaySurface
 
-        controller.unfold()
-        SystemClock.sleep(ANIMATION_TIMEOUT) // Let's wait for the unfold animation to finish.
+            controller.unfold()
+            SystemClock.sleep(ANIMATION_TIMEOUT) // Let's wait for the unfold animation to finish.
 
-        ensureThat("screen is on after unfolding") { screenOn }
-        ensureThat("screen surface increases after unfolding") {
-            displaySurface > initialScreenSurface
+            ensureThat("screen is on after unfolding") { screenOn }
+            ensureThat("screen surface increases after unfolding") {
+                displaySurface > initialScreenSurface
+            }
         }
     }
 
     fun setHingeAngle(@FloatRange(from = 0.0, to = 180.0) angle: Float) {
-        controller.setHingeAngle(angle)
+        trace("Setting hinge angle to $angle") { controller.setHingeAngle(angle) }
     }
 
     val foldBeforeTestRule: TestRule = FoldControlRule(FoldableState.FOLDED)
@@ -97,14 +108,16 @@ class FoldableRule(private val ensureScreenOn: Boolean = false) : TestWatcher() 
 
     private inner class FoldControlRule(private val startState: FoldableState) : TestWatcher() {
         override fun starting(description: Description?) {
-            check(initialized) { "Initialize of FoldableRule needed before this." }
-            if (currentState == startState) {
-                return
-            }
-            when (startState) {
-                FoldableState.FOLDED -> fold()
-                FoldableState.UNFOLDED -> unfold()
-                FoldableState.HALF_FOLDED -> TODO("Not yet supported.")
+            trace("FoldControlRule#starting") {
+                check(initialized) { "Initialize of FoldableRule needed before this." }
+                if (currentState == startState) {
+                    return
+                }
+                when (startState) {
+                    FoldableState.FOLDED -> fold()
+                    FoldableState.UNFOLDED -> unfold()
+                    FoldableState.HALF_FOLDED -> TODO("Not yet supported.")
+                }
             }
         }
     }

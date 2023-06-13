@@ -35,4 +35,18 @@ public interface ISettingsDisplayHelper extends ISettingsHomeHelper {
      * <p>This method validates Settings Display page.
      */
     void isDisplayPage();
+
+    /**
+     * Setup expectations: Settings Display page is open
+     *
+     * <p>This method scrolls to Settings Dark theme text.
+     */
+    void scrollToDarkTheme();
+
+    /**
+     * Setup expectations: Settings Display page is open
+     *
+     * <p>This method toggles Settings Dark theme switch.
+     */
+    void toggleDarkTheme();
 }

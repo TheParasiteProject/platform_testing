@@ -16,12 +16,10 @@
 package android.platform.test.scenario.tapl_common
 
 import android.platform.uiautomator_helpers.BetterSwipe
+import android.platform.uiautomator_helpers.WaitUtils.ensureThat
 import androidx.test.uiautomator.StaleObjectException
 import androidx.test.uiautomator.UiObject2
-import androidx.test.uiautomator.UiObject2Condition
-import androidx.test.uiautomator.Until
 import java.time.Duration
-import org.junit.Assert.assertTrue
 
 /**
  * A collection of gestures for UI objects that implements flake-proof patterns and adds
@@ -32,27 +30,31 @@ object Gestures {
     private val WAIT_TIME = Duration.ofSeconds(10)
 
     private fun waitForObjectCondition(
-        uiObject: UiObject2,
         objectName: String,
-        condition: UiObject2Condition<Boolean>,
-        conditionName: String
+        conditionName: String,
+        condition: () -> Boolean
     ) {
-        assertTrue(
-            "UI object '$objectName' is not $conditionName.",
-            uiObject.wait(condition, WAIT_TIME.toMillis())
+        ensureThat(
+            condition = condition,
+            description = "UI object '$objectName' becomes $conditionName",
+            timeout = WAIT_TIME
         )
     }
 
-    private fun waitForObjectEnabled(uiObject: UiObject2, objectName: String) {
-        waitForObjectCondition(uiObject, objectName, Until.enabled(true), "enabled")
+    internal fun waitForObjectEnabled(uiObject: UiObject2, objectName: String) {
+        waitForObjectCondition(objectName, "enabled") { uiObject.isEnabled() }
     }
 
     private fun waitForObjectClickable(uiObject: UiObject2, waitReason: String) {
-        waitForObjectCondition(uiObject, waitReason, Until.clickable(true), "clickable")
+        waitForObjectCondition(waitReason, "clickable") { uiObject.isClickable() }
     }
 
     private fun waitForObjectLongClickable(uiObject: UiObject2, waitReason: String) {
-        waitForObjectCondition(uiObject, waitReason, Until.longClickable(true), "long-clickable")
+        waitForObjectCondition(waitReason, "long-clickable") { uiObject.isLongClickable() }
+    }
+
+    internal fun waitForObjectScrollable(uiObject: UiObject2, waitReason: String) {
+        waitForObjectCondition(waitReason, "scrollable") { uiObject.isScrollable() }
     }
 
     /**

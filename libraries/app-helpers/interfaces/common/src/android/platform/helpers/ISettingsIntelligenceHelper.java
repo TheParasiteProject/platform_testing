@@ -68,6 +68,18 @@ public interface ISettingsIntelligenceHelper extends IAppHelper {
     public static final String PAGE_ACTION_WIFI_TETHERING_HOTSPOT =
             "com.android.settings.WIFI_TETHER_SETTINGS";
 
+    String PAGE_ACTION_BLUETOOTH_PAIRING = "android.settings.BLUETOOTH_PAIRING_SETTINGS";
+    String PAGE_ACTION_CONNECTED_ADVANCED =
+            "com.android.settings.ADVANCED_CONNECTED_DEVICE_SETTINGS";
+    String PAGE_ACTION_DISPLAY_LOCKSCRN = "android.settings.LOCK_SCREEN_SETTINGS";
+    String PAGE_ACTION_DISPLAY_TEXT = "android.settings.TEXT_READING_SETTINGS";
+    String PAGE_ACTION_LOCKSCRN_PLAYING = "com.google.intelligence.sense.NOW_PLAYING_SETTINGS";
+    String PAGE_ACTION_NETWORK_INSTALL_CERT = "android.credentials.INSTALL";
+    String PAGE_ACTION_NETWORK_VPN = "android.settings.VPN_SETTINGS";
+    String PAGE_ACTION_SOUND_MEDIA = "android.settings.ACTION_MEDIA_CONTROLS_SETTINGS";
+    String PAGE_ACTION_WIFI_IP = "android.settings.WIFI_IP_SETTINGS";
+    String PAGE_ACTION_WIFI_SAVED = "android.settings.WIFI_SAVED_NETWORK_SETTINGS";
+
     /**
      * Sets the intent data uri representing the Settings page to open when open() is called.
      *

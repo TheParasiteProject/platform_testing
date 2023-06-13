@@ -58,7 +58,9 @@ class SensorInjectionController(sensorType: Int) : TestWatcher() {
                 SensorManager.SENSOR_STATUS_ACCURACY_HIGH,
                 System.currentTimeMillis()
             )
-        ) { "Error while injecting sensor data." }
+        ) {
+            "Error while injecting sensor data."
+        }
     }
 
     companion object {
