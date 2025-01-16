@@ -783,3 +783,59 @@ python_test_host {
         },
     },
 }
+
+python_test_host {
+    name: "BTDialerMediaCenter",
+    main: "dialer_test_mediacenter_dialer.py",
+    srcs: ["dialer_test_mediacenter_dialer.py"],
+
+    libs: [
+        "mobly",
+        "utilities",
+        "bluetooth_test",
+    ],
+    test_suites: [
+        "catbox",
+    ],
+    test_options: {
+        unit_test: false,
+    },
+    device_common_data: [
+        // Package the snippet with the mobly test
+        ":AutomotiveSnippet",
+        ":PhoneSnippet",
+    ],
+    version: {
+        py3: {
+            embedded_launcher: true,
+        },
+    },
+}
+
+python_test_host {
+    name: "BTDialerAppSwitch",
+    main: "dialer_test_call_displayed_after_app_switch.py",
+    srcs: ["dialer_test_call_displayed_after_app_switch.py"],
+
+    libs: [
+        "mobly",
+        "utilities",
+        "bluetooth_test",
+    ],
+    test_suites: [
+        "catbox",
+    ],
+    test_options: {
+        unit_test: false,
+    },
+    device_common_data: [
+        // Package the snippet with the mobly test
+        ":AutomotiveSnippet",
+        ":PhoneSnippet",
+    ],
+    version: {
+        py3: {
+            embedded_launcher: true,
+        },
+    },
+}
