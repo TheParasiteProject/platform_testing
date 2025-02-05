@@ -27,6 +27,7 @@ android_test {
         "automotive-facet-bar-helper",
         "automotive-utility-helper",
         "app-helpers-auto-interfaces",
+        "automotive-status-bar-helper",
         "androidx.test.uiautomator_uiautomator",
         "hamcrest-library",
         "automotive-home-helper",

@@ -297,4 +297,19 @@ public interface IAutoStatusBarHelper extends IAppHelper {
      * <p>Get the Device current time Zone
      */
     String getDeviceCurrentTimeZone();
+
+    /**
+     * Setup expectations: Adaptive Brightness Palette Open Adaptive Brightness Toggle ON/OFF
+     *
+     * <p>Click on Adaptive Brightness toggle Switch
+     */
+    void clickOnAdaptiveBrightnessToggleSwitch();
+
+    /**
+     * Method Verifies the Adaptive brightness toggle switch value using API
+     *
+     * @return Boolean Value True if Adaptive brightness Switch is "ON" False if Adaptive brightness
+     *     Switch is "OFF"
+     */
+    boolean isAdaptiveBrightnessOn();
 }

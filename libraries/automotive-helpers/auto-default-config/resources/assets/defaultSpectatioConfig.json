@@ -75,7 +75,8 @@
     "DAY_MODE_COMMAND": "dumpsys activity service com.android.car/.CarService day-night-mode  day",
     "OPEN_SYSTEM_UI": "am crash com.android.systemui",
     "OPEN_CAR_UI": "am crash com.android.car",
-    "DATE_COMMAND": "date"
+    "DATE_COMMAND": "date",
+    "ADAPTIVE_BRIGHTNESS_COMMAND": "settings get system screen_brightness_mode"
   },
   "UI_ELEMENTS": {
     "MAKE_CALL": {
@@ -2348,6 +2349,19 @@
     "USER_SETTINGS_USER_AVATAR": {
       "TYPE": "RESOURCE_ID",
       "VALUE": "user_avatar"
+    },
+    "ADAPTIVE_BRIGHTNESS_TOGGLE_SWITCH": {
+      "TYPE": "MULTIPLE",
+      "SPECIFIERS": [
+        {
+          "TYPE": "DESCRIPTION",
+          "VALUE": "Display brightness"
+        },
+        {
+          "TYPE": "CLASS",
+          "VALUE": "android.widget.Switch"
+        }
+      ]
     }
   },
   "WORKFLOWS": {
