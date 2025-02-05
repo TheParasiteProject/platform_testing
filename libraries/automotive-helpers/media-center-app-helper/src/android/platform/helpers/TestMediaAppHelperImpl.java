@@ -17,6 +17,7 @@
 package android.platform.helpers;
 
 import android.app.Instrumentation;
+import android.util.Log;
 
 import androidx.test.uiautomator.BySelector;
 import androidx.test.uiautomator.UiObject2;
@@ -26,6 +27,7 @@ import java.util.List;
 /** Helper class for Test Media app for MediaCenter test */
 public class TestMediaAppHelperImpl extends AbstractStandardAppHelper
         implements IAutoTestMediaAppHelper {
+    private static final String LOG_TAG = TestMediaAppHelperImpl.class.getSimpleName();
     // Wait Time
     private static final int SHORT_RESPONSE_WAIT_MS = 1000;
 
@@ -84,6 +86,7 @@ public class TestMediaAppHelperImpl extends AbstractStandardAppHelper
     }
 
     private void selectSongInTestMediaApp() {
+        Log.i(LOG_TAG, "Select Song In TestMediaApp");
         BySelector songListSelector =
                 getUiElementFromConfig(AutomotiveConfigConstants.MEDIA_SONGS_LIST);
 
@@ -91,8 +94,9 @@ public class TestMediaAppHelperImpl extends AbstractStandardAppHelper
         getSpectatioUiUtil()
                 .validateUiObjects(songList, AutomotiveConfigConstants.MEDIA_SONGS_LIST);
         getSpectatioUiUtil().clickAndWait(songList.get(1));
-        getSpectatioUiUtil().wait1Second();
+        getSpectatioUiUtil().waitForIdle();
 
+        Log.i(LOG_TAG, "Minimize the window");
         // minimize songs
         BySelector goBackToSongsListSelector =
                 getUiElementFromConfig(AutomotiveConfigConstants.MEDIA_APP_NAVIGATION_ICON);
@@ -100,7 +104,8 @@ public class TestMediaAppHelperImpl extends AbstractStandardAppHelper
         getSpectatioUiUtil()
                 .validateUiObject(
                         goBackToSongsList, AutomotiveConfigConstants.MEDIA_APP_NAVIGATION_ICON);
-        getSpectatioUiUtil().wait1Second();
+        getSpectatioUiUtil().clickAndWait(goBackToSongsList);
+        getSpectatioUiUtil().waitForIdle();
     }
 
     private void clickAndWait(String autoConfigConstants, String fieldName) {
@@ -111,7 +116,7 @@ public class TestMediaAppHelperImpl extends AbstractStandardAppHelper
                 .validateUiObject(
                         mediaTestAppField, String.format("Test Media App field: %s", fieldName));
         getSpectatioUiUtil().clickAndWait(mediaTestAppField);
-        getSpectatioUiUtil().wait1Second();
+        getSpectatioUiUtil().waitForIdle();
     }
 
 }
