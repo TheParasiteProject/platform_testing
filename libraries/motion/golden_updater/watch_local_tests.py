@@ -34,6 +34,8 @@ import hashlib
 import shutil
 import secrets
 import datetime
+import glob
+import gzip
 
 
 from collections import defaultdict
@@ -50,6 +52,13 @@ def main():
         type=int,
         help="Port to run test at watcher web UI on.",
     )
+
+    parser.add_argument(
+        "--atest",
+        default=False,
+        help="Watches atest output",
+    )
+
     parser.add_argument(
         "--serial",
         default=os.environ.get("ANDROID_SERIAL"),
@@ -100,7 +109,36 @@ def main():
 
     with tempfile.TemporaryDirectory() as tmpdir:
         global golden_watcher, this_server_address
-        golden_watcher = GoldenFileWatcher(tmpdir, adb_client)
+
+        if args.atest:
+            print("ATEST is running.")
+            user = os.environ.get("USER")
+            golden_watcher = AtestGoldenWatcher(
+                tmpdir, f"/tmp/atest_result_{user}/LATEST/"
+            )
+
+        else:
+            serial = args.serial
+            if not serial:
+                devices_response = subprocess.run(
+                    ["adb", "devices"], check=True, capture_output=True
+                ).stdout.decode("utf-8")
+                lines = [s for s in devices_response.splitlines() if s.strip()]
+
+                if len(lines) == 1:
+                    print("no adb devices found")
+                    sys.exit(1)
+
+                if len(lines) > 2:
+                    print("multiple adb devices found, specify --serial")
+                    sys.exit(1)
+
+                serial = lines[1].split("\t")[0]
+
+            adb_client = AdbClient(serial)
+            if not adb_client.run_as_root():
+                sys.exit(1)
+            golden_watcher = GoldenFileWatcher(tmpdir, adb_client)
 
         this_server_address = f"http://localhost:{args.port}"
 
@@ -157,12 +195,12 @@ class WatchWebAppRequestHandler(http.server.BaseHTTPRequestHandler):
         elif parsed.path.startswith("/golden/"):
             requested_file_start_index = parsed.path.find("/", len("/golden/") + 1)
             requested_file = parsed.path[requested_file_start_index + 1 :]
-            print(requested_file)
+            print("requested_file: {}".format(requested_file))
             self.serve_file(golden_watcher.temp_dir, requested_file)
             return
         elif parsed.path.startswith("/expected/"):
             golden_id = parsed.path[len("/expected/") :]
-            print(golden_id)
+            print("golden_id: {}".format(golden_id))
 
             goldens = golden_watcher.cached_goldens.values()
             for golden in goldens:
@@ -211,8 +249,8 @@ class WatchWebAppRequestHandler(http.server.BaseHTTPRequestHandler):
     def serve_file(self, root_directory, file_relative_to_root, mime_type=None):
         resolved_path = path.abspath(path.join(root_directory, file_relative_to_root))
 
-        print(resolved_path)
-        print(root_directory)
+        print("resolved_path: {}".format(resolved_path))
+        print("root_directory: {}".format(root_directory))
 
         if path.commonprefix(
             [resolved_path, root_directory]
@@ -356,6 +394,88 @@ class GoldenFileWatcher:
     def run_adb_command(self, args):
         return self.adb_client.run_adb_command(args)
 
+class AtestGoldenWatcher:
+
+    def __init__(self, temp_dir, atest_latest_dir):
+        self.temp_dir = temp_dir
+        self.atest_latest_dir = atest_latest_dir
+
+        # name -> CachedGolden
+        self.cached_goldens = {}
+        self.refresh_golden_files()
+
+    def clean(self):
+        self.cached_goldens = {}
+
+    def refresh_golden_files(self):
+
+        # Atest writes the files with a wide variety of filenames. Examples
+        # log/stub/local_atest/inv_8184127433410125702/light_portrait_pagingRight.actual.json_4383267726505225616.txt.gz
+        # log/invocation_3042186109657619915/inv_5155363728971335727/recordMotion_captureCrossfade.actual_10536896158799342698.json
+        # log/stub/local_atest/inv_6860054371355660320/light_portrait_noOverscrollRight.actual_118505410949600545.json.gz
+
+        # log/stub/local_atest/inv_6860054371355660320/light_portrait_noOverscrollRight.actual_12613191689435798576.mp4
+        # log/invocation_3042186109657619915/inv_5155363728971335727/recordMotion_captureCrossfade.actual_1988198704080929506.mp4
+        # log/stub/local_atest/inv_8184127433410125702/light_portrait_pagingRight.actual.mp4_1617964025478041468.txt.gz
+
+        pattern_type_unrecognized = (
+            r".*/(?P<name>.*)\.actual\.(?P<ext>\w+)_\d+\.txt(?P<compressed>\.gz)?"
+        )
+        pattern_type_recognized = (
+            r".*/(?P<name>.*.*)\.actual_\d+\.(?P<ext>\w+)(?P<compressed>\.gz)?"
+        )
+
+        # Output from on-device runs
+        # Modifying the search regex to handle files not ending with json as given above.
+        for filename in glob.iglob(
+            f"{self.atest_latest_dir}//**/*.actual*json*", recursive=True
+        ):
+            print(filename)
+
+            match = re.search(pattern_type_unrecognized, filename)
+            if not match:
+                match = re.search(pattern_type_recognized, filename)
+
+            if not match:
+                continue
+
+            golden_name = match.group("name")
+            ext = match.group("ext")
+            is_compressed = match.group("compressed") == ".gz"
+
+            print(f"Found golden {golden_name}.{ext} (compressed {is_compressed})")
+
+            local_file = os.path.join(self.temp_dir, f"{golden_name}.actual.json")
+            self.copy_file(filename, local_file, is_compressed)
+            golden = CachedGolden(filename, local_file)
+
+            if golden.video_location:
+                for video_filename in glob.iglob(
+                    f"{self.atest_latest_dir}/**/{golden_name}.actual*.mp4*",
+                    recursive=True,
+                ):
+
+                    local_video_file = os.path.join(
+                        self.temp_dir, golden.video_location
+                    )
+                    video_is_compressed = video_filename.endswith(".gz")
+                    self.copy_file(
+                        video_filename, local_video_file, video_is_compressed
+                    )
+
+                    break
+
+            self.cached_goldens[filename] = golden
+
+    def copy_file(self, source, target, is_compressed):
+        os.makedirs(os.path.dirname(target), exist_ok=True)
+
+        if is_compressed:
+            with gzip.open(source, "rb") as f_in:
+                with open(target, "wb") as f_out:
+                    shutil.copyfileobj(f_in, f_out)
+        else:
+            shutil.copyfile(source, target)
 
 class CachedGolden:
 
