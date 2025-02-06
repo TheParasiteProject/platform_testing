@@ -222,6 +222,17 @@ public class SettingsBluetoothHelperImpl extends AbstractStandardAppHelper
 
     /** {@inheritDoc} */
     @Override
+    public boolean isPhoneProfileEnabled() {
+        BySelector phoneToogleSelector =
+                getUiElementFromConfig(AutomotiveConfigConstants.TOGGLE_PHONE);
+        UiObject2 phoneToogleSwitch = getSpectatioUiUtil().findUiObject(phoneToogleSelector);
+        getSpectatioUiUtil()
+                .validateUiObject(phoneToogleSwitch, AutomotiveConfigConstants.TOGGLE_PHONE);
+        return phoneToogleSwitch.isChecked();
+    }
+
+    /** {@inheritDoc} */
+    @Override
     public String getPackage() {
         return getPackageFromConfig(AutomotiveConfigConstants.SETTINGS_PACKAGE);
     }
