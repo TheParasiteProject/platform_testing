@@ -253,4 +253,10 @@ public interface IAutoPrivacySettingsHelper extends IAppHelper {
      */
     void skipImprovementCallingAndTextingPopUp();
 
+    /**
+     * Setup expectation: On Privacy Settings Page
+     *
+     * <p>Click on Location Text in the Right panel/ sub Settings page
+     */
+    void clickOnLocationInPrivacySettings();
 }
