@@ -23,6 +23,8 @@ import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 
+import android.device.collectors.BaseMetricListener;
+import android.device.collectors.BaseMetricListener.IterationMetadata;
 import android.os.Bundle;
 import android.os.SystemClock;
 import android.platform.test.microbenchmark.Microbenchmark.NoMetricAfter;
@@ -53,6 +55,7 @@ import org.junit.runners.model.Statement;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 
+import java.lang.annotation.Annotation;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -260,6 +263,38 @@ public final class MicrobenchmarkTest {
                         "@After",
                         "@NoMetricAfter",
                         "@NoMetricRule finished")
+                .inOrder();
+    }
+
+    @Test
+    public void testMultipleIterationsWithRename_iterationAnnotationPresent()
+            throws InitializationError {
+        Bundle args = new Bundle();
+        args.putString("iterations", "2");
+        args.putString("rename-iterations", "true");
+        args.putString("iteration-separator", "--");
+        LoggingMicrobenchmark loggingRunner = new LoggingMicrobenchmark(
+                LoggingTestIterationTest.class, args);
+
+        Result result = new JUnitCore().run(loggingRunner);
+
+        assertThat(result.wasSuccessful()).isTrue();
+        assertThat(sLogs)
+                .containsExactly(
+                        "@Rule starting, iteration = 1",
+                        "begin: testMethod--1("
+                                + "android.platform.test.microbenchmark.MicrobenchmarkTest$"
+                                + "LoggingTestIterationTest)",
+                        "testMethod",
+                        "end",
+                        "@Rule finished, iteration = 1",
+                        "@Rule starting, iteration = 2",
+                        "begin: testMethod--2("
+                                + "android.platform.test.microbenchmark.MicrobenchmarkTest$"
+                                + "LoggingTestIterationTest)",
+                        "testMethod",
+                        "end",
+                        "@Rule finished, iteration = 2")
                 .inOrder();
     }
 
@@ -879,6 +914,38 @@ public final class MicrobenchmarkTest {
         @Test
         public void testMethod() {
             throw new RuntimeException("I failed.");
+        }
+    }
+
+    @RunWith(LoggingMicrobenchmark.class)
+    public static class LoggingTestIterationTest {
+        @Rule
+        public IterationLogRule rule = new IterationLogRule();
+
+        @Test
+        public void testMethod() {
+            sLogs.add("testMethod");
+        }
+
+        public static class IterationLogRule extends TestWatcher {
+            @Override
+            public void starting(Description description) {
+                sLogs.add("@Rule starting, iteration = " + extractIteration(description));
+            }
+
+            @Override
+            public void finished(Description description) {
+                sLogs.add("@Rule finished, iteration = " + extractIteration(description));
+            }
+
+            private int extractIteration(Description description) {
+                for (Annotation annotation : description.getAnnotations()) {
+                    if (annotation instanceof IterationMetadata) {
+                        return ((IterationMetadata) annotation).getIteration();
+                    }
+                }
+                return 0;
+            }
         }
     }
 

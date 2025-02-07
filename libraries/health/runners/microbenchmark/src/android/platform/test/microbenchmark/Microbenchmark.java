@@ -19,6 +19,7 @@ import static android.content.Context.BATTERY_SERVICE;
 import static android.os.BatteryManager.BATTERY_PROPERTY_CAPACITY;
 import static android.os.BatteryManager.BATTERY_PROPERTY_CHARGE_COUNTER;
 
+import android.device.collectors.BaseMetricListener.IterationMetadata;
 import android.os.BatteryManager;
 import android.os.Bundle;
 import android.os.SystemClock;
@@ -337,13 +338,18 @@ public class Microbenchmark extends BlockJUnit4ClassRunner {
         if (!mRenameIterations) {
             return original;
         }
+
+        final int iteration = mIterations.getOrDefault(original, 0);
+        final List<Annotation> annotations = new ArrayList<>(original.getAnnotations());
+        annotations.add(new IterationMetadata(iteration));
+
         return Description.createTestDescription(
                 original.getTestClass(),
                 String.join(
                         mIterationSep,
                         original.getMethodName(),
-                        String.valueOf(mIterations.get(original))),
-                original.getAnnotations().toArray(Annotation[]::new));
+                        String.valueOf(iteration)),
+                annotations.toArray(Annotation[]::new));
     }
 
     /** Re-implement the private rules wrapper from {@link BlockJUnit4ClassRunner} in JUnit 4.12. */
