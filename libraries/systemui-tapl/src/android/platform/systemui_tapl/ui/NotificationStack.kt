@@ -145,7 +145,7 @@ open class NotificationStack internal constructor(val fromLockscreen: Boolean) {
     /**
      * Finds a notification by its identity. Fails if the notification can't be found.
      *
-     * @param identity description of the notification type and properties
+     * @param identity description of the notification tyoe and properties
      * @param waitTimeout duration to wait for notification to appear.
      * @return Notification (throws assertion if not found)
      */
@@ -166,7 +166,7 @@ open class NotificationStack internal constructor(val fromLockscreen: Boolean) {
      * Scrolls to a notification defined by its identity. Fails if the notification can't be found
      * in the shade.
      *
-     * @param identity description of the notification type and properties
+     * @param identity description of the notification tyoe and properties
      * @param waitTimeout duration to wait for notification to appear.
      * @return Notification (throws assertion if not found)
      */
@@ -236,10 +236,10 @@ open class NotificationStack internal constructor(val fromLockscreen: Boolean) {
         /**
          * Finds a notification by its identity. Fails is the notification can't be found.
          *
-         * @param identity description of the notification type and properties.
+         * @param identity description of the notification tyoe and properties.
          * @param fromLockscreen flag set in the returned Notification object.
          * @param isHeadsUpNotification flag set in the returned Notification object.
-         * @param scroll allow scrolling to find the notification in the notification stack.
+         * @param scroll allow scrolling to find the notification in the notification stak.
          * @param waitTimeout duration to wait for notification to appear.
          * @return Notification (throws assertion if not found)
          */
@@ -352,7 +352,7 @@ open class NotificationStack internal constructor(val fromLockscreen: Boolean) {
                 .hasDescendant(androidResSelector("title").text(title))
 
         internal fun notificationByTextSelector(text: String) =
-            By.copy(NOTIFICATION_ROW_SELECTOR).hasDescendant(By.textContains(text))
+            By.copy(NOTIFICATION_ROW_SELECTOR).hasDescendant(By.text(text))
 
         internal fun getNotificationCountByIdentityText(identity: NotificationIdentity): Int {
             val notifications: Collection<UiObject2> =
