@@ -104,6 +104,11 @@ class CallUtils:
         logging.info("Opening contacts")
         self.device.mbs.openContacts()
 
+    def open_favorites(self):
+        """Open favorites"""
+        logging.info("Opening favorites")
+        self.device.mbs.openFavorites()
+
     def open_dialpad(self):
         """Open the dial pad from the dialer main screen"""
         logging.info("Opening the dialpad")

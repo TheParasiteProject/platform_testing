@@ -52,6 +52,8 @@ class AddRemoveFavoriteContact(bluetooth_base_test.BluetoothBaseTest):
     # Adding the contacts to favorites from the favorites tab and verifying it
     self.call_utils.add_favorites_from_favorites_tab(
         contact_name)
+    self.call_utils.open_contacts()
+    self.call_utils.open_favorites()
     asserts.assert_true(self.discoverer.mbs.hasUIElementWithText(contact_name),
                         'Favorite contact should be displayed on Favorites Tab')
     self.discoverer.mbs.clickUIElementWithText(contact_name)
