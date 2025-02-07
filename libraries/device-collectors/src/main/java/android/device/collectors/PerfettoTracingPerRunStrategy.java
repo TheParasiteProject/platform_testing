@@ -39,8 +39,10 @@ import java.util.function.Supplier;
  * <root>/<test_name>/PerfettoTracingStrategy/<random UUID>-<invocation_count>.perfetto-trace
  */
 public class PerfettoTracingPerRunStrategy extends PerfettoTracingStrategy {
+    private static final String STRATEGY_IDENTIFIER = "per_run";
+
     PerfettoTracingPerRunStrategy(Instrumentation instr) {
-        super(instr);
+        super(instr, STRATEGY_IDENTIFIER);
     }
 
     /**
@@ -49,7 +51,7 @@ public class PerfettoTracingPerRunStrategy extends PerfettoTracingStrategy {
      */
     @VisibleForTesting
     public PerfettoTracingPerRunStrategy(PerfettoHelper helper, Instrumentation instr) {
-        super(helper, instr);
+        super(helper, instr, STRATEGY_IDENTIFIER);
     }
 
     /**
@@ -64,7 +66,8 @@ public class PerfettoTracingPerRunStrategy extends PerfettoTracingStrategy {
             Supplier<PowerManager.WakeLock> wakelockSupplier,
             WakeLockAcquirer wakeLockAcquirer,
             WakeLockReleaser wakeLockReleaser) {
-        super(helper, instr, wakeLockContext, wakelockSupplier, wakeLockAcquirer, wakeLockReleaser);
+        super(helper, instr, STRATEGY_IDENTIFIER, wakeLockContext, wakelockSupplier,
+                wakeLockAcquirer, wakeLockReleaser);
     }
 
     @Override

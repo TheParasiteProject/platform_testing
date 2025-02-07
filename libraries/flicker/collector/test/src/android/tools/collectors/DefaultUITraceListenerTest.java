@@ -27,6 +27,7 @@ import static org.mockito.Mockito.verify;
 import android.app.Instrumentation;
 import android.device.collectors.DataRecord;
 import android.device.collectors.PerfettoListener;
+import android.device.collectors.PerfettoTracingBeforeAfterTestStrategy;
 import android.device.collectors.PerfettoTracingPerClassStrategy;
 import android.device.collectors.PerfettoTracingPerRunStrategy;
 import android.device.collectors.PerfettoTracingPerTestStrategy;
@@ -48,6 +49,8 @@ import org.mockito.MockitoAnnotations;
 import org.mockito.Spy;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Android Unit tests for {@link DefaultUITraceListener}.
@@ -80,18 +83,26 @@ public class DefaultUITraceListenerTest {
         mTest2Desc = Description.createTestDescription("run2", "test2");
     }
 
-    private PerfettoTracingStrategy initStrategy(Bundle b) {
+    private List<PerfettoTracingStrategy> initStrategies(Bundle b) {
+        final List<PerfettoTracingStrategy> strategies = new ArrayList<>();
         if (Boolean.parseBoolean(b.getString(PerfettoListener.COLLECT_PER_RUN))) {
-            return new PerfettoTracingPerRunStrategy(mPerfettoHelper, mInstrumentation);
+            strategies.add(new PerfettoTracingPerRunStrategy(mPerfettoHelper, mInstrumentation));
         } else if (Boolean.parseBoolean(b.getString(PerfettoListener.COLLECT_PER_CLASS))) {
-            return new PerfettoTracingPerClassStrategy(mPerfettoHelper, mInstrumentation);
+            strategies.add(new PerfettoTracingPerClassStrategy(mPerfettoHelper, mInstrumentation));
+        } else {
+            strategies.add(new PerfettoTracingPerTestStrategy(mPerfettoHelper, mInstrumentation));
         }
 
-        return new PerfettoTracingPerTestStrategy(mPerfettoHelper, mInstrumentation);
+        if (Boolean.parseBoolean(b.getString(PerfettoListener.COLLECT_BEFORE_AFTER))) {
+            strategies.add(new PerfettoTracingBeforeAfterTestStrategy(mPerfettoHelper,
+                    mInstrumentation));
+        }
+
+        return strategies;
     }
 
     private DefaultUITraceListener initListener(Bundle b) {
-        DefaultUITraceListener listener = spy(new DefaultUITraceListener(b, initStrategy(b)));
+        DefaultUITraceListener listener = spy(new DefaultUITraceListener(b, initStrategies(b)));
 
         mDataRecord = new DataRecord();
         listener.setInstrumentation(mInstrumentation);

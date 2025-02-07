@@ -39,11 +39,13 @@ import java.util.function.Supplier;
  * <root>/<test_name>/PerfettoTracingStrategy/<test class>.perfetto-trace
  */
 public class PerfettoTracingPerClassStrategy extends PerfettoTracingStrategy {
+    private static final String STRATEGY_IDENTIFIER = "per_class";
+
     private List<String> mFileList = new ArrayList<>();
     private Description mLastDescription;
 
     PerfettoTracingPerClassStrategy(Instrumentation instr) {
-        super(instr);
+        super(instr, STRATEGY_IDENTIFIER);
     }
 
     /**
@@ -52,7 +54,7 @@ public class PerfettoTracingPerClassStrategy extends PerfettoTracingStrategy {
      */
     @VisibleForTesting
     public PerfettoTracingPerClassStrategy(PerfettoHelper helper, Instrumentation instr) {
-        super(helper, instr);
+        super(helper, instr, STRATEGY_IDENTIFIER);
     }
 
     /**
@@ -67,11 +69,12 @@ public class PerfettoTracingPerClassStrategy extends PerfettoTracingStrategy {
             Supplier<PowerManager.WakeLock> wakelockSupplier,
             WakeLockAcquirer wakeLockAcquirer,
             WakeLockReleaser wakeLockReleaser) {
-        super(helper, instr, wakeLockContext, wakelockSupplier, wakeLockAcquirer, wakeLockReleaser);
+        super(helper, instr, STRATEGY_IDENTIFIER, wakeLockContext, wakelockSupplier,
+                wakeLockAcquirer, wakeLockReleaser);
     }
 
     @Override
-    void testStart(DataRecord testData, Description description) {
+    void testStart(DataRecord testData, Description description, int iteration) {
         boolean isClassChanging =
                 mLastDescription == null
                         || !description.getClassName().equals(mLastDescription.getClassName());
@@ -127,7 +130,7 @@ public class PerfettoTracingPerClassStrategy extends PerfettoTracingStrategy {
     private void uploadMetrics(DataRecord dataRecord) {
         int counter = 0;
         for (String filePath : mFileList) {
-            String metricName = PERFETTO_FILE_PATH + counter++;
+            String metricName = getFilePathKeyPrefix() + counter++;
             dataRecord.addStringMetric(metricName, filePath);
         }
     }

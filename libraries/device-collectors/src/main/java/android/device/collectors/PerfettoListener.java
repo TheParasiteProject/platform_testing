@@ -20,11 +20,12 @@ import android.os.Bundle;
 
 import androidx.annotation.VisibleForTesting;
 
-import com.android.helpers.PerfettoHelper;
-
 import org.junit.runner.Description;
 import org.junit.runner.Result;
 import org.junit.runner.notification.Failure;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * A {@link PerfettoListener} that captures the perfetto trace during each test method and save the
@@ -35,8 +36,9 @@ import org.junit.runner.notification.Failure;
 public class PerfettoListener extends BaseMetricListener {
     public static final String COLLECT_PER_RUN = "per_run";
     public static final String COLLECT_PER_CLASS = "per_class";
+    public static final String COLLECT_BEFORE_AFTER = "perfetto_before_after_test";
 
-    private PerfettoTracingStrategy mTracingStrategy;
+    private List<PerfettoTracingStrategy> mTracingStrategies;
 
     public PerfettoListener() {
         super();
@@ -47,59 +49,65 @@ public class PerfettoListener extends BaseMetricListener {
      * for testing.
      */
     @VisibleForTesting
-    public PerfettoListener(Bundle args, PerfettoTracingStrategy strategy) {
+    public PerfettoListener(Bundle args, List<PerfettoTracingStrategy> strategies) {
         super(args);
-        mTracingStrategy = strategy;
-    }
-
-    protected PerfettoHelper getPerfettoHelper() {
-        return mTracingStrategy.getPerfettoHelper();
+        mTracingStrategies = strategies;
     }
 
     @Override
     public void onTestRunStart(DataRecord runData, Description description) {
-        mTracingStrategy.testRunStart(runData, description);
+        mTracingStrategies.forEach(strategy -> strategy.testRunStart(runData, description));
     }
 
     @Override
     public void onTestStart(DataRecord testData, Description description) {
-        mTracingStrategy.testStart(testData, description);
+        final int iteration = getIteration(description);
+        mTracingStrategies.forEach(strategy -> strategy.testStart(testData, description,
+                iteration));
     }
 
     @Override
     public void onTestFail(DataRecord testData, Description description, Failure failure) {
-        mTracingStrategy.testFail(testData, description, failure);
+        mTracingStrategies.forEach(strategy -> strategy.testFail(testData, description, failure));
     }
 
     @Override
     public void onTestEnd(DataRecord testData, Description description) {
-        mTracingStrategy.testEnd(testData, description);
+        final int iteration = getIteration(description);
+        mTracingStrategies.forEach(strategy -> strategy.testEnd(testData, description, iteration));
     }
 
     @Override
     public void onTestRunEnd(DataRecord runData, Result result) {
-        mTracingStrategy.testRunEnd(runData, result);
+        mTracingStrategies.forEach(strategy -> strategy.testRunEnd(runData, result));
     }
 
     @Override
     public void setupAdditionalArgs() {
         Bundle args = getArgsBundle();
 
-        if (mTracingStrategy == null) {
-            initTracingStrategy(args);
+        if (mTracingStrategies == null) {
+            initTracingStrategies(args);
         }
 
-        mTracingStrategy.setup(args);
+        mTracingStrategies.forEach(strategy -> strategy.setup(args));
     }
 
-    private void initTracingStrategy(Bundle args) {
+    private void initTracingStrategies(Bundle args) {
+        mTracingStrategies = new ArrayList<>();
+
         // Whether to collect the for the entire test run, per test, or per class.
         if (Boolean.parseBoolean(args.getString(COLLECT_PER_RUN))) {
-            mTracingStrategy = new PerfettoTracingPerRunStrategy(getInstrumentation());
+            mTracingStrategies.add(new PerfettoTracingPerRunStrategy(getInstrumentation()));
         } else if (Boolean.parseBoolean(args.getString(COLLECT_PER_CLASS))) {
-            mTracingStrategy = new PerfettoTracingPerClassStrategy(getInstrumentation());
+            mTracingStrategies.add(new PerfettoTracingPerClassStrategy(getInstrumentation()));
         } else {
-            mTracingStrategy = new PerfettoTracingPerTestStrategy(getInstrumentation());
+            mTracingStrategies.add(new PerfettoTracingPerTestStrategy(getInstrumentation()));
+        }
+
+        if (Boolean.parseBoolean(args.getString(COLLECT_BEFORE_AFTER))) {
+            mTracingStrategies.add(
+                    new PerfettoTracingBeforeAfterTestStrategy(getInstrumentation()));
         }
     }
 
@@ -110,6 +118,6 @@ public class PerfettoListener extends BaseMetricListener {
 
     @VisibleForTesting
     void runWithWakeLock(Runnable runnable) {
-        mTracingStrategy.runWithWakeLock(runnable);
+        mTracingStrategies.forEach(strategy -> strategy.runWithWakeLock(runnable));
     }
 }

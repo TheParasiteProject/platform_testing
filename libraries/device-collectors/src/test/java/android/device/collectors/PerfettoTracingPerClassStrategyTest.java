@@ -110,7 +110,7 @@ public class PerfettoTracingPerClassStrategyTest {
         // Test run start behavior
         strategy.testRunStart(mDataRecord, mRunDesc);
         verify(mPerfettoHelper, times(0)).startCollecting();
-        strategy.testStart(mDataRecord, mTest1Desc);
+        strategy.testStart(mDataRecord, mTest1Desc, /* iteration= */ 1);
         verify(mPerfettoHelper, times(1)).startCollecting();
     }
 
@@ -124,10 +124,10 @@ public class PerfettoTracingPerClassStrategyTest {
         // Test run start behavior
         strategy.testRunStart(mDataRecord, mRunDesc);
         verify(mPerfettoHelper, times(0)).startCollecting();
-        strategy.testStart(mDataRecord, mTest1Desc);
-        strategy.testEnd(mDataRecord, mTest1Desc);
-        strategy.testStart(mDataRecord, mTest2Desc);
-        strategy.testEnd(mDataRecord, mTest2Desc);
+        strategy.testStart(mDataRecord, mTest1Desc, /* iteration= */ 1);
+        strategy.testEnd(mDataRecord, mTest1Desc, /* iteration= */ 1);
+        strategy.testStart(mDataRecord, mTest2Desc, /* iteration= */ 1);
+        strategy.testEnd(mDataRecord, mTest2Desc, /* iteration= */ 1);
         verify(mPerfettoHelper, times(1)).startCollecting();
     }
 
@@ -140,10 +140,10 @@ public class PerfettoTracingPerClassStrategyTest {
         doReturn(true).when(mPerfettoHelper).stopCollecting(anyLong(), anyString());
         // Test run start behavior
         strategy.testRunStart(mDataRecord, mRunDesc);
-        strategy.testStart(mDataRecord, mTest1Desc);
-        strategy.testEnd(mDataRecord, mTest1Desc);
+        strategy.testStart(mDataRecord, mTest1Desc, /* iteration= */ 1);
+        strategy.testEnd(mDataRecord, mTest1Desc, /* iteration= */ 1);
         verify(mPerfettoHelper, times(0)).stopCollecting(anyLong(), anyString());
-        strategy.testStart(mDataRecord, mTest3Desc);
+        strategy.testStart(mDataRecord, mTest3Desc, /* iteration= */ 1);
         verify(mPerfettoHelper, times(1)).stopCollecting(anyLong(), anyString());
         verify(mPerfettoHelper, times(2)).startCollecting();
     }
@@ -157,8 +157,8 @@ public class PerfettoTracingPerClassStrategyTest {
         doReturn(true).when(mPerfettoHelper).stopCollecting(anyLong(), anyString());
         // Test run start behavior
         strategy.testRunStart(mDataRecord, mRunDesc);
-        strategy.testStart(mDataRecord, mTest1Desc);
-        strategy.testEnd(mDataRecord, mTest1Desc);
+        strategy.testStart(mDataRecord, mTest1Desc, /* iteration= */ 1);
+        strategy.testEnd(mDataRecord, mTest1Desc, /* iteration= */ 1);
         verify(mPerfettoHelper, times(0)).stopCollecting(anyLong(), anyString());
         strategy.testRunEnd(mDataRecord, new Result());
         verify(mPerfettoHelper, times(1)).stopCollecting(anyLong(), anyString());
@@ -174,8 +174,8 @@ public class PerfettoTracingPerClassStrategyTest {
         DataRecord dataRecord = spy(new DataRecord());
         // Test run start behavior
         strategy.testRunStart(dataRecord, mRunDesc);
-        strategy.testStart(dataRecord, mTest1Desc);
-        strategy.testEnd(dataRecord, mTest1Desc);
+        strategy.testStart(dataRecord, mTest1Desc, /* iteration= */ 1);
+        strategy.testEnd(dataRecord, mTest1Desc, /* iteration= */ 1);
         verify(dataRecord, times(0)).addStringMetric(anyString(), anyString());
     }
 
@@ -189,8 +189,8 @@ public class PerfettoTracingPerClassStrategyTest {
         DataRecord dataRecord = spy(new DataRecord());
         // Test run start behavior
         strategy.testRunStart(dataRecord, mRunDesc);
-        strategy.testStart(dataRecord, mTest1Desc);
-        strategy.testEnd(dataRecord, mTest1Desc);
+        strategy.testStart(dataRecord, mTest1Desc, /* iteration= */ 1);
+        strategy.testEnd(dataRecord, mTest1Desc, /* iteration= */ 1);
         strategy.testRunEnd(dataRecord, new Result());
         verify(dataRecord, times(1)).addStringMetric(anyString(), anyString());
     }
@@ -205,10 +205,10 @@ public class PerfettoTracingPerClassStrategyTest {
         DataRecord dataRecord = spy(new DataRecord());
         // Test run start behavior
         strategy.testRunStart(dataRecord, mRunDesc);
-        strategy.testStart(dataRecord, mTest1Desc);
-        strategy.testEnd(dataRecord, mTest1Desc);
-        strategy.testStart(dataRecord, mTest3Desc);
-        strategy.testEnd(dataRecord, mTest3Desc);
+        strategy.testStart(dataRecord, mTest1Desc, /* iteration= */ 1);
+        strategy.testEnd(dataRecord, mTest1Desc, /* iteration= */ 1);
+        strategy.testStart(dataRecord, mTest3Desc, /* iteration= */ 1);
+        strategy.testEnd(dataRecord, mTest3Desc, /* iteration= */ 1);
         verify(dataRecord, times(0)).addStringMetric(anyString(), anyString());
         strategy.testRunEnd(dataRecord, new Result());
         verify(dataRecord, times(2)).addStringMetric(anyString(), anyString());

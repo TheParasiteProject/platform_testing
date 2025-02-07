@@ -27,6 +27,7 @@ import androidx.test.platform.app.InstrumentationRegistry;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.List;
 
 /**
  * A {@link PerfettoListener} that captures the perfetto trace for UI traces during each test method
@@ -48,8 +49,8 @@ public class DefaultUITraceListener extends PerfettoListener {
      * for testing.
      */
     @VisibleForTesting
-    DefaultUITraceListener(Bundle args, PerfettoTracingStrategy strategy) {
-        super(args, strategy);
+    DefaultUITraceListener(Bundle args, List<PerfettoTracingStrategy> strategies) {
+        super(args, strategies);
     }
 
     @Override
