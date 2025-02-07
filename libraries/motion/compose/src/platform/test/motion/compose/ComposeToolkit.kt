@@ -43,6 +43,7 @@ import kotlin.math.roundToInt
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Duration.Companion.seconds
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -102,7 +103,7 @@ fun createComposeMotionTestRule(
     deviceEmulationSpec: DeviceEmulationSpec = DeviceEmulationSpec(Displays.Phone),
 ): MotionTestRule<ComposeToolkit> {
     val deviceEmulationRule = DeviceEmulationRule(deviceEmulationSpec)
-    val composeRule = createComposeRule(testScope.coroutineContext)
+    val composeRule = createComposeRule(testScope.coroutineContext + Dispatchers.Main)
 
     return MotionTestRule(
         ComposeToolkit(composeRule, testScope),
