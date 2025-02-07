@@ -533,4 +533,32 @@ public class StatusBarHelperImpl extends AbstractStandardAppHelper implements IA
                         AutomotiveConfigConstants.SOUND_PALETTE_SOUND_SETTINGS_PAGE_TITLE);
         return (getSpectatioUiUtil().hasUiElement(soundSettingsPageTitleSelector));
     }
+
+    /** {@inheritDoc} */
+    @Override
+    public void clickOnAdaptiveBrightnessToggleSwitch() {
+        BySelector adaptiveBrightnessSelector =
+                getUiElementFromConfig(AutomotiveConfigConstants.ADAPTIVE_BRIGHTNESS_TOGGLE_SWITCH);
+        UiObject2 adaptiveBrightnessToggleObject =
+                getSpectatioUiUtil().findUiObject(adaptiveBrightnessSelector);
+        getSpectatioUiUtil()
+                .validateUiObject(
+                        adaptiveBrightnessToggleObject,
+                        AutomotiveConfigConstants.ADAPTIVE_BRIGHTNESS_TOGGLE_SWITCH);
+        getSpectatioUiUtil().clickAndWait(adaptiveBrightnessToggleObject);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public boolean isAdaptiveBrightnessOn() {
+        String value =
+                getSpectatioUiUtil()
+                        .executeShellCommand(
+                                getCommandFromConfig(
+                                        AutomotiveConfigConstants.ADAPTIVE_BRIGHTNESS_COMMAND));
+        boolean isAdaptiveBrightnessOn = Integer.parseInt(value.replaceAll("\\s", "")) == 1;
+        return isAdaptiveBrightnessOn;
+    }
 }
