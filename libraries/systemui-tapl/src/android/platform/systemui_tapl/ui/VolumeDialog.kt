@@ -24,6 +24,8 @@ import android.platform.uiautomatorhelpers.DeviceHelpers.click
 import android.platform.uiautomatorhelpers.DeviceHelpers.uiDevice
 import android.platform.uiautomatorhelpers.DeviceHelpers.waitForObj
 import android.platform.uiautomatorhelpers.PRECISE_GESTURE_INTERPOLATOR
+import androidx.test.uiautomator.BySelector
+import com.android.systemui.Flags
 import com.google.common.truth.Truth
 
 /** System UI test automation object representing the dialog for adjusting the device volume. */
@@ -47,9 +49,14 @@ class VolumeDialog internal constructor() {
 
     /** Open the ringer drawer by clicking the ringer mode icon on the volume dialog. */
     fun openRingerDrawer(): VolumeRingerDrawer {
-        val ringerIconSel = sysuiResSelector("volume_new_ringer_active_icon_container")
-        waitForObj(ringerIconSel).click()
-        return VolumeRingerDrawer()
+        val ringerIconSelector =
+            if (Flags.volumeRedesign()) {
+                sysuiResSelector("ringer_buttons_background")
+            } else {
+                sysuiResSelector("volume_new_ringer_active_icon_container")
+            }
+        waitForObj(ringerIconSelector).click()
+        return VolumeRingerDrawer.get()
     }
 
     /** Open the volume setting panel by clicking the setting icon on the volume dialog. */
@@ -58,13 +65,21 @@ class VolumeDialog internal constructor() {
         replaceWith = ReplaceWith("openNewVolumePanel"),
     )
     fun openVolumePanel(): VolumePanelDialog {
-        sysuiResSelector("settings").click()
+        if (Flags.volumeRedesign()) {
+            sysuiResSelector("volume_dialog_settings").click()
+        } else {
+            sysuiResSelector("settings").click()
+        }
         return VolumePanelDialog()
     }
 
     /** Open the volume setting panel by clicking the setting icon on the volume dialog. */
     fun openNewVolumePanel(): VolumePanel {
-        waitForObj(sysuiResSelector("settings")).click()
+        if (Flags.volumeRedesign()) {
+            waitForObj(sysuiResSelector("volume_dialog_settings")).click()
+        } else {
+            waitForObj(sysuiResSelector("settings")).click()
+        }
         return VolumePanel()
     }
 
@@ -81,7 +96,6 @@ class VolumeDialog internal constructor() {
     }
 
     companion object {
-        private val SLIDER = sysuiResSelector("volume_row_slider")
         val PAGE_TITLE_SELECTOR = sysuiResSelector("volume_dialog")
         private const val MAX_VOLUME = 26
         private const val MIN_VOLUME = -1
@@ -93,10 +107,16 @@ class VolumeDialog internal constructor() {
          * @param volume value for volume to changed
          */
         private fun dragAndChangeVolume(volume: Int) {
-            val coordinates = getDragCoordinates(volume)
+            val slider =
+                if (Flags.volumeRedesign()) {
+                    sysuiResSelector("volume_dialog_slider")
+                } else {
+                    sysuiResSelector("volume_row_slider")
+                }
+            val coordinates = getDragCoordinates(slider, volume)
             assertVolumeDialogVisible()
             BetterSwipe.swipe(
-                waitForObj(SLIDER).visibleCenter,
+                waitForObj(slider).visibleCenter,
                 coordinates,
                 interpolator = PRECISE_GESTURE_INTERPOLATOR,
             )
@@ -132,10 +152,10 @@ class VolumeDialog internal constructor() {
          * @param volume value for volume to changed
          * @return an of Point which is the coordinate of the slider to be moved too.
          */
-        private fun getDragCoordinates(volume: Int): Point {
+        private fun getDragCoordinates(slider: BySelector, volume: Int): Point {
             Truth.assertThat(volume).isLessThan(MAX_VOLUME)
             Truth.assertThat(volume).isGreaterThan(MIN_VOLUME)
-            val dimension = uiDevice.waitForObj(SLIDER).visibleBounds
+            val dimension = uiDevice.waitForObj(slider).visibleBounds
             val top = dimension.top
             val left = dimension.left
             val right = dimension.right
