@@ -1216,11 +1216,10 @@ public class NotificationController {
     }
 
     private static void postNotificationSync(int id, Builder builder, String groupKey) {
-        final int initialCount = getNotificationCount(true);
-
+        final int initialCount = getNotificationCount();
         final Notification notification = builder.setGroup(groupKey).build();
         NOTIFICATION_MANAGER.notify(id, notification);
-        waitUntilPostedNotificationsCountMatches(true, initialCount + 1);
+        waitUntilPostedNotificationsCountMatches(initialCount + 1);
     }
 
     /**
@@ -1228,20 +1227,9 @@ public class NotificationController {
      * notification via NOTIFICATION_MANAGER.notify, this count isn't guaranteed to be correct
      * unless you've waited for it to arrive. If the notification is posted by postNotificationSync,
      * the count will be correct after posting. Use only postNotificationSync to post notifications.
-     *
-     * @param ignoreGroupSummaries The notification manager can insert group summaries which are
-     *     counted as notifications. If this flag is true, they are ignored in the count.
-     * @return number of notifications.
      */
-    private static int getNotificationCount(boolean ignoreGroupSummaries) {
-        StatusBarNotification[] notifications = NOTIFICATION_MANAGER.getActiveNotifications();
-        int notificationCount = 0;
-        for (StatusBarNotification notification : notifications) {
-            if (!notification.getNotification().isGroupSummary() || !ignoreGroupSummaries) {
-                notificationCount++;
-            }
-        }
-        return notificationCount;
+    private static int getNotificationCount() {
+        return NOTIFICATION_MANAGER.getActiveNotifications().length;
     }
 
     private static boolean hasNotification(int id) {
@@ -1279,18 +1267,13 @@ public class NotificationController {
     }
 
     private static void waitUntilPostedNotificationsCountMatches(int count) {
-        waitUntilPostedNotificationsCountMatches(false, count);
-    }
-
-    private static void waitUntilPostedNotificationsCountMatches(
-            boolean ignoreGroupSummaries, int count) {
         waitForCondition(
                 () ->
                         "Notification count didn't become "
                                 + count
                                 + ". It is currently equal to "
-                                + getNotificationCount(ignoreGroupSummaries),
-                () -> getNotificationCount(ignoreGroupSummaries) == count);
+                                + getNotificationCount(),
+                () -> getNotificationCount() == count);
     }
 
     private static Builder getBuilder(String pkg) {

@@ -17,7 +17,6 @@
 package android.platform.systemui_tapl.ui
 
 import android.os.SystemClock
-import android.graphics.Point
 import android.platform.helpers.CommonUtils
 import android.platform.systemui_tapl.utils.DeviceUtils.LONG_WAIT
 import android.platform.systemui_tapl.utils.DeviceUtils.settingsResSelector
@@ -25,13 +24,12 @@ import android.platform.systemui_tapl.utils.DeviceUtils.sysuiResSelector
 import android.platform.test.scenario.tapl_common.Gestures
 import android.platform.test.scenario.tapl_common.TaplUiDevice
 import android.platform.test.scenario.tapl_common.TaplUiObject
-import android.platform.uiautomatorhelpers.BetterSwipe
 import android.platform.uiautomatorhelpers.DeviceHelpers.assertInvisible
 import android.platform.uiautomatorhelpers.DeviceHelpers.assertVisible
 import android.platform.uiautomatorhelpers.DeviceHelpers.betterSwipe
 import android.platform.uiautomatorhelpers.DeviceHelpers.context
 import android.platform.uiautomatorhelpers.DeviceHelpers.uiDevice
-import android.platform.uiautomatorhelpers.DurationUtils.platformAdjust
+import android.platform.uiautomatorhelpers.FLING_GESTURE_INTERPOLATOR
 import android.platform.uiautomatorhelpers.TracingUtils.trace
 import android.view.WindowManager
 import android.view.WindowMetrics
@@ -45,8 +43,6 @@ import com.android.systemui.Flags
 import com.google.common.truth.StandardSubjectBuilder
 import com.google.common.truth.Truth.assertThat
 import com.google.common.truth.Truth.assertWithMessage
-import java.time.Duration
-import java.lang.Thread
 import kotlin.math.floor
 
 /** System UI test automation object representing the notification shade. */
@@ -190,13 +186,6 @@ class NotificationShade internal constructor() {
         val device = uiDevice
         // Swipe in first quarter to avoid desktop windowing app handle interactions.
         val swipeXCoordinate = device.displayWidth / 4
-        try {
-            Thread.sleep(4000)
-        } catch (ex: Exception) {
-
-        }
-        BetterSwipe.swipe(Point(swipeXCoordinate, screenBottom), Point(swipeXCoordinate, 0))
-        /*
         device.betterSwipe(
             startX = swipeXCoordinate,
             startY = screenBottom,
@@ -204,7 +193,6 @@ class NotificationShade internal constructor() {
             endY = 0,
             interpolator = FLING_GESTURE_INTERPOLATOR,
         )
-         */
         waitForShadeToClose()
     }
 
@@ -309,7 +297,7 @@ class NotificationShade internal constructor() {
             get() =
                 uiDevice.wait(
                     Until.findObject(sysuiResSelector(UI_NOTIFICATION_LIST_ID)),
-                    Duration.ofMillis(SHORT_TRANSITION_WAIT).platformAdjust().toMillis(),
+                    SHORT_TRANSITION_WAIT,
                 )
 
         val isShowingBottomOfShade: Boolean
