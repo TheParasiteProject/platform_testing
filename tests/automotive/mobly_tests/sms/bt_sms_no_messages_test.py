@@ -1,4 +1,4 @@
-#  Copyright (C) 2023 The Android Open Source Project
+#  Copyright (C) 2025 The Android Open Source Project
 #
 #  Licensed under the Apache License, Version 2.0 (the "License");
 #  you may not use this file except in compliance with the License.
@@ -39,18 +39,20 @@ class SMSNoSMSTest(bluetooth_sms_base_test.BluetoothSMSBaseTest):
     def setup_class(self):
       super().setup_class()
       self.common_utils = CommonUtils(self.target, self.discoverer)
+
     def setup_test(self):
 
-      # pair the devices
+      logging.info("Pairing phone to car head unit.")
       self.bt_utils.pair_primary_to_secondary()
 
-      # wait for user permissions popup & give contacts and sms permissions
+      logging.info("wait for user permissions popup & give contacts and sms permissions")
       self.call_utils.wait_with_log(20)
       self.common_utils.click_on_ui_element_with_text('Allow')
 
-      # Clearing the sms from the phone
+      logging.info("Clearing the sms from the phone.")
       self.call_utils.clear_sms_app(self.target)
-      # Reboot Phone
+
+      logging.info("Rebooting the phone.")
       self.target.unload_snippet('mbs')
       self.target.reboot()
       self.call_utils.wait_with_log(30)
@@ -58,14 +60,15 @@ class SMSNoSMSTest(bluetooth_sms_base_test.BluetoothSMSBaseTest):
       super().enable_recording()
 
     def test_no_messages_sms(self):
-      # To test 'No messages' appears on HU, when there is no sms
+      # To test 'No messages text' appears on HU, when there is no sms
 
       # Open the sms app
       self.call_utils.open_sms_app()
 
       logging.info("Verifying that there is no sms currently")
-      asserts.assert_false(self.call_utils.verify_sms_app_unread_message(),
-              'Message app should be empty, but found existing messages.')
+      asserts.assert_true(self.call_utils.verify_sms_no_messages_displayed(),
+              'Message app should be empty and <<No Messages>> should be displayed, but found existing messages.')
+
 
     def teardown_test(self):
       # Go to home screen

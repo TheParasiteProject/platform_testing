@@ -1,4 +1,4 @@
-#  Copyright (C) 2023 The Android Open Source Project
+#  Copyright (C) 2025 The Android Open Source Project
 #
 #  Licensed under the Apache License, Version 2.0 (the "License");
 #  you may not use this file except in compliance with the License.
@@ -37,16 +37,17 @@ class SMSReplyFromPhoneSync(bluetooth_sms_base_test.BluetoothSMSBaseTest):
 
     def setup_test(self):
 
-        # pair the devices
+        logging.info("Pairing phone to car head unit.")
         self.bt_utils.pair_primary_to_secondary()
 
-        # wait for user permissions popup & give contacts and sms permissions
+        logging.info("wait for user permissions popup & give contacts and sms permissions")
         self.call_utils.wait_with_log(20)
         self.common_utils.click_on_ui_element_with_text('Allow')
 
-        # Clearing the sms from the phone
+        logging.info("Clearing the sms from the phone.")
         self.call_utils.clear_sms_app(self.target)
-        # Reboot Phone
+
+        logging.info("Rebooting the phone.")
         self.target.unload_snippet('mbs')
         self.target.reboot()
         self.call_utils.wait_with_log(30)
@@ -54,26 +55,32 @@ class SMSReplyFromPhoneSync(bluetooth_sms_base_test.BluetoothSMSBaseTest):
 
     def test_reply_from_phone_sms_sync(self):
 
-        # send a new sms
+        logging.info("Sending the sms from unpaired phone to paired phone")
         target_phone_number = self.target.mbs.getPhoneNumber()
         self.phone_notpaired.mbs.sendSms(target_phone_number,constants.SMS_REPLY_TEXT)
         self.call_utils.wait_with_log(10)
+
         # Verify the new UNREAD sms in IVI device
         self.call_utils.open_sms_app()
+        asserts.assert_true(self.call_utils.verify_sms_preview_text(constants.SMS_REPLY_TEXT),
+                    'Messages app should contain new test message but found none')
         asserts.assert_true(self.call_utils.verify_sms_app_unread_message(),
-                                    'Message app should contain an unread msg, but there are no unread messages')
+            'Message app should contain an unread test msg, but there are no unread messages')
 
         # REPLY to the message on paired phone
         self.call_utils.open_notification_on_phone(self.target)
         self.call_utils.wait_with_log(3)
+        self.target.mbs.clickUIElementWithText(constants.SMS_REPLY_TEXT)
         self.target.mbs.clickUIElementWithText(constants.REPLY_SMS)
+        self.call_utils.wait_with_log(3)
 
         # Verify the SYNC Reply sms in IVI device
         self.call_utils.press_home()
         self.call_utils.open_sms_app()
         asserts.assert_false(self.call_utils.verify_sms_app_unread_message(),
-                                            'Message app should not contain the unread msg, but contains one')
-        self.call_utils.verify_sms_preview_text(constants.REPLY_SMS)
+            'Message app should not contain the unread badge.')
+        asserts.assert_true(self.call_utils.verify_sms_preview_text(constants.REPLY_SMS),
+            'Messages app should the contain the reply message.')
 
     def teardown_test(self):
          # Go to home screen
