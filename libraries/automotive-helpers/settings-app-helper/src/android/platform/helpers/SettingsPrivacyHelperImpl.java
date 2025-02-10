@@ -373,4 +373,24 @@ public class SettingsPrivacyHelperImpl extends AbstractStandardAppHelper
         getSpectatioUiUtil().clickAndWait(continueButton);
         getSpectatioUiUtil().waitForIdle();
     }
+
+    /** {@inheritDoc} */
+    @Override
+    public void clickOnLocationInPrivacySettings() {
+        UiObject2 subSettingsObject =
+                getSpectatioUiUtil()
+                        .findUiObject(
+                                getUiElementFromConfig(
+                                        AutomotiveConfigConstants
+                                                .SETTINGS_SUB_SETTING_SCROLL_ELEMENT));
+        UiObject2 locationObject =
+                getSpectatioUiUtil()
+                        .findUiObjectInGivenElement(
+                                subSettingsObject,
+                                getUiElementFromConfig(AutomotiveConfigConstants.PRIVACY_LOCATION));
+        getSpectatioUiUtil()
+                .validateUiObject(locationObject, AutomotiveConfigConstants.PRIVACY_LOCATION);
+        getSpectatioUiUtil().clickAndWait(locationObject);
+        getSpectatioUiUtil().waitForIdle();
+    }
 }
