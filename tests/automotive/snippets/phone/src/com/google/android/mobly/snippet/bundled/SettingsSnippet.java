@@ -68,6 +68,11 @@ public class SettingsSnippet implements Snippet {
         return mBluetoothSettingsHelper.get().isPhonePreferenceEnabled();
     }
 
+    @Rpc(description = "Returns whether the phone profile switch is enabled on Summary Page")
+    public boolean isPhoneProfileEnabled() {
+        return mBluetoothSettingsHelper.get().isPhoneProfileEnabled();
+    }
+
     @Rpc(
             description =
                     "Get the device summary of a device "

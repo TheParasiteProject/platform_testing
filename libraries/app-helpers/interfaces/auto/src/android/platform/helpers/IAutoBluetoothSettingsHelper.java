@@ -140,4 +140,11 @@ public interface IAutoBluetoothSettingsHelper extends IAppHelper, Scrollable {
      * <p>Setup Expectations: A connected device bluetooth view is open ('level two')
      */
     void goBackToBluetoothSettings();
+
+    /**
+     * Setup Expectations: A connected device bluetooth summary page is open ('level two')
+     *
+     * @return - Whether the phone profile is enabled
+     */
+    boolean isPhoneProfileEnabled();
 }

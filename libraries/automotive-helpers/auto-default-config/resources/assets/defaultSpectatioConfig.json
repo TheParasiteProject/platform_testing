@@ -1683,6 +1683,27 @@
         }
       ]
     },
+    "TOGGLE_PHONE": {
+      "TYPE": "MULTIPLE",
+      "SPECIFIERS": [
+        {
+          "TYPE": "CLASS",
+          "VALUE": "android.widget.Switch"
+        },
+        {
+          "TYPE": "HAS_ANCESTOR",
+          "MAX_DEPTH": 3,
+          "ANCESTOR": {
+            "TYPE": "HAS_DESCENDANT",
+            "MAX_DEPTH": 2,
+            "DESCENDANT": {
+              "TYPE": "TEXT",
+              "VALUE": "Phone Calls"
+            }
+          }
+        }
+      ]
+    },
     "SEARCH": {
       "TYPE": "DESCRIPTION",
       "VALUE": "Search"
