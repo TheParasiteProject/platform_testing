@@ -256,6 +256,12 @@ public class DialerSnippet implements Snippet {
         mDialerHelper.get().openContacts();
     }
 
+    /** Open favorite menu in dialer */
+    @Rpc(description = "Open Favorites.")
+    public void openFavorites() {
+        mDialerHelper.get().openFavorites();
+    }
+
     /** Press 'Device' prompt which comes up when trying to transfer files to a device. */
     @Rpc(description = "Press 'Device' on a prompt, if present.")
     public void pressDevice() {

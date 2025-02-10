@@ -315,6 +315,13 @@ public interface IAutoDialHelper extends IAppHelper, Scrollable {
     /**
      * Setup expectations: The contacts page is open.
      *
+     * <p>This method is used to open favorite menu. Throws an error if no contacts are visible.
+     */
+    void openFavorites();
+
+    /**
+     * Setup expectations: The contacts page is open.
+     *
      * <p>This method is used to open the contact details page of the first visible contact. Throws
      * an error if no contacts are visible.
      */

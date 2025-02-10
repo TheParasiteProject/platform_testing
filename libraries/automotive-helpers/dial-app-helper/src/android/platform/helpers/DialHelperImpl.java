@@ -744,7 +744,8 @@ public class DialHelperImpl extends AbstractStandardAppHelper implements IAutoDi
     }
 
     /** This method opens the Favorites tab. */
-    private void openFavorites() {
+    @Override
+    public void openFavorites() {
         BySelector favoritesMenuSelector =
                 getUiElementFromConfig(AutomotiveConfigConstants.FAVORITES_MENU);
         UiObject2 favoritesMenuButton = getSpectatioUiUtil().findUiObject(favoritesMenuSelector);
