@@ -83,27 +83,6 @@ def main():
         print("ANDROID_BUILD_TOP not set. Have you sourced envsetup.sh?")
         sys.exit(1)
 
-    serial = args.serial
-    if not serial:
-        devices_response = subprocess.run(
-            ["adb", "devices"], check=True, capture_output=True
-        ).stdout.decode("utf-8")
-        lines = [s for s in devices_response.splitlines() if s.strip()]
-
-        if len(lines) == 1:
-            print("no adb devices found")
-            sys.exit(1)
-
-        if len(lines) > 2:
-            print("multiple adb devices found, specify --serial")
-            sys.exit(1)
-
-        serial = lines[1].split("\t")[0]
-
-    adb_client = AdbClient(serial)
-    if not adb_client.run_as_root():
-        sys.exit(1)
-
     global android_build_top
     android_build_top = args.android_build_top
 
@@ -418,11 +397,8 @@ class AtestGoldenWatcher:
         # log/invocation_3042186109657619915/inv_5155363728971335727/recordMotion_captureCrossfade.actual_1988198704080929506.mp4
         # log/stub/local_atest/inv_8184127433410125702/light_portrait_pagingRight.actual.mp4_1617964025478041468.txt.gz
 
-        pattern_type_unrecognized = (
-            r".*/(?P<name>.*)\.actual\.(?P<ext>\w+)_\d+\.txt(?P<compressed>\.gz)?"
-        )
-        pattern_type_recognized = (
-            r".*/(?P<name>.*.*)\.actual_\d+\.(?P<ext>\w+)(?P<compressed>\.gz)?"
+        pattern_type = (
+            r".*/(?P<name>.*)\.actual((\.(?P<ext1>[a-zA-Z0-9]+)_\d+\.txt)|(_\d+\.(?P<ext2>[a-zA-Z0-9]+)))(?P<compressed>\.gz)?"
         )
 
         # Output from on-device runs
@@ -430,17 +406,15 @@ class AtestGoldenWatcher:
         for filename in glob.iglob(
             f"{self.atest_latest_dir}//**/*.actual*json*", recursive=True
         ):
-            print(filename)
+            print("filename: {}".format(filename))
 
-            match = re.search(pattern_type_unrecognized, filename)
-            if not match:
-                match = re.search(pattern_type_recognized, filename)
+            match = re.search(pattern_type, filename)
 
             if not match:
                 continue
 
             golden_name = match.group("name")
-            ext = match.group("ext")
+            ext = match.group("ext1") or match.group("ext2")
             is_compressed = match.group("compressed") == ".gz"
 
             print(f"Found golden {golden_name}.{ext} (compressed {is_compressed})")
@@ -449,6 +423,7 @@ class AtestGoldenWatcher:
             self.copy_file(filename, local_file, is_compressed)
             golden = CachedGolden(filename, local_file)
 
+            print("goldenVideoLocation: {}".format(golden.video_location))
             if golden.video_location:
                 for video_filename in glob.iglob(
                     f"{self.atest_latest_dir}/**/{golden_name}.actual*.mp4*",
