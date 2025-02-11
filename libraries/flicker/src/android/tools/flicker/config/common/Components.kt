@@ -23,4 +23,9 @@ object Components {
     val NAV_BAR = ComponentTemplate("Navbar") { ComponentNameMatcher.NAV_BAR }
     val STATUS_BAR = ComponentTemplate("StatusBar") { ComponentNameMatcher.STATUS_BAR }
     val LAUNCHER = ComponentTemplate("Launcher") { ComponentNameMatcher.LAUNCHER }
+    val WALLPAPER =
+        ComponentTemplate("Wallpaper") {
+            ComponentNameMatcher.WALLPAPER_BBQ_WRAPPER
+            ComponentNameMatcher.WALLPAPER_WINDOW_TOKEN
+        }
 }
