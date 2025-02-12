@@ -123,7 +123,7 @@ fun getCurrentState(
 
     Log.d(LOG_TAG, "Requesting new device state dump")
 
-    val perfettoTrace =
+    val reader =
         PerfettoTraceMonitor.newBuilder()
             .also {
                 if (requestedWmDump && android.tracing.Flags.perfettoWmDump()) {
@@ -136,7 +136,9 @@ fun getCurrentState(
             }
             .build()
             .withTracing(resultReaderProvider = { ResultReader(it, SERVICE_TRACE_CONFIG) }) {}
-            .readBytes(TraceType.PERFETTO) ?: ByteArray(0)
+    val perfettoTrace = reader.readBytes(TraceType.PERFETTO) ?: ByteArray(0)
+
+    reader.artifact.deleteIfExists()
 
     val wmDump =
         if (android.tracing.Flags.perfettoWmDump()) {
