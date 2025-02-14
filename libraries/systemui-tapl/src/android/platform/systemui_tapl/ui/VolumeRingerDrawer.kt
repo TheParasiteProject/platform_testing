@@ -111,14 +111,23 @@ class VolumeRingerDrawerImpl : VolumeRingerDrawer {
 
     /** Click the given ringer icon in the drawer. */
     override fun selectRingerMode(mode: RingerMode) {
-        container.children[mode.getIndex()].click()
+        val index = mode.getIndex() ?: error("ringer mode is unavailable")
+        container.children[index].click()
     }
 
-    private fun RingerMode.getIndex(): Int {
-        return when (this) {
-            RingerMode.NORMAL -> 3
-            RingerMode.SILENT -> 2
-            RingerMode.VIBRATE -> 1
+    private fun RingerMode.getIndex(): Int? {
+        return if (!RingerMode.VIBRATE.isAvailable) {
+            when (this) {
+                RingerMode.NORMAL -> 2
+                RingerMode.SILENT -> 1
+                RingerMode.VIBRATE -> null
+            }
+        } else {
+            when (this) {
+                RingerMode.NORMAL -> 3
+                RingerMode.SILENT -> 2
+                RingerMode.VIBRATE -> 1
+            }
         }
     }
 }
