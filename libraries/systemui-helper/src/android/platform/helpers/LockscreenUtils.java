@@ -58,7 +58,8 @@ public class LockscreenUtils {
     private static final String SET_PATTERN_COMMAND = "locksettings set-pattern";
     private static final String SET_SWIPE_COMMAND = "locksettings set-disabled false";
     private static final String SET_LOCK_AS_NONE_COMMAND = "locksettings set-disabled true";
-    private static final int MAX_LOCKSCREEN_TIMEOUT_IN_SEC = 10;
+    // The SysUI/WM goingAway timeout is 10s. Give that time to process before timing out.
+    private static final int MAX_LOCKSCREEN_TIMEOUT_IN_SEC = 15;
 
     public static int sPreviousAodSetting;
 
