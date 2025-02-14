@@ -201,4 +201,11 @@ public interface IGoogleHelper extends IAppHelper {
     public default boolean clearSearchResult() {
         throw new UnsupportedOperationException("Not yet implemented.");
     }
+
+    /**
+     * Setup expectations: Feed open.
+     *
+     * <p>This method disable the autoplay video preivews
+     */
+    void disableAutoplayVideoPreviews();
 }
