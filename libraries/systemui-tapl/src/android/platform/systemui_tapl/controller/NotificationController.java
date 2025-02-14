@@ -1227,9 +1227,20 @@ public class NotificationController {
      * notification via NOTIFICATION_MANAGER.notify, this count isn't guaranteed to be correct
      * unless you've waited for it to arrive. If the notification is posted by postNotificationSync,
      * the count will be correct after posting. Use only postNotificationSync to post notifications.
+     * Filter out autogroup notifications created by the NotificationManager.
      */
     private static int getNotificationCount() {
-        return NOTIFICATION_MANAGER.getActiveNotifications().length;
+        StatusBarNotification[] notifications = NOTIFICATION_MANAGER.getActiveNotifications();
+        int filteredNotificationCount = 0;
+        for (StatusBarNotification notification : notifications) {
+
+            // ignore the auto-group notifications created by the NotificationManager.
+            if ((notification.getNotification().flags & Notification.FLAG_AUTOGROUP_SUMMARY)
+                    == 0x0) {
+                filteredNotificationCount++;
+            }
+        }
+        return filteredNotificationCount;
     }
 
     private static boolean hasNotification(int id) {
