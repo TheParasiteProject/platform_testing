@@ -38,6 +38,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PrintStream;
+import java.lang.annotation.Annotation;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -45,6 +46,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 
 /**
@@ -569,5 +571,53 @@ public class BaseMetricListener extends InstrumentationRunListener {
             return false;
         }
         return true;
+    }
+
+    /**
+     * Returns iteration number for the test or 0 if the test hasn't started executing yet
+     */
+    protected int getIteration(Description description) {
+        for (Annotation annotation : description.getAnnotations()) {
+            // If IterationMetadata annotation is present, return the iteration number from it
+            // As likely the test was renamed, so counting using mTestIdInvocationCount won't work
+            if (annotation instanceof IterationMetadata) {
+                return ((IterationMetadata) annotation).getIteration();
+            }
+        }
+        return mTestIdInvocationCount.getOrDefault(description.toString(), 0);
+    }
+
+    /**
+     * Special metadata annotation object that could indicate the original iteration number.
+     * It could be useful to retrieve the iteration number for a test if the test was renamed
+     * to include iteration number in the name.
+     */
+    public static class IterationMetadata implements Annotation {
+
+        private final int mIteration;
+
+        public IterationMetadata(int iteration) {
+            mIteration = iteration;
+        }
+
+        public int getIteration() {
+            return mIteration;
+        }
+
+        @Override
+        public Class<? extends Annotation> annotationType() {
+            return IterationMetadata.class;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (!(o instanceof IterationMetadata that)) return false;
+            return mIteration == that.mIteration;
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hashCode(mIteration);
+        }
     }
 }
