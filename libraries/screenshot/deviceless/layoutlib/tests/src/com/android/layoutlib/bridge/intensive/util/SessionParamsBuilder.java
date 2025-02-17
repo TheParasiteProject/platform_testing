@@ -32,7 +32,6 @@ import com.android.ide.common.resources.ResourceRepositoryUtil;
 import com.android.ide.common.resources.ResourceResolver;
 import com.android.ide.common.resources.ResourceValueMap;
 import com.android.ide.common.resources.configuration.FolderConfiguration;
-import com.android.layoutlib.bridge.android.RenderParamsFlags;
 import com.android.layoutlib.bridge.intensive.setup.ConfigGenerator;
 import com.android.layoutlib.bridge.intensive.setup.LayoutPullParser;
 import com.android.resources.ResourceType;
@@ -64,7 +63,6 @@ public class SessionParamsBuilder {
     private boolean mDecor = true;
     private IImageFactory mImageFactory = null;
     private boolean enableLayoutValidator = false;
-    private boolean enableLayoutValidatorImageCheck = false;
     private boolean transparentBackground = false;
 
     @NonNull
@@ -171,12 +169,6 @@ public class SessionParamsBuilder {
         this.enableLayoutValidator = true;
         return this;
     }
-
-    @NonNull
-    public SessionParamsBuilder enableLayoutValidationImageCheck() {
-        this.enableLayoutValidatorImageCheck = true;
-        return this;
-    }
     
     @NonNull
     public SessionParamsBuilder setTransparentBackground() {
@@ -215,10 +207,7 @@ public class SessionParamsBuilder {
         SessionParams params = new SessionParams(mLayoutParser, mRenderingMode, mProjectKey /* for
         caching */, mConfigGenerator.getHardwareConfig(), resourceResolver, mLayoutlibCallback,
                 mMinSdk, mTargetSdk, mLayoutLog);
-        params.setFlag(RenderParamsFlags.FLAG_ENABLE_LAYOUT_VALIDATOR, enableLayoutValidator);
-        params.setFlag(
-                RenderParamsFlags.FLAG_ENABLE_LAYOUT_VALIDATOR_IMAGE_CHECK,
-                enableLayoutValidatorImageCheck);
+        params.setLayoutValidationChecker(() -> enableLayoutValidator);
         if (mImageFactory != null) {
             params.setImageFactory(mImageFactory);
         }
