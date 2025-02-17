@@ -126,12 +126,11 @@ class MotionTestRule<Toolkit>(
         result: TimeSeriesVerificationResult,
     ) {
         requireValidGoldenIdentifier(goldenIdentifier)
-
         val relativeGoldenPath =
             goldenPathManager.goldenIdentifierResolver(goldenIdentifier, JSON_ACTUAL_EXTENSION)
-        val deviceLocalPath = File(goldenPathManager.deviceLocalPath)
+        val goldenFilePath = getGoldenFilePath()
         val goldenFile =
-            deviceLocalPath.resolve(recordedMotion.testClassName).resolve(relativeGoldenPath)
+            goldenFilePath.resolve(recordedMotion.testClassName).resolve(relativeGoldenPath)
 
         val goldenFileDirectory = checkNotNull(goldenFile.parentFile)
         if (!goldenFileDirectory.exists()) {
@@ -147,7 +146,7 @@ class MotionTestRule<Toolkit>(
         metadata.put("goldenIdentifier", goldenIdentifier)
         metadata.put("testClassName", recordedMotion.testClassName)
         metadata.put("testMethodName", recordedMotion.testMethodName)
-        metadata.put("deviceLocalPath", deviceLocalPath)
+        metadata.put("deviceLocalPath", goldenFilePath)
         metadata.put("result", result.name)
 
         recordedMotion.videoRenderer?.let { videoRenderer ->
@@ -156,7 +155,7 @@ class MotionTestRule<Toolkit>(
                     goldenFile.resolveSibling("${goldenFile.nameWithoutExtension}.$VIDEO_EXTENSION")
 
                 videoRenderer.renderToFile(videoFile.absolutePath)
-                metadata.put("videoLocation", videoFile.relativeTo(deviceLocalPath))
+                metadata.put("videoLocation", videoFile.relativeTo(goldenFilePath))
             } catch (e: Exception) {
                 Log.e(TAG, "Failed to render motion test video", e)
             }
@@ -173,6 +172,11 @@ class MotionTestRule<Toolkit>(
         }
     }
 
+    private fun getGoldenFilePath(): File {
+        return if (isRobolectricRuntime()) File("/tmp/motion")
+        else File(goldenPathManager.deviceLocalPath)
+    }
+
     private fun requireValidGoldenIdentifier(goldenIdentifier: String) {
         require(goldenIdentifier.matches(GOLDEN_IDENTIFIER_REGEX)) {
             "Golden identifier '$goldenIdentifier' does not satisfy the naming " +
@@ -187,6 +191,10 @@ class MotionTestRule<Toolkit>(
         private const val JSON_INDENTATION = 2
         private val GOLDEN_IDENTIFIER_REGEX = "^[A-Za-z0-9_-]+$".toRegex()
         private const val TAG = "MotionTestRule"
+
+        fun isRobolectricRuntime(): Boolean {
+            return this::class.java.getClassLoader().javaClass.getName().contains("robolectric")
+        }
     }
 }
 
