@@ -28,6 +28,8 @@ import android.tools.traces.events.ICujType
 import android.tools.traces.wm.Transition
 import android.tools.withTracing
 
+import java.lang.IllegalStateException
+
 data class ScenarioInstanceImpl
 @JvmOverloads
 constructor(
@@ -82,25 +84,33 @@ constructor(
             reader: Reader,
             config: FlickerConfigEntry,
         ): ScenarioInstanceImpl {
-            val layersTrace = reader.readLayersTrace() ?: error("Missing layers trace")
-            val startTimestamp = traceSlice.startTimestamp
-            val endTimestamp = traceSlice.endTimestamp
+            try {
+                val layersTrace = reader.readLayersTrace() ?: error("Missing layers trace")
+                val startTimestamp = traceSlice.startTimestamp
+                val endTimestamp = traceSlice.endTimestamp
 
-            val displayAtStart =
-                Utils.getOnDisplayFor(layersTrace.getFirstEntryWithOnDisplayAfter(startTimestamp))
-            val displayAtEnd =
-                Utils.getOnDisplayFor(layersTrace.getLastEntryWithOnDisplayBefore(endTimestamp))
+                val displayAtStart =
+                    Utils.getOnDisplayFor(
+                        layersTrace.getFirstEntryWithOnDisplayAfter(startTimestamp))
+                val displayAtEnd =
+                    Utils.getOnDisplayFor(layersTrace.getLastEntryWithOnDisplayBefore(endTimestamp))
 
-            return ScenarioInstanceImpl(
-                config,
-                startRotation = displayAtStart.transform.getRotation(),
-                endRotation = displayAtEnd.transform.getRotation(),
-                startTimestamp = startTimestamp,
-                endTimestamp = endTimestamp,
-                associatedCuj = traceSlice.associatedCuj,
-                associatedTransition = traceSlice.associatedTransition,
-                reader = reader.slice(startTimestamp, endTimestamp),
-            )
+                return ScenarioInstanceImpl(
+                    config,
+                    startRotation = displayAtStart.transform.getRotation(),
+                    endRotation = displayAtEnd.transform.getRotation(),
+                    startTimestamp = startTimestamp,
+                    endTimestamp = endTimestamp,
+                    associatedCuj = traceSlice.associatedCuj,
+                    associatedTransition = traceSlice.associatedTransition,
+                    reader = reader.slice(startTimestamp, endTimestamp),
+                )
+            } catch (e: Exception) {
+                throw IllegalStateException(
+                    "Failed to create scenario instance for slice: $traceSlice",
+                    e,
+                )
+            }
         }
     }
 }
