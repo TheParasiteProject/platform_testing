@@ -39,6 +39,7 @@ import androidx.compose.ui.test.performTouchInput
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.IntSize
 import java.util.concurrent.TimeUnit
+import java.util.concurrent.TimeoutException
 import kotlin.math.roundToInt
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.milliseconds
@@ -229,8 +230,13 @@ fun MotionTestRule<ComposeToolkit>.recordMotion(
 
             if (recordingSpec.captureScreenshots) {
                 val view = (onRoot().fetchSemanticsNode().root as ViewRootForTest).view
-                val bitmap = view.captureToBitmapAsync().get(10, TimeUnit.SECONDS)
-                screenshotCollector.add(bitmap.asImageBitmap())
+                try {
+                    screenshotCollector.add(
+                        view.captureToBitmapAsync().get(10, TimeUnit.SECONDS).asImageBitmap()
+                    )
+                } catch (e: TimeoutException) {
+                    throw Exception("Capturing screenshot timed out, see b/260824883", e)
+                }
             }
         }
 
