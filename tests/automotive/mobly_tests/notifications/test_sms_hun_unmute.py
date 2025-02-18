@@ -57,7 +57,7 @@ class NotificationsSmsHunUnmute(
     self.target.load_snippet('mbs', android_device.MBS_PACKAGE)
     super().enable_recording()
 
-  def test_sms_unmute(self):
+  def test_sms_hun_unmute(self):
     """
     GIVEN a SMS HUN is displayed in the car's head unit,
     WHEN the SMS HUN is muted,
@@ -76,6 +76,9 @@ class NotificationsSmsHunUnmute(
     self.phone_notpaired.mbs.sendSms(receiver_phone_number, sms_text)
 
     logging.info("Assert: New SMS is displayed as a heads-up notification.")
+    assert self.discoverer.mbs.isSmsHunDisplayed() is True, (
+        "New SMS is not displayed as a heads-up notification."
+    )
     assert self.discoverer.mbs.isSmsHunDisplayedWithTitle(sender_phone_number) is True, (
         "New SMS is not displayed as a heads-up notification with the correct title."
     )

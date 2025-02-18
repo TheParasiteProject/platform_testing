@@ -60,7 +60,7 @@ class NotificationsSmsHunPlayInDrivingMode(
     self.target.load_snippet('mbs', android_device.MBS_PACKAGE)
     super().enable_recording()
 
-  def test_sms_hun_play(self):
+  def test_sms_hun_play_in_driving_mode(self):
     """
     GIVEN the phone which is paired to the car,
     WHEN the SMS is sent to paired phone,
@@ -78,6 +78,9 @@ class NotificationsSmsHunPlayInDrivingMode(
     self.phone_notpaired.mbs.sendSms(receiver_phone_number, sms_text)
 
     logging.info("Assert: New SMS is displayed as a heads-up notification.")
+    assert self.discoverer.mbs.isSmsHunDisplayed() is True, (
+        "New SMS is not displayed as a heads-up notification."
+    )
     assert self.discoverer.mbs.isSmsHunDisplayedWithTitle(sender_phone_number) is True, (
         "New SMS is not displayed as a heads-up notification with the correct title."
     )
