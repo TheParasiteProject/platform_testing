@@ -53,4 +53,25 @@ public interface IAutoSettingsLocationHelper extends IAppHelper {
      * <p>Check if recently accessed options is present
      */
     boolean hasRecentlyAccessed();
+
+    /**
+     * Setup expectations: location settings page is opened
+     *
+     * <p>Opens app level permissions page
+     */
+    void openAppLevelPermissions();
+
+    /**
+     * Setup expectations: location settings page is opened
+     *
+     * <p>Opens maps in recently accessed page
+     */
+    void openMapsInRecentlyAccessed();
+
+    /**
+     * Setup expectations: location settings page is opened
+     *
+     * <p>Clicks View All in location settings
+     */
+    void clickViewAll();
 }

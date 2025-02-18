@@ -619,6 +619,7 @@ public class AutomotiveConfigConstants {
     public static final String MICROPHONE = "MICROPHONE";
     public static final String LOCATION = "LOCATION";
     public static final String APP_PERMISSION = "APP_PERMISSION";
+    public static final String APP_LEVEL_PERMISSION = "APP_LEVEL_PERMISSION";
     public static final String INFOTAINMENT_SYSTEM_DATA = "INFOTAINMENT_SYSTEM_DATA";
     public static final String DATA_SHARING_WITH_GOOGLE = "DATA_SHARING_WITH_GOOGLE";
     public static final String SETTINGS_BACK_BUTTON = "SETTINGS_BACK_BUTTON";
