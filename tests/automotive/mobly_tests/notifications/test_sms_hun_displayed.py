@@ -33,7 +33,7 @@ from utilities.common_utils import CommonUtils
 from utilities.main_utils import common_main
 
 
-class NotificationsSmsHunDisplayedInDrivingMode(
+class NotificationsSmsHunDisplayed(
     bluetooth_sms_base_test.BluetoothSMSBaseTest
 ):
 
@@ -50,9 +50,6 @@ class NotificationsSmsHunDisplayedInDrivingMode(
     logging.info("Clearing the sms from the phone.")
     self.call_utils.clear_sms_app(self.target)
 
-    logging.info("Enabling driving mode.")
-    self.call_utils.enable_driving_mode()
-
     logging.info("Removing mbs snippet and rebooting the phone.")
     self.target.unload_snippet('mbs')
     self.target.reboot()
@@ -60,12 +57,11 @@ class NotificationsSmsHunDisplayedInDrivingMode(
     self.target.load_snippet('mbs', android_device.MBS_PACKAGE)
     super().enable_recording()
 
-  def test_sms_hun_displayed_in_driving_mode(self):
+  def test_sms_hun_displayed(self):
     """
     GIVEN the phone which is paired to the car,
     WHEN the SMS is sent to paired phone,
-    THEN the SMS appears as a heads-up notification on the car's head unit,
-    AND the SMS appears in the notification center on the car.
+    THEN the SMS appears as a heads-up notification on the car's head unit.
     """
     receiver_phone_number = self.target.mbs.getPhoneNumber()
     sender_phone_number = self.phone_notpaired.mbs.getPhoneNumber()
@@ -82,23 +78,8 @@ class NotificationsSmsHunDisplayedInDrivingMode(
         "New SMS is not displayed as a heads-up notification with the correct title."
     )
 
-    logging.info("Assert: Verify the content is not displayed in HUN.")
-    assert self.discoverer.mbs.getSmsHunContent(sender_phone_number) == "New message", (
-        "New SMS is displayed as a heads-up notification with the correct content."
-    )
-
-    logging.info("Assert: SMS is displayed in the notification center on the car.")
-    assert self.discoverer.mbs.isNotificationWithTitleExists(sender_phone_number) is True, (
-        "New SMS is not displayed in the notification center."
-    )
-
   def teardown_test(self):
     self.call_utils.press_home()
-
-    try:
-      self.call_utils.disable_driving_mode()
-    except Exception as e:  # pylint: disable=broad-except
-      logging.info("Failed to disable driving mode: %s", e)
 
     try:
       super().teardown_test()

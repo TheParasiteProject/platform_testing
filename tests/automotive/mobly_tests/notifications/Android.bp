@@ -17,6 +17,34 @@ package {
 }
 
 python_test_host {
+    name: "NotificationsSmsHunDisplayed",
+    main: "test_sms_hun_displayed.py",
+    srcs: ["test_sms_hun_displayed.py"],
+    libs: [
+        "mobly",
+        "utilities",
+        "BluetoothSMSTestLibrary",
+    ],
+    test_suites: [
+        "catbox",
+    ],
+    test_options: {
+        unit_test: false,
+    },
+    device_common_data: [
+        // Package the snippet with the mobly test
+        ":AutomotiveSnippet",
+        ":PhoneSnippet",
+        "bt_notifications_config.yaml",
+    ],
+    version: {
+        py3: {
+            embedded_launcher: true,
+        },
+    },
+}
+
+python_test_host {
     name: "NotificationsSmsHunDisplayedInDrivingMode",
     main: "test_sms_hun_displayed_in_driving_mode.py",
     srcs: ["test_sms_hun_displayed_in_driving_mode.py"],
