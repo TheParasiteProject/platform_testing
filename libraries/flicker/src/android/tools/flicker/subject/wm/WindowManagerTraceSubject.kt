@@ -217,19 +217,22 @@ constructor(val trace: WindowManagerTrace, override val reader: Reader? = null) 
 
     /** {@inheritDoc} */
     override fun isNonAppWindowInvisible(
-        componentMatcher: IComponentMatcher
-    ): WindowManagerTraceSubject = isNonAppWindowInvisible(componentMatcher, isOptional = false)
+        componentMatcher: IComponentMatcher,
+        mustExist: Boolean,
+    ): WindowManagerTraceSubject =
+        isNonAppWindowInvisible(componentMatcher, isOptional = false, mustExist)
 
     /** See [isNonAppWindowInvisible] */
     fun isNonAppWindowInvisible(
         componentMatcher: IComponentMatcher,
         isOptional: Boolean,
+        mustExist: Boolean = false,
     ): WindowManagerTraceSubject = apply {
         addAssertion(
             "isNonAppWindowInvisible(${componentMatcher.toWindowIdentifier()})",
             isOptional,
         ) {
-            it.isNonAppWindowInvisible(componentMatcher)
+            it.isNonAppWindowInvisible(componentMatcher, mustExist)
         }
     }
 
@@ -316,16 +319,19 @@ constructor(val trace: WindowManagerTrace, override val reader: Reader? = null) 
 
     /** {@inheritDoc} */
     override fun isAppWindowInvisible(
-        componentMatcher: IComponentMatcher
-    ): WindowManagerTraceSubject = isAppWindowInvisible(componentMatcher, isOptional = false)
+        componentMatcher: IComponentMatcher,
+        mustExist: Boolean,
+    ): WindowManagerTraceSubject =
+        isAppWindowInvisible(componentMatcher, isOptional = false, mustExist)
 
     /** See [isAppWindowInvisible] */
     fun isAppWindowInvisible(
         componentMatcher: IComponentMatcher,
         isOptional: Boolean,
+        mustExist: Boolean = false,
     ): WindowManagerTraceSubject = apply {
         addAssertion("isAppWindowInvisible(${componentMatcher.toWindowIdentifier()})", isOptional) {
-            it.isAppWindowInvisible(componentMatcher)
+            it.isAppWindowInvisible(componentMatcher, mustExist)
         }
     }
 

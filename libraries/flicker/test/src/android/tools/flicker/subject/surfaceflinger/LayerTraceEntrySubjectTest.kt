@@ -406,6 +406,19 @@ class LayerTraceEntrySubjectTest {
         subject.visibleLayersShownMoreThanOneConsecutiveEntry()
     }
 
+    @Test
+    fun failsOnNonEsistingComponent_isInvisibleWithMustExist() {
+        val reader =
+            getLayerTraceReaderFromAsset("layers_trace_visible_outside_bounds.perfetto-trace")
+        val trace = reader.readLayersTrace() ?: error("Unable to read layers trace")
+        val subject =
+            LayersTraceSubject(trace, reader)
+                .getEntryBySystemUpTime(1253267561044, byElapsedTimestamp = true)
+        assertFail("ImaginaryWindow should exist") {
+            subject.isInvisible(TestComponents.IMAGINARY, mustExist = true)
+        }
+    }
+
     companion object {
         @ClassRule @JvmField val ENV_CLEANUP = CleanFlickerEnvironmentRule()
     }

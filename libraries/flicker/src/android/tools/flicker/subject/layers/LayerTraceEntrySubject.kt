@@ -194,7 +194,13 @@ constructor(
     }
 
     /** {@inheritDoc} */
-    override fun isInvisible(componentMatcher: IComponentMatcher): LayerTraceEntrySubject = apply {
+    override fun isInvisible(
+        componentMatcher: IComponentMatcher,
+        mustExist: Boolean,
+    ): LayerTraceEntrySubject = apply {
+        if (mustExist) {
+            contains(componentMatcher)
+        }
         val layers = subjects.map { it.layer }
         val hasInvisibleComponent =
             componentMatcher.check(layers) { componentLayers ->
