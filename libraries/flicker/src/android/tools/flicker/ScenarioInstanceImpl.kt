@@ -107,7 +107,8 @@ constructor(
                 )
             } catch (e: Exception) {
                 throw IllegalStateException(
-                    "Failed to create scenario instance for slice: $traceSlice",
+                    "Failed to create scenario (${config.scenarioId.name}) instance from slice: "
+                        + traceSlice,
                     e,
                 )
             }
