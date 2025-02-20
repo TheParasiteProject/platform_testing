@@ -179,6 +179,7 @@ open class ViewScreenshotTestRule(
             goldenIdentifier,
             waitForIdle,
             dialogProvider,
+            frameLimit,
             waitingForDialog,
         )
     }

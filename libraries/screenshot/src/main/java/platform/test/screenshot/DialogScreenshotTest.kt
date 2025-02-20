@@ -30,6 +30,7 @@ fun <A : Activity> dialogScreenshotTest(
     goldenIdentifier: String,
     waitForIdle: () -> Unit = {},
     dialogProvider: (A) -> Dialog,
+    frameLimit: Int = 10,
     checkDialog: (Dialog) -> Boolean = { _ -> false },
 ) {
     var dialog: Dialog? = null
@@ -61,7 +62,7 @@ fun <A : Activity> dialogScreenshotTest(
     // laying out and drawing its content.
     var waitForActivity = true
     var iterCount = 0
-    while (waitForActivity && iterCount < 10) {
+    while (waitForActivity && iterCount < frameLimit) {
         activityRule.scenario.onActivity { waitForActivity = checkDialog(dialog!!) }
         iterCount++
     }
