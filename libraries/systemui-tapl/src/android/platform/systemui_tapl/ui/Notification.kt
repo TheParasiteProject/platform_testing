@@ -278,7 +278,7 @@ internal constructor(
             notification,
             "Notification",
             whileHoldingFn = {
-                val guts = notification.waitForObj(GUTS_SELECTOR, UI_RESPONSE_TIMEOUT)
+                val guts = notification.waitForObj(GUTS_SELECTOR)
                 guts.assertVisibility(By.text(APP_NAME), true)
                 guts.assertVisibility(By.text(NOTIFICATION_CHANNEL_NAME), true)
 
