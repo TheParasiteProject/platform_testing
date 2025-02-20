@@ -34,15 +34,21 @@ object Utils {
         val transactionsTrace =
             reader.readTransactionsTrace() ?: error("Missing transactions trace")
 
-        val lastWmEntryBeforeTransitionCreated = try {
-            wmTrace.getEntryAt(transition.createTime)
+        val lastWmEntryBeforeTransitionWasSentToShell = try {
+            wmTrace.getEntryAt(transition.sendTime)
         } catch (e: Exception) {
             throw RuntimeException(
-                "Failed to get last WM entry before transition created for transition: $transition",
-                e)
+                "Failed to get last WM entry before transition was sent to shell: $transition", e)
         }
-        val elapsedNanos = lastWmEntryBeforeTransitionCreated.timestamp.elapsedNanos
-        val unixNanos = lastWmEntryBeforeTransitionCreated.timestamp.unixNanos
+        val elapsedNanos = lastWmEntryBeforeTransitionWasSentToShell.timestamp.elapsedNanos
+        val unixNanos = lastWmEntryBeforeTransitionWasSentToShell.timestamp.unixNanos
+
+        assert(elapsedNanos != 0L) {
+            "lastWmEntryBeforeTransitionWasSentToShell.timestamp.elapsedNanos is 0"
+        }
+        assert(unixNanos != 0L) {
+            "lastWmEntryBeforeTransitionWasSentToShell.timestamp.unixNanos is 0"
+        }
 
         val startTransactionAppliedTimestamp =
             transition.getStartTransaction(transactionsTrace)?.let {
