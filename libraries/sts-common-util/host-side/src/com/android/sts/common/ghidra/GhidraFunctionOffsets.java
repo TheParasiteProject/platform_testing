@@ -53,7 +53,7 @@ public class GhidraFunctionOffsets {
      *
      * @param ghidra An instance of Ghidra.
      * @param binaryFile The binary file in device.
-     * @param functions The list of function names.
+     * @param functions The list of function patterns.
      * @return A string containing space separated function offsets.
      */
     public static String getFunctionOffsetsAsCmdLineArgs(
@@ -70,7 +70,7 @@ public class GhidraFunctionOffsets {
      *
      * @param ghidra An instance of Ghidra.
      * @param binaryFile The binary file in device.
-     * @param functions The list of function names.
+     * @param functions The list of function patterns.
      * @return A list of BigIntegers containing function offsets in the same order as @param
      *     functions.
      */
@@ -117,7 +117,7 @@ public class GhidraFunctionOffsets {
                                 readResource(POST_SCRIPT_CONTENT_RESOURCE_PATH),
                                 new HashMap<String, String>(
                                         ImmutableMap.of(
-                                                "functionNames",
+                                                "functionPatterns",
                                                 String.join(" ", functions),
                                                 "port",
                                                 String.valueOf(port))));
