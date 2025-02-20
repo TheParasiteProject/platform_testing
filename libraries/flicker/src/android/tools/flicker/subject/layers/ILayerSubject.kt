@@ -63,12 +63,18 @@ interface ILayerSubject<LayerSubjectType, RegionSubjectType> {
      */
     fun isVisible(componentMatcher: IComponentMatcher): LayerSubjectType
 
+    /** Manual overload for java compatibility */
+    fun isInvisible(componentMatcher: IComponentMatcher): LayerSubjectType =
+        isInvisible(componentMatcher, false)
+
     /**
-     * Asserts that a [Layer] matching [componentMatcher] doesn't exist or is invisible.
+     * Asserts that a [Layer] matching [componentMatcher] is invisible or doesn't exist (only if
+     * !mustExist).
      *
      * @param componentMatcher Components to search
+     * @param mustExist when set to true, will fail if the component is not found
      */
-    fun isInvisible(componentMatcher: IComponentMatcher): LayerSubjectType
+    fun isInvisible(componentMatcher: IComponentMatcher, mustExist: Boolean): LayerSubjectType
 
     /**
      * Asserts that the entry contains a visible splash screen [Layer] for a [layer] matching

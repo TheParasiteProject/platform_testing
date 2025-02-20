@@ -467,13 +467,25 @@ constructor(
 
     /** {@inheritDoc} */
     override fun isAppWindowInvisible(
-        componentMatcher: IComponentMatcher
-    ): WindowManagerStateSubject = apply { checkWindowIsInvisible(appWindows, componentMatcher) }
+        componentMatcher: IComponentMatcher,
+        mustExist: Boolean,
+    ): WindowManagerStateSubject = apply {
+        if (mustExist) {
+            containsAppWindow(componentMatcher)
+        }
+        checkWindowIsInvisible(appWindows, componentMatcher)
+    }
 
     /** {@inheritDoc} */
     override fun isNonAppWindowInvisible(
-        componentMatcher: IComponentMatcher
-    ): WindowManagerStateSubject = apply { checkWindowIsInvisible(nonAppWindows, componentMatcher) }
+        componentMatcher: IComponentMatcher,
+        mustExist: Boolean,
+    ): WindowManagerStateSubject = apply {
+        if (mustExist) {
+            containsNonAppWindow(componentMatcher)
+        }
+        checkWindowIsInvisible(nonAppWindows, componentMatcher)
+    }
 
     private fun checkWindowIsInvisible(
         subjectList: List<WindowStateSubject>,

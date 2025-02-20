@@ -426,6 +426,18 @@ class WindowManagerStateSubjectTest {
         entry.isAppWindowInvisible(TestComponents.CHROME_SPLASH_SCREEN)
     }
 
+    @Test
+    fun failsOnNonExistingComponent_isInvisibleWithMustExist() {
+        val entry =
+            WindowManagerTraceSubject(trace, reader).getEntryByElapsedTimestamp(9215551505798L)
+        assertFail("ImaginaryWindow should exist") {
+            entry.isAppWindowInvisible(TestComponents.IMAGINARY, mustExist = true)
+        }
+        assertFail("ImaginaryWindow should exist") {
+            entry.isNonAppWindowInvisible(TestComponents.IMAGINARY, mustExist = true)
+        }
+    }
+
     companion object {
         @ClassRule @JvmField val ENV_CLEANUP = CleanFlickerEnvironmentRule()
     }

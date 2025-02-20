@@ -158,16 +158,21 @@ constructor(val trace: LayersTrace, override val reader: Reader? = null) :
         }
 
     /** {@inheritDoc} */
-    override fun isInvisible(componentMatcher: IComponentMatcher): LayersTraceSubject =
-        isInvisible(componentMatcher, isOptional = false)
+    override fun isInvisible(
+        componentMatcher: IComponentMatcher,
+        mustExist: Boolean,
+    ): LayersTraceSubject = isInvisible(componentMatcher, mustExist, isOptional = false)
 
     /** See [isInvisible] */
-    fun isInvisible(componentMatcher: IComponentMatcher, isOptional: Boolean): LayersTraceSubject =
-        apply {
-            addAssertion("isInvisible(${componentMatcher.toLayerIdentifier()})", isOptional) {
-                it.isInvisible(componentMatcher)
-            }
+    fun isInvisible(
+        componentMatcher: IComponentMatcher,
+        mustExist: Boolean = false,
+        isOptional: Boolean,
+    ): LayersTraceSubject = apply {
+        addAssertion("isInvisible(${componentMatcher.toLayerIdentifier()})", isOptional) {
+            it.isInvisible(componentMatcher, mustExist)
         }
+    }
 
     /** {@inheritDoc} */
     override fun isSplashScreenVisibleFor(
