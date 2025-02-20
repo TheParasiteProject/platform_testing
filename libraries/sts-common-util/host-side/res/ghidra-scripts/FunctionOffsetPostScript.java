@@ -24,21 +24,23 @@ import java.net.Socket;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.regex.Pattern;
 
 public class FunctionOffsetPostScript extends GhidraScript {
 
     public void run() throws Exception {
-        String spaceSeparatedFunctionNames = propertiesFileParams.getValue("functionNames");
-        List<String> listOfFunctions = Arrays.asList(spaceSeparatedFunctionNames.split("\\s+"));
+        String spaceSeparatedFunctionPatterns = propertiesFileParams.getValue("functionPatterns");
+        List<String> listOfFunctions = Arrays.asList(spaceSeparatedFunctionPatterns.split("\\s+"));
         List<BigInteger> output = new ArrayList<>();
 
         // Find the function offsets
         for (String function : listOfFunctions) {
             FunctionIterator functionIterator = currentProgram.getListing().getFunctions(true);
+            Pattern pattern = Pattern.compile(function);
             BigInteger offset = null;
             while (functionIterator.hasNext()) {
                 Function nextFunction = functionIterator.next();
-                if (!nextFunction.getName().equals(function)) {
+                if (!pattern.matcher(nextFunction.getName()).find()) {
                     continue; // Skip to the next iteration if the function name doesn't match
                 }
 
