@@ -251,4 +251,11 @@ public interface IAutoSettingHelper extends IAppHelper {
      * <p>This method checks if Recently accessed apps is displayed in settings Location
      */
     boolean isRecentAppDisplayedInLocationSettings(String app);
+
+    /**
+     * Setup expectation: None
+     *
+     * <p>This method presses settings back
+     */
+    void pressSettingsBackNavIcon();
 }
