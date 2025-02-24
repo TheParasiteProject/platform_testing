@@ -164,11 +164,11 @@ public class PerfettoTracingPerRunStrategyTest {
         doReturn(true).when(mPerfettoHelper).stopCollecting(anyLong(), anyString());
         // Test run start behavior
         strategy.testRunStart(mDataRecord, mRunDesc);
-        strategy.testStart(mDataRecord, mTest1Desc);
-        strategy.testEnd(mDataRecord, mTest1Desc);
+        strategy.testStart(mDataRecord, mTest1Desc, /* iteration= */ 1);
+        strategy.testEnd(mDataRecord, mTest1Desc, /* iteration= */ 1);
         verify(mPerfettoHelper, times(0)).stopCollecting(anyLong(), anyString());
-        strategy.testStart(mDataRecord, mTest2Desc);
-        strategy.testEnd(mDataRecord, mTest2Desc);
+        strategy.testStart(mDataRecord, mTest2Desc, /* iteration= */ 1);
+        strategy.testEnd(mDataRecord, mTest2Desc, /* iteration= */ 1);
         verify(mPerfettoHelper, times(0)).stopCollecting(anyLong(), anyString());
         strategy.testRunEnd(mDataRecord, new Result());
         verify(mPerfettoHelper, times(1)).stopCollecting(anyLong(), anyString());
@@ -185,8 +185,8 @@ public class PerfettoTracingPerRunStrategyTest {
         doReturn(true).when(mPerfettoHelper).stopCollecting(anyLong(), anyString());
         // Test run start behavior
         strategy.testRunStart(mDataRecord, mRunDesc);
-        strategy.testStart(mDataRecord, mTest1Desc);
-        strategy.testEnd(mDataRecord, mRunDesc);
+        strategy.testStart(mDataRecord, mTest1Desc, /* iteration= */ 1);
+        strategy.testEnd(mDataRecord, mRunDesc, /* iteration= */ 1);
         verify(mPerfettoHelper, times(1)).startCollecting();
         verify(mPerfettoHelper, times(0)).stopCollecting(anyLong(), anyString());
     }
@@ -201,7 +201,7 @@ public class PerfettoTracingPerRunStrategyTest {
         doReturn(false).when(mPerfettoHelper).startCollecting();
         // Test run start behavior
         strategy.testRunStart(mDataRecord, mRunDesc);
-        strategy.testStart(mDataRecord, mTest1Desc);
+        strategy.testStart(mDataRecord, mTest1Desc, /* iteration= */ 1);
 
         Failure failureDesc = new Failure(FAKE_TEST_DESCRIPTION, new Exception());
         strategy.testFail(mDataRecord, mTest1Desc, failureDesc);
