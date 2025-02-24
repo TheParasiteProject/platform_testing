@@ -53,6 +53,9 @@
     "USER_SETTINGS_SCROLL_DIRECTION": "VERTICAL",
     "USER_SETTINGS_SCROLL_MARGIN": "6",
     "USER_SETTINGS_SCROLL_WAIT_TIME": "2",
+    "PRIVACY_SETTINGS_SCROLL_MARGIN": "10",
+    "PRIVACY_SETTINGS_SCROLL_WAIT_TIME": "10",
+    "PRIVACY_SETTINGS_SCROLL_ACTION": "USE_GESTURE",
     "ACCOUNT_SETTINGS_SCROLL_ACTION": "USE_GESTURE",
     "ACCOUNT_SETTINGS_SCROLL_DIRECTION": "VERTICAL",
     "SETTINGS_SUB_SETTING_SCROLL_ACTION": "USE_GESTURE",
@@ -2419,6 +2422,19 @@
           "VALUE": "android.widget.Switch"
         }
       ]
+    },
+    "PRIVACY_OTHER_PERMISSIONS":
+        {
+          "TYPE": "TEXT",
+          "VALUE": "Other permissions"
+    },
+    "CAR_INFORMATION": {
+      "TYPE": "TEXT",
+      "VALUE": "Car information"
+    },
+    "PERMISSION_USED_BY_SYSTEM": {
+      "TYPE": "TEXT",
+      "VALUE": "Permission used by the system"
     }
   },
   "WORKFLOWS": {

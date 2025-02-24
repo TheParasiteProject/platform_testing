@@ -16,6 +16,8 @@
 package android.platform.helpers;
 
 import android.app.Instrumentation;
+import android.platform.helpers.ScrollUtility.ScrollActions;
+import android.platform.helpers.ScrollUtility.ScrollDirection;
 
 import androidx.test.uiautomator.By;
 import androidx.test.uiautomator.BySelector;
@@ -25,8 +27,46 @@ import androidx.test.uiautomator.UiObject2;
 public class SettingsPrivacyHelperImpl extends AbstractStandardAppHelper
         implements IAutoPrivacySettingsHelper {
     private static final int MAX_WAIT_COUNT = 5;
+    private static final int WAIT_TIME = 10000;
+
+    private HelperAccessor<IAutoUISettingsHelper> mSettingUIHelper;
+    private ScrollUtility mScrollUtility;
+    private ScrollActions mScrollAction;
+    private BySelector mBackwardButtonSelector;
+    private BySelector mForwardButtonSelector;
+    private BySelector mScrollableElementSelector;
+    private ScrollDirection mScrollDirection;
+
     public SettingsPrivacyHelperImpl(Instrumentation instr) {
         super(instr);
+        mSettingUIHelper = new HelperAccessor<>(IAutoUISettingsHelper.class);
+
+        mScrollUtility = ScrollUtility.getInstance(getSpectatioUiUtil());
+        mScrollAction =
+                ScrollActions.valueOf(
+                        getActionFromConfig(
+                                AutomotiveConfigConstants.PRIVACY_SETTINGS_SCROLL_ACTION));
+        mBackwardButtonSelector =
+                getUiElementFromConfig(
+                        AutomotiveConfigConstants.SETTINGS_SUB_SETTING_SCROLL_BACKWARD_BUTTON);
+        mForwardButtonSelector =
+                getUiElementFromConfig(
+                        AutomotiveConfigConstants.SETTINGS_SUB_SETTING_SCROLL_FORWARD_BUTTON);
+        mScrollableElementSelector =
+                getUiElementFromConfig(
+                        AutomotiveConfigConstants.SETTINGS_SUB_SETTING_SCROLL_ELEMENT);
+        mScrollDirection =
+                ScrollDirection.valueOf(
+                        getActionFromConfig(
+                                AutomotiveConfigConstants.SETTINGS_SUB_SETTING_SCROLL_DIRECTION));
+        mScrollUtility.setScrollValues(
+                Integer.valueOf(
+                        getActionFromConfig(
+                                AutomotiveConfigConstants.PRIVACY_SETTINGS_SCROLL_MARGIN)),
+                Integer.valueOf(
+                        getActionFromConfig(
+                                AutomotiveConfigConstants.PRIVACY_SETTINGS_SCROLL_WAIT_TIME)));
+        mSettingUIHelper = new HelperAccessor<>(IAutoUISettingsHelper.class);
     }
     /** {@inheritDoc} */
     @Override
@@ -404,5 +444,38 @@ public class SettingsPrivacyHelperImpl extends AbstractStandardAppHelper
                                         AutomotiveConfigConstants.MICRO_PHONE_ON_SCREEN));
         getSpectatioUiUtil().clickAndWait(homeMic);
         getSpectatioUiUtil().waitForIdle();
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    public void clickOtherPermissionsPage() {
+        BySelector otherPermissionSelector =
+                getUiElementFromConfig(AutomotiveConfigConstants.PRIVACY_OTHER_PERMISSIONS);
+        UiObject2 otherPermissionObject =
+                mScrollUtility.scrollAndFindUiObject(
+                        mScrollAction,
+                        mScrollDirection,
+                        mForwardButtonSelector,
+                        mBackwardButtonSelector,
+                        mScrollableElementSelector,
+                        otherPermissionSelector,
+                        String.format(
+                                "Scroll on Manage Permission to find  %s",
+                                otherPermissionSelector));
+        getSpectatioUiUtil().waitNSeconds(WAIT_TIME);
+        getSpectatioUiUtil()
+                .validateUiObject(
+                        otherPermissionObject,
+                        String.format("Unable to find UI Element %s.", otherPermissionSelector));
+        getSpectatioUiUtil().clickAndWait(otherPermissionObject);
+        BySelector permissionUsedSelector =
+                getUiElementFromConfig(AutomotiveConfigConstants.PERMISSION_USED_BY_SYSTEM);
+        getSpectatioUiUtil().waitForUiObject(permissionUsedSelector, WAIT_TIME);
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    public boolean isCarInformationUIElementDisplayed() {
+        return mSettingUIHelper.get().hasUIElement(AutomotiveConfigConstants.CAR_INFORMATION);
     }
 }
