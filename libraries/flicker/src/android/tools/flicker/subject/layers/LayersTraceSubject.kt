@@ -24,7 +24,6 @@ import android.tools.flicker.subject.region.RegionTraceSubject
 import android.tools.function.AssertionPredicate
 import android.tools.io.Reader
 import android.tools.traces.component.ComponentNameMatcher
-import android.tools.traces.component.EdgeExtensionComponentMatcher
 import android.tools.traces.component.IComponentMatcher
 import android.tools.traces.component.IComponentNameMatcher
 import android.tools.traces.component.SurfaceViewBackgroundMatcher
@@ -352,7 +351,6 @@ constructor(val trace: LayersTrace, override val reader: Reader? = null) :
                 ComponentNameMatcher.TRANSITION_SNAPSHOT,
                 ComponentNameMatcher.FLOATING_ROTATION_BUTTON,
                 ComponentNameMatcher.WIRED_CHARGING_ANIMATION,
-                EdgeExtensionComponentMatcher(),
                 SurfaceViewBackgroundMatcher(),
             )
     }
