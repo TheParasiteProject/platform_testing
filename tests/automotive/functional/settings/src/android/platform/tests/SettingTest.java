@@ -19,9 +19,11 @@ package android.platform.tests;
 import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertTrue;
 
+import android.platform.helpers.AutomotiveConfigConstants;
 import android.platform.helpers.HelperAccessor;
 import android.platform.helpers.IAutoAppInfoSettingsHelper;
 import android.platform.helpers.IAutoSettingHelper;
+import android.platform.helpers.IAutoUISettingsHelper;
 import android.platform.helpers.SettingsConstants;
 
 import androidx.test.runner.AndroidJUnit4;
@@ -35,8 +37,10 @@ public class SettingTest {
     private static final int DAY_MODE_VALUE = 0;
     private HelperAccessor<IAutoAppInfoSettingsHelper> mAppInfoSettingsHelper;
     private HelperAccessor<IAutoSettingHelper> mSettingHelper;
+    private HelperAccessor<IAutoUISettingsHelper> mSettingsUIHelper;
 
     public SettingTest() throws Exception {
+        mSettingsUIHelper = new HelperAccessor<>(IAutoUISettingsHelper.class);
         mAppInfoSettingsHelper = new HelperAccessor<>(IAutoAppInfoSettingsHelper.class);
         mSettingHelper = new HelperAccessor<>(IAutoSettingHelper.class);
     }
@@ -60,7 +64,9 @@ public class SettingTest {
         mSettingHelper.get().openSetting(SettingsConstants.SOUND_SETTINGS);
         assertTrue(
                 "Sound setting did not open",
-                mSettingHelper.get().checkMenuExists("In-call volume"));
+                mSettingsUIHelper
+                        .get()
+                        .hasUIElement(AutomotiveConfigConstants.SOUND_SETTING_INCALL));
     }
 
     @Test
