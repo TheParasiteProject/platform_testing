@@ -24,6 +24,8 @@ import androidx.test.uiautomator.By;
 import androidx.test.uiautomator.BySelector;
 import androidx.test.uiautomator.UiDevice;
 
+import com.android.systemui.Flags;
+
 import org.junit.runner.Description;
 
 import java.time.Duration;
@@ -32,7 +34,9 @@ import java.time.Duration;
 public class UnlockScreenRule extends TestWatcher {
 
     protected static final BySelector KEYGUARD_ROOT_VIEW =
-            By.res("com.android.systemui", "keyguard_root_view");
+            Flags.sceneContainer()
+                    ? By.res("element:lockscreen")
+                    : By.res("com.android.systemui", "keyguard_root_view");
 
     @Override
     protected void starting(Description description) {
