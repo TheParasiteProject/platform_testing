@@ -294,10 +294,11 @@ class WatchWebAppRequestHandler(http.server.BaseHTTPRequestHandler):
                 print("skip", golden.id)
                 continue
 
-            shutil.copyfile(
-                golden.local_file,
-                path.join(android_build_top, golden.golden_repo_path),
-            )
+            dst = path.join(android_build_top, golden.golden_repo_path)
+            if not path.exists(path.dirname(dst)):
+                os.makedirs(path.dirname(dst))
+
+            shutil.copyfile(golden.local_file, dst)
 
             golden.updated = True
             self.send_json({"result": "OK"})
