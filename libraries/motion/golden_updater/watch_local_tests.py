@@ -60,6 +60,12 @@ def main():
     )
 
     parser.add_argument(
+         "--studioTest",
+         default=False,
+         help="Watch for artifacs generated when a deviceless test is run via SysUi Studio",
+    )
+
+    parser.add_argument(
         "--serial",
         default=os.environ.get("ANDROID_SERIAL"),
         help="The ADB device serial to pull goldens from.",
@@ -96,6 +102,11 @@ def main():
                 tmpdir, f"/tmp/atest_result_{user}/LATEST/"
             )
 
+        elif args.studioTest:
+            print("Running for devicess sysui studio test")
+            golden_watcher = StudioGoldenWatcher(
+                tmpdir, f"/tmp/motion/"
+            )
         else:
             serial = args.serial
             if not serial:
@@ -373,6 +384,31 @@ class GoldenFileWatcher:
 
     def run_adb_command(self, args):
         return self.adb_client.run_adb_command(args)
+
+
+class StudioGoldenWatcher:
+
+    def __init__(self, temp_dir, latest_dir):
+        self.temp_dir = temp_dir
+        self.latest_dir = latest_dir
+        self.cached_goldens = {}
+        self.refresh_golden_files()
+
+    def refresh_golden_files(self):
+        for filename in glob.iglob(
+            f"{self.latest_dir}//**/*.actual.json", recursive=True
+        ):
+            local_file = os.path.join(self.temp_dir, f"copy_{filename}")
+            self.copy_file(filename, local_file)
+            golden = CachedGolden(filename, local_file)
+            self.cached_goldens[filename] = golden
+
+    def copy_file(self, source, target):
+        os.makedirs(os.path.dirname(target), exist_ok=True)
+        shutil.copyfile(source, target)
+
+    def clean(self):
+        self.cached_goldens = {}
 
 class AtestGoldenWatcher:
 

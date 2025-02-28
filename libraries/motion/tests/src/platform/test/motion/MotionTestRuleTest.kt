@@ -42,6 +42,10 @@ class MotionTestRuleTest {
 
     private val subject = MotionTestRule(Unit, goldenPathManager)
 
+    val goldenExportDirectory =
+        if (MotionTestRule.isRobolectricRuntime()) File("/tmp/motion")
+        else File(goldenPathManager.deviceLocalPath)
+
     private val emptyRecordedMotion =
         RecordedMotion(
             "FooClass",
@@ -79,9 +83,7 @@ class MotionTestRuleTest {
             emptyRecordedMotion,
             TimeSeriesVerificationResult.PASSED,
         )
-        val expectedFile =
-            File(goldenPathManager.deviceLocalPath).resolve("FooClass/updated_golden.actual.json")
-
+        val expectedFile = goldenExportDirectory.resolve("FooClass/updated_golden.actual.json")
         assertThat(expectedFile.exists()).isTrue()
     }
 
@@ -92,8 +94,7 @@ class MotionTestRuleTest {
             emptyRecordedMotion,
             TimeSeriesVerificationResult.PASSED,
         )
-        val expectedFile =
-            File(goldenPathManager.deviceLocalPath).resolve("FooClass/updated_golden.actual.json")
+        val expectedFile = goldenExportDirectory.resolve("FooClass/updated_golden.actual.json")
 
         val fileContentsWithoutMetadata =
             JSONObject(expectedFile.readText()).apply { remove("//metadata") }
@@ -114,15 +115,17 @@ class MotionTestRuleTest {
             emptyRecordedMotion,
             TimeSeriesVerificationResult.MISSING_REFERENCE,
         )
-        val expectedFile =
-            File(goldenPathManager.deviceLocalPath).resolve("FooClass/updated_golden.actual.json")
-
+        val expectedFile = goldenExportDirectory.resolve("FooClass/updated_golden.actual.json")
         val fileContents = JSONObject(expectedFile.readText())
         val metadataJson = fileContents.get("//metadata") as JSONObject
 
         assertThat(metadataJson.has("deviceLocalPath")).isTrue()
         val deviceLocalPath = metadataJson.remove("deviceLocalPath") as String
-        assertThat(deviceLocalPath).matches(DeviceLocalPathPattern)
+        if (MotionTestRule.isRobolectricRuntime()) {
+            assertThat(deviceLocalPath).matches("/tmp/motion")
+        } else {
+            assertThat(deviceLocalPath).matches(DeviceLocalPathPattern)
+        }
 
         assertThat(metadataJson)
             .isEqualTo(
@@ -140,9 +143,7 @@ class MotionTestRuleTest {
     fun writeGeneratedTimeSeries_withScreenshots_writesVideoAndIncludesMetadata() {
         val w = 100
         val h = 200
-
-        subject.writeGeneratedTimeSeries(
-            "updated_golden",
+        val recordedMotion =
             RecordedMotion(
                 "FooClass",
                 "bar_test",
@@ -155,23 +156,30 @@ class MotionTestRuleTest {
                     mockScreenshot(Color.GREEN, w, h),
                     mockScreenshot(Color.BLUE, w, h),
                 ),
-            ),
+            )
+        subject.writeGeneratedTimeSeries(
+            "updated_golden",
+            recordedMotion,
             TimeSeriesVerificationResult.MISSING_REFERENCE,
         )
+        if (recordedMotion.videoRenderer != null) {
+            val expectedVideo =
+                File(goldenPathManager.deviceLocalPath)
+                    .resolve("FooClass/updated_golden.actual.mp4")
+            assertThat(expectedVideo.exists()).isTrue()
+        }
 
-        val expectedVideo =
-            File(goldenPathManager.deviceLocalPath).resolve("FooClass/updated_golden.actual.mp4")
-        assertThat(expectedVideo.exists()).isTrue()
-
-        val expectedFile =
-            File(goldenPathManager.deviceLocalPath).resolve("FooClass/updated_golden.actual.json")
+        val expectedFile = goldenExportDirectory.resolve("FooClass/updated_golden.actual.json")
         val fileContents = JSONObject(expectedFile.readText())
         val metadataJson = fileContents.get("//metadata") as JSONObject
 
         assertThat(metadataJson.has("deviceLocalPath")).isTrue()
         val deviceLocalPath = metadataJson.remove("deviceLocalPath") as String
-        assertThat(deviceLocalPath).matches(DeviceLocalPathPattern)
-
+        if (!MotionTestRule.isRobolectricRuntime()) {
+            assertThat(deviceLocalPath).matches(DeviceLocalPathPattern)
+        } else {
+            assertThat(deviceLocalPath).matches("/tmp/motion")
+        }
         assertThat(metadataJson)
             .isEqualTo(
                 JSONObject().apply {
@@ -180,7 +188,9 @@ class MotionTestRuleTest {
                     put("testClassName", "FooClass")
                     put("testMethodName", "bar_test")
                     put("result", "MISSING_REFERENCE")
-                    put("videoLocation", "FooClass/updated_golden.actual.mp4")
+                    if (recordedMotion.videoRenderer != null) {
+                        put("videoLocation", "FooClass/updated_golden.actual.mp4")
+                    }
                 }
             )
     }
