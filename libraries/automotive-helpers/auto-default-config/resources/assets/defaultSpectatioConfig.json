@@ -2020,6 +2020,10 @@
       "TYPE": "TEXT",
       "VALUE": "App permissions"
     },
+    "APP_LEVEL_PERMISSION": {
+      "TYPE": "TEXT",
+      "VALUE": "App-level permissions"
+    },
     "INFOTAINMENT_SYSTEM_DATA": {
       "TYPE": "TEXT",
       "VALUE": "Infotainment system data"

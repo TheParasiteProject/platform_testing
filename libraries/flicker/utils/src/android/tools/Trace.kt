@@ -42,7 +42,9 @@ interface Trace<Entry : TraceEntry> {
      * the provided [timestamp] is before all entries in the trace
      */
     fun getEntryAt(timestamp: Timestamp): Entry {
+        assert(entries.isNotEmpty()) { "No entries in the trace" }
         return entries.toList().dropLastWhile { it.timestamp > timestamp }.lastOrNull()
-            ?: error("No entry at or before timestamp $timestamp")
+            ?: error("No entry at or before timestamp $timestamp. "
+                    + "First entry is at ${entries.first().timestamp}")
     }
 }

@@ -36,6 +36,13 @@ object Components {
             )
         }
 
+    val OPENING_CHANGES =
+        ComponentTemplate("OPENING_CHANGE(S)") { scenarioInstance: ScenarioInstance ->
+            openingChanges(
+                scenarioInstance.associatedTransition ?: error("Missing associated transition")
+            )
+        }
+
     private fun openingAppFrom(
         transition: Transition,
         layersTrace: LayersTrace?,
@@ -52,6 +59,19 @@ object Components {
             targetChanges.map { FullComponentIdMatcher(it.windowId, it.layerId) }
 
         return openingAppMatchers.reduce<IComponentMatcher, IComponentMatcher> { acc, matcher ->
+            acc.or(matcher)
+        }
+    }
+
+    private fun openingChanges(transition: Transition): IComponentMatcher {
+        val changes =
+            transition.changes.filter {
+                it.transitMode == TransitionType.OPEN || it.transitMode == TransitionType.TO_FRONT
+            }
+
+        val matcher = changes.map { FullComponentIdMatcher(it.windowId, it.layerId) }
+
+        return matcher.reduce<IComponentMatcher, IComponentMatcher> { acc, matcher ->
             acc.or(matcher)
         }
     }

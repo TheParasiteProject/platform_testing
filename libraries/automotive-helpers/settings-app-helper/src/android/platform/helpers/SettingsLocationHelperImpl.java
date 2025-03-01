@@ -101,4 +101,34 @@ public class SettingsLocationHelperImpl extends AbstractStandardAppHelper
         return (getSpectatioUiUtil().hasUiElement(mapsWidgetSelector));
     }
 
+    /** {@inheritDoc} */
+    @Override
+    public void openAppLevelPermissions() {
+        BySelector appPermissionsSelector =
+                getUiElementFromConfig(AutomotiveConfigConstants.APP_LEVEL_PERMISSION);
+        UiObject2 appLevelPermissions = getSpectatioUiUtil().findUiObject(appPermissionsSelector);
+        getSpectatioUiUtil().clickAndWait(appLevelPermissions);
+        getSpectatioUiUtil().wait5Seconds();
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    public void openMapsInRecentlyAccessed() {
+        BySelector mapsSelector =
+                getUiElementFromConfig(
+                        AutomotiveConfigConstants.LOCATION_SETTINGS_RECENTLY_ACCESSED_MAPS);
+        UiObject2 maps = getSpectatioUiUtil().findUiObject(mapsSelector);
+        getSpectatioUiUtil().clickAndWait(maps);
+        getSpectatioUiUtil().wait5Seconds();
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    public void clickViewAll() {
+        BySelector viewAllSelector =
+                getUiElementFromConfig(AutomotiveConfigConstants.LOCATION_SETTINGS_VIEW_ALL);
+        UiObject2 viewAll = getSpectatioUiUtil().findUiObject(viewAllSelector);
+        getSpectatioUiUtil().clickAndWait(viewAll);
+        getSpectatioUiUtil().wait5Seconds();
+    }
 }

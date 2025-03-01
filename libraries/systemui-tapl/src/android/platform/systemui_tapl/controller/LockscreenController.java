@@ -107,20 +107,36 @@ public class LockscreenController {
      * @return whether AOD was enabled.
      */
     public boolean setAodEnabled(boolean enableAod) {
-        final ContentResolver contentResolver = getContext().getContentResolver();
-        final boolean aodWasEnabled =
-                Settings.Secure.getInt(contentResolver, Settings.Secure.DOZE_ALWAYS_ON, 0) == 1;
+        return setSecureSetting(
+                Settings.Secure.DOZE_ALWAYS_ON, enableAod, false);
+    }
 
-        if (enableAod != aodWasEnabled) {
+    /**
+     * Enables or disables glanceale hub.
+     *
+     * @param enableHub Whether to enable glanceable hub?
+     * @return whether the hub was previously enabled before calling this method.
+     */
+    public boolean setGlanceableHubEnabled(boolean enableHub) {
+        return setSecureSetting(
+                Settings.Secure.GLANCEABLE_HUB_ENABLED, enableHub, true);
+    }
+
+    private boolean setSecureSetting(String key, boolean value, boolean defaultValue) {
+        final ContentResolver contentResolver = getContext().getContentResolver();
+        final boolean previousValue =
+                Settings.Secure.getInt(contentResolver, key, defaultValue ? 1 : 0) == 1;
+
+        if (value != previousValue) {
             assertThat(
                             Settings.Secure.putInt(
                                     contentResolver,
-                                    Settings.Secure.DOZE_ALWAYS_ON,
-                                    enableAod ? 1 : 0))
+                                    key,
+                                    value ? 1 : 0))
                     .isTrue();
         }
 
-        return aodWasEnabled;
+        return previousValue;
     }
 
     /** Turns screen off by going to sleep. */

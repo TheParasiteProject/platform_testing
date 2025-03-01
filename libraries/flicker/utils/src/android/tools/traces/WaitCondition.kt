@@ -104,7 +104,9 @@ private constructor(
                 Pair(true, currState)
             } else {
                 val detailedMessage = condition.getMessage(currState)
-                onLog?.accept("***Waiting for $detailedMessage... retry=${retryNr + 1}", true)
+                val isError = retryNr + 1 >= retryLimit
+                onLog?.accept(
+                    "***Waiting for $detailedMessage... retry=${retryNr + 1}/$retryLimit", isError)
                 Pair(false, currState)
             }
         } finally {

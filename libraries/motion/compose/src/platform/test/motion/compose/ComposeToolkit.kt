@@ -39,6 +39,7 @@ import androidx.compose.ui.test.performTouchInput
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.IntSize
 import java.util.concurrent.TimeUnit
+import java.util.concurrent.TimeoutException
 import kotlin.math.roundToInt
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.milliseconds
@@ -74,8 +75,16 @@ import platform.test.screenshot.Displays
 import platform.test.screenshot.GoldenPathManager
 import platform.test.screenshot.captureToBitmapAsync
 
-/** Toolkit to support Compose-based [MotionTestRule] tests. */
-class ComposeToolkit(val composeContentTestRule: ComposeContentTestRule, val testScope: TestScope) {
+/**
+ * Toolkit to support Compose-based [MotionTestRule] tests.
+ *
+ * @param fixedDensity when non-null, sets the specified density on the content.
+ */
+class ComposeToolkit(
+    val composeContentTestRule: ComposeContentTestRule,
+    val testScope: TestScope,
+    val fixedDensity: Density? = null,
+) {
     internal companion object {
         const val TAG = "ComposeToolkit"
     }
@@ -229,8 +238,13 @@ fun MotionTestRule<ComposeToolkit>.recordMotion(
 
             if (recordingSpec.captureScreenshots) {
                 val view = (onRoot().fetchSemanticsNode().root as ViewRootForTest).view
-                val bitmap = view.captureToBitmapAsync().get(10, TimeUnit.SECONDS)
-                screenshotCollector.add(bitmap.asImageBitmap())
+                try {
+                    screenshotCollector.add(
+                        view.captureToBitmapAsync().get(10, TimeUnit.SECONDS).asImageBitmap()
+                    )
+                } catch (e: TimeoutException) {
+                    throw Exception("Capturing screenshot timed out, see b/260824883", e)
+                }
             }
         }
 
@@ -238,7 +252,16 @@ fun MotionTestRule<ComposeToolkit>.recordMotion(
 
         mainClock.autoAdvance = false
 
-        setContent { EnableMotionTestValueCollection { content(playbackStarted) } }
+        setContent {
+            EnableMotionTestValueCollection {
+                val fixedDensity = toolkit.fixedDensity
+                if (fixedDensity != null) {
+                    FixedDensity(fixedDensity) { content(playbackStarted) }
+                } else {
+                    content(playbackStarted)
+                }
+            }
+        }
         Log.i(TAG, "recordMotion() created compose content")
 
         waitForIdle()

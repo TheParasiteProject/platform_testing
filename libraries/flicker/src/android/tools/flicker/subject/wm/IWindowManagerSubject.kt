@@ -176,6 +176,10 @@ interface IWindowManagerSubject<WMSubjectType, RegionSubjectType> {
     /** Asserts the state contains no visible app windows. */
     fun isKeyguardShowing(): WMSubjectType
 
+    /** Manual overload for java compatibility */
+    fun isAppWindowInvisible(componentMatcher: IComponentMatcher): WMSubjectType =
+        isAppWindowInvisible(componentMatcher, mustExist = false)
+
     /**
      * Asserts the state contains an invisible window [WindowState] matching [componentMatcher].
      *
@@ -183,8 +187,14 @@ interface IWindowManagerSubject<WMSubjectType, RegionSubjectType> {
      * that it contains an invisible [Activity] matching [componentMatcher].
      *
      * @param componentMatcher Components to search
+     * @param mustExist when true, the test will fail if the component doesn't exist. Otherwise, the
+     *   test will automatically pass when the component is not found
      */
-    fun isAppWindowInvisible(componentMatcher: IComponentMatcher): WMSubjectType
+    fun isAppWindowInvisible(componentMatcher: IComponentMatcher, mustExist: Boolean): WMSubjectType
+
+    /** Manual overload for java compatibility */
+    fun isNonAppWindowInvisible(componentMatcher: IComponentMatcher): WMSubjectType =
+        isNonAppWindowInvisible(componentMatcher, mustExist = false)
 
     /**
      * Asserts the state contains an invisible window matching [componentMatcher].
@@ -193,8 +203,13 @@ interface IWindowManagerSubject<WMSubjectType, RegionSubjectType> {
      * that it contains an invisible [Activity] matching [componentMatcher].
      *
      * @param componentMatcher Components to search
+     * @param mustExist when true, the test will fail if the component doesn't exist. Otherwise, the
+     *   test will automatically pass when the component is not found
      */
-    fun isNonAppWindowInvisible(componentMatcher: IComponentMatcher): WMSubjectType
+    fun isNonAppWindowInvisible(
+        componentMatcher: IComponentMatcher,
+        mustExist: Boolean,
+    ): WMSubjectType
 
     /** Asserts the state home activity is visible */
     fun isHomeActivityVisible(): WMSubjectType

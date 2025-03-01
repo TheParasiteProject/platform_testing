@@ -48,7 +48,9 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.mockito.Spy;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -96,39 +98,53 @@ public class PerfettoListenerTest {
                 .run(any());
     }
 
-    private PerfettoTracingStrategy initStrategy(Bundle b) {
+    private List<PerfettoTracingStrategy> initStrategies(Bundle b) {
+        final List<PerfettoTracingStrategy> strategies = new ArrayList<>();
         if (Boolean.parseBoolean(b.getString(PerfettoListener.COLLECT_PER_RUN))) {
-            return new PerfettoTracingPerRunStrategy(
+            strategies.add(new PerfettoTracingPerRunStrategy(
                     mPerfettoHelper,
                     mInstrumentation,
                     mWakeLockContext,
                     () -> null,
                     mWakelLockAcquirer,
-                    mWakeLockReleaser);
+                    mWakeLockReleaser));
         } else if (Boolean.parseBoolean(b.getString(PerfettoListener.COLLECT_PER_CLASS))) {
-            return new PerfettoTracingPerClassStrategy(
+            strategies.add(new PerfettoTracingPerClassStrategy(
                     mPerfettoHelper,
                     mInstrumentation,
                     mWakeLockContext,
                     () -> null,
                     mWakelLockAcquirer,
-                    mWakeLockReleaser);
+                    mWakeLockReleaser));
+        } else {
+            strategies.add(new PerfettoTracingPerTestStrategy(
+                    mPerfettoHelper,
+                    mInstrumentation,
+                    mInvocationCount,
+                    mWakeLockContext,
+                    () -> null,
+                    mWakelLockAcquirer,
+                    mWakeLockReleaser)
+            );
         }
 
-        return new PerfettoTracingPerTestStrategy(
-                mPerfettoHelper,
-                mInstrumentation,
-                mInvocationCount,
-                mWakeLockContext,
-                () -> null,
-                mWakelLockAcquirer,
-                mWakeLockReleaser);
+        if (Boolean.parseBoolean(b.getString(PerfettoListener.COLLECT_BEFORE_AFTER))) {
+            strategies.add(new PerfettoTracingBeforeAfterTestStrategy(
+                    mPerfettoHelper,
+                    mInstrumentation,
+                    mWakeLockContext,
+                    () -> null,
+                    mWakelLockAcquirer,
+                    mWakeLockReleaser));
+        }
+
+        return strategies;
     }
 
     private PerfettoListener initListener(Bundle b) {
         mInvocationCount = new HashMap<>();
 
-        PerfettoListener listener = spy(new PerfettoListener(b, initStrategy(b)));
+        PerfettoListener listener = spy(new PerfettoListener(b, initStrategies(b)));
 
         mDataRecord = listener.createDataRecord();
         listener.setInstrumentation(mInstrumentation);
@@ -155,7 +171,7 @@ public class PerfettoListenerTest {
                 .stopCollecting(
                         anyLong(),
                         eq(
-                                "/sdcard/test_results/run_test1/"
+                                "/data/local/tmp/perfetto-traces/run_test1/"
                                         + "PerfettoTracingPerTestStrategy/"
                                         + "perfetto_run_test1-1.perfetto-trace"));
     }
@@ -567,7 +583,7 @@ public class PerfettoListenerTest {
                 .stopCollecting(
                         anyLong(),
                         eq(
-                                "/sdcard/test_results/run#123_test1#456/"
+                                "/data/local/tmp/perfetto-traces/run#123_test1#456/"
                                         + "PerfettoTracingPerTestStrategy/"
                                         + "perfetto_run#123_test1#456-1.perfetto-trace"));
     }

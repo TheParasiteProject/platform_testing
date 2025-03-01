@@ -68,8 +68,14 @@ public abstract class PerfettoTracingStrategy {
     public static final String SKIP_TEST_FAILURE_METRICS = "skip_test_failure_metrics";
     // Skip success metrics collection if this flag is set to true (i.e. collect only failures).
     public static final String SKIP_TEST_SUCCESS_METRICS = "skip_test_success_metrics";
-    // Perfetto file path key.
-    protected static final String PERFETTO_FILE_PATH = "perfetto_file_path";
+    // List of test iterations to capture, capture all if empty
+    public static final String ARGUMENT_ALLOW_ITERATIONS = "allow_iterations";
+    // Perfetto file path key argument name
+    public static final String ARGUMENT_FILE_PATH_KEY_PREFIX = "perfetto_file_path_key_prefix";
+    // Perfetto file path key prefix
+    protected static final String DEFAULT_FILE_PATH_KEY_PREFIX = "perfetto_file_path";
+    // Perfetto file path key prefix for failed tests
+    protected static final String FAILED_FILE_PATH_KEY_PREFIX = "perfetto_failed_file_path";
     // Argument to get custom time in millisecs to wait before dumping the trace.
     // This has to be at least the dump interval time set in the trace config file
     // or greater than that. Otherwise, we will miss trace information from the test.
@@ -81,7 +87,7 @@ public abstract class PerfettoTracingStrategy {
     // Destination directory to save the trace results.
     private static final String TEST_OUTPUT_ROOT = "test_output_root";
     // Default output folder to store the perfetto output traces.
-    private static final String DEFAULT_OUTPUT_ROOT = "/sdcard/test_results";
+    private static final String DEFAULT_OUTPUT_ROOT = "/data/local/tmp/perfetto-traces";
     // Default wait time before stopping the perfetto trace.
     private static final String DEFAULT_WAIT_TIME_MSECS = "0";
     // Argument to get custom time in millisecs to wait before starting the
@@ -95,11 +101,11 @@ public abstract class PerfettoTracingStrategy {
     public static final String SPACES_PATTERN = "\\s+";
     // Space replacement value
     public static final String REPLACEMENT_CHAR = "#";
+    // Separator character used to specify custom arguments for the strategy
+    public static final String STRATEGY_ARGUMENT_NAMESPACE_SEPARATOR = "#";
     // For USB disconnected cases you may want this option to be true. This option makes sure
     // the device does not go to sleep while collecting.
     public static final String PERFETTO_START_BG_WAIT = "perfetto_start_bg_wait";
-    // Argument to indicate whenever to move the temp trace using tf contend provider.
-    public static final String SHOULD_USE_CONTENT_PROVIDER = "perfetto_should_use_content_provider";
 
     @VisibleForTesting
     static final String HOLD_WAKELOCK_WHILE_COLLECTING = "hold_wakelock_while_collecting";
@@ -111,8 +117,8 @@ public abstract class PerfettoTracingStrategy {
     private final WakeLockAcquirer mWakeLockAcquirer;
     private final WakeLockReleaser mWakeLockReleaser;
     private final Instrumentation mInstr;
-
-    private PerfettoHelper mPerfettoHelper = new PerfettoHelper();
+    private final String mIdentifier;
+    private final PerfettoHelper mPerfettoHelper;
     // Wait time can be customized based on the dump interval set in the trace config.
     private long mWaitTimeInMs;
     // Wait time can be customized based on how much time to wait before starting the
@@ -130,12 +136,24 @@ public abstract class PerfettoTracingStrategy {
     private boolean mIsTestFailed = false;
     // Store the method name and invocation count to create unique file name for each trace.
     private boolean mPerfettoStartSuccess = false;
+    private String mFilePathKeyPrefix = DEFAULT_FILE_PATH_KEY_PREFIX;
     private String mOutputFilePrefix;
     private String mTrackPerfettoProcIdRootDir;
+    private final Set<Integer> mAllowedIterations = new HashSet<>();
 
-    PerfettoTracingStrategy(Instrumentation instr) {
+    /**
+     * @param instr Android instrumentation object
+     * @param identifier Unique strategy identifier, used for strategy specific configuration
+     *                   parameters and to track multiple parallel strategies running at the
+     *                   same time. For example, to pass Perfetto configuration to a specific
+     *                   strategy we could pass "[strategy_identifier]:perfetto_config_file"
+     *                   argument instead of "perfetto_config_file".
+     */
+    PerfettoTracingStrategy(Instrumentation instr, String identifier) {
         super();
         mInstr = instr;
+        mIdentifier = identifier;
+        mPerfettoHelper = new PerfettoHelper(identifier);
         mWakeLockContext = this::runWithWakeLock;
         mWakelockSupplier = this::getWakeLock;
         mWakeLockAcquirer = this::acquireWakelock;
@@ -147,10 +165,11 @@ public abstract class PerfettoTracingStrategy {
      * for testing.
      */
     @VisibleForTesting
-    PerfettoTracingStrategy(PerfettoHelper helper, Instrumentation instr) {
+    PerfettoTracingStrategy(PerfettoHelper helper, Instrumentation instr, String identifier) {
         super();
         mPerfettoHelper = helper;
         mInstr = instr;
+        mIdentifier = identifier;
         mWakeLockContext = this::runWithWakeLock;
         mWakelockSupplier = this::getWakeLock;
         mWakeLockAcquirer = this::acquireWakelock;
@@ -164,12 +183,14 @@ public abstract class PerfettoTracingStrategy {
     PerfettoTracingStrategy(
             PerfettoHelper helper,
             Instrumentation instr,
+            String identifier,
             WakeLockContext wakeLockContext,
             Supplier<PowerManager.WakeLock> wakelockSupplier,
             WakeLockAcquirer wakeLockAcquirer,
             WakeLockReleaser wakeLockReleaser) {
         super();
         mPerfettoHelper = helper;
+        mIdentifier = identifier;
         mInstr = instr;
         mWakeLockContext = wakeLockContext;
         mWakeLockAcquirer = wakeLockAcquirer;
@@ -246,11 +267,11 @@ public abstract class PerfettoTracingStrategy {
         }
     }
 
-    void testStart(DataRecord testData, Description description) {
+    void testStart(DataRecord testData, Description description, int iteration) {
         mIsTestFailed = false;
     }
 
-    void testEnd(DataRecord testData, Description description) {
+    void testEnd(DataRecord testData, Description description, int iteration) {
         // No-op
     }
 
@@ -294,8 +315,17 @@ public abstract class PerfettoTracingStrategy {
      * record with the path to the trace file.
      */
     protected void stopPerfettoTracingAndReportMetric(Path path, DataRecord record) {
+        stopPerfettoTracingAndReportMetric(path, record, mFilePathKeyPrefix);
+    }
+
+    protected void stopPerfettoTracingAndReportMetric(Path path, DataRecord record,
+            String metricName) {
         if (stopPerfettoTracing(path)) {
-            record.addStringMetric(PERFETTO_FILE_PATH, path.toString());
+            if (mIsTestFailed) {
+                record.addStringMetric(FAILED_FILE_PATH_KEY_PREFIX, path.toString());
+            } else {
+                record.addStringMetric(metricName, path.toString());
+            }
         }
     }
 
@@ -323,11 +353,30 @@ public abstract class PerfettoTracingStrategy {
         return mOutputFilePrefix;
     }
 
+    protected String getFilePathKeyPrefix() {
+        return mFilePathKeyPrefix;
+    }
+
     protected String getTestOutputRoot() {
         return mTestOutputRoot;
     }
 
     protected boolean skipMetric() {
+        return skipMetric(/* iteration= */ null);
+    }
+
+    protected boolean skipMetric(Integer iteration) {
+        if (iteration != null && !mAllowedIterations.isEmpty()) {
+            if (iteration.equals(0)) {
+                throw new IllegalStateException("Skip metric check was executed before "
+                        + "the test has started");
+            }
+
+            if (!mAllowedIterations.contains(iteration)) {
+                return true;
+            }
+        }
+
         return (mSkipTestFailureMetrics && mIsTestFailed)
                 || (mSkipTestSuccessMetrics && !mIsTestFailed);
     }
@@ -401,9 +450,8 @@ public abstract class PerfettoTracingStrategy {
     }
 
     void setup(Bundle args) {
-
-        boolean perfettoStartBgWait =
-                Boolean.parseBoolean(args.getString(PERFETTO_START_BG_WAIT, String.valueOf(true)));
+        boolean perfettoStartBgWait = Boolean.parseBoolean(getArgumentValue(args,
+                PERFETTO_START_BG_WAIT, String.valueOf(true)));
         mPerfettoHelper.setPerfettoStartBgWait(perfettoStartBgWait);
 
         // Root directory path containing the perfetto config file.
@@ -415,57 +463,71 @@ public abstract class PerfettoTracingStrategy {
         mPerfettoHelper.setPerfettoConfigRootDir(configRootDir);
 
         // Whether the config is text proto or not. By default set to false.
-        mIsConfigTextProto = Boolean.parseBoolean(args.getString(PERFETTO_CONFIG_TEXT_PROTO));
+        mIsConfigTextProto = Boolean.parseBoolean(getArgumentValue(args, PERFETTO_CONFIG_TEXT_PROTO,
+                String.valueOf(false)));
 
         // Perfetto config file has to be under /data/misc/perfetto-traces/
         // defaulted to DEFAULT_TEXT_CONFIG_FILE or DEFAULT_CONFIG_FILE if perfetto_config_file is
         // not passed.
-        mConfigFileName =
-                args.getString(
-                        PERFETTO_CONFIG_FILE_ARG,
-                        mIsConfigTextProto ? DEFAULT_TEXT_CONFIG_FILE : DEFAULT_CONFIG_FILE);
+        mConfigFileName = getArgumentValue(args, PERFETTO_CONFIG_FILE_ARG,
+                mIsConfigTextProto ? DEFAULT_TEXT_CONFIG_FILE : DEFAULT_CONFIG_FILE);
 
-        mConfigContent = args.getString(PERFETTO_CONFIG_TEXT_CONTENT, "");
+        mConfigContent = getArgumentValue(args, PERFETTO_CONFIG_TEXT_CONTENT, "");
 
-        mOutputFilePrefix =
-                args.getString(PERFETTO_CONFIG_OUTPUT_FILE_PREFIX, DEFAULT_PERFETTO_PREFIX);
+        mOutputFilePrefix = getArgumentValue(args, PERFETTO_CONFIG_OUTPUT_FILE_PREFIX,
+                DEFAULT_PERFETTO_PREFIX);
 
-        mPerfettoHelper.setTrackPerfettoPidFlag(
-                Boolean.parseBoolean(args.getString(PERFETTO_PERSIST_PID_TRACK, "true")));
+        mPerfettoHelper.setTrackPerfettoPidFlag(Boolean.parseBoolean(getArgumentValue(args,
+                PERFETTO_PERSIST_PID_TRACK, String.valueOf(true))));
         if (mPerfettoHelper.getTrackPerfettoPidFlag()) {
-            mPerfettoHelper.setTrackPerfettoRootDir(
-                    args.getString(PERFETTO_PID_TRACK_ROOT, DEFAULT_PERFETTO_PID_TRACK_ROOT));
+            mPerfettoHelper.setTrackPerfettoRootDir(getArgumentValue(args, PERFETTO_PID_TRACK_ROOT,
+                    DEFAULT_PERFETTO_PID_TRACK_ROOT));
         }
 
         // Whether to hold wakelocks on all Prefetto tracing functions. You may want to enable
         // this if your device is not USB connected. This option prevents the device from
         // going into suspend mode while this listener is running intensive tasks.
-        mHoldWakelockWhileCollecting =
-                Boolean.parseBoolean(args.getString(HOLD_WAKELOCK_WHILE_COLLECTING));
+        mHoldWakelockWhileCollecting = Boolean.parseBoolean(getArgumentValue(args,
+                HOLD_WAKELOCK_WHILE_COLLECTING, String.valueOf(false)));
 
         // Wait time before stopping the perfetto trace collection after the test
         // is completed. Defaulted to 0 msecs.
-        mWaitTimeInMs =
-                Long.parseLong(args.getString(PERFETTO_WAIT_TIME_ARG, DEFAULT_WAIT_TIME_MSECS));
+        mWaitTimeInMs = Long.parseLong(getArgumentValue(args, PERFETTO_WAIT_TIME_ARG,
+                DEFAULT_WAIT_TIME_MSECS));
 
         // Wait time before the perfetto trace is started.
-        mWaitStartTimeInMs =
-                Long.parseLong(
-                        args.getString(
-                                PERFETTO_START_WAIT_TIME_ARG, DEFAULT_START_WAIT_TIME_MSECS));
+        mWaitStartTimeInMs = Long.parseLong(getArgumentValue(args, PERFETTO_START_WAIT_TIME_ARG,
+                DEFAULT_START_WAIT_TIME_MSECS));
 
         // Destination folder in the device to save all the trace files.
         // Defaulted to /sdcard/test_results if test_output_root is not passed.
-        mTestOutputRoot = args.getString(TEST_OUTPUT_ROOT, DEFAULT_OUTPUT_ROOT);
+        mTestOutputRoot = getArgumentValue(args, TEST_OUTPUT_ROOT, DEFAULT_OUTPUT_ROOT);
 
         // By default, this flag is set to false to collect the metrics on test failure.
-        mSkipTestFailureMetrics = "true".equals(args.getString(SKIP_TEST_FAILURE_METRICS));
-        mSkipTestSuccessMetrics = "true".equals(args.getString(SKIP_TEST_SUCCESS_METRICS));
+        mSkipTestFailureMetrics = Boolean.parseBoolean(getArgumentValue(args,
+                SKIP_TEST_FAILURE_METRICS, String.valueOf(false)));
+        mSkipTestSuccessMetrics = Boolean.parseBoolean(getArgumentValue(args,
+                SKIP_TEST_SUCCESS_METRICS, String.valueOf(false)));
 
-        // By default, use content provider to move the trace file.
-        boolean shouldUseContentProvider =
-                Boolean.parseBoolean(args.getString(SHOULD_USE_CONTENT_PROVIDER, "true"));
-        mPerfettoHelper.setShouldUseContentProvider(shouldUseContentProvider);
+        mFilePathKeyPrefix = getArgumentValue(args, ARGUMENT_FILE_PATH_KEY_PREFIX,
+                DEFAULT_FILE_PATH_KEY_PREFIX);
+
+        final String iterations = getArgumentValue(args, ARGUMENT_ALLOW_ITERATIONS, "");
+        for (String iteration : iterations.split(",")) {
+            if (!iteration.isEmpty()) {
+                mAllowedIterations.add(Integer.parseInt(iteration));
+            }
+        }
+    }
+
+    /**
+     * Gets argument value, strategy-specific argument has a priority over global argument
+     */
+    private String getArgumentValue(Bundle args, String key, String defaultValue) {
+        String strategySpecificValue = args.getString(mIdentifier +
+                STRATEGY_ARGUMENT_NAMESPACE_SEPARATOR + key);
+        if (strategySpecificValue != null) return strategySpecificValue;
+        return args.getString(key, defaultValue);
     }
 
     /**

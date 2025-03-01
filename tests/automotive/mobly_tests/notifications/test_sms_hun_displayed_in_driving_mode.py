@@ -60,7 +60,7 @@ class NotificationsSmsHunDisplayedInDrivingMode(
     self.target.load_snippet('mbs', android_device.MBS_PACKAGE)
     super().enable_recording()
 
-  def test_sms_hun_displayed(self):
+  def test_sms_hun_displayed_in_driving_mode(self):
     """
     GIVEN the phone which is paired to the car,
     WHEN the SMS is sent to paired phone,
