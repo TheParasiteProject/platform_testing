@@ -36,11 +36,13 @@ import android.tools.flicker.extractors.TraceSlice
 import android.tools.io.Reader
 import androidx.test.platform.app.InstrumentationRegistry
 import com.google.common.truth.Truth
+import java.time.Instant
 import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.TestRule
 import org.junit.runner.RunWith
 import org.junit.runner.notification.RunNotifier
+import org.junit.runners.model.Statement
 import org.mockito.ArgumentMatchers
 import org.mockito.Mockito
 
@@ -52,6 +54,47 @@ class FlickerServiceJUnit4ClassRunnerTest {
         runner.run(RunNotifier())
 
         Truth.assertThat(testRuleRunCount).isEqualTo(1)
+    }
+
+    @Test
+    fun runsTheTestRulesAtTheRightTime() {
+        var testRuleStartTs: Instant? = null
+        var testRuleEndTs: Instant? = null
+        var testStateTs: Instant? = null
+        var testRuleExecutionCount = 0
+        onTestRuleStart =
+            object : Runnable {
+                override fun run() {
+                    testRuleExecutionCount++
+                    testRuleStartTs = Instant.now()
+                }
+            }
+        onTestRuleEnd =
+            object : Runnable {
+                override fun run() {
+                    testRuleEndTs = Instant.now()
+                }
+            }
+        onTestStart =
+            object : Runnable {
+                override fun run() {
+                    testStateTs = Instant.now()
+                }
+            }
+
+        val runner = FlickerServiceJUnit4ClassRunner(SimpleTest::class.java)
+        runner.run(RunNotifier())
+
+        Truth.assertWithMessage("Test rule start running after test block")
+            .that(testRuleStartTs)
+            .isLessThan(testStateTs)
+        Truth.assertWithMessage("Test rule end running before test block")
+            .that(testStateTs)
+            .isLessThan(testRuleEndTs)
+
+        Truth.assertWithMessage("Test rule ran the wrong number of times")
+            .that(testRuleExecutionCount)
+            .isEqualTo(1)
     }
 
     @Test
@@ -100,13 +143,21 @@ class FlickerServiceJUnit4ClassRunnerTest {
 
         @get:Rule
         val myRule = TestRule { base, _ ->
-            testRuleRunCount++
-            base
+            object : Statement() {
+                @Throws(Throwable::class)
+                override fun evaluate() {
+                    onTestRuleStart?.run()
+                    testRuleRunCount++
+                    base.evaluate()
+                    onTestRuleEnd?.run()
+                }
+            }
         }
 
         @Test
         @ExpectedScenarios(["MY_CUSTOM_SCENARIO"])
         fun test() {
+            onTestStart?.run()
             testApp.open()
         }
 
@@ -160,5 +211,9 @@ class FlickerServiceJUnit4ClassRunnerTest {
 
     companion object {
         var testRuleRunCount = 0
+
+        var onTestRuleStart: Runnable? = null
+        var onTestStart: Runnable? = null
+        var onTestRuleEnd: Runnable? = null
     }
 }
