@@ -137,7 +137,7 @@ public interface IAutoHeadsUpNotificationHelper extends Scrollable, IAppHelper {
      *
      * Get the content of the SMS heads-up notification in the car's head unit.
      *
-     * @param text UiObject2 representing the SMS heads-up notification.
+     * @param text The text to match with the heads-up notification title.
      * @return The content of the SMS heads-up notification, or null if it's not found.
      */
     String getSmsHunContent(String text);
@@ -168,4 +168,13 @@ public interface IAutoHeadsUpNotificationHelper extends Scrollable, IAppHelper {
      * @return True if the SMS HUN is played in the car's head unit, false otherwise.
      */
     boolean isSmsHunPlayedViaCarSpeaker();
+
+    /**
+     * Setup expectations: A heads-up notification (HUN) is posted.
+     *
+     * Wait for the heads-up notification in the car's head unit to disappear.
+     *     *
+     * @return True if the heads-up notification in the car's head unit disappears within the given timeout, false otherwise.
+     */
+    boolean waitForHunToDisappear();
 }

@@ -30,6 +30,7 @@ from bluetooth_sms_test import bluetooth_sms_base_test
 from mobly.controllers import android_device
 from utilities import constants
 from utilities.common_utils import CommonUtils
+from utilities.faker import fake
 from utilities.main_utils import common_main
 
 
@@ -66,7 +67,7 @@ class NotificationsSmsHunSwipe(
     logging.info("Arrange: Get the phone number of phone to send the SMS.")
     receiver_phone_number = self.target.mbs.getPhoneNumber()
     sender_phone_number = self.phone_notpaired.mbs.getPhoneNumber()
-    sms_text = constants.SMS_TEXT
+    sms_text = fake.string
 
     logging.info(f"Act: Sending new SMS to {receiver_phone_number}")
     self.phone_notpaired.mbs.sendSms(receiver_phone_number, sms_text)

@@ -96,4 +96,9 @@ public class HeadsUpNotificationSnippet implements Snippet {
     public boolean isSmsHunPlayedViaCarSpeaker() {
         return mHeadsUpNotificationHelper.get().isSmsHunPlayedViaCarSpeaker();
     }
+
+    @Rpc(description = "Wait for the HUN in the car's head unit to disappear.")
+    public boolean waitForHunToDisappear() {
+        return mHeadsUpNotificationHelper.get().waitForHunToDisappear();
+    }
 }
