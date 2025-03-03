@@ -94,7 +94,7 @@ class NotificationsSmsHunUnmute(
 
     logging.info("Assert: SMS is not displayed in notification center.")
     self.discoverer.mbs.waitForHunToDisappear()
-    assert self.discoverer.mbs.isNotificationWithTitleExists(sender_phone_number) is False, (
+    assert self.discoverer.mbs.isNotificationDisplayedInCenterWithTitle(sender_phone_number) is False, (
         "SMS is still displayed in the notification center after mute."
     )
 
@@ -111,7 +111,7 @@ class NotificationsSmsHunUnmute(
 
     logging.info("Assert: New SMS is displayed in notification center.")
     self.discoverer.mbs.waitForHunToDisappear()
-    assert self.discoverer.mbs.isNotificationWithTitleExists(sender_phone_number) is True, (
+    assert self.discoverer.mbs.isNotificationDisplayedInCenterWithTitle(sender_phone_number) is True, (
         "New SMS is not displayed in the notification center."
     )
 

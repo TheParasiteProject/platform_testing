@@ -30,7 +30,7 @@ public interface IAutoNotificationHelper extends Scrollable, IAppHelper {
      * <p>Check whether notification has been posted.
      *
      * @param title of the notification to be checked.
-     */
+    */
     boolean checkNotificationExists(String title);
 
     /**
@@ -40,16 +40,16 @@ public interface IAutoNotificationHelper extends Scrollable, IAppHelper {
      *
      * @param title text of the notification.
      */
-    boolean isNotificationWithTitleExists(String text);
+    boolean isNotificationDisplayedInCenterWithTitle(String title);
 
     /**
      * Setup expectations: A notification is received.
      *
      * <p>Check whether notification with specific content exists in notification center.
      *
-     * @param content text of the notification.
+     * @param content of the notification to be checked.
      */
-    boolean isNotificationWithContentExists(String text);
+    boolean isNotificationDisplayedInCenterWithContent(String content);
 
     /**
      * Setup expectations: A notification is received.
