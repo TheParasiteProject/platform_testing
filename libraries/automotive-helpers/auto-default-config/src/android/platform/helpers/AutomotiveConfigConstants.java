@@ -183,6 +183,7 @@ public class AutomotiveConfigConstants {
     public static final String NOTIFICATION_BODY = "NOTIFICATION_BODY";
     public static final String NOTIFICATION_TITLE = "NOTIFICATION_TITLE";
     public static final String NOTIFICATION_CONTENT = "NOTIFICATION_CONTENT";
+    public static final String NOTIFICATION_SMS_COUNT = "NOTIFICATION_SMS_COUNT";
     public static final String NOTIFICATION_LIST_EMPTY = "NOTIFICATION_LIST_EMPTY";
     public static final String NOTIFICATION_LIST_SCROLL_FORWARD_BUTTON =
             "NOTIFICATION_LIST_SCROLL_FORWARD_BUTTON";

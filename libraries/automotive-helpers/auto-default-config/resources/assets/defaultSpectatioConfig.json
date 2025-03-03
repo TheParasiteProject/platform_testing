@@ -887,9 +887,14 @@
       "VALUE": "notification_body_content",
       "PACKAGE": "com.android.systemui"
     },
-    "NOTIFICATION_LIST_EMPTY": {
+    "NOTIFICATION_ACTION_BUTTON": {
       "TYPE": "RESOURCE_ID",
-      "VALUE": "empty_notification_text",
+      "VALUE": "action_1",
+      "PACKAGE": "com.android.systemui"
+    },
+    "NOTIFICATION_SMS_COUNT": {
+      "TYPE": "RESOURCE_ID",
+      "VALUE": "message_count",
       "PACKAGE": "com.android.systemui"
     },
     "NOTIFICATION_LIST_SCROLL_FORWARD_BUTTON": {
