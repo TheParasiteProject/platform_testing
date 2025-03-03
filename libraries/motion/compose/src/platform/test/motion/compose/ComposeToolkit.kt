@@ -78,12 +78,12 @@ import platform.test.screenshot.captureToBitmapAsync
 /**
  * Toolkit to support Compose-based [MotionTestRule] tests.
  *
- * @param fixedDensity when non-null, sets the specified density on the content.
+ * @param fixedConfiguration when non-null, applies the specified configuration to the content.
  */
 class ComposeToolkit(
     val composeContentTestRule: ComposeContentTestRule,
     val testScope: TestScope,
-    val fixedDensity: Density? = null,
+    val fixedConfiguration: FixedConfiguration? = null,
 ) {
     internal companion object {
         const val TAG = "ComposeToolkit"
@@ -254,9 +254,9 @@ fun MotionTestRule<ComposeToolkit>.recordMotion(
 
         setContent {
             EnableMotionTestValueCollection {
-                val fixedDensity = toolkit.fixedDensity
-                if (fixedDensity != null) {
-                    FixedDensity(fixedDensity) { content(playbackStarted) }
+                val fixedConfiguration = toolkit.fixedConfiguration
+                if (fixedConfiguration != null) {
+                    FixedConfigurationProvider(fixedConfiguration) { content(playbackStarted) }
                 } else {
                     content(playbackStarted)
                 }
