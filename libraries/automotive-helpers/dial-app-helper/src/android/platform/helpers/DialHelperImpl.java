@@ -909,4 +909,20 @@ public class DialHelperImpl extends AbstractStandardAppHelper implements IAutoDi
                 getUiElementFromConfig(AutomotiveConfigConstants.DIALER_DIALPAD);
         return getSpectatioUiUtil().hasUiElement(dialerDialpadSelector);
     }
+
+    /** {@inheritDoc} */
+    @Override
+    public boolean verifyDialerSearchLens() {
+        BySelector dialerSearchSelector =
+                getUiElementFromConfig(AutomotiveConfigConstants.SEARCH_CONTACT);
+        return getSpectatioUiUtil().hasUiElement(dialerSearchSelector);
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    public boolean verifyDialerSettings() {
+        BySelector dialerSettingsSelector =
+                getUiElementFromConfig(AutomotiveConfigConstants.DIALER_SETTINGS_BUTTON);
+        return getSpectatioUiUtil().hasUiElement(dialerSettingsSelector);
+    }
 }

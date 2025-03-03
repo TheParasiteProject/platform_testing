@@ -72,6 +72,33 @@ python_test_host {
 }
 
 python_test_host {
+    name: "BluetoothDialerOptionsTest",
+    main: "dialer_test_dialer_options_test.py",
+    srcs: ["dialer_test_dialer_options_test.py"],
+    libs: [
+        "mobly",
+        "utilities",
+        "bluetooth_test",
+    ],
+    test_suites: [
+        "catbox",
+    ],
+    test_options: {
+        unit_test: false,
+    },
+    device_common_data: [
+        // Package the snippet with the mobly test
+        ":AutomotiveSnippet",
+        ":PhoneSnippet",
+    ],
+    version: {
+        py3: {
+            embedded_launcher: true,
+        },
+    },
+}
+
+python_test_host {
     name: "BTContactSortTest",
     main: "dialer_test_sort_contacts_by_last_name.py",
     srcs: ["dialer_test_sort_contacts_by_last_name.py"],

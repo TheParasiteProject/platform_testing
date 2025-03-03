@@ -327,6 +327,18 @@ public class DialerSnippet implements Snippet {
         return mDialerHelper.get().verifyDialerDialpadTab();
     }
 
+    /** Validates whether Search leans is displayed or not */
+    @Rpc(description = "is Dialpad search lens in Dialer page ")
+    public boolean verifyDialerSearchLens() {
+        return mDialerHelper.get().verifyDialerSearchLens();
+    }
+
+    /** Validates whether dialer settings is displayed or not */
+    @Rpc(description = "is Dialpad settings in Dialer page ")
+    public boolean verifyDialerSettings() {
+        return mDialerHelper.get().verifyDialerSettings();
+    }
+
     @Override
     public void shutdown() {}
 }
