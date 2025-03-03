@@ -238,7 +238,7 @@ public class StatusBar {
                                 .wait(
                                         Until.hasObject(
                                                 sysuiResSelector(UI_SYSTEM_ICONS_ID)
-                                                        .hasChild(
+                                                        .hasDescendant(
                                                                 By.descContains(
                                                                         DOCK_DEFEND_ICON_SUFFIX_STRING))),
                                         SHORT_WAIT.toMillis()))
