@@ -88,6 +88,7 @@ class NotificationsSmsHunDisplayedInDrivingMode(
     )
 
     logging.info("Assert: SMS is displayed in the notification center on the car.")
+    self.discoverer.mbs.waitForHunToDisappear()
     assert self.discoverer.mbs.isNotificationWithTitleExists(sender_phone_number) is True, (
         "New SMS is not displayed in the notification center."
     )
