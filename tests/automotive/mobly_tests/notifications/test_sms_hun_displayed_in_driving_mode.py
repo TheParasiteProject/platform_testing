@@ -30,7 +30,6 @@ from bluetooth_sms_test import bluetooth_sms_base_test
 from mobly.controllers import android_device
 from utilities import constants
 from utilities.common_utils import CommonUtils
-from utilities.faker import fake
 from utilities.main_utils import common_main
 
 
@@ -70,7 +69,7 @@ class NotificationsSmsHunDisplayedInDrivingMode(
     """
     receiver_phone_number = self.target.mbs.getPhoneNumber()
     sender_phone_number = self.phone_notpaired.mbs.getPhoneNumber()
-    sms_text = fake.string
+    sms_text = constants.SMS_TEXT
 
     logging.info(f"Act: Sending SMS to {receiver_phone_number}")
     self.phone_notpaired.mbs.sendSms(receiver_phone_number, sms_text)
@@ -89,8 +88,7 @@ class NotificationsSmsHunDisplayedInDrivingMode(
     )
 
     logging.info("Assert: SMS is displayed in the notification center on the car.")
-    self.discoverer.mbs.waitForHunToDisappear()
-    assert self.discoverer.mbs.isNotificationDisplayedInCenterWithTitle(sender_phone_number) is True, (
+    assert self.discoverer.mbs.isNotificationWithTitleExists(sender_phone_number) is True, (
         "New SMS is not displayed in the notification center."
     )
 

@@ -40,7 +40,7 @@ public interface IAutoNotificationHelper extends Scrollable, IAppHelper {
      *
      * @param title text of the notification.
      */
-    boolean isNotificationDisplayedInCenterWithTitle(String text);
+    boolean isNotificationWithTitleExists(String text);
 
     /**
      * Setup expectations: A notification is received.
@@ -49,7 +49,7 @@ public interface IAutoNotificationHelper extends Scrollable, IAppHelper {
      *
      * @param content text of the notification.
      */
-    boolean isNotificationDisplayedInCenterWithContent(String text);
+    boolean isNotificationWithContentExists(String text);
 
     /**
      * Setup expectations: A notification is received.
@@ -101,5 +101,4 @@ public interface IAutoNotificationHelper extends Scrollable, IAppHelper {
      * <p>Checks App Permissions is present
      */
     boolean checkAppPermissionsExists(String title);
-
 }

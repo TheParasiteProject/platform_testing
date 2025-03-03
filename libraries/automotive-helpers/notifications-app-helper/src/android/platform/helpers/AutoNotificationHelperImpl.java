@@ -35,7 +35,6 @@ import java.util.ArrayList;
 public class AutoNotificationHelperImpl extends AbstractStandardAppHelper
         implements IAutoNotificationHelper {
 
-    private static final String LOG_TAG = AutoNotificationHelperImpl.class.getSimpleName();
     private ScrollUtility mScrollUtility;
     private ScrollActions mScrollAction;
     private BySelector mBackwardButtonSelector;
@@ -172,7 +171,8 @@ public class AutoNotificationHelperImpl extends AbstractStandardAppHelper
 
     /** {@inheritDoc} */
     @Override
-    public boolean isNotificationDisplayedInCenterWithTitle(String text) {
+    public boolean isNotificationWithTitleExists(String text) {
+        getSpectatioUiUtil().waitNSeconds(10000);
         open();
 
         BySelector notificationsSelector = getUiElementFromConfig(AutomotiveConfigConstants.NOTIFICATION_BODY);
@@ -193,7 +193,8 @@ public class AutoNotificationHelperImpl extends AbstractStandardAppHelper
 
     /** {@inheritDoc} */
     @Override
-    public boolean isNotificationDisplayedInCenterWithContent(String text) {
+    public boolean isNotificationWithContentExists(String text) {
+        getSpectatioUiUtil().waitNSeconds(10000);
         open();
 
         BySelector notificationsSelector = getUiElementFromConfig(AutomotiveConfigConstants.NOTIFICATION_BODY);
