@@ -19,14 +19,13 @@ package android.platform.helpers;
 import android.app.Instrumentation;
 import android.platform.helpers.ScrollUtility.ScrollActions;
 import android.platform.helpers.ScrollUtility.ScrollDirection;
+import android.util.Log;
 
 import androidx.test.uiautomator.By;
 import androidx.test.uiautomator.BySelector;
 import androidx.test.uiautomator.UiObject2;
 
-import android.util.Log;
 import java.util.List;
-import java.util.ArrayList;
 
 /**
  * Helper for Notifications on Automotive device openNotification() for swipeDown is removed- Not
@@ -235,7 +234,7 @@ public class AutoNotificationHelperImpl extends AbstractStandardAppHelper
                 .validateUiObject(
                         postedNotification,
                         String.format("Unable to get the posted notification."));
-        getSpectatioUiUtil().swipeLeft(postedNotification);
+        getSpectatioUiUtil().swipeRight(postedNotification);
         getSpectatioUiUtil().wait5Seconds();
     }
 
