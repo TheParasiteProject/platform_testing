@@ -37,6 +37,21 @@ filegroup {
     ],
 }
 
+android_app {
+    name: "PlatformMotionTestingRoboApplication",
+
+    srcs: [
+        "src/com/**/*.java",
+        "com/**/*.kt",
+    ],
+    asset_dirs: ["compose/tests/goldens"],
+    platform_apis: true,
+    static_libs: [
+        "PlatformMotionTesting",
+        "PlatformMotionTestingCompose",
+    ],
+}
+
 android_library {
     name: "PlatformMotionTesting",
     manifest: "AndroidManifest.xml",

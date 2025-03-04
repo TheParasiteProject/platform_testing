@@ -74,7 +74,7 @@ import platform.test.motion.testing.createGoldenPathManager
 class ComposeToolkitTest {
     private val pathManager =
         createGoldenPathManager("platform_testing/libraries/motion/compose/tests/goldens")
-    @get:Rule val motionRule = createComposeMotionTestRule(pathManager)
+    @get:Rule val motionRule = createFixedConfigurationComposeMotionTestRule(pathManager)
 
     @Test
     fun recordMotion_capturePosition() =

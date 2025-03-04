@@ -371,6 +371,10 @@ private class MotionControlImpl(
             }
 
     fun nextFrame() {
+        // we wait for the main thread to get idle, required in robolectric tests as there was a
+        // delay of one frame between actual and expected golden.
+        // Need some more digging into why this is required for robolectric.
+        composeTestRule.waitForIdle()
         composeTestRule.mainClock.advanceTimeByFrame()
         composeTestRule.waitForIdle()
 
