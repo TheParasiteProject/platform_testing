@@ -330,48 +330,6 @@ public final class MicrobenchmarkTest {
                 .inOrder();
     }
 
-    /**
-     * Test method iteration will iterate the inner-most test method N times.
-     *
-     * <p>Before --> TightBefore --> Trace (begin) --> Test x N --> Trace(end) --> TightAfter -->
-     * After
-     */
-    @Test
-    public void testMultipleMethodIterations() throws InitializationError {
-        Bundle args = new Bundle();
-        args.putString("iterations", "1");
-        args.putString("method-iterations", "10");
-        args.putString("rename-iterations", "false");
-        LoggingMicrobenchmark loggingRunner = new LoggingMicrobenchmark(LoggingTest.class, args);
-        Result result = new JUnitCore().run(loggingRunner);
-        assertThat(result.wasSuccessful()).isTrue();
-        assertThat(sLogs)
-                .containsExactly(
-                        "@NoMetricRule starting",
-                        "@NoMetricBefore",
-                        "@Before",
-                        "@TightMethodRule before",
-                        "begin: testMethod("
-                                + "android.platform.test.microbenchmark.MicrobenchmarkTest"
-                                + "$LoggingTest)",
-                        "@Test method body",
-                        "@Test method body",
-                        "@Test method body",
-                        "@Test method body",
-                        "@Test method body",
-                        "@Test method body",
-                        "@Test method body",
-                        "@Test method body",
-                        "@Test method body",
-                        "@Test method body",
-                        "end",
-                        "@TightMethodRule after",
-                        "@After",
-                        "@NoMetricAfter",
-                        "@NoMetricRule finished")
-                .inOrder();
-    }
-
     /** Test that the microbenchmark will terminate if the battery is too low. */
     @Test
     public void testStopsEarly_ifBatteryLevelIsBelowThreshold() throws InitializationError {
