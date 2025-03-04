@@ -28,6 +28,7 @@ import android.platform.uiautomatorhelpers.DeviceHelpers.uiDevice
 import android.platform.uiautomatorhelpers.DeviceHelpers.waitForObj
 import android.platform.uiautomatorhelpers.FLING_GESTURE_INTERPOLATOR
 import androidx.test.uiautomator.By
+import com.android.launcher3.tapl.LauncherInstrumentation
 import com.android.launcher3.tapl.Workspace
 import com.android.systemui.Flags.sceneContainer
 import com.google.common.truth.Truth.assertWithMessage
@@ -72,6 +73,21 @@ class LockScreen internal constructor() {
             .that(LockscreenController.get().isDeviceLocked)
             .isFalse()
         return Root.get().goHomeViaKeycode()
+    }
+
+    /** Uses home key to get to the unlocked state, skipping potentially flaky gesture. */
+    fun unlockDirectly() {
+        uiDevice.pressMenu()
+        LOCKSCREEN_SELECTOR.assertInvisible { "Lockscreen still visible after swiping up." }
+        assertWithMessage("Device is still locked after swiping up")
+            .that(LockscreenController.get().isDeviceLocked)
+            .isFalse()
+
+        // Without this part, the launcher might not be ready when tests start to exercise it.
+        uiDevice.pressHome()
+        val instrumentation = LauncherInstrumentation()
+        instrumentation.setExpectedRotation(uiDevice.displayRotation)
+        instrumentation.waitForLauncherInitialized()
     }
 
     /** Swipes left to access the Communal Hub */
