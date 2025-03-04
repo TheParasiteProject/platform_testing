@@ -46,7 +46,7 @@ import org.mockito.Mockito
 
 class FlickerServiceDecoratorTest {
     @Test
-    fun sendsInstrumentationUpdatesOWhenComputingTestMethods() {
+    fun sendsInstrumentationUpdatesWhenComputingTestMethods() {
         val instrumentation = Mockito.mock(Instrumentation::class.java)
         val testClass = Mockito.mock(TestClass::class.java)
         val innerDecorator = Mockito.mock(IFlickerJUnitDecorator::class.java)
@@ -59,6 +59,9 @@ class FlickerServiceDecoratorTest {
             .thenReturn(listOf(method))
         Mockito.`when`(testClass.getAnnotatedMethods(FlickerConfigProvider::class.java))
             .thenReturn(listOf(flickerConfigProviderMethods))
+        Mockito.`when`(testClass.javaClass).thenReturn(FlickerServiceDecoratorTest::class.java)
+        Mockito.`when`(testClass.onlyConstructor)
+            .thenReturn(FlickerServiceDecoratorTest::class.java.constructors.first())
         Mockito.`when`(flickerConfigProviderMethods.invokeExplosively(testClass))
             .thenReturn(FlickerConfig().use(FlickerServiceConfig.DEFAULT))
         Mockito.`when`(method.annotations).thenReturn(emptyArray())
@@ -120,6 +123,9 @@ class FlickerServiceDecoratorTest {
             .thenReturn(listOf(method))
         Mockito.`when`(testClass.getAnnotatedMethods(FlickerConfigProvider::class.java))
             .thenReturn(listOf(flickerConfigProviderMethods))
+        Mockito.`when`(testClass.javaClass).thenReturn(FlickerServiceDecoratorTest::class.java)
+        Mockito.`when`(testClass.onlyConstructor)
+            .thenReturn(FlickerServiceDecoratorTest::class.java.constructors.first())
         Mockito.`when`(flickerConfigProviderMethods.invokeExplosively(testClass))
             .thenReturn(FlickerConfig().use(FlickerServiceConfig.DEFAULT))
         Mockito.`when`(method.annotations).thenReturn(emptyArray())
