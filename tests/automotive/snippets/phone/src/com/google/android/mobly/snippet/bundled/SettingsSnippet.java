@@ -128,6 +128,12 @@ public class SettingsSnippet implements Snippet {
         mBluetoothSettingsHelper.get().pressDevice(deviceName);
     }
 
+    /** waits until deice connection status is changed in bluetooth settings */
+    @Rpc(description = "Waits until device connection status is changed in bluetooth settings")
+    public void waitUntilConnectionStatus(String status) {
+        mBluetoothSettingsHelper.get().waitUntilConnectionStatus(status);
+    }
+
     @Rpc(description = "Press an entry listed under 'Paired Devices'")
     public void pressDeviceName(String deviceName) {
         mBluetoothSettingsHelper.get().pressDevice(deviceName);
