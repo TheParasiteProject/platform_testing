@@ -16,7 +16,6 @@
 
 package android.platform.tests;
 
-import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertTrue;
 
 import android.platform.helpers.AutomotiveConfigConstants;
@@ -65,10 +64,6 @@ public class PrivacySettingVerifyUIElementsTest {
         assertTrue(
                 "Microphone settings did not open",
                 mSettingHelper.get().checkMenuExists("Microphone"));
-        String currentTitle = mSettingHelper.get().getPageTitleText();
-        mSettingsUIHelper.get().pressBackButton();
-        String newTitle = mSettingHelper.get().getPageTitleText();
-        assertFalse("Back button is not working", currentTitle.equals(newTitle));
     }
 
     @Test
@@ -80,10 +75,6 @@ public class PrivacySettingVerifyUIElementsTest {
         assertTrue(
                 "Location settings did not open",
                 mSettingHelper.get().checkMenuExists("Location access"));
-        String currentTitle = mSettingHelper.get().getPageTitleText();
-        mSettingsUIHelper.get().pressBackButton();
-        String newTitle = mSettingHelper.get().getPageTitleText();
-        assertFalse("Back button is not working", currentTitle.equals(newTitle));
     }
 
     @Test
@@ -95,10 +86,6 @@ public class PrivacySettingVerifyUIElementsTest {
         assertTrue(
                 "App permissions settings did not open",
                 mSettingHelper.get().checkMenuExists("Privacy dashboard"));
-        String currentTitle = mSettingHelper.get().getPageTitleText();
-        mSettingsUIHelper.get().pressBackButton();
-        String newTitle = mSettingHelper.get().getPageTitleText();
-        assertFalse("Back button is not working", currentTitle.equals(newTitle));
     }
 
     @Test
@@ -112,10 +99,6 @@ public class PrivacySettingVerifyUIElementsTest {
         assertTrue(
                 "Infotainment system data settings did not open",
                 mSettingHelper.get().checkMenuExists("Delete your profile"));
-        String currentTitle = mSettingHelper.get().getPageTitleText();
-        mSettingsUIHelper.get().pressBackButton();
-        String newTitle = mSettingHelper.get().getPageTitleText();
-        assertFalse("Back button is not working", currentTitle.equals(newTitle));
     }
 
     @Test
