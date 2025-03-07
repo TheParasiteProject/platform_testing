@@ -152,11 +152,11 @@ public class AutoNotificationHelperImpl extends AbstractStandardAppHelper
                 getUiElementFromConfig(AutomotiveConfigConstants.MANAGE_BUTTON);
         if (checkIfManageButtonExist(manageButtonSelector)) {
             UiObject2 manage_btn = getSpectatioUiUtil().findUiObject(manageButtonSelector);
-            getSpectatioUiUtil().clickAndWait(manage_btn);
+            getSpectatioUiUtil().clickAndWaitUntilNewWindowAppears(manage_btn);
+            Log.i(LOG_TAG, String.format("Clicked the manage button"));
         } else {
             throw new RuntimeException("Cannot find Manage button");
         }
-
     }
 
     /** {@inheritDoc} */
@@ -171,7 +171,11 @@ public class AutoNotificationHelperImpl extends AbstractStandardAppHelper
     /** {@inheritDoc} */
     @Override
     public boolean isNotificationDisplayedInCenterWithTitle(String title) {
-        Log.i(LOG_TAG, "Checking if notification with title: " + title + " is displayed in the notification center.");
+        Log.i(
+                LOG_TAG,
+                "Checking if notification with title: "
+                        + title
+                        + " is displayed in the notification center.");
 
         List<UiObject2> notifications = getNotifications();
         for (UiObject2 notification : notifications) {
@@ -191,7 +195,11 @@ public class AutoNotificationHelperImpl extends AbstractStandardAppHelper
     /** {@inheritDoc} */
     @Override
     public boolean isNotificationDisplayedInCenterWithContent(String content) {
-        Log.i(LOG_TAG, "Checking if notification with content: " + content + " is displayed in the notification center.");
+        Log.i(
+                LOG_TAG,
+                "Checking if notification with content: "
+                        + content
+                        + " is displayed in the notification center.");
 
         List<UiObject2> notifications = getNotifications();
         for (UiObject2 notification : notifications) {
@@ -237,6 +245,7 @@ public class AutoNotificationHelperImpl extends AbstractStandardAppHelper
     /** {@inheritDoc} */
     @Override
     public boolean isNotificationSettingsOpened() {
+        Log.i(LOG_TAG, String.format("Verifying if the Notification Settings are opened"));
         BySelector notificationLayoutSelector =
                 getUiElementFromConfig(AutomotiveConfigConstants.NOTIFICATION_SETTINGS_LAYOUT);
         List<UiObject2> notificationLayoutList =

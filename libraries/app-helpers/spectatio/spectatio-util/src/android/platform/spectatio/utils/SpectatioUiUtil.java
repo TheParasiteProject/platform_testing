@@ -259,6 +259,16 @@ public class SpectatioUiUtil {
     }
 
     /**
+     * Click and wait until new window opens, wait for the specified time. Usecases * Clicking a
+     * object that opens a new window * Navigating between screens * Clicking an object that can
+     * open a popup
+     */
+    public void clickAndWaitUntilNewWindowAppears(UiObject2 uiObject) {
+        validateUiObjectAndThrowIllegalArgumentException(uiObject, /* action= */ "Click");
+        uiObject.clickAndWait(Until.newWindow(), EXTRA_LONG_UI_RESPONSE_WAIT_MS);
+    }
+
+    /**
      * Click at a specific location in the UI, and wait one second
      *
      * @param location Where to click
