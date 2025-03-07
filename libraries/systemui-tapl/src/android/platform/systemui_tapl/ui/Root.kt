@@ -281,11 +281,11 @@ class Root private constructor() {
     /** Verifies that no bubbles or an expanded bubble stack are visible. */
     fun verifyNoBubbleIsVisible() {
         Bubble.BUBBLE_VIEW.assertInvisible(timeout = Bubble.FIND_OBJECT_TIMEOUT)
-        verifyNoExpandedBubbleStackIsVisible()
+        verifyNoExpandedBubbleIsVisible()
     }
 
-    /** Verifies that expanded bubble stack is not visible. */
-    fun verifyNoExpandedBubbleStackIsVisible() {
+    /** Verifies that expanded bubble stack (or bar) is not visible. */
+    fun verifyNoExpandedBubbleIsVisible() {
         BUBBLE_EXPANDED_VIEW.assertInvisible(timeout = Bubble.FIND_OBJECT_TIMEOUT)
     }
 
