@@ -30,7 +30,7 @@ class BluetoothDialerOptionsTest(bluetooth_base_test.BluetoothBaseTest):
 
 
    def test_dialer_options(self):
-     """Test of dialer options
+       """Test of dialer options
         Steps include:
         1. Launch Dialer app from App Launcher
         2. Verify: Dialer Launches
