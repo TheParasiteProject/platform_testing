@@ -17,6 +17,7 @@
 package platform.test.motion.golden
 
 import org.json.JSONArray
+import platform.test.motion.isApproximatelyEqualTo
 
 fun Float.asDataPoint() = DataPointTypes.float.makeDataPoint(this)
 
@@ -70,6 +71,14 @@ object DataPointTypes {
                     else -> it
                 }
             },
+            isApproximateEqual = { actual, expected ->
+                when{
+                    expected.isNaN() -> actual.isNaN()
+                    expected == Float.NEGATIVE_INFINITY -> actual == Float.NEGATIVE_INFINITY
+                    expected == Float.POSITIVE_INFINITY -> actual == Float.POSITIVE_INFINITY
+                    else -> actual.isApproximatelyEqualTo(expected)
+                }
+            }
         )
 
     val int: DataPointType<Int> =
@@ -87,7 +96,11 @@ object DataPointTypes {
         )
 
     val string: DataPointType<String> =
-        DataPointType("string", jsonToValue = { it.toString() }, valueToJson = { it })
+        DataPointType(
+            "string",
+            jsonToValue = { it.toString() },
+            valueToJson = { it },
+        )
 
     /**
      * Creates a [DataPointType] to serialize a list of values in an array, using [dataPointType].
@@ -110,7 +123,7 @@ object DataPointTypes {
             },
             valueToJson = {
                 JSONArray().apply { it.forEach { value -> put(dataPointType.toJson(value)) } }
-            },
+            }
         )
     }
 }
