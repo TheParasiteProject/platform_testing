@@ -331,6 +331,15 @@ class CallUtils:
         logging.info("Checks if dialpad is displayed")
         return self.device.mbs.verifyDialerDialpadTab()
 
+    def verify_dialer_search_lens(self):
+        logging.info("Checks if Search lens is displayed")
+        return self.device.mbs.verifyDialerSearchLens()
+
+
+    def verify_dialer_settings(self):
+        logging.info("Checks if dialer settings is displayed")
+        return self.device.mbs.verifyDialerSettings()
+
     def open_sms_app(self):
         """Open sms app"""
         logging.info('Opening sms app')

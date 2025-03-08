@@ -49,6 +49,7 @@ platform_tests += \
     long_trace_config.textproto \
     mediaframeworktest \
     MemoryUsage \
+    memory_per_process-avg_rss_and_swap.textproto \
     mmapPerf \
     OverviewFunctionalTests \
     perfetto_trace_processor_shell \
@@ -72,6 +73,8 @@ platform_tests += \
     SmokeTest \
     SmokeTestApp \
     StubIME \
+    total_runtime_per_slice_for_systemui_process.textproto \
+    total_runtime_per_thread_for_systemui_process.textproto \
     trace_config.textproto \
     trace_config_boot_time.textproto \
     trace_config_boot_time_stop.textproto \

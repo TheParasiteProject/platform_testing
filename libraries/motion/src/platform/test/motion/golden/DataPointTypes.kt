@@ -43,6 +43,10 @@ object DataPointTypes {
             valueToJson = { it },
         )
 
+    private const val NAN_STRING = "NaN"
+    private const val POSITIVE_INFINITY_STRING = "+∞"
+    private const val NEGATIVE_INFINITY_STRING = "-∞"
+
     val float: DataPointType<Float> =
         DataPointType(
             "float",
@@ -50,11 +54,22 @@ object DataPointTypes {
                 when (it) {
                     is Float -> it
                     is Number -> it.toFloat()
+                    NAN_STRING -> Float.NaN
+                    POSITIVE_INFINITY_STRING -> Float.POSITIVE_INFINITY
+                    NEGATIVE_INFINITY_STRING -> Float.NEGATIVE_INFINITY
                     is String -> it.toFloatOrNull() ?: throw UnknownTypeException()
                     else -> throw UnknownTypeException()
                 }
             },
-            valueToJson = { it },
+            valueToJson = {
+                when {
+                    it.isFinite() -> it
+                    it.isNaN() -> NAN_STRING
+                    it == Float.NEGATIVE_INFINITY -> NEGATIVE_INFINITY_STRING
+                    it == Float.POSITIVE_INFINITY -> POSITIVE_INFINITY_STRING
+                    else -> it
+                }
+            },
         )
 
     val int: DataPointType<Int> =

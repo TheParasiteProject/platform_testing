@@ -53,7 +53,6 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -232,22 +231,7 @@ public class Microbenchmark extends BlockJUnit4ClassRunner {
      */
     @Override
     protected Statement methodInvoker(FrameworkMethod method, Object test) {
-        // Iterate on the test method multiple times for more data. If unset, defaults to 1.
-        Iterate<Statement> methodIterator = new Iterate<Statement>();
-        methodIterator.setOptionName("method-iterations");
-        final List<Statement> testMethodStatement =
-                methodIterator.apply(
-                        mArguments,
-                        Arrays.asList(new Statement[] {super.methodInvoker(method, test)}));
-        Statement start =
-                new Statement() {
-                    @Override
-                    public void evaluate() throws Throwable {
-                        for (Statement method : testMethodStatement) {
-                            method.evaluate();
-                        }
-                    }
-                };
+        Statement start = super.methodInvoker(method, test);
         // Wrap the multiple-iteration test method with trace points.
         start = getTracePointRule().apply(start, describeChild(method));
         // Invoke special @TightMethodRules that wrap @Test methods.

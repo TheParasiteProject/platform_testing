@@ -19,6 +19,7 @@ import android.device.collectors.annotations.OptionClass;
 import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.util.Log;
+
 import androidx.annotation.VisibleForTesting;
 import androidx.test.uiautomator.UiDevice;
 
@@ -28,9 +29,8 @@ import org.junit.runner.notification.Failure;
 import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.util.Map;
 import java.util.HashMap;
-
+import java.util.Map;
 
 /**
  * A {@link BaseMetricListener} that captures screenshots when a test fails.
@@ -109,8 +109,13 @@ public class ScreenshotOnFailureCollector extends BaseMetricListener {
         if (mDestDir == null) {
             return;
         }
+
+        // Update iteration separator from $ to _ as linux file system doesn't handle file
+        // names with $ correctly.
         final String fileNameBase =
-                String.format("%s.%s", description.getClassName(), description.getMethodName());
+                String.format(
+                        "%s.%s",
+                        description.getClassName(), description.getMethodName().replace('$', '_'));
         // Omit the iteration number for the first iteration.
         int iteration = mTestIterations.get(description.getDisplayName());
         final String fileName =

@@ -74,6 +74,41 @@ class DataPointTypesTest {
     }
 
     @Test
+    fun float_fromJson_NaN() {
+        assertThat(DataPointTypes.float.fromJson("NaN")).isEqualTo(Float.NaN.asDataPoint())
+    }
+
+    @Test
+    fun float_fromJson_positiveInfinity() {
+        assertThat(DataPointTypes.float.fromJson("+∞"))
+            .isEqualTo(Float.POSITIVE_INFINITY.asDataPoint())
+    }
+
+    @Test
+    fun float_fromJson_negativeInfinity() {
+        assertThat(DataPointTypes.float.fromJson("-∞"))
+            .isEqualTo(Float.NEGATIVE_INFINITY.asDataPoint())
+    }
+
+    @Test
+    fun float_toJson_NaN() {
+        assertThat(Float.NaN.asDataPoint().asJson()).isEqualTo("NaN")
+    }
+
+    @Test
+    fun float_toJson_positiveInfinity() {
+        assertThat(Float.NaN.asDataPoint().asJson()).isEqualTo("NaN")
+        assertThat(DataPointTypes.float.fromJson("+∞"))
+            .isEqualTo(Float.POSITIVE_INFINITY.asDataPoint())
+    }
+
+    @Test
+    fun float_toJson_negativeInfinity() {
+        assertThat(DataPointTypes.float.fromJson("-∞"))
+            .isEqualTo(Float.NEGATIVE_INFINITY.asDataPoint())
+    }
+
+    @Test
     fun int_fromJson_native() {
         assertThat(DataPointTypes.int.fromJson(1)).isEqualTo(1.asDataPoint())
     }

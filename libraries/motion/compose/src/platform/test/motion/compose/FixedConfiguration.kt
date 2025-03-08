@@ -25,10 +25,14 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalViewConfiguration
+import androidx.compose.ui.platform.ViewConfiguration
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.junit4.ComposeContentTestRule
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.unit.Density
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.dp
 import kotlin.math.floor
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.test.TestScope
@@ -37,53 +41,73 @@ import platform.test.motion.MotionTestRule
 import platform.test.screenshot.GoldenPathManager
 
 /**
- * Default density for tests.
- *
- * Using a uneven number to reveal issues with rounding.
+ * @param density Sets the [LocalDensity], allowing for a deterministic calculation of `dp -> px ->
+ *   dp`.
+ * @param touchSlop Sets the [ViewConfiguration.touchSlop], allowing for a deterministic gesture
+ *   start.
  */
-val DefaultFixedDensity = Density(2.5f)
+data class FixedConfiguration(
+    val density: Density = DefaultDensity,
+    val touchSlop: Dp = DefaultTouchSlop,
+) {
+
+    companion object {
+        /**
+         * Default density for tests.
+         *
+         * Using a uneven number to reveal issues with rounding.
+         */
+        val DefaultDensity = Density(2.5f)
+
+        /**
+         * Touch slop for gestures.
+         *
+         * Using the cuttlefish default value.
+         */
+        val DefaultTouchSlop = 12.dp
+    }
+}
 
 /**
  * Convenience to create a [MotionTestRule], including the required setup.
  *
- * NOTE: The [density] applies to the complete content, EXCEPT the root node returned by the
+ * NOTE: The [configuration] applies to the complete content, EXCEPT the root node returned by the
  * `isRoot()` [SemanticMatcher]. This can produce unexpected results when dispatching gestures on
  * the root node. To work around this, dispatch the gestures on a node owned by the composable under
  * test.
- *
- * This is an experimental replacement for the `createComposeMotionTestRule`, and avoids setting the
- * device density to achieve the same results.
- *
- * This rule sets the [LocalDensity] to [density], allowing for a deterministic calculation of `dp
- * -> px -> dp`.
  *
  * In addition to the [MotionTestRule], this function also creates a [ComposeContentTestRule], which
  * is run as part of the [MotionTestRule].
  */
 @OptIn(ExperimentalTestApi::class)
-fun createFixedDensityComposeMotionTestRule(
+fun createFixedConfigurationComposeMotionTestRule(
     goldenPathManager: GoldenPathManager,
     testScope: TestScope = TestScope(),
-    density: Density = DefaultFixedDensity,
+    configuration: FixedConfiguration = FixedConfiguration(),
 ): MotionTestRule<ComposeToolkit> {
     val composeRule = createComposeRule(testScope.coroutineContext + Dispatchers.Main)
 
     return MotionTestRule(
-        ComposeToolkit(composeRule, testScope, density),
+        ComposeToolkit(composeRule, testScope, configuration),
         goldenPathManager,
         extraRules = RuleChain.outerRule(composeRule),
     )
 }
 
 @Composable
-internal fun FixedDensity(density: Density, content: @Composable () -> Unit) {
-    val previousConfiguration = LocalConfiguration.current
+internal fun FixedConfigurationProvider(
+    fixedConfiguration: FixedConfiguration,
+    content: @Composable () -> Unit,
+) {
+    val baseLocalConfiguration = LocalConfiguration.current
     val configuration =
-        remember(previousConfiguration, density) {
+        remember(baseLocalConfiguration, fixedConfiguration) {
             Configuration().apply {
-                updateFrom(previousConfiguration)
-                densityDpi = floor(density.density * DisplayMetrics.DENSITY_DEFAULT).toInt()
-                fontScale = density.fontScale
+                updateFrom(baseLocalConfiguration)
+                densityDpi =
+                    floor(fixedConfiguration.density.density * DisplayMetrics.DENSITY_DEFAULT)
+                        .toInt()
+                fontScale = fixedConfiguration.density.fontScale
             }
         }
     val previousContext = LocalContext.current
@@ -93,10 +117,21 @@ internal fun FixedDensity(density: Density, content: @Composable () -> Unit) {
                 applyOverrideConfiguration(configuration)
             }
         }
+
+    val baseViewConfiguration = LocalViewConfiguration.current
+    val customViewConfiguration =
+        remember(baseViewConfiguration, fixedConfiguration) {
+            object : ViewConfiguration by baseViewConfiguration {
+                override val touchSlop: Float =
+                    with(fixedConfiguration.density) { fixedConfiguration.touchSlop.toPx() }
+            }
+        }
+
     CompositionLocalProvider(
         LocalContext provides context,
-        LocalDensity provides density,
+        LocalDensity provides fixedConfiguration.density,
         LocalConfiguration provides configuration,
+        LocalViewConfiguration provides customViewConfiguration,
         content = content,
     )
 }

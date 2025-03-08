@@ -31,15 +31,16 @@ import static org.mockito.Mockito.verify;
 import android.app.Instrumentation;
 import android.device.collectors.util.SendToInstrumentation;
 import android.os.Bundle;
+
 import androidx.test.runner.AndroidJUnit4;
 
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.Description;
-import org.junit.runner.notification.Failure;
 import org.junit.runner.Result;
 import org.junit.runner.RunWith;
+import org.junit.runner.notification.Failure;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InOrder;
 import org.mockito.Mock;
@@ -78,7 +79,7 @@ public class ScreenshotOnFailureCollectorTest {
         mPngLogFile = new File("unique_png_log_file.log");
         mUixLogFile = new File("unique_uix_log_file.log");
         mRunDesc = Description.createSuiteDescription("run");
-        mTestDesc = Description.createTestDescription("run", "test");
+        mTestDesc = Description.createTestDescription("run", "test$1");
     }
 
     @After
@@ -240,10 +241,12 @@ public class ScreenshotOnFailureCollectorTest {
         // The first saved screenshot should not have an iteration number.
         screenshotSaveVerifier.verify(mListener).takeScreenshot(matches("^.*[^1].png$"));
         // The second and later saved screenshots should contain the iteration number.
+        // The iteraion number must be preceded by an underscore '_' instead of '$'
         for (int i = 1; i < NUM_TEST_CASE; i++) {
             screenshotSaveVerifier
                     .verify(mListener)
-                    .takeScreenshot(endsWith(String.format("%d-screenshot-on-failure.png", i + 1)));
+                    .takeScreenshot(
+                            endsWith(String.format("_1-%d-screenshot-on-failure.png", i + 1)));
         }
 
         // Verifies that XMLs are saved with iterations that start with 1.

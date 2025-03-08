@@ -21,7 +21,6 @@ import android.graphics.Point;
 import android.graphics.Rect;
 import android.os.RemoteException;
 import android.os.SystemClock;
-import android.os.UserHandle;
 import android.platform.spectatio.constants.JsonConfigConstants;
 import android.platform.spectatio.exceptions.MissingUiElementException;
 import android.util.Log;
@@ -323,7 +322,11 @@ public class SpectatioUiUtil {
 
         // Map of supported substitutions
         Map<String, String> vars = new HashMap<>();
-        vars.put("user_id", String.valueOf(UserHandle.CURRENT.myUserId()));
+        try {
+            vars.put("user_id", mDevice.executeShellCommand("am get-current-user"));
+        } catch (IOException e) {
+            Log.e(LOG_TAG, "Could not execute `am get-current-user` to retrieve user id");
+        }
 
         try (InputStreamReader reader =
                 new InputStreamReader(

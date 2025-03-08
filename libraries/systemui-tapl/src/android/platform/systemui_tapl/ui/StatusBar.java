@@ -26,6 +26,7 @@ import static android.platform.uiautomatorhelpers.WaitUtils.ensureThat;
 import static androidx.test.uiautomator.Until.findObject;
 
 import static com.android.settingslib.flags.Flags.newStatusBarIcons;
+import static com.android.systemui.Flags.statusBarChipsModernization;
 
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.Truth.assertWithMessage;
@@ -71,6 +72,8 @@ public class StatusBar {
     static final String DND_ICON_DESC = Flags.modesUi() ? "Do Not Disturb is on" : "Do Not Disturb";
     private static final String WIFI_ICON_ID = "wifi_combo";
     private static final String ONGOING_ACTIVITY_CHIP_ICON_ID = "ongoing_activity_chip_primary";
+    // Corresponds to ScreenRecordChipViewModel.KEY
+    private static final String SCREEN_RECORDING_CHIP_ID = "ScreenRecord";
     static final String SCREEN_RECORD_DESC_STRING = "Recording screen";
     static final String SILENT_ICON_DESC_PREFIX_STRING = "Ringer silent";
     static final String VIBRATE_ICON_DESC_PREFIX_STRING = "Ringer vibrate";
@@ -238,7 +241,7 @@ public class StatusBar {
                                 .wait(
                                         Until.hasObject(
                                                 sysuiResSelector(UI_SYSTEM_ICONS_ID)
-                                                        .hasChild(
+                                                        .hasDescendant(
                                                                 By.descContains(
                                                                         DOCK_DEFEND_ICON_SUFFIX_STRING))),
                                         SHORT_WAIT.toMillis()))
@@ -326,8 +329,14 @@ public class StatusBar {
 
     /** Assert that the screen record chip is visible. */
     public void verifyScreenRecordChipIsVisible() {
+        String resSelector;
+        if (statusBarChipsModernization()) {
+            resSelector = SCREEN_RECORDING_CHIP_ID;
+        } else {
+            resSelector = ONGOING_ACTIVITY_CHIP_ICON_ID;
+        }
         DeviceHelpers.INSTANCE.assertVisible(
-                sysuiResSelector(ONGOING_ACTIVITY_CHIP_ICON_ID)
+                sysuiResSelector(resSelector)
                         .hasDescendant(By.descContains(SCREEN_RECORD_DESC_STRING)),
                 LONG_WAIT,
                 () -> "Recording chip should be visible in status bar.");

@@ -412,4 +412,18 @@ public interface IAutoDialHelper extends IAppHelper, Scrollable {
      * <p>This method is used to check if Dialpad tab is present in dialer page
      */
     boolean verifyDialerDialpadTab();
+
+    /**
+     * Setup expectations: The dialer page is open
+     *
+     * <p>This method is used to check if search lens is present in dialer page
+     */
+    boolean verifyDialerSearchLens();
+
+    /**
+     * Setup expectations: The dialer page is open
+     *
+     * <p>This method is used to check if dialer settings is present in dialer page
+     */
+    boolean verifyDialerSettings();
 }

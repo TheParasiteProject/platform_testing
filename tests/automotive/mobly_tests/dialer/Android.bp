@@ -37,17 +37,34 @@ python_test_host {
         ":AutomotiveSnippet",
         ":PhoneSnippet",
     ],
-    version: {
-        py3: {
-            embedded_launcher: true,
-        },
-    },
 }
 
 python_test_host {
     name: "BluetoothDialTest",
     main: "dialer_test_dial_test.py",
     srcs: ["dialer_test_dial_test.py"],
+    libs: [
+        "mobly",
+        "utilities",
+        "bluetooth_test",
+    ],
+    test_suites: [
+        "catbox",
+    ],
+    test_options: {
+        unit_test: false,
+    },
+    device_common_data: [
+        // Package the snippet with the mobly test
+        ":AutomotiveSnippet",
+        ":PhoneSnippet",
+    ],
+}
+
+python_test_host {
+    name: "BluetoothDialerOptionsTest",
+    main: "dialer_test_dialer_options_test.py",
+    srcs: ["dialer_test_dialer_options_test.py"],
     libs: [
         "mobly",
         "utilities",
@@ -91,11 +108,6 @@ python_test_host {
         ":AutomotiveSnippet",
         ":PhoneSnippet",
     ],
-    version: {
-        py3: {
-            embedded_launcher: true,
-        },
-    },
 }
 
 python_test_host {
@@ -118,11 +130,6 @@ python_test_host {
         ":AutomotiveSnippet",
         ":PhoneSnippet",
     ],
-    version: {
-        py3: {
-            embedded_launcher: true,
-        },
-    },
 }
 
 python_test_host {
@@ -145,11 +152,6 @@ python_test_host {
         ":AutomotiveSnippet",
         ":PhoneSnippet",
     ],
-    version: {
-        py3: {
-            embedded_launcher: true,
-        },
-    },
 }
 
 python_test_host {
@@ -172,11 +174,6 @@ python_test_host {
         ":AutomotiveSnippet",
         ":PhoneSnippet",
     ],
-    version: {
-        py3: {
-            embedded_launcher: true,
-        },
-    },
 }
 
 python_test_host {
@@ -199,11 +196,6 @@ python_test_host {
         ":AutomotiveSnippet",
         ":PhoneSnippet",
     ],
-    version: {
-        py3: {
-            embedded_launcher: true,
-        },
-    },
 }
 
 python_test_host {
@@ -226,11 +218,6 @@ python_test_host {
         ":AutomotiveSnippet",
         ":PhoneSnippet",
     ],
-    version: {
-        py3: {
-            embedded_launcher: true,
-        },
-    },
 }
 
 python_test_host {
@@ -253,11 +240,6 @@ python_test_host {
         ":AutomotiveSnippet",
         ":PhoneSnippet",
     ],
-    version: {
-        py3: {
-            embedded_launcher: true,
-        },
-    },
 }
 
 python_test_host {
@@ -280,11 +262,6 @@ python_test_host {
         ":AutomotiveSnippet",
         ":PhoneSnippet",
     ],
-    version: {
-        py3: {
-            embedded_launcher: true,
-        },
-    },
 }
 
 python_test_host {
@@ -307,11 +284,6 @@ python_test_host {
         ":AutomotiveSnippet",
         ":PhoneSnippet",
     ],
-    version: {
-        py3: {
-            embedded_launcher: true,
-        },
-    },
 }
 
 python_test_host {
@@ -335,11 +307,6 @@ python_test_host {
         ":PhoneSnippet",
         "bt_3device_config.yaml",
     ],
-    version: {
-        py3: {
-            embedded_launcher: true,
-        },
-    },
 }
 
 python_test_host {
@@ -362,11 +329,6 @@ python_test_host {
         ":AutomotiveSnippet",
         ":PhoneSnippet",
     ],
-    version: {
-        py3: {
-            embedded_launcher: true,
-        },
-    },
 }
 
 python_test_host {
@@ -389,11 +351,6 @@ python_test_host {
         ":AutomotiveSnippet",
         ":PhoneSnippet",
     ],
-    version: {
-        py3: {
-            embedded_launcher: true,
-        },
-    },
 }
 
 python_test_host {
@@ -416,11 +373,6 @@ python_test_host {
         ":AutomotiveSnippet",
         ":PhoneSnippet",
     ],
-    version: {
-        py3: {
-            embedded_launcher: true,
-        },
-    },
 }
 
 python_test_host {
@@ -443,11 +395,6 @@ python_test_host {
         ":AutomotiveSnippet",
         ":PhoneSnippet",
     ],
-    version: {
-        py3: {
-            embedded_launcher: true,
-        },
-    },
 }
 
 python_test_host {
@@ -470,11 +417,6 @@ python_test_host {
         ":AutomotiveSnippet",
         ":PhoneSnippet",
     ],
-    version: {
-        py3: {
-            embedded_launcher: true,
-        },
-    },
 }
 
 python_test_host {
@@ -497,11 +439,6 @@ python_test_host {
         ":AutomotiveSnippet",
         ":PhoneSnippet",
     ],
-    version: {
-        py3: {
-            embedded_launcher: true,
-        },
-    },
 }
 
 python_test_host {
@@ -524,11 +461,6 @@ python_test_host {
         ":AutomotiveSnippet",
         ":PhoneSnippet",
     ],
-    version: {
-        py3: {
-            embedded_launcher: true,
-        },
-    },
 }
 
 python_test_host {
@@ -551,11 +483,6 @@ python_test_host {
         ":AutomotiveSnippet",
         ":PhoneSnippet",
     ],
-    version: {
-        py3: {
-            embedded_launcher: true,
-        },
-    },
 }
 
 python_test_host {
@@ -578,11 +505,6 @@ python_test_host {
         ":AutomotiveSnippet",
         ":PhoneSnippet",
     ],
-    version: {
-        py3: {
-            embedded_launcher: true,
-        },
-    },
 }
 
 python_test_host {
@@ -606,11 +528,6 @@ python_test_host {
         ":AutomotiveSnippet",
         ":PhoneSnippet",
     ],
-    version: {
-        py3: {
-            embedded_launcher: true,
-        },
-    },
 }
 
 python_test_host {
@@ -634,11 +551,6 @@ python_test_host {
         ":AutomotiveSnippet",
         ":PhoneSnippet",
     ],
-    version: {
-        py3: {
-            embedded_launcher: true,
-        },
-    },
 }
 
 python_test_host {
@@ -662,11 +574,6 @@ python_test_host {
         ":AutomotiveSnippet",
         ":PhoneSnippet",
     ],
-    version: {
-        py3: {
-            embedded_launcher: true,
-        },
-    },
 }
 
 python_test_host {
@@ -691,11 +598,6 @@ python_test_host {
         ":AutomotiveSnippet",
         ":PhoneSnippet",
     ],
-    version: {
-        py3: {
-            embedded_launcher: true,
-        },
-    },
 }
 
 python_test_host {
@@ -720,11 +622,6 @@ python_test_host {
         ":AutomotiveSnippet",
         ":PhoneSnippet",
     ],
-    version: {
-        py3: {
-            embedded_launcher: true,
-        },
-    },
 }
 
 python_test_host {
@@ -749,11 +646,6 @@ python_test_host {
         ":AutomotiveSnippet",
         ":PhoneSnippet",
     ],
-    version: {
-        py3: {
-            embedded_launcher: true,
-        },
-    },
 }
 
 python_test_host {

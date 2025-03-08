@@ -69,7 +69,7 @@ public class NotificationTest {
         mNotificationHelper.get().exit();
         assertFalse(
                 "Notifications were not cleared.",
-                mNotificationHelper.get().checkNotificationExists(NOTIFICATION_TITLE));
+                mNotificationHelper.get().isNotificationDisplayedInCenterWithTitle(NOTIFICATION_TITLE));
     }
 
     @Test
@@ -90,7 +90,7 @@ public class NotificationTest {
         mNotificationHelper.get().removeNotification(NOTIFICATION_TITLE);
         assertFalse(
                 "Notifications were not cleared.",
-                mNotificationHelper.get().checkNotificationExists(NOTIFICATION_TITLE));
+                mNotificationHelper.get().isNotificationDisplayedInCenterWithTitle(NOTIFICATION_TITLE));
     }
 
     @Test

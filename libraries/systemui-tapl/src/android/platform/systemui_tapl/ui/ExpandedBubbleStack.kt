@@ -73,13 +73,13 @@ class ExpandedBubbleStack internal constructor() {
             duration = Duration.of(700, MILLIS),
             interpolator = FLING_GESTURE_INTERPOLATOR,
         )
-        Root.get().verifyNoExpandedBubbleStackIsVisible()
+        Root.get().verifyNoExpandedBubbleIsVisible()
     }
 
     /** Closes the stack by the "back" gesture. */
     fun closeByBackGesture() {
         LauncherInstrumentation().pressBack()
-        Root.get().verifyNoExpandedBubbleStackIsVisible()
+        Root.get().verifyNoExpandedBubbleIsVisible()
     }
 
     /** Closes the stack by clicking outside. */
@@ -91,7 +91,7 @@ class ExpandedBubbleStack internal constructor() {
         val clickX = gestureInsets.left
         val clickY = gestureInsets.top
         uiDevice.click(clickX, clickY)
-        Root.get().verifyNoExpandedBubbleStackIsVisible()
+        Root.get().verifyNoExpandedBubbleIsVisible()
     }
 
     /** Dismiss Manage education to proceed with expanded bubbles */
