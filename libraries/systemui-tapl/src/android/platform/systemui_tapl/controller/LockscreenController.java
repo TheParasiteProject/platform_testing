@@ -143,14 +143,11 @@ public class LockscreenController {
     public void turnScreenOff() {
         try {
             getUiDevice().sleep();
-
-            if (getUiDevice().isScreenOn()) {
-                SystemClock.sleep(SLEEP_INTERVAL_MS * 4);
-                waitForCondition(() -> "Screen didn't turn off", () -> !getUiDevice().isScreenOn());
-            }
         } catch (RemoteException e) {
             throw new RuntimeException(e);
         }
+        SystemClock.sleep(SLEEP_INTERVAL_MS * 4);
+        waitForCondition(() -> "Screen didn't turn off", () -> !getUiDevice().isScreenOn());
     }
 
     /** Turns screen on by waking up from sleep. */
@@ -159,14 +156,11 @@ public class LockscreenController {
         try {
             try {
                 getUiDevice().wakeUp();
-
-                if (!getUiDevice().isScreenOn()) {
-                    SystemClock.sleep(SLEEP_INTERVAL_MS * 4);
-                    ensureThat("Screen is on", () -> isScreenOnSettled(getUiDevice()));
-                }
             } catch (RemoteException e) {
                 throw new RuntimeException(e);
             }
+            SystemClock.sleep(SLEEP_INTERVAL_MS * 4);
+            ensureThat("Screen is on", () -> isScreenOnSettled(getUiDevice()));
         } finally {
             Trace.endSection();
         }
