@@ -530,6 +530,7 @@ public class AutomotiveConfigConstants {
     public static final String STATUS_BAR_WIFI_SETTINGS = "STATUS_BAR_WIFI_SETTINGS";
     public static final String STATUS_BAR_DISPLAY_SETTINGS = "STATUS_BAR_DISPLAY_SETTINGS";
     public static final String STATUS_BAR_SOUND_SETTINGS = "STATUS_BAR_SOUND_SETTINGS";
+    public static final String MICRO_PHONE_ON_SCREEN = "MICRO_PHONE_ON_SCREEN";
 
     // APP info Setting UI ELEMENTS
     public static final String RECENTLY_OPENED_UI_ELEMENT = "RECENTLY_OPENED_UI_ELEMENT";

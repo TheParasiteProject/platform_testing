@@ -393,4 +393,16 @@ public class SettingsPrivacyHelperImpl extends AbstractStandardAppHelper
         getSpectatioUiUtil().clickAndWait(locationObject);
         getSpectatioUiUtil().waitForIdle();
     }
+
+    /** {@inheritDoc} */
+    @Override
+    public void clickMicroPhoneOnScreen() {
+        UiObject2 homeMic =
+                getSpectatioUiUtil()
+                        .findUiObject(
+                                getUiElementFromConfig(
+                                        AutomotiveConfigConstants.MICRO_PHONE_ON_SCREEN));
+        getSpectatioUiUtil().clickAndWait(homeMic);
+        getSpectatioUiUtil().waitForIdle();
+    }
 }

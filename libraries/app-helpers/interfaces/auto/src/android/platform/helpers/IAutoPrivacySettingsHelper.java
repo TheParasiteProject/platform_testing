@@ -259,4 +259,11 @@ public interface IAutoPrivacySettingsHelper extends IAppHelper {
      * <p>Click on Location Text in the Right panel/ sub Settings page
      */
     void clickOnLocationInPrivacySettings();
+
+    /**
+     * Setup expectation: Home screen is open
+     *
+     * <p>Click on Mic
+     */
+    void clickMicroPhoneOnScreen();
 }
