@@ -24,6 +24,8 @@ instrumentation_tests := \
     BinderProxyCountingTestService \
     FrameworksNetTests \
     FrameworksUiServicesTests \
+    FrameworksUiServicesNotificationTests \
+    FrameworksUiServicesZenTests \
     BstatsTestApp \
     FrameworksServicesTests \
     FrameworksMockingServicesTests \
