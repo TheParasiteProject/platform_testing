@@ -229,6 +229,13 @@ public interface IAutoSettingHelper extends IAppHelper {
     boolean checkMenuExists(String setting);
 
     /**
+     * Setup expectations: Setting is displayed on scrolling.
+     *
+     * <p>scroll and check whether a setting menu in Settings is displayed or not .
+     */
+    boolean scrollAndCheckMenuExists(String setting);
+
+    /**
      * Setup expectations: Setting is open.
      *
      * <p>Find the setting menu and perform a click action.

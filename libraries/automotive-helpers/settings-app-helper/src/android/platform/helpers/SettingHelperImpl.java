@@ -43,6 +43,9 @@ public class SettingHelperImpl extends AbstractStandardAppHelper implements IAut
     private static final String SCREEN_BRIGHTNESS = "screen_brightness";
 
     private ScrollUtility mScrollUtility;
+
+    private HelperAccessor<IAutoUISettingsHelper> mSettingUIHelper =
+            new HelperAccessor<>(IAutoUISettingsHelper.class);
     private ScrollActions mScrollAction;
     private BySelector mBackwardButtonSelector;
     private BySelector mForwardButtonSelector;
@@ -434,6 +437,12 @@ public class SettingHelperImpl extends AbstractStandardAppHelper implements IAut
     @Override
     public boolean checkMenuExists(String setting) {
         return getSpectatioUiUtil().hasUiElement(setting);
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    public boolean scrollAndCheckMenuExists(String setting) {
+        return mSettingUIHelper.get().hasUIElement(setting);
     }
 
     /**

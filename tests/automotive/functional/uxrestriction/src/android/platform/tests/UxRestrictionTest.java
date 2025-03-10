@@ -19,6 +19,7 @@ package android.platform.tests;
 import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertTrue;
 
+import android.platform.helpers.AutomotiveConfigConstants;
 import android.platform.helpers.HelperAccessor;
 import android.platform.helpers.IAutoAppGridHelper;
 import android.platform.helpers.IAutoSettingHelper;
@@ -67,7 +68,9 @@ public class UxRestrictionTest {
         String currentTitle = mSettingHelper.get().getSettingsPageTitleText();
         assertTrue(
                 "Sound setting did not open",
-                mSettingHelper.get().checkMenuExists("In-call volume"));
+                mSettingHelper
+                        .get()
+                        .scrollAndCheckMenuExists(AutomotiveConfigConstants.SOUND_SETTING_INCALL));
         mSettingHelper.get().openMenuWith("In-call Volume");
         String newTitle = mSettingHelper.get().getSettingsPageTitleText();
         assertTrue("Phone ringtone setting is not disabled", currentTitle.equals(newTitle));
