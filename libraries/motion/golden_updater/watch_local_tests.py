@@ -185,12 +185,10 @@ class WatchWebAppRequestHandler(http.server.BaseHTTPRequestHandler):
         elif parsed.path.startswith("/golden/"):
             requested_file_start_index = parsed.path.find("/", len("/golden/") + 1)
             requested_file = parsed.path[requested_file_start_index + 1 :]
-            print("requested_file: {}".format(requested_file))
             self.serve_file(golden_watcher.temp_dir, requested_file)
             return
         elif parsed.path.startswith("/expected/"):
             golden_id = parsed.path[len("/expected/") :]
-            print("golden_id: {}".format(golden_id))
 
             goldens = golden_watcher.cached_goldens.values()
             for golden in goldens:
@@ -238,9 +236,6 @@ class WatchWebAppRequestHandler(http.server.BaseHTTPRequestHandler):
 
     def serve_file(self, root_directory, file_relative_to_root, mime_type=None):
         resolved_path = path.abspath(path.join(root_directory, file_relative_to_root))
-
-        print("resolved_path: {}".format(resolved_path))
-        print("root_directory: {}".format(root_directory))
 
         if path.commonprefix(
             [resolved_path, root_directory]
@@ -369,7 +364,10 @@ class GoldenFileWatcher:
             self.cached_goldens[golden_remote_file] = golden
 
     def adb_pull(self, remote_file):
-        local_file = os.path.join(self.temp_dir, os.path.basename(remote_file))
+        baseName = os.path.basename(remote_file)
+        filename, ext = os.path.splitext(baseName)
+        remoteFilenameHash = hashlib.md5(remote_file.encode("utf-8")).hexdigest()
+        local_file = os.path.join(self.temp_dir, f'{filename}_{remoteFilenameHash}{ext}')
         self.run_adb_command(["pull", remote_file, local_file])
         self.run_adb_command(["shell", "rm", remote_file])
         return local_file
@@ -398,7 +396,10 @@ class StudioGoldenWatcher:
         for filename in glob.iglob(
             f"{self.latest_dir}//**/*.actual.json", recursive=True
         ):
-            local_file = os.path.join(self.temp_dir, f"copy_{filename}")
+            baseName = os.path.basename(filename)
+            filename, ext = os.path.splitext(baseName)
+            timeHash = hashlib.md5(datetime.datetime.now().isoformat().encode("utf-8")).hexdigest()
+            local_file = os.path.join(self.temp_dir, f'copy_{filename}_{timeHash}{ext}')
             self.copy_file(filename, local_file)
             golden = CachedGolden(filename, local_file)
             self.cached_goldens[filename] = golden
@@ -435,7 +436,7 @@ class AtestGoldenWatcher:
         # log/stub/local_atest/inv_8184127433410125702/light_portrait_pagingRight.actual.mp4_1617964025478041468.txt.gz
 
         pattern_type = (
-            r".*/(?P<name>.*)\.actual((\.(?P<ext1>[a-zA-Z0-9]+)_\d+\.txt)|(_\d+\.(?P<ext2>[a-zA-Z0-9]+)))(?P<compressed>\.gz)?"
+            r".*/(?P<name>.*)\.actual((\.(?P<ext1>[a-zA-Z0-9]+)_(?P<hash1>\d+)\.txt)|(_(?P<hash2>\d+)\.(?P<ext2>[a-zA-Z0-9]+)))(?P<compressed>\.gz)?"
         )
 
         # Output from on-device runs
@@ -443,7 +444,6 @@ class AtestGoldenWatcher:
         for filename in glob.iglob(
             f"{self.atest_latest_dir}//**/*.actual*json*", recursive=True
         ):
-            print("filename: {}".format(filename))
 
             match = re.search(pattern_type, filename)
 
@@ -452,15 +452,13 @@ class AtestGoldenWatcher:
 
             golden_name = match.group("name")
             ext = match.group("ext1") or match.group("ext2")
+            hash = match.group("hash1") or match.group("hash2")
             is_compressed = match.group("compressed") == ".gz"
 
-            print(f"Found golden {golden_name}.{ext} (compressed {is_compressed})")
-
-            local_file = os.path.join(self.temp_dir, f"{golden_name}.actual.json")
+            local_file = os.path.join(self.temp_dir, f"{golden_name}_{hash}.actual.json")
             self.copy_file(filename, local_file, is_compressed)
             golden = CachedGolden(filename, local_file)
 
-            print("goldenVideoLocation: {}".format(golden.video_location))
             if golden.video_location:
                 for video_filename in glob.iglob(
                     f"{self.atest_latest_dir}/**/{golden_name}.actual*.mp4*",
