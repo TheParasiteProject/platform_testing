@@ -18,7 +18,7 @@ package com.android.helpers.tests;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.inOrder;
-import static org.mockito.Mockito.verifyZeroInteractions;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 
 import androidx.test.uiautomator.UiDevice;
 
@@ -68,7 +68,7 @@ public final class GarbageCollectionHelperTest {
     public void testNoSetUp() throws Throwable {
         mHelper.garbageCollect(TEST_POST_GC_WAIT_TIME_MS);
 
-        verifyZeroInteractions(mUiDevice);
+        verifyNoMoreInteractions(mUiDevice);
     }
 
     /**

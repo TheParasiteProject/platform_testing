@@ -23,7 +23,7 @@ import static android.device.preparers.GarbageCollectionPreparer.PROCESS_SEPARAT
 
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyZeroInteractions;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 
 import android.app.Instrumentation;
 import android.os.Bundle;
@@ -78,7 +78,7 @@ public class GarbageCollectionPreparerTest {
         mPreparer.testStarted(mRunDesc);
         mPreparer.testFinished(mRunDesc);
 
-        verifyZeroInteractions(mGcHelper);
+        verifyNoMoreInteractions(mGcHelper);
     }
 
     @Test
