@@ -95,3 +95,20 @@ data_sources: {
     }
   }
 }
+
+data_sources {
+  config {
+    name: "android.protolog"
+    protolog_config {
+      group_overrides {
+        group_name: "WM_ERROR"
+        log_from: PROTOLOG_LEVEL_VERBOSE
+      }
+      group_overrides {
+        group_name: "WM_DEBUG_ANIM"
+        log_from: PROTOLOG_LEVEL_INFO
+      }
+      default_log_from_level: PROTOLOG_LEVEL_DEBUG
+    }
+  }
+}
