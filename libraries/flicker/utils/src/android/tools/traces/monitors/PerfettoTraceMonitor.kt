@@ -23,6 +23,8 @@ import java.io.File
 import java.util.concurrent.locks.ReentrantLock
 import perfetto.protos.PerfettoConfig
 import perfetto.protos.PerfettoConfig.DataSourceConfig
+import perfetto.protos.PerfettoConfig.FtraceConfig
+import perfetto.protos.PerfettoConfig.ProcessStatsConfig
 import perfetto.protos.PerfettoConfig.SurfaceFlingerLayersConfig
 import perfetto.protos.PerfettoConfig.SurfaceFlingerTransactionsConfig
 import perfetto.protos.PerfettoConfig.TraceConfig
@@ -206,6 +208,9 @@ open class PerfettoTraceMonitor(val config: TraceConfig) : TraceMonitor() {
                 configBuilder.setUniqueSessionName(uniqueSessionName)
             }
 
+            dataSourceConfigs.add(createProcessStatsDataSourceConfig())
+            dataSourceConfigs.add(createFtraceDataSourceConfig())
+
             for (dataSourceConfig in dataSourceConfigs) {
                 configBuilder.addDataSources(createDataSourceWithConfig(dataSourceConfig))
             }
@@ -305,6 +310,31 @@ open class PerfettoTraceMonitor(val config: TraceConfig) : TraceMonitor() {
                 .build()
         }
 
+        private fun createProcessStatsDataSourceConfig(): DataSourceConfig {
+            return DataSourceConfig.newBuilder()
+                .setName(PROCESS_STATS_DATA_SOURCE)
+                .setTargetBuffer(0)
+                .setProcessStatsConfig(
+                    ProcessStatsConfig.newBuilder().setScanAllProcessesOnStart(true).build()
+                )
+                .build()
+        }
+
+        private fun createFtraceDataSourceConfig(): DataSourceConfig {
+            val ftraceEvents = listOf("ftrace/print", "task/task_newtask", "task/task_rename")
+            val atraceCategories = listOf("ss", "wm")
+            return DataSourceConfig.newBuilder()
+                .setName(FTRACE_DATA_SOURCE)
+                .setTargetBuffer(0)
+                .setFtraceConfig(
+                    FtraceConfig.newBuilder()
+                        .apply { ftraceEvents.forEach { addFtraceEvents(it) } }
+                        .apply { atraceCategories.forEach { addAtraceCategories(it) } }
+                        .build()
+                )
+                .build()
+        }
+
         private fun createDataSourceWithConfig(
             dataSourceConfig: DataSourceConfig
         ): TraceConfig.DataSource {
@@ -322,6 +352,8 @@ open class PerfettoTraceMonitor(val config: TraceConfig) : TraceMonitor() {
         private const val PROTOLOG_DATA_SOURCE = "android.protolog"
         private const val VIEWCAPTURE_DATA_SOURCE = "android.viewcapture"
         private const val WINDOWMANAGER_DATA_SOURCE = "android.windowmanager"
+        private const val PROCESS_STATS_DATA_SOURCE = "linux.process_stats"
+        private const val FTRACE_DATA_SOURCE = "linux.ftrace"
 
         private val allPerfettoPids = mutableListOf<Int>()
         private val allPerfettoPidsLock = ReentrantLock()
