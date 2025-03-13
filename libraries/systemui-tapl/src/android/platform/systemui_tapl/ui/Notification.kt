@@ -225,7 +225,7 @@ internal constructor(
                 startX = center.x,
                 startY = center.y,
                 endX = center.x,
-                endY = center.y + 300,
+                endY = center.y + 280,
                 interpolator = FLING_GESTURE_INTERPOLATOR,
             )
         } else {
