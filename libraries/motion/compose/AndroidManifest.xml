@@ -17,4 +17,6 @@
 
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="platform.test.motion.compose">
+
+  <application><activity android:name="androidx.activity.ComponentActivity" /></application>
 </manifest>

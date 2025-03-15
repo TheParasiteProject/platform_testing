@@ -216,7 +216,7 @@ class FlickerServiceRuleTest {
         testRule.failed(Throwable(), mockDescription)
         testRule.skipped(Mockito.mock(AssumptionViolatedException::class.java), mockDescription)
 
-        Mockito.verifyZeroInteractions(mockFlickerServiceResultsCollector)
+        Mockito.verifyNoMoreInteractions(mockFlickerServiceResultsCollector)
     }
 
     @Test

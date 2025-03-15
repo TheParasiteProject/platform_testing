@@ -43,3 +43,30 @@ android_test {
     ],
     test_suites: ["general-tests"],
 }
+
+android_robolectric_test {
+    enabled: true,
+
+    name: "PlatformMotionTestingComposeTestsRobo",
+
+    srcs: [
+        ":PlatformMotionTestingCompose-srcs",
+        "src/**/ComposeToolkitTest.kt",
+    ],
+
+    java_resource_dirs: ["config"],
+    static_libs: [
+        "PlatformMotionTesting",
+        "PlatformMotionTestingComposeValues",
+        "androidx.test.ext.junit",
+        "androidx.test.runner",
+        "androidx.compose.runtime_runtime",
+        "androidx.compose.material3_material3",
+        "androidx.compose.ui_ui-test-junit4",
+        "androidx.compose.ui_ui-test-manifest",
+        "truth",
+    ],
+
+    instrumentation_for: "PlatformMotionTestingRoboApplication",
+
+}

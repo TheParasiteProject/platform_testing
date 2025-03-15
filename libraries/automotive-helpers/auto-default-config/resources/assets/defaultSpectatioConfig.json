@@ -543,6 +543,11 @@
       "VALUE": "home",
       "PACKAGE": "com.android.systemui"
     },
+    "MICRO_PHONE_ON_SCREEN": {
+      "TYPE": "RESOURCE_ID",
+      "VALUE": "assistant",
+      "PACKAGE": "com.android.systemui"
+    },
     "HOME_TEMPERATURE_BUTTON": {
       "TYPE": "RESOURCE_ID",
       "VALUE": "hvac_temperature_text",
