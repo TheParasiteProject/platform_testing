@@ -94,12 +94,18 @@ public:
    */
   static std::unique_ptr<VkmsTester>
   CreateWithConfig(const std::vector<VkmsConnectorSetup> &config);
+  static void ForceDeleteVkmsDir();
+
   ~VkmsTester();
 
   // Returns the number of connectors that have been successfully created
   // regardless of their connection status.
   int getActiveConnectorsCount() const { return mActiveConnectorsCount; }
   bool ToggleConnector(int connectorIndex, bool enable);
+
+  // Prevent the VkmsTester instance from cleaning up the VKMS directories upon
+  // destruction.
+  void DisableCleanupOnDestruction();
 
 private:
   enum class DrmResource {
@@ -134,8 +140,8 @@ private:
   bool SetVkmsAsDisplayDriver();
   bool SetupDisplays(int displaysCount,
                      const std::vector<VkmsConnectorSetup> &explicitConfig);
-  bool ToggleVkms(bool enable);
-  bool ToggleHwc3(bool enable);
+  static bool ToggleVkms(bool enable);
+  static bool ToggleHwc3(bool enable);
 
   bool CreateResource(DrmResource resource, int index);
   bool SetConnectorStatus(int index, bool enable);
@@ -145,9 +151,9 @@ private:
   bool LinkToCrtc(DrmResource resource, int resourceIdx, int crtcIdx);
   bool LinkConnectorToEncoder(int connectorIdx, int encoderIdx);
 
-  void ShutdownAndCleanUpVkms();
-  void FindAndCleanupPossibleLinks(const std::string &dirPath);
-  void CleanUpDirAndChildren(const std::string &rootDir);
+  static void ShutdownAndCleanUpVkms();
+  static void FindAndCleanupPossibleLinks(const std::string &dirPath);
+  static void CleanUpDirAndChildren(const std::string &rootDir);
 
   size_t mActiveConnectorsCount = 0;
   // Used to track the most recently created plane ID, as the number of planes
@@ -155,6 +161,7 @@ private:
   // created.
   int mLatestPlaneId = 0;
 
+  bool mDisableCleanupOnDestruction = false;
   bool mInitialized = false;
 };
 

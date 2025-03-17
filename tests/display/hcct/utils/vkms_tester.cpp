@@ -87,6 +87,9 @@ VkmsTester::CreateWithConfig(const std::vector<VkmsConnectorSetup> &config) {
   return tester;
 }
 
+// static
+void VkmsTester::ForceDeleteVkmsDir() { ShutdownAndCleanUpVkms(); }
+
 VkmsTester::VkmsTester(size_t displaysCount,
                        const std::vector<VkmsConnectorSetup> &explicitConfig) {
   mInitialized = ToggleHwc3(false) && SetVkmsAsDisplayDriver() &&
@@ -101,10 +104,22 @@ VkmsTester::VkmsTester(size_t displaysCount,
   mActiveConnectorsCount = displaysCount;
 }
 
-VkmsTester::~VkmsTester() { ShutdownAndCleanUpVkms(); }
+VkmsTester::~VkmsTester() {
+  if (mDisableCleanupOnDestruction) {
+    ALOGI("Skipping cleanup on destruction. mDisableCleanupOnDestruction is "
+          "set to true.");
+    return;
+  }
+
+  ShutdownAndCleanUpVkms();
+}
 
 bool VkmsTester::ToggleConnector(int connectorIndex, bool enable) {
   return SetConnectorStatus(connectorIndex, enable);
+}
+
+void VkmsTester::DisableCleanupOnDestruction() {
+  mDisableCleanupOnDestruction = true;
 }
 
 bool VkmsTester::SetVkmsAsDisplayDriver() {
@@ -183,6 +198,7 @@ bool VkmsTester::SetupDisplays(
   return true;
 }
 
+// static
 bool VkmsTester::ToggleVkms(bool enable) {
   std::string path = std::string(kVkmsBaseDir) + "/enabled";
   std::string value = enable ? "1" : "0";
@@ -195,6 +211,7 @@ bool VkmsTester::ToggleVkms(bool enable) {
   return true;
 }
 
+// static
 bool VkmsTester::ToggleHwc3(bool enable) {
   const char *serviceName = "vendor.hwcomposer-3";
   const char *propertyName = "ctl.start";
@@ -308,8 +325,8 @@ bool VkmsTester::LinkToCrtc(DrmResource resource, int resourceIdx,
     return false;
   }
 
-  ALOGI("Successfully linked %s %i to CRTC %i",
-        kDrmResourceBase.at(resource).c_str(), resourceIdx, crtcIdx);
+  ALOGI("Successfully linked %s to %s", possibleCrtcPath.c_str(),
+        crtcDir.c_str());
   return true;
 }
 
@@ -329,11 +346,12 @@ bool VkmsTester::LinkConnectorToEncoder(int connectorIdx, int encoderIdx) {
     return false;
   }
 
-  ALOGI("Successfully linked connector %i to encoder %i", connectorIdx,
-        encoderIdx);
+  ALOGI("Successfully linked %s to %s", possibleEncoderPath.c_str(),
+        encoderDir.c_str());
   return true;
 }
 
+// static
 // ConfigFS has special rules about deletion, so we need to clean up manually
 // every layer.
 void VkmsTester::ShutdownAndCleanUpVkms() {
@@ -349,6 +367,7 @@ void VkmsTester::ShutdownAndCleanUpVkms() {
   CleanUpDirAndChildren(kVkmsBaseDir);
 }
 
+// static
 void VkmsTester::FindAndCleanupPossibleLinks(const std::string &dirPath) {
   DIR *dir = opendir(dirPath.c_str());
   if (!dir) {
@@ -404,6 +423,7 @@ void VkmsTester::FindAndCleanupPossibleLinks(const std::string &dirPath) {
   closedir(dir);
 }
 
+// static
 void VkmsTester::CleanUpDirAndChildren(const std::string &dirPath) {
   DIR *dir = opendir(dirPath.c_str());
   if (!dir) {
