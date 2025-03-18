@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+#include "edid_helper.h"
 #include "vkms_tester.h"
 #include <log/log.h>
 #include <sstream>
@@ -22,6 +23,7 @@
 #include <unistd.h>
 #include <vector>
 
+// clang-format off
 /*
  * A binary that turns on vkms and creates connectors.
  *
@@ -30,23 +32,25 @@
  *     ./setup_vkms_connectors_for_atest <number_of_connectors>
  *
  *   Advanced mode:
- *     ./setup_vkms_connectors_for_atest --config TYPE,NUMBER_OF_OVERLAY_PLANES
- * TYPE,NUMBER_OF_OVERLAY_PLANES ...
+ *     ./setup_vkms_connectors_for_atest --config TYPE,NUMBER_OF_OVERLAY_PLANES[,EDID_NAME]
+ * TYPE,NUMBER_OF_OVERLAY_PLANES[,EDID_NAME] ...
  *
  *   Where:
  *     TYPE = connector type (DP, HDMIA, HDMIB, eDP, DSI, VGA, VIRTUAL, etc.)
  *     NUMBER_OF_OVERLAY_PLANES = number of additional overlay planes (integer)
+ *     EDID_NAME = optional EDID profile name (e.g., ACI_9713_ASUS_VE258_DP)
  *
  * Examples:
- *   ./setup_vkms_connectors_for_atest 3                      # Creates 3
- * virtual connectors
- *   ./setup_vkms_connectors_for_atest --config DP,2 HDMIA,1  # Creates 2
- * connectors with specific configs
+ *   ./setup_vkms_connectors_for_atest 3                      # Creates 3 virtual connectors
+ *   ./setup_vkms_connectors_for_atest --config DP,2 HDMIA,1  # Creates 2 connectors with specific configs
+ *   ./setup_vkms_connectors_for_atest --config DP,2,ACI_9713_ASUS_VE258_DP HDMIA,1,ACI_9155_ASUS_VH238_HDMI
+ *      # Creates connectors with specific EDID profiles
  *
  * The binary will set up the vkms (virtual kernel mode setting) driver
  * with the specified configuration. It disables cleanup on destruction
  * so that the vkms setup persists after program termination.
  */
+// clang-format on
 
 // Helper function to convert string to ConnectorType
 hcct::VkmsTester::ConnectorType
@@ -72,11 +76,39 @@ stringToConnectorType(const std::string &typeStr) {
   return hcct::VkmsTester::ConnectorType::kUnknown;
 }
 
+bool stringToMonitorName(const std::string &edidName,
+                         hcct::edid::MonitorName &monitorName) {
+  if (edidName.empty()) {
+    return false;
+  }
+
+  // Check if it's a DP monitor
+#define CHECK_DP_MONITOR(monitor)                                              \
+  if (edidName == #monitor) {                                                  \
+    monitorName = hcct::edid::MonitorName(hcct::edid::DpMonitorName::monitor); \
+    return true;                                                               \
+  }
+  // Generate checks for all DP monitors
+  DP_MONITOR_LIST(CHECK_DP_MONITOR)
+
+  // Check if it's an HDMI monitor
+#define CHECK_HDMI_MONITOR(monitor)                                            \
+  if (edidName == #monitor) {                                                  \
+    monitorName =                                                              \
+        hcct::edid::MonitorName(hcct::edid::HdmiMonitorName::monitor);         \
+    return true;                                                               \
+  }
+  // Generate checks for all HDMI monitors
+  HDMI_MONITOR_LIST(CHECK_HDMI_MONITOR)
+
+  return false;
+}
+
 // Helper function to parse a connector configuration string
 bool parseConnectorConfig(const std::string &configStr,
                           hcct::VkmsTester::VkmsConnectorSetup &config) {
   std::istringstream ss(configStr);
-  std::string typeStr, planesStr;
+  std::string typeStr, planesStr, edidStr;
 
   // Parse type
   if (std::getline(ss, typeStr, ',')) {
@@ -99,6 +131,17 @@ bool parseConnectorConfig(const std::string &configStr,
     config.additionalOverlayPlanes = planes;
   }
 
+  // Parse optional EDID name
+  if (std::getline(ss, edidStr, ',')) {
+    hcct::edid::MonitorName monitorName(
+        hcct::edid::DpMonitorName::ACI_9713_ASUS_VE258_DP); // Default
+    if (!stringToMonitorName(edidStr, monitorName)) {
+      ALOGE("Unknown EDID profile name: %s", edidStr.c_str());
+      return false;
+    }
+    config.monitorName = monitorName;
+  }
+
   return true;
 }
 
@@ -119,11 +162,10 @@ bool parseConnectorConfigs(
 }
 
 void printUsage(const char *programName) {
+  // clang-format off
   ALOGI("Usage:");
   ALOGI("  Simple mode:   %s <number_of_connectors>", programName);
-  ALOGI("  Advanced mode: %s --config TYPE,NUMBER_OF_OVERLAY_PLANES "
-        "TYPE,NUMBER_OF_OVERLAY_PLANES ...",
-        programName);
+  ALOGI("  Advanced mode: %s --config TYPE,NUMBER_OF_OVERLAY_PLANES[,EDID_NAME] TYPE,NUMBER_OF_OVERLAY_PLANES[,EDID_NAME] ...", programName);
   ALOGI("  Where:");
   ALOGI("    TYPE = connector type (DP, HDMIA, HDMIB, eDP, DSI, VGA, VIRTUAL, "
         "WRITEBACK, DPI)");
@@ -131,7 +173,9 @@ void printUsage(const char *programName) {
         "(integer)");
   ALOGI("Examples:");
   ALOGI("  %s 3", programName);
-  ALOGI("  %s --config DP,2 HDMIA,1 eDP,0", programName);
+  ALOGI("  %s --config DP,2 HDMIA,1", programName);
+  ALOGI("  %s --config DP,2,ACI_9713_ASUS_VE258_DP HDMIA,1,ACI_9155_ASUS_VH238_HDMI", programName);
+  // clang-format on
 }
 
 int main(int argc, char *argv[]) {

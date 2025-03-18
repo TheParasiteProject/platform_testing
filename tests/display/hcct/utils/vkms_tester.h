@@ -16,6 +16,7 @@
 
 #pragma once
 
+#include "edid_helper.h"
 #include <memory>
 #include <string>
 #include <unordered_map>
@@ -58,6 +59,10 @@ public:
     // Each connector has a primary and a cursor plane by default. Use this to
     // add additional overlay planes.
     int additionalOverlayPlanes = 0;
+    // The Monitor Name that corresponds to the EDID to be used for this
+    // connector.
+    edid::MonitorName monitorName =
+        edid::MonitorName(edid::DpMonitorName::ACI_9713_ASUS_VE258_DP);
   };
 
   /**
@@ -146,6 +151,7 @@ private:
   bool CreateResource(DrmResource resource, int index);
   bool SetConnectorStatus(int index, bool enable);
   bool SetConnectorType(int index, ConnectorType type);
+  bool SetConnectorEdid(int index, edid::MonitorName monitorName);
   bool SetPlaneType(int index, PlaneType type);
   bool SetPlaneFormat(int index);
   bool LinkToCrtc(DrmResource resource, int resourceIdx, int crtcIdx);
