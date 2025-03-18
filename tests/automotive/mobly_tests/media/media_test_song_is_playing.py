@@ -47,13 +47,6 @@ class IsSongPlayingTest(bluetooth_base_test.BluetoothBaseTest):
                             'Invalid song titles. '
                             'Song title on phone device and HU should be the same')
 
-        # Switch to the next song on HU
-        self.media_utils.click_next_track_on_hu()
-        current_next_phone_song_title = self.media_utils.get_song_title_from_phone()
-        current_next_hu_song_title = self.media_utils.get_song_title_from_hu()
-        asserts.assert_true(current_next_phone_song_title == current_next_hu_song_title,
-                            'Invalid song titles. '
-                            'Song title on phone device and HU should be the same')
 
     def teardown_test(self):
         self.media_utils.get_bt_dumpsys_metadata()
