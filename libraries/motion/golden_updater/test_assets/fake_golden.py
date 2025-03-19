@@ -13,9 +13,8 @@
 # limitations under the License.
 #
 
-import enum
+class FakeGolden:
 
-class GoldenWatcherTypes(enum.Enum):
-    ATEST = "atest"
-    FILE = "file"
-    ROBOLECTRIC = "robolectric"
+   def __init__(self, video_location=None, device_local_path=None):
+      self.video_location=video_location
+      self.device_local_path=device_local_path

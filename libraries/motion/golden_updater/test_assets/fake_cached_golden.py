@@ -13,9 +13,13 @@
 # limitations under the License.
 #
 
-import enum
+from test_assets.test_assets import returnNoneIfOverFlow
 
-class GoldenWatcherTypes(enum.Enum):
-    ATEST = "atest"
-    FILE = "file"
-    ROBOLECTRIC = "robolectric"
+class FakeCachedGolden:
+    def __init__(self):
+        self.calls=[]
+        self.goldens=[]
+
+    def __call__(self, remote_file, local_file):
+        self.calls.append([remote_file, local_file])
+        return returnNoneIfOverFlow(self.goldens, len(self.calls)-1)
