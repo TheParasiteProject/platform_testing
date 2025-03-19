@@ -16,6 +16,7 @@
 package android.platform.systemui_tapl.ui
 
 import android.graphics.PointF
+import android.platform.systemui_tapl.utils.DeviceUtils
 import android.platform.systemui_tapl.utils.DeviceUtils.sysuiResSelector
 import android.platform.systemui_tapl.utils.SETTINGS_PACKAGE
 import android.platform.systemui_tapl.utils.SYSUI_PACKAGE
@@ -29,6 +30,7 @@ import android.platform.uiautomatorhelpers.DeviceHelpers.waitForFirstObj
 import android.platform.uiautomatorhelpers.DeviceHelpers.waitForObj
 import android.platform.uiautomatorhelpers.scrollUntilFound
 import androidx.test.uiautomator.By
+import androidx.test.uiautomator.BySelector
 import androidx.test.uiautomator.Direction
 import androidx.test.uiautomator.UiSelector
 import java.util.regex.Pattern
@@ -126,23 +128,30 @@ class QuickSettings internal constructor() {
         )
     }
 
-    private companion object {
-        val UI_QUICK_SETTINGS_CONTAINER_ID = sysuiResSelector("quick_settings_panel")
-        val FOOTER_SELECTOR = sysuiResSelector("qs_footer_actions")
+    companion object {
+        private val UI_QUICK_SETTINGS_CONTAINER_ID = sysuiResSelector("quick_settings_panel")
+        private val FOOTER_SELECTOR = sysuiResSelector("qs_footer_actions")
 
         // https://hsv.googleplex.com/5291196806070272?node=109
-        const val POWER_BTN_RES_ID = "pm_lite"
+        private const val POWER_BTN_RES_ID = "pm_lite"
 
         // https://hsv.googleplex.com/5291196806070272?node=108
-        const val SETTINGS_BUTTON_RES_ID = "settings_button_container"
+        private const val SETTINGS_BUTTON_RES_ID = "settings_button_container"
 
         // http://go/hsv/5465641194618880?node=84
-        const val MULTI_USER_SWITCH_RES_ID = "multi_user_switch"
-        const val PAGER_CLASS_NAME = "androidx.viewpager.widget.ViewPager"
-        const val PAGER_RES_ID = "$SYSUI_PACKAGE:id/qs_pager"
-        val PAGER_SELECTOR = UiSelector().className(PAGER_CLASS_NAME).resourceId(PAGER_RES_ID)
-        const val PAGER_UI_OBJECT_RES_ID = "qs_pager"
-        val PAGER_UI_OBJECT_SELECTOR = sysuiResSelector(PAGER_UI_OBJECT_RES_ID)
+        private const val MULTI_USER_SWITCH_RES_ID = "multi_user_switch"
+        private const val PAGER_CLASS_NAME = "androidx.viewpager.widget.ViewPager"
+        private const val PAGER_RES_ID = "$SYSUI_PACKAGE:id/qs_pager"
+        private val PAGER_SELECTOR =
+            UiSelector().className(PAGER_CLASS_NAME).resourceId(PAGER_RES_ID)
+        private const val PAGER_UI_OBJECT_RES_ID = "qs_pager"
+        private val PAGER_UI_OBJECT_SELECTOR = sysuiResSelector(PAGER_UI_OBJECT_RES_ID)
+
+        fun textFeedbackSelector(tileName: String): BySelector {
+            return DeviceUtils.sysuiResSelector("text_feedback")
+                .hasDescendant(By.textContains(tileName))
+        }
+
         private val QUICK_SETTINGS_SCROLLVIEW_SELECTOR = sysuiResSelector("expanded_qs_scroll_view")
         private val QUICK_SETTING_FOOTER_SELECTOR = sysuiResSelector("qs_footer_actions")
     }
