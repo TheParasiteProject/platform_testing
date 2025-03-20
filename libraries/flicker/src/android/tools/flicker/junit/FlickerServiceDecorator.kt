@@ -76,14 +76,15 @@ class FlickerServiceDecorator(
 
     private fun getTestRules(): MutableList<TestRule> {
         val collector = RuleCollector<TestRule>()
+        val instance = testClass.onlyConstructor.newInstance()
         testClass.collectAnnotatedMethodValues<TestRule>(
-            testClass.onlyConstructor.newInstance(),
+            instance,
             Rule::class.java,
             TestRule::class.java,
             collector,
         )
         testClass.collectAnnotatedFieldValues<TestRule>(
-            testClass.javaClass,
+            instance,
             Rule::class.java,
             TestRule::class.java,
             collector,
