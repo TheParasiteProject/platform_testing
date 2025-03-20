@@ -69,6 +69,7 @@ cc_library_static {
     name: "vkms_tester",
     srcs: [
         "vkms_tester.cpp",
+        "edid_helper.cpp",
     ],
     export_include_dirs: [
         ".",

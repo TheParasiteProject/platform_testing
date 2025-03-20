@@ -27,7 +27,7 @@
     <target_preparer class="com.android.tradefed.targetprep.RunCommandTargetPreparer">
         <option name="run-command" value="stop"/>
         <option name="run-command" value="stop vendor.hwcomposer-3"/>
-        <option name="run-command" value="./data/local/tmp/setup_vkms_connectors_for_atest --config eDP,0 DP,1 HDMIA,2 HDMIB,3 DP,4"/>
+        <option name="run-command" value="./data/local/tmp/setup_vkms_connectors_for_atest --config eDP,0 DP,1,HP_Spectre32_4K_DP HDMIA,2,ACI_9155_ASUS_VH238_HDMI HDMIB,3,HWP_12447_HP_Z24i_HDMI DP,4,DEL_61463_DELL_U2410_DP"/>
         <option name="teardown-command" value="./data/local/tmp/teardown_vkms"/>
         <option name="teardown-command" value="start vendor.hwcomposer-3"/>
         <option name="teardown-command" value="start"/>

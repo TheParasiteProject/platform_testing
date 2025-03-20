@@ -160,6 +160,7 @@ bool VkmsTester::SetupDisplays(
     SetConnectorStatus(i, isExplicitConfig && explicitConfig[i].enabledAtStart);
     if (isExplicitConfig) {
       SetConnectorType(i, explicitConfig[i].type);
+      SetConnectorEdid(i, explicitConfig[i].monitorName);
     } else {
       // Set connector type, eDP for first one, DP for the rest
       SetConnectorType(i, i == 0 ? ConnectorType::keDP
@@ -275,6 +276,37 @@ bool VkmsTester::SetConnectorType(int index, ConnectorType type) {
   ALOGI("Successfully set connector %i type to %i", index,
         static_cast<int>(type));
   return true;
+}
+
+bool VkmsTester::SetConnectorEdid(int index, edid::MonitorName monitorName) {
+  std::vector<uint8_t> edidData = edid::getBinaryEdidForMonitor(monitorName);
+  if (edidData.empty()) {
+    ALOGE("Failed to get EDID data for monitor");
+    return false;
+  }
+
+  std::string connectorDir = std::string(kVkmsBaseDir) + "/" +
+                             kDrmResourceBase.at(DrmResource::kConnector) +
+                             std::to_string(index);
+  std::string edidPath = connectorDir + "/edid";
+
+  int fd = open(edidPath.c_str(), O_WRONLY | O_CREAT | O_TRUNC, 0644);
+  if (fd == -1) {
+    ALOGE("Failed to open EDID file for writing: %s", strerror(errno));
+    return false;
+  }
+
+  bool success =
+      android::base::WriteFully(fd, edidData.data(), edidData.size());
+  close(fd);
+
+  if (success) {
+    ALOGI("Successfully wrote EDID data to connector %i", index);
+  } else {
+    ALOGE("Failed to write complete EDID data: %s", strerror(errno));
+  }
+
+  return success;
 }
 
 bool VkmsTester::SetPlaneType(int index, PlaneType type) {
