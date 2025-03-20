@@ -173,6 +173,10 @@ public class AutomotiveConfigConstants {
     public static final String LOCK_TYPE_PASSWORD = "LOCK_TYPE_PASSWORD";
     public static final String LOCK_TYPE_PIN = "LOCK_TYPE_PIN";
     public static final String LOCK_SCREEN_CONTINUE_BUTTON = "LOCK_SCREEN_CONTINUE_BUTTON";
+    public static final String LOCK_SCREEN_PASSWORD = "LOCK_SCREEN_PASSWORD";
+    public static final String LOCK_SCREEN_COMMAND = "LOCK_SCREEN_COMMAND";
+    public static final String LOCK_SCREEN_EDIT_TEXT = "LOCK_SCREEN_EDIT_TEXT";
+    public static final String LOCK_SCREEN_CONFIRM_BUTTON = "LOCK_SCREEN_CONFIRM_BUTTON";
 
     // Notification App Constants
     public static final String OPEN_NOTIFICATIONS_COMMAND = "OPEN_NOTIFICATIONS_COMMAND";

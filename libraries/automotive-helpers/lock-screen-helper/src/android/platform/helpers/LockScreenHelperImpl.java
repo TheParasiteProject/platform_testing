@@ -28,8 +28,8 @@ public class LockScreenHelperImpl extends AbstractStandardAppHelper
         implements IAutoLockScreenHelper {
 
     private static final int DEFAULT_WAIT_TIME = 5000;
+    private static final int TEN_SECONDS_WAIT_TIME = 10000;
     private static final int KEY_ENTER = 66;
-    private static final String UNLOCK_BY = "input text %s";
 
     private HelperAccessor<IAutoSecuritySettingsHelper> mSecuritySettingsHelper;
     private HelperAccessor<IAutoSettingHelper> mSettingHelper;
@@ -69,13 +69,16 @@ public class LockScreenHelperImpl extends AbstractStandardAppHelper
             mSecuritySettingsHelper.get().setLockByPassword(credential);
         }
         getSpectatioUiUtil().pressPower();
-        getSpectatioUiUtil().wait5Seconds();
+        getSpectatioUiUtil().waitForIdle();
     }
 
     @Override
     public void unlockScreenBy(LockType lockType, String credential) {
         getSpectatioUiUtil().pressPower();
-        getSpectatioUiUtil().wait5Seconds();
+        getSpectatioUiUtil().waitForIdle();
+        BySelector lockscreenSelector =
+                getUiElementFromConfig(AutomotiveConfigConstants.LOCK_SCREEN_PASSWORD);
+        getSpectatioUiUtil().waitForUiObject(lockscreenSelector, TEN_SECONDS_WAIT_TIME);
         if (lockType == LockType.PIN) {
             unlockByPin(credential);
         } else {
@@ -84,8 +87,18 @@ public class LockScreenHelperImpl extends AbstractStandardAppHelper
     }
 
     private void unlockByPassword(String password) {
-        getSpectatioUiUtil().executeShellCommand(String.format(UNLOCK_BY, password));
-        getSpectatioUiUtil().wait5Seconds();
+        BySelector lockscreenSelector =
+                getUiElementFromConfig(AutomotiveConfigConstants.LOCK_SCREEN_EDIT_TEXT);
+        UiObject2 editPasswordButtonObject = getSpectatioUiUtil().findUiObject(lockscreenSelector);
+        getSpectatioUiUtil()
+                .validateUiObject(
+                        editPasswordButtonObject, AutomotiveConfigConstants.LOCK_SCREEN_EDIT_TEXT);
+        getSpectatioUiUtil().clickAndWait(editPasswordButtonObject, DEFAULT_WAIT_TIME);
+        getSpectatioUiUtil()
+                .executeShellCommand(
+                        String.format(
+                                getCommandFromConfig(AutomotiveConfigConstants.LOCK_SCREEN_COMMAND),
+                                password));
         pressEnter();
         mSettingHelper.get().openSetting(SettingsConstants.SECURITY_SETTINGS);
     }

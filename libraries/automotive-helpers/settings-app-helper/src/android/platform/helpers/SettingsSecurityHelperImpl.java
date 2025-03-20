@@ -32,6 +32,7 @@ public class SettingsSecurityHelperImpl extends AbstractStandardAppHelper
 
     private static final String CHOOSE_LOCK_TYPE = "Choose a lock type";
     private static final int KEY_ENTER = 66;
+    private static final int DEFAULT_WAIT_TIME = 5000;
     private ScrollUtility mScrollUtility;
     private ScrollActions mScrollAction;
     private BySelector mBackwardButtonSelector;
@@ -89,6 +90,9 @@ public class SettingsSecurityHelperImpl extends AbstractStandardAppHelper
         pressEnter();
         typePasswordOnTextEditor(password);
         pressEnter();
+        BySelector profileLockSelector =
+                getUiElementFromConfig(AutomotiveConfigConstants.SECURITY_SETTINGS_PROFILE_LOCK);
+        getSpectatioUiUtil().waitForUiObject(profileLockSelector, DEFAULT_WAIT_TIME);
     }
 
     private void openChooseLockTypeMenu() {
@@ -120,7 +124,7 @@ public class SettingsSecurityHelperImpl extends AbstractStandardAppHelper
         getSpectatioUiUtil()
                 .validateUiObject(
                         textEditor, AutomotiveConfigConstants.SECURITY_SETTINGS_ENTER_PASSWORD);
-        textEditor.setText(password);
+        getSpectatioUiUtil().setTextForUiElement(textEditor, password);
     }
 
     /** {@inheritDoc} */
@@ -146,13 +150,7 @@ public class SettingsSecurityHelperImpl extends AbstractStandardAppHelper
         getSpectatioUiUtil().clickAndWait(continue_button);
         getSpectatioUiUtil().wait5Seconds();
         selectPinOnPinPad(pin);
-        BySelector confirm_buttonSelector =
-                getUiElementFromConfig(AutomotiveConfigConstants.SECURITY_SETTINGS_CONFIRM_BUTTON);
-        UiObject2 confirm_button = getSpectatioUiUtil().findUiObject(confirm_buttonSelector);
-        getSpectatioUiUtil()
-                .validateUiObject(
-                        confirm_button, AutomotiveConfigConstants.SECURITY_SETTINGS_CONFIRM_BUTTON);
-        getSpectatioUiUtil().clickAndWait(confirm_button);
+        clickOnConfirmButton();
         getSpectatioUiUtil().wait5Seconds();
     }
 
@@ -247,5 +245,15 @@ public class SettingsSecurityHelperImpl extends AbstractStandardAppHelper
 
     protected void pressEnter() {
         getSpectatioUiUtil().pressKeyCode(KEY_ENTER);
+    }
+
+    private void clickOnConfirmButton() {
+        BySelector confirm_buttonSelector =
+                getUiElementFromConfig(AutomotiveConfigConstants.SECURITY_SETTINGS_CONFIRM_BUTTON);
+        UiObject2 confirm_button = getSpectatioUiUtil().findUiObject(confirm_buttonSelector);
+        getSpectatioUiUtil()
+                .validateUiObject(
+                        confirm_button, AutomotiveConfigConstants.SECURITY_SETTINGS_CONFIRM_BUTTON);
+        getSpectatioUiUtil().clickAndWait(confirm_button);
     }
 }

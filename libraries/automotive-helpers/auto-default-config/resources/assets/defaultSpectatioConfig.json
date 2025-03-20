@@ -76,7 +76,8 @@
     "OPEN_SYSTEM_UI": "am crash com.android.systemui",
     "OPEN_CAR_UI": "am crash com.android.car",
     "DATE_COMMAND": "date",
-    "ADAPTIVE_BRIGHTNESS_COMMAND": "settings get system screen_brightness_mode"
+    "ADAPTIVE_BRIGHTNESS_COMMAND": "settings get system screen_brightness_mode",
+    "LOCK_SCREEN_COMMAND": "input text %s"
   },
   "UI_ELEMENTS": {
     "MAKE_CALL": {
@@ -856,6 +857,14 @@
     "LOCK_SCREEN_CONFIRM_BUTTON": {
       "TYPE": "TEXT",
       "VALUE": "Confirm"
+    },
+    "LOCK_SCREEN_PASSWORD": {
+      "TYPE": "TEXT",
+      "VALUE": "Enter your password"
+    },
+    "LOCK_SCREEN_EDIT_TEXT": {
+      "TYPE": "RESOURCE_ID",
+      "VALUE": "passwordEntry"
     },
     "NOTIFICATION_VIEW": {
       "TYPE": "RESOURCE_ID",
