@@ -55,24 +55,10 @@
 // Helper function to convert string to ConnectorType
 hcct::VkmsTester::ConnectorType
 stringToConnectorType(const std::string &typeStr) {
-  if (typeStr == "DP")
-    return hcct::VkmsTester::ConnectorType::kDisplayPort;
-  if (typeStr == "HDMIA")
-    return hcct::VkmsTester::ConnectorType::kHDMIA;
-  if (typeStr == "HDMIB")
-    return hcct::VkmsTester::ConnectorType::kHDMIB;
-  if (typeStr == "eDP")
-    return hcct::VkmsTester::ConnectorType::keDP;
-  if (typeStr == "VGA")
-    return hcct::VkmsTester::ConnectorType::kVGA;
-  if (typeStr == "DSI")
-    return hcct::VkmsTester::ConnectorType::kDSI;
-  if (typeStr == "DPI")
-    return hcct::VkmsTester::ConnectorType::kDPI;
-  if (typeStr == "VIRTUAL")
-    return hcct::VkmsTester::ConnectorType::kVirtual;
-  if (typeStr == "WRITEBACK")
-    return hcct::VkmsTester::ConnectorType::kWriteback;
+  #define CONNECTOR_TYPE(enumName, value, connectorName) \
+    if (typeStr == connectorName) return hcct::VkmsTester::ConnectorType::enumName;
+  CONNECTOR_TYPES
+  #undef CONNECTOR_TYPE
   return hcct::VkmsTester::ConnectorType::kUnknown;
 }
 
@@ -81,6 +67,16 @@ bool stringToMonitorName(const std::string &edidName,
   if (edidName.empty()) {
     return false;
   }
+
+  // Check if it's an eDP
+#define CHECK_EDP_MONITOR(monitor)                                             \
+  if (edidName == #monitor) {                                                  \
+    monitorName =                                                              \
+        hcct::edid::MonitorName(hcct::edid::EdpMonitorName::monitor);          \
+    return true;                                                               \
+  }
+  // Generate checks for eDPs
+  EDP_MONITOR_LIST(CHECK_EDP_MONITOR)
 
   // Check if it's a DP monitor
 #define CHECK_DP_MONITOR(monitor)                                              \

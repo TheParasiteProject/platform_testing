@@ -24,6 +24,18 @@
 
 namespace hcct {
 
+// https://cs.android.com/android/platform/superproject/main/+/main:external/libdrm/include/drm/drm_mode.h;l=403
+#define CONNECTOR_TYPES \
+  CONNECTOR_TYPE(kUnknown, 0, "UNKNOWN") \
+  CONNECTOR_TYPE(kVGA, 1, "VGA") \
+  CONNECTOR_TYPE(kDisplayPort, 10, "DP") \
+  CONNECTOR_TYPE(kHDMIA, 11, "HDMIA") \
+  CONNECTOR_TYPE(keDP, 14, "eDP") \
+  CONNECTOR_TYPE(kVirtual, 15, "VIRTUAL") \
+  CONNECTOR_TYPE(kDSI, 16, "DSI") \
+  CONNECTOR_TYPE(kDPI, 17, "DPI") \
+  CONNECTOR_TYPE(kWriteback, 18, "WRITEBACK")
+
 /**
  * @class VkmsTester
  * @brief Handles setup and configuration of Virtual KMS (VKMS) for display
@@ -34,18 +46,10 @@ namespace hcct {
  */
 class VkmsTester {
 public:
-  // https://cs.android.com/android/platform/superproject/main/+/main:external/libdrm/include/drm/drm_mode.h;l=403
   enum class ConnectorType {
-    kUnknown = 0,
-    kVGA = 1,
-    kDisplayPort = 10,
-    kHDMIA = 11,
-    kHDMIB = 12,
-    keDP = 14,
-    kVirtual = 15,
-    kDSI = 16,
-    kDPI = 17,
-    kWriteback = 18,
+    #define CONNECTOR_TYPE(enumName, value, stringName) enumName = value,
+    CONNECTOR_TYPES
+    #undef CONNECTOR_TYPE
   };
 
   // VkmsConnectorSetup describes the desired configuration for a VKMS
@@ -61,8 +65,7 @@ public:
     int additionalOverlayPlanes = 0;
     // The Monitor Name that corresponds to the EDID to be used for this
     // connector.
-    edid::MonitorName monitorName =
-        edid::MonitorName(edid::DpMonitorName::ACI_9713_ASUS_VE258_DP);
+    edid::MonitorName monitorName;
   };
 
   /**
