@@ -30,6 +30,7 @@ import android.platform.uiautomatorhelpers.PRECISE_GESTURE_INTERPOLATOR
 import android.view.WindowInsets
 import android.view.WindowManager
 import androidx.test.uiautomator.UiObject2
+import com.android.wm.shell.Flags
 import com.google.common.truth.Truth.assertWithMessage
 import java.time.Duration
 import java.time.temporal.ChronoUnit
@@ -127,7 +128,7 @@ class Bubble internal constructor(private val bubbleView: UiObject2) {
         internal val bubbleViews: List<UiObject2>
             get() {
                 val bubbleViews =
-                    if (CommonUtils.isLargeScreen()) {
+                    if (CommonUtils.isLargeScreen() && Flags.enableBubbleBar()) {
                         // Check bubble bar first if we're large screen
                         waitForPossibleEmpty(BUBBLE_BAR_VIEWS, timeout = FIND_OBJECT_TIMEOUT)
                             .ifEmpty {
