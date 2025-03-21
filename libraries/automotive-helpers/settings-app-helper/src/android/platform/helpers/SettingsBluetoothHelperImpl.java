@@ -29,6 +29,7 @@ public class SettingsBluetoothHelperImpl extends AbstractStandardAppHelper
         implements IAutoBluetoothSettingsHelper {
 
     private static final String LOG_TAG = SettingHelperImpl.class.getSimpleName();
+    private static final int WAIT_TIME_MAX = 15;
 
     private final ScrollUtility mScrollUtility;
     private final SeekUtility mSeekUtility;
@@ -157,13 +158,20 @@ public class SettingsBluetoothHelperImpl extends AbstractStandardAppHelper
     /** {@inheritDoc} */
     @Override
     public void pressDevice(String deviceName) {
-
         BySelector nameField = By.text(deviceName);
         BySelector clickable = By.hasDescendant(By.hasDescendant(nameField));
         UiObject2 clickableDevice = getSpectatioUiUtil().findUiObject(clickable);
+        getSpectatioUiUtil().waitForUiObject(clickable, WAIT_TIME_MAX);
         getSpectatioUiUtil()
                 .validateUiObject(clickableDevice, "Viewgroup ancestor of  " + deviceName);
         getSpectatioUiUtil().clickAndWait(clickableDevice);
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    public void waitUntilConnectionStatus(String status) {
+        BySelector statusSelector = By.text(status);
+        getSpectatioUiUtil().waitForUiObject(statusSelector);
     }
 
     /** {@inheritDoc} */
@@ -172,6 +180,7 @@ public class SettingsBluetoothHelperImpl extends AbstractStandardAppHelper
 
         BySelector statusSelector =
                 getUiElementFromConfig(AutomotiveConfigConstants.DEVICE_HEADER_SUMMARY);
+        getSpectatioUiUtil().waitForUiObject(statusSelector);
         UiObject2 statusField = getSpectatioUiUtil().findUiObject(statusSelector);
         getSpectatioUiUtil()
                 .validateUiObject(statusField, AutomotiveConfigConstants.DEVICE_HEADER_SUMMARY);

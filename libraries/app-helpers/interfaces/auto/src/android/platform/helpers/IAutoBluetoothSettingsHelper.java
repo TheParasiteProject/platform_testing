@@ -105,6 +105,15 @@ public interface IAutoBluetoothSettingsHelper extends IAppHelper, Scrollable {
     void pressDevice(String deviceName);
 
     /**
+     * Waits until device connection status is changed
+     *
+     * <p>Setup Expectations: The bluetooth settings view is open.
+     *
+     * @param status - expected statuts to be displayed
+     */
+    void waitUntilConnectionStatus(String status);
+
+    /**
      * Setup Expectations: A connected device bluetooth view is open ('level two')
      *
      * @return - The exact text displayed as the device's connection status
