@@ -52,16 +52,6 @@
  */
 // clang-format on
 
-// Helper function to convert string to ConnectorType
-hcct::VkmsTester::ConnectorType
-stringToConnectorType(const std::string &typeStr) {
-  #define CONNECTOR_TYPE(enumName, value, connectorName) \
-    if (typeStr == connectorName) return hcct::VkmsTester::ConnectorType::enumName;
-  CONNECTOR_TYPES
-  #undef CONNECTOR_TYPE
-  return hcct::VkmsTester::ConnectorType::kUnknown;
-}
-
 bool stringToMonitorName(const std::string &edidName,
                          hcct::edid::MonitorName &monitorName) {
   if (edidName.empty()) {
@@ -100,20 +90,16 @@ bool stringToMonitorName(const std::string &edidName,
   return false;
 }
 
-// Helper function to parse a connector configuration string
-bool parseConnectorConfig(const std::string &configStr,
-                          hcct::VkmsTester::VkmsConnectorSetup &config) {
+hcct::VkmsTester::VkmsConnectorBuilder parseConnectorConfig(
+    const std::string &configStr) {
   std::istringstream ss(configStr);
   std::string typeStr, planesStr, edidStr;
 
+  auto builder = hcct::VkmsTester::VkmsConnectorBuilder::create();
+
   // Parse type
   if (std::getline(ss, typeStr, ',')) {
-    config.type = stringToConnectorType(typeStr);
-    if (config.type == hcct::VkmsTester::ConnectorType::kUnknown &&
-        typeStr != "UNKNOWN") {
-      ALOGE("Invalid connector type: %s", typeStr.c_str());
-      return false;
-    }
+    builder.withType(typeStr);
   }
 
   // Parse additional planes
@@ -122,39 +108,35 @@ bool parseConnectorConfig(const std::string &configStr,
     int planes = strtol(planesStr.c_str(), &endptr, 10);
     if (*endptr != '\0' || planes < 0) {
       ALOGE("Invalid number of planes: %s", planesStr.c_str());
-      return false;
+    } else {
+      builder.withAdditionalOverlayPlanes(planes);
     }
-    config.additionalOverlayPlanes = planes;
   }
 
   // Parse optional EDID name
   if (std::getline(ss, edidStr, ',')) {
-    hcct::edid::MonitorName monitorName(
-        hcct::edid::DpMonitorName::ACI_9713_ASUS_VE258_DP); // Default
-    if (!stringToMonitorName(edidStr, monitorName)) {
+    hcct::edid::MonitorName monitorName;
+    if (stringToMonitorName(edidStr, monitorName)) {
+      builder.withMonitor(monitorName);
+    } else {
       ALOGE("Unknown EDID profile name: %s", edidStr.c_str());
-      return false;
     }
-    config.monitorName = monitorName;
   }
 
-  return true;
+  return builder;
 }
 
 // Helper function to parse all connector configurations
-bool parseConnectorConfigs(
-    int argc, char *argv[], int startIndex,
-    std::vector<hcct::VkmsTester::VkmsConnectorSetup> &configs) {
+std::vector<hcct::VkmsTester::VkmsConnectorBuilder> parseConnectorConfigs(
+    int argc, char *argv[], int startIndex) {
+  std::vector<hcct::VkmsTester::VkmsConnectorBuilder> builders;
+
   for (int i = startIndex; i < argc; i++) {
     std::string configStr(argv[i]);
-    hcct::VkmsTester::VkmsConnectorSetup config;
-    if (!parseConnectorConfig(configStr, config)) {
-      return false;
-    }
-    configs.push_back(config);
+    builders.push_back(parseConnectorConfig(configStr));
   }
 
-  return !configs.empty();
+  return builders;
 }
 
 void printUsage(const char *programName) {
@@ -182,7 +164,6 @@ int main(int argc, char *argv[]) {
   }
 
   std::unique_ptr<hcct::VkmsTester> vkmsTester;
-  std::vector<hcct::VkmsTester::VkmsConnectorSetup> connectorConfigs;
 
   // Check for advanced mode with --config flag
   if (strcmp(argv[1], "--config") == 0) {
@@ -193,14 +174,14 @@ int main(int argc, char *argv[]) {
     }
 
     // Parse configs from multiple arguments starting from index 2
-    if (!parseConnectorConfigs(argc, argv, 2, connectorConfigs)) {
+    auto builders = parseConnectorConfigs(argc, argv, 2);
+    if (builders.empty()) {
       ALOGE("Failed to parse connector configurations");
       return -1;
     }
 
-    ALOGI("Setting up vkms with %zu custom connectors",
-          connectorConfigs.size());
-    vkmsTester = hcct::VkmsTester::CreateWithConfig(connectorConfigs);
+    ALOGI("Setting up vkms with %zu custom connectors", builders.size());
+    vkmsTester = hcct::VkmsTester::CreateWithBuilders(builders);
   } else {
     // Simple mode - just a number of connectors
     char *endptr;
