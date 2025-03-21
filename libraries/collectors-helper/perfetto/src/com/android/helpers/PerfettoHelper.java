@@ -59,8 +59,10 @@ public class PerfettoHelper {
     private static final String REMOVE_CMD = "rm %s";
     // Add the trace output file /data/misc/perfetto-traces/trace_output.perfetto-trace
     private static final String CREATE_FILE_CMD = "touch %s";
-    // Command to move the perfetto output trace file to given folder.
-    private static final String MOVE_CMD = "mv %s %s";
+    // Command to copy the perfetto output trace file to given folder.
+    private static final String COPY_CMD = "cp %s %s";
+    // Command to set the read permission for all users on the given file.
+    private static final String CHMOD_READ_CMD = "chmod a+r %s";
     // Max wait count for checking if perfetto is stopped successfully
     private static final int PERFETTO_KILL_WAIT_COUNT = 12;
     // Check if perfetto is stopped every 5 secs.
@@ -500,18 +502,41 @@ public class PerfettoHelper {
 
         // Copy the collected trace from /data/misc/perfetto-traces/trace_output.perfetto-trace to
         // destinationFile
+        // Note: Due to b/141386109, certain devices do not allow moving the files between
+        //       directories with different encryption policies, so manually copy and then
+        //       remove the original file
+        //       Moreover, the copied trace file may end up with different permissions, resulting
+        //       in b/162072200, to prevent this, ensure the files are readable after copying
         try {
-            String moveResult = mUIDevice.executeShellCommand(String.format(
-                    MOVE_CMD, mTmpOutputFilePath, destinationFile));
-            if (!moveResult.isEmpty()) {
+            String copyResult = mUIDevice.executeShellCommand(String.format(
+                    COPY_CMD, mTmpOutputFilePath, destinationFile));
+            if (!copyResult.isEmpty()) {
                 Log.e(LOG_TAG, String.format(
-                        "Unable to move perfetto output file from %s to %s due to %s",
-                        mTmpOutputFilePath, destinationFile, moveResult));
+                        "Unable to copy perfetto output file from %s to %s due to %s",
+                        mTmpOutputFilePath, destinationFile, copyResult));
+                return false;
+            }
+            String chmodResult = mUIDevice.executeShellCommand(String.format(
+                    CHMOD_READ_CMD, destinationFile));
+            if (!chmodResult.isEmpty()) {
+                Log.e(LOG_TAG, String.format(
+                        "Unable to set read permission on perfetto output file %s due to %s",
+                        destinationFile, chmodResult));
+                return false;
+            }
+            // This will silently fail on unrooted devices due to missing sepolicy for file writing,
+            // but it will be cleaned up by perfetto on the next run.
+            String removeResult = mUIDevice.executeShellCommand(String.format(
+                    REMOVE_CMD, mTmpOutputFilePath));
+            if (!removeResult.isEmpty()) {
+                Log.e(LOG_TAG, String.format(
+                        "Unable to remove temporary perfetto output file %s due to %s",
+                        mTmpOutputFilePath, removeResult));
                 return false;
             }
         } catch (IOException ioe) {
             Log.e(LOG_TAG,
-                    "Unable to move the perfetto trace file to destination file."
+                    "Unable to copy the perfetto trace file to destination file."
                             + ioe.getMessage());
             return false;
         }
