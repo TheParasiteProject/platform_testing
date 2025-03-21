@@ -18,17 +18,19 @@ from typing import List
 
 
 class DesktopTest(object):
-  """Marks the type of test with purpose of asserting Desktop requirements.
+  """Marks the type of test with purpose of asserting Desktop requirements and cujs.
 
   Args:
       requirements: the list of Desktop requirements.
+      cujs: the list of Desktop cujs.
 
   Example:
-      @DesktopTest(requirements=['D-0-1', 'D-0-2'])
+      @DesktopTest(requirements=['D-0-1', 'D-0-2'], cujs=['cuj-1', 'cuj-2'])
   """
 
-  def __init__(self, requirements: List[str] = []):
+  def __init__(self, requirements: List[str] = [], cujs: List[str] = []):
     self._requirements = requirements
+    self._cujs = cujs
 
   def __call__(self, func):
     return func
