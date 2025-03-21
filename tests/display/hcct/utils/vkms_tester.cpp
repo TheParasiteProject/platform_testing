@@ -30,6 +30,7 @@
 #include <unistd.h>
 #include <unordered_map>
 #include <vector>
+#include <inttypes.h>
 
 namespace hcct {
 
@@ -160,7 +161,9 @@ bool VkmsTester::SetupDisplays(
     SetConnectorStatus(i, isExplicitConfig && explicitConfig[i].enabledAtStart);
     if (isExplicitConfig) {
       SetConnectorType(i, explicitConfig[i].type);
-      SetConnectorEdid(i, explicitConfig[i].monitorName);
+      if (explicitConfig[i].monitorName.type != edid::MonitorName::Type::UNSET) {
+        SetConnectorEdid(i, explicitConfig[i].monitorName);
+      }
     } else {
       // Set connector type, eDP for first one, DP for the rest
       SetConnectorType(i, i == 0 ? ConnectorType::keDP
@@ -301,7 +304,8 @@ bool VkmsTester::SetConnectorEdid(int index, edid::MonitorName monitorName) {
   close(fd);
 
   if (success) {
-    ALOGI("Successfully wrote EDID data to connector %i", index);
+    ALOGI("Successfully wrote EDID data with size %" PRIu64 " to connector %i",
+        edidData.size(), index);
   } else {
     ALOGE("Failed to write complete EDID data: %s", strerror(errno));
   }

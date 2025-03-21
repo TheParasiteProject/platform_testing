@@ -22,6 +22,9 @@
 namespace hcct {
 namespace edid {
 
+#define EDP_MONITOR_LIST(X)                                                     \
+  X(REDRIX)                                                    \
+
 #define DP_MONITOR_LIST(X)                                                     \
   X(ACI_9713_ASUS_VE258_DP)                                                    \
   X(DEL_61463_DELL_U2410_DP)                                                   \
@@ -33,6 +36,12 @@ namespace edid {
   X(DEL_61462_DELL_U2410_HDMI)                                                 \
   X(HP_Spectre32_4K_HDMI)                                                      \
   X(HWP_12447_HP_Z24i_HDMI)
+
+enum class EdpMonitorName {
+  #define X(monitor) monitor,
+    EDP_MONITOR_LIST(X)
+  #undef X
+};
 
 enum class DpMonitorName {
 #define X(monitor) monitor,
@@ -48,11 +57,14 @@ enum class HdmiMonitorName {
 
 // Unified type to use for function arguments to handle both DP and HDMI.
 struct MonitorName {
-  enum class Type { DP, HDMI } type;
+  enum class Type { UNSET, EDP, DP, HDMI } type;
   union {
+    EdpMonitorName edp;
     DpMonitorName dp;
     HdmiMonitorName hdmi;
   };
+  MonitorName() : type(Type::UNSET) {}
+  MonitorName(EdpMonitorName name) : type(Type::EDP), edp(name) {}
   MonitorName(DpMonitorName name) : type(Type::DP), dp(name) {}
   MonitorName(HdmiMonitorName name) : type(Type::HDMI), hdmi(name) {}
 };
