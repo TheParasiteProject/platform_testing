@@ -68,6 +68,9 @@ public abstract class PerfettoTracingStrategy {
     public static final String SKIP_TEST_FAILURE_METRICS = "skip_test_failure_metrics";
     // Skip success metrics collection if this flag is set to true (i.e. collect only failures).
     public static final String SKIP_TEST_SUCCESS_METRICS = "skip_test_success_metrics";
+    // Skip the empty metrics storing if this flag is set to true (i.e. if the perfetto trace file
+    // is empty, then do not store the empty file).
+    public static final String SKIP_EMPTY_METRICS = "skip_empty_metrics";
     // List of test iterations to capture, capture all if empty
     public static final String ARGUMENT_ALLOW_ITERATIONS = "allow_iterations";
     // Perfetto file path key argument name
@@ -133,6 +136,7 @@ public abstract class PerfettoTracingStrategy {
     private String mConfigContent;
     protected boolean mSkipTestFailureMetrics;
     private boolean mSkipTestSuccessMetrics;
+    private boolean mSkipEmptyMetrics;
     private boolean mIsTestFailed = false;
     // Store the method name and invocation count to create unique file name for each trace.
     private boolean mPerfettoStartSuccess = false;
@@ -504,10 +508,15 @@ public abstract class PerfettoTracingStrategy {
         mTestOutputRoot = getArgumentValue(args, TEST_OUTPUT_ROOT, DEFAULT_OUTPUT_ROOT);
 
         // By default, this flag is set to false to collect the metrics on test failure.
-        mSkipTestFailureMetrics = Boolean.parseBoolean(getArgumentValue(args,
-                SKIP_TEST_FAILURE_METRICS, String.valueOf(false)));
+        mSkipTestFailureMetrics =
+                Boolean.parseBoolean(
+                        getArgumentValue(args, SKIP_TEST_FAILURE_METRICS, String.valueOf(false)));
         mSkipTestSuccessMetrics = Boolean.parseBoolean(getArgumentValue(args,
                 SKIP_TEST_SUCCESS_METRICS, String.valueOf(false)));
+        mSkipEmptyMetrics =
+                Boolean.parseBoolean(
+                        getArgumentValue(args, SKIP_EMPTY_METRICS, String.valueOf(false)));
+        mPerfettoHelper.setCheckEmptyMetrics(mSkipEmptyMetrics);
 
         mFilePathKeyPrefix = getArgumentValue(args, ARGUMENT_FILE_PATH_KEY_PREFIX,
                 DEFAULT_FILE_PATH_KEY_PREFIX);
