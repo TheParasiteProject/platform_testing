@@ -53,7 +53,7 @@ import platform.test.screenshot.dialogScreenshotTest
 class ComposeScreenshotTestRule(
     private val emulationSpec: DeviceEmulationSpec,
     pathManager: GoldenPathManager,
-    private val screenshotRule: ScreenshotTestRule = ScreenshotTestRule(pathManager)
+    private val screenshotRule: ScreenshotTestRule = ScreenshotTestRule(pathManager),
 ) : TestRule, BitmapDiffer by screenshotRule, ScreenshotAsserterFactory by screenshotRule {
     private val colorsRule = MaterialYouColorsRule()
     private val fontsRule = FontsRule()
@@ -62,9 +62,7 @@ class ComposeScreenshotTestRule(
     val composeRule = createAndroidComposeRule<ScreenshotActivity>()
 
     private val commonRule =
-        RuleChain.outerRule(deviceEmulationRule)
-            .around(screenshotRule)
-            .around(composeRule)
+        RuleChain.outerRule(deviceEmulationRule).around(screenshotRule).around(composeRule)
 
     // As denoted in `MaterialYouColorsRule` and `FontsRule`, these two rules need to come first,
     // though their relative orders are not critical.
@@ -108,9 +106,7 @@ class ComposeScreenshotTestRule(
                 val focusManager = LocalFocusManager.current.also { focusManager = it }
 
                 PlatformTheme {
-                    Surface(
-                        color = MaterialTheme.colorScheme.background,
-                    ) {
+                    Surface(color = MaterialTheme.colorScheme.background) {
                         content()
 
                         // Clear the focus early. This disposable effect will run after any
@@ -141,15 +137,19 @@ class ComposeScreenshotTestRule(
 
     fun dialogScreenshotTest(
         goldenIdentifier: String,
+        waitForIdle: () -> Unit = {},
         dialogProvider: (Activity) -> Dialog,
     ) {
         dialogScreenshotTest(
-            composeRule.activityRule,
-            screenshotRule,
-            matcher,
-            goldenIdentifier,
-            waitForIdle = { composeRule.waitForIdle() },
-            dialogProvider,
+            activityRule = composeRule.activityRule,
+            bitmapDiffer = screenshotRule,
+            matcher = matcher,
+            goldenIdentifier = goldenIdentifier,
+            waitForIdle = {
+                composeRule.waitForIdle()
+                waitForIdle()
+            },
+            dialogProvider = dialogProvider,
         )
     }
 }

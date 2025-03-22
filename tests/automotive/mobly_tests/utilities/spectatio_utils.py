@@ -525,8 +525,8 @@ class CallUtils:
         if expected_search_result not in actual_search_result:
             raise CallUtilsError('Actual search result does not contain Expected.')
 
-    def verify_sms_app_unread_message(self, expected):
-        """Verify unread message on sms app"""
+    def verify_sms_app_unread_message(self):
+        """Verify unread message badge on sms app"""
         logging.info('Verify Unread Message on SMS app')
         return self.device.mbs.isUnreadSmsDisplayed()
 
@@ -534,7 +534,6 @@ class CallUtils:
         """Verify sms preview text"""
         logging.info('Verify SMS Preview Text')
         return self.device.mbs.isSmsPreviewTextDisplayed(text)
-        actual_message_preview_displayed = self.device.mbs.isSmsPreviewTextDisplayed(text)
 
     def tap_to_read_aloud(self):
         """Tap on Received Text message"""
@@ -548,36 +547,18 @@ class CallUtils:
             logging.info("Assistant SMS Transcription plate has opened upon tapping the SMS.")
         return visibility_status
 
-    def verify_sms_preview_timestamp(self, expected):
+    def verify_sms_preview_timestamp(self):
         """Verify sms preview timestamp"""
         logging.info('Verify SMS Preview TimeStamp')
-        actual_message_preview_timestamp = self.device.mbs.isSmsTimeStampDisplayed()
-        logging.info(
-            'SMS Preview TimeStamp Expected: <%s>, Actual: <%s>',
-            expected,
-            actual_message_preview_timestamp,
-        )
-        if actual_message_preview_timestamp != expected:
-            raise CallUtilsError(
-                "SMS Preview TimeStamp - Actual and Expected doesn't match."
-            )
+        return self.device.mbs.isSmsTimeStampDisplayed()
 
-    def verify_sms_no_messages_displayed(self, expected):
-        """Verify sms preview timestamp"""
-        logging.info('Verify No Msg displayed')
-        actual_message_preview_timestamp = self.device.mbs.isNoMessagesDisplayed()
-        logging.info(
-            'SMS No Messages Expected: <%s>, Actual: <%s>',
-            expected,
-            actual_message_preview_timestamp,
-        )
-        if actual_message_preview_timestamp != expected:
-            raise CallUtilsError(
-                "No messages - Actual and Expected doesn't match."
-            )
+    def verify_sms_no_messages_displayed(self):
+        """Verify no messages text is displayed"""
+        logging.info('Verify No Messages Text displayed')
+        return self.device.mbs.isNoMessagesDisplayed()
 
     def clear_sms_app(self, device_target):
-        """Verify sms preview timestamp"""
+        """Clearing the sms app"""
         logging.debug('clearing the sms app')
         # self.execute_shell_on_device(device_target, constants.ROOT)
         self.execute_shell_on_device(device_target, constants.DELETE_MESSAGING_DB)

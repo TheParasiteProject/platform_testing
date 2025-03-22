@@ -397,9 +397,9 @@ class StudioGoldenWatcher:
             f"{self.latest_dir}//**/*.actual.json", recursive=True
         ):
             baseName = os.path.basename(filename)
-            filename, ext = os.path.splitext(baseName)
+            baseFilename, ext = os.path.splitext(baseName)
             timeHash = hashlib.md5(datetime.datetime.now().isoformat().encode("utf-8")).hexdigest()
-            local_file = os.path.join(self.temp_dir, f'copy_{filename}_{timeHash}{ext}')
+            local_file = os.path.join(self.temp_dir, f'copy_{baseFilename}_{timeHash}{ext}')
             self.copy_file(filename, local_file)
             golden = CachedGolden(filename, local_file)
             self.cached_goldens[filename] = golden

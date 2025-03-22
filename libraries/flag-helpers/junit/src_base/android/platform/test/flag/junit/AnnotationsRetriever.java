@@ -305,7 +305,7 @@ public class AnnotationsRetriever {
         @Nonnull
         Set<String> getFlagsSet(T annotation) {
             String[] flags = getFlags(annotation);
-            return flags == null ? Set.of() : Set.of(flags);
+            return flags == null ? Set.of() : new HashSet<>(List.of(flags));
         }
     }
 
