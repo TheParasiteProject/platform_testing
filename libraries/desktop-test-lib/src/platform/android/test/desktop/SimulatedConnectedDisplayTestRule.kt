@@ -35,9 +35,7 @@ import org.junit.rules.TestRule
 import org.junit.runner.Description
 import org.junit.runners.model.Statement
 
-/**
- * A TestRule to manage multiple simulated connected overlay displays.
- */
+/** A TestRule to manage multiple simulated connected overlay displays. */
 class SimulatedConnectedDisplayTestRule : TestRule {
 
     private val context = InstrumentationRegistry.getInstrumentation().targetContext
@@ -60,11 +58,11 @@ class SimulatedConnectedDisplayTestRule : TestRule {
     }
 
     /**
-     * Adds multiple overlay displays with specified dimensions. Any existing overlay displays
-     * will be removed before adding the new ones.
+     * Adds multiple overlay displays with specified dimensions. Any existing overlay displays will
+     * be removed before adding the new ones.
      *
-     * @param displays A list of [Point] objects, where each [Point] represents the
-     *                 width and height of a simulated display.
+     * @param displays A list of [Point] objects, where each [Point] represents the width and height
+     *   of a simulated display.
      * @return List of displayIds of added displays.
      */
     fun setupTestDisplays(displays: List<Point>): List<Int> = runBlocking {
@@ -77,32 +75,33 @@ class SimulatedConnectedDisplayTestRule : TestRule {
         }
 
         val displayAddedFlow: Flow<Int> = callbackFlow {
-            val listener = object : DisplayListener {
-                override fun onDisplayAdded(displayId: Int) {
-                    trySend(displayId)
-                }
+            val listener =
+                object : DisplayListener {
+                    override fun onDisplayAdded(displayId: Int) {
+                        trySend(displayId)
+                    }
 
-                override fun onDisplayRemoved(displayId: Int) {}
-                override fun onDisplayChanged(displayId: Int) {}
-            }
+                    override fun onDisplayRemoved(displayId: Int) {}
+
+                    override fun onDisplayChanged(displayId: Int) {}
+                }
 
             val handler = Handler(Looper.getMainLooper())
             displayManager.registerDisplayListener(listener, handler)
 
-            awaitClose {
-                displayManager.unregisterDisplayListener(listener)
-            }
+            awaitClose { displayManager.unregisterDisplayListener(listener) }
         }
 
-        val displaySettings = displays.joinToString(separator = ";") { size ->
-            "${size.x}x${size.y}/$DEFAULT_DENSITY"
-        }
+        val displaySettings =
+            displays.joinToString(separator = ";") { size ->
+                "${size.x}x${size.y}/$DEFAULT_DENSITY"
+            }
 
         // Add the overlay displays
         Settings.Global.putString(
             InstrumentationRegistry.getInstrumentation().context.contentResolver,
             Settings.Global.OVERLAY_DISPLAY_DEVICES,
-            displaySettings
+            displaySettings,
         )
         withTimeoutOrNull(TIMEOUT) {
             displayAddedFlow.take(displays.size).collect { displayId ->
@@ -113,8 +112,8 @@ class SimulatedConnectedDisplayTestRule : TestRule {
     }
 
     /**
-     * Adds multiple overlay displays with default dimensions. Any existing overlay displays
-     * will be removed before adding the new ones.
+     * Adds multiple overlay displays with default dimensions. Any existing overlay displays will be
+     * removed before adding the new ones.
      *
      * @param count number of displays to add.
      * @return List of displayIds of added displays.
@@ -126,20 +125,20 @@ class SimulatedConnectedDisplayTestRule : TestRule {
 
     private fun cleanupTestDisplays() = runBlocking {
         val displayRemovedFlow: Flow<Int> = callbackFlow {
-            val listener = object : DisplayListener {
-                override fun onDisplayAdded(displayId: Int) {}
-                override fun onDisplayRemoved(displayId: Int) {
-                    trySend(displayId)
-                }
+            val listener =
+                object : DisplayListener {
+                    override fun onDisplayAdded(displayId: Int) {}
 
-                override fun onDisplayChanged(displayId: Int) {}
-            }
+                    override fun onDisplayRemoved(displayId: Int) {
+                        trySend(displayId)
+                    }
+
+                    override fun onDisplayChanged(displayId: Int) {}
+                }
             val handler = Handler(Looper.getMainLooper())
             displayManager.registerDisplayListener(listener, handler)
 
-            awaitClose {
-                displayManager.unregisterDisplayListener(listener)
-            }
+            awaitClose { displayManager.unregisterDisplayListener(listener) }
         }
 
         // Remove overlay displays. We'll execute this regardless of addedDisplays just to
@@ -150,7 +149,7 @@ class SimulatedConnectedDisplayTestRule : TestRule {
         Settings.Global.putString(
             InstrumentationRegistry.getInstrumentation().context.contentResolver,
             Settings.Global.OVERLAY_DISPLAY_DEVICES,
-            null
+            null,
         )
 
         if (!addedDisplays.isEmpty()) {
