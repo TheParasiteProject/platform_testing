@@ -29,6 +29,7 @@ import org.json.JSONObject
 import org.junit.Assert.assertThrows
 import org.junit.Test
 import org.junit.runner.RunWith
+import platform.test.motion.filmstrip.Mp4VideoFileExporter
 import platform.test.motion.golden.SupplementalFrameId
 import platform.test.motion.golden.TimeSeries
 import platform.test.motion.golden.TimestampFrameId
@@ -162,12 +163,19 @@ class MotionTestRuleTest {
             recordedMotion,
             TimeSeriesVerificationResult.MISSING_REFERENCE,
         )
-        if (recordedMotion.videoRenderer != null) {
-            val expectedVideo =
-                File(goldenPathManager.deviceLocalPath)
-                    .resolve("FooClass/updated_golden.actual.mp4")
-            assertThat(expectedVideo.exists()).isTrue()
-        }
+
+        // The test is run either using robolectric or on device. The behavior is
+        // different depending on the actual environment.
+        val expectedVideoLocation =
+            if (MotionTestRule.isRobolectricRuntime())
+                "FooClass/updated_golden.actual.screenshots.zip"
+            else "FooClass/updated_golden.actual.mp4"
+
+        val expectedVideoFile =
+            if (MotionTestRule.isRobolectricRuntime())
+                File("/tmp/motion").resolve(expectedVideoLocation)
+            else File(goldenPathManager.deviceLocalPath).resolve(expectedVideoLocation)
+        assertThat(expectedVideoFile.exists()).isTrue()
 
         val expectedFile = goldenExportDirectory.resolve("FooClass/updated_golden.actual.json")
         val fileContents = JSONObject(expectedFile.readText())
@@ -188,9 +196,12 @@ class MotionTestRuleTest {
                     put("testClassName", "FooClass")
                     put("testMethodName", "bar_test")
                     put("result", "MISSING_REFERENCE")
-                    if (recordedMotion.videoRenderer != null) {
-                        put("videoLocation", "FooClass/updated_golden.actual.mp4")
-                    }
+                    put(
+                        "videoLocation",
+                        if (recordedMotion.screenshotExporter is Mp4VideoFileExporter)
+                            "FooClass/updated_golden.actual.mp4"
+                        else "FooClass/updated_golden.actual.screenshots.zip",
+                    )
                 }
             )
     }
