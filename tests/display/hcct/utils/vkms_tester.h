@@ -52,20 +52,47 @@ public:
     #undef CONNECTOR_TYPE
   };
 
-  // VkmsConnectorSetup describes the desired configuration for a VKMS
-  // connector. It provides default values, allowing you to specify only the
-  // parameters that need customization.
-  struct VkmsConnectorSetup {
-    ConnectorType type = ConnectorType::kDisplayPort;
-    // Indicates whether the connector is enabled upon VKMS initialization.
-    // This simulates a device powering on with a display already connected.
-    bool enabledAtStart = true;
-    // Each connector has a primary and a cursor plane by default. Use this to
-    // add additional overlay planes.
-    int additionalOverlayPlanes = 0;
-    // The Monitor Name that corresponds to the EDID to be used for this
-    // connector.
-    edid::MonitorName monitorName;
+  class VkmsConnectorBuilder {
+   public:
+    // Create a builder with default settings
+    static VkmsConnectorBuilder create() { return VkmsConnectorBuilder(); }
+
+    VkmsConnectorBuilder& withType(ConnectorType type) {
+      mType = type;
+      return *this;
+    }
+
+    VkmsConnectorBuilder& withType(const std::string& typeStr) {
+#define CONNECTOR_TYPE(enumName, value, stringName) \
+  if (typeStr == stringName) mType = ConnectorType::enumName;
+      CONNECTOR_TYPES
+#undef CONNECTOR_TYPE
+      return *this;
+    }
+
+    VkmsConnectorBuilder& enabledAtStart(bool enabled = true) {
+      mEnabledAtStart = enabled;
+      return *this;
+    }
+
+    VkmsConnectorBuilder& withAdditionalOverlayPlanes(int count) {
+      mAdditionalOverlayPlanes = count;
+      return *this;
+    }
+
+    VkmsConnectorBuilder& withMonitor(edid::MonitorName monitorName) {
+      mMonitorName = monitorName;
+      return *this;
+    }
+
+    // Friend access for VkmsTester to read the configuration
+    friend class VkmsTester;
+
+   private:
+    ConnectorType mType = ConnectorType::kDisplayPort;
+    bool mEnabledAtStart = true;
+    int mAdditionalOverlayPlanes = 0;
+    edid::MonitorName mMonitorName;
   };
 
   /**
@@ -86,22 +113,24 @@ public:
    */
   static std::unique_ptr<VkmsTester>
   CreateWithGenericConnectors(int displaysCount);
+
   /**
-   * Creates a VKMS configuration based on a provided vector of
-   * `VkmsConnectorSetup`.
+   * Creates a VKMS configuration based on a provided vector of connector
+   * builders.
    *
    * This method allows for fine-grained control over the configuration of each
-   * virtual display. Each entry in the `config` vector corresponds to a single
-   * connector and its associated configurable resources.
+   * virtual display. Each builder in the vector defines a single connector and
+   * its associated configuration.
    *
-   * @param config A vector of `VkmsConnectorSetup` objects, each defining the
+   * @param builders A vector of VkmsConnectorBuilder objects, each defining the
    * configuration for a single connector. The size of the vector determines the
    * number of virtual displays to create.
    * @return A unique pointer to the created VkmsTester instance, or nullptr if
    * creation failed.
    */
-  static std::unique_ptr<VkmsTester>
-  CreateWithConfig(const std::vector<VkmsConnectorSetup> &config);
+  static std::unique_ptr<VkmsTester> CreateWithBuilders(
+      const std::vector<VkmsConnectorBuilder>& builders);
+
   static void ForceDeleteVkmsDir();
 
   ~VkmsTester();
@@ -141,13 +170,12 @@ private:
 
   // Private constructor to prevent direct instantiation without the Create
   // functions.
-  explicit VkmsTester(
-      size_t displaysCount,
-      const std::vector<VkmsConnectorSetup> &explicitConfig = {});
+  explicit VkmsTester(size_t displaysCount,
+                      const std::vector<VkmsConnectorBuilder>& builders = {});
 
   bool SetVkmsAsDisplayDriver();
   bool SetupDisplays(int displaysCount,
-                     const std::vector<VkmsConnectorSetup> &explicitConfig);
+                     const std::vector<VkmsConnectorBuilder>& builders);
   static bool ToggleVkms(bool enable);
   static bool ToggleHwc3(bool enable);
 

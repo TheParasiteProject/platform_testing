@@ -69,19 +69,19 @@ VkmsTester::CreateWithGenericConnectors(int displaysCount) {
 }
 
 // static
-std::unique_ptr<VkmsTester>
-VkmsTester::CreateWithConfig(const std::vector<VkmsConnectorSetup> &config) {
-  if (config.empty()) {
+std::unique_ptr<VkmsTester> VkmsTester::CreateWithBuilders(
+    const std::vector<VkmsConnectorBuilder> &builders) {
+  if (builders.empty()) {
     ALOGE("Empty configuration provided. At least one connector must be "
           "specified.");
     return nullptr;
   }
 
   auto tester =
-      std::unique_ptr<VkmsTester>(new VkmsTester(config.size(), config));
+      std::unique_ptr<VkmsTester>(new VkmsTester(builders.size(), builders));
 
   if (!tester->mInitialized) {
-    ALOGE("Failed to initialize VkmsTester with Config");
+    ALOGE("Failed to initialize VkmsTester with Builder Config");
     return nullptr;
   }
 
@@ -92,10 +92,10 @@ VkmsTester::CreateWithConfig(const std::vector<VkmsConnectorSetup> &config) {
 void VkmsTester::ForceDeleteVkmsDir() { ShutdownAndCleanUpVkms(); }
 
 VkmsTester::VkmsTester(size_t displaysCount,
-                       const std::vector<VkmsConnectorSetup> &explicitConfig) {
+                       const std::vector<VkmsConnectorBuilder> &builders) {
   mInitialized = ToggleHwc3(false) && SetVkmsAsDisplayDriver() &&
-                 SetupDisplays(displaysCount, explicitConfig) &&
-                 ToggleVkms(true) && ToggleHwc3(true);
+                 SetupDisplays(displaysCount, builders) && ToggleVkms(true) &&
+                 ToggleHwc3(true);
   if (!mInitialized) {
     ALOGE("Failed to set up VKMS");
     ShutdownAndCleanUpVkms();
@@ -144,10 +144,10 @@ bool VkmsTester::SetVkmsAsDisplayDriver() {
 }
 
 bool VkmsTester::SetupDisplays(
-    int displaysCount, const std::vector<VkmsConnectorSetup> &explicitConfig) {
-  bool isExplicitConfig = !explicitConfig.empty();
-  if (isExplicitConfig && displaysCount != explicitConfig.size()) {
-    ALOGE("Mismatch between requested displays count and explicit config size");
+    int displaysCount, const std::vector<VkmsConnectorBuilder> &builders) {
+  bool isExplicitConfig = !builders.empty();
+  if (isExplicitConfig && displaysCount != builders.size()) {
+    ALOGE("Mismatch between requested displays count and builder config size");
     return false;
   }
 
@@ -158,11 +158,11 @@ bool VkmsTester::SetupDisplays(
 
     CreateResource(DrmResource::kConnector, i);
     // Unless explicitly configured, set all connectors to disconnected.
-    SetConnectorStatus(i, isExplicitConfig && explicitConfig[i].enabledAtStart);
+    SetConnectorStatus(i, isExplicitConfig && builders[i].mEnabledAtStart);
     if (isExplicitConfig) {
-      SetConnectorType(i, explicitConfig[i].type);
-      if (explicitConfig[i].monitorName.type != edid::MonitorName::Type::UNSET) {
-        SetConnectorEdid(i, explicitConfig[i].monitorName);
+      SetConnectorType(i, builders[i].mType);
+      if (builders[i].mMonitorName.type != edid::MonitorName::Type::UNSET) {
+        SetConnectorEdid(i, builders[i].mMonitorName);
       }
     } else {
       // Set connector type, eDP for first one, DP for the rest
@@ -172,7 +172,7 @@ bool VkmsTester::SetupDisplays(
     LinkConnectorToEncoder(i, i);
 
     int additionalOverlays =
-        isExplicitConfig ? explicitConfig[i].additionalOverlayPlanes : 0;
+        isExplicitConfig ? builders[i].mAdditionalOverlayPlanes : 0;
     for (int j = 0; j < 2 + additionalOverlays; ++j) {
       CreateResource(DrmResource::kPlane, mLatestPlaneId);
       // For each connector, create at least 2 planes, a primary and a cursor
