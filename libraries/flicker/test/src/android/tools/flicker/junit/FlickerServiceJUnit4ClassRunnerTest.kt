@@ -37,6 +37,7 @@ import android.tools.io.Reader
 import androidx.test.platform.app.InstrumentationRegistry
 import com.google.common.truth.Truth
 import java.time.Instant
+import org.junit.Assert
 import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.TestRule
@@ -133,6 +134,28 @@ class FlickerServiceJUnit4ClassRunnerTest {
             )
         Mockito.verify(notifier, Mockito.atLeast(2))
             .fireTestFinished(ArgumentMatchers.argThat { it.methodName.contains("FaaS") })
+    }
+
+    @Test
+    fun reportsTestRuleFailureInTest() {
+        var testRan = false
+        onTestRuleStart = Runnable { Assert.fail("Test rule failed") }
+        onTestStart = Runnable { testRan = true }
+
+        val runner = FlickerServiceJUnit4ClassRunner(SimpleTest::class.java)
+        val notifier = Mockito.mock(RunNotifier::class.java)
+        runner.run(notifier)
+
+        Truth.assertThat(testRan).isFalse()
+
+        Truth.assertThat(runner.testCount()).isEqualTo(1)
+        Mockito.verify(notifier)
+            .fireTestFailure(
+                ArgumentMatchers.argThat {
+                    it.description.methodName.equals("test") &&
+                        it.message.contains("Test rule failed")
+                }
+            )
     }
 
     /** Below are all the mock test classes uses for testing purposes */
