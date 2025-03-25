@@ -259,34 +259,62 @@ public class BackupUtilsTest {
 
     @Test
     public void testWaitForBackupInitialization_whenEnabled() throws Exception {
-        BackupUtils backupUtils = new BackupUtils() {
-            @Override
-            protected InputStream executeShellCommand(String command) throws IOException {
-                String output = "";
-                if (command.equals("dumpsys backup")) {
-                    output = "Backup Manager is enabled / provisioned / not pending init";
-                    mIsDumpsysCommandCalled = true;
-                }
-                return new ByteArrayInputStream(output.getBytes("UTF-8"));
-            }
-        };
+        BackupUtils backupUtils =
+                new BackupUtils() {
+                    @Override
+                    protected InputStream executeShellCommand(String command) throws IOException {
+                        String output = "";
+                        if (command.equals("dumpsys backup")) {
+                            output = "Backup Manager is enabled / provisioned / not pending init";
+                            mIsDumpsysCommandCalled = true;
+                        } else if (command.equals("am get-current-user")) {
+                            output = "0";
+                        }
+                        return new ByteArrayInputStream(output.getBytes("UTF-8"));
+                    }
+                };
         backupUtils.waitForBackupInitialization();
         assertTrue(mIsDumpsysCommandCalled);
     }
 
     @Test
     public void testWaitForBackupInitialization_whenDisabled() throws Exception {
-        BackupUtils backupUtils = new BackupUtils() {
-            @Override
-            protected InputStream executeShellCommand(String command) throws IOException {
-                String output = "";
-                if (command.equals("dumpsys backup")) {
-                    output = "Backup Manager is disabled / provisioned / not pending init";
-                    mIsDumpsysCommandCalled = true;
-                }
-                return new ByteArrayInputStream(output.getBytes("UTF-8"));
-            }
-        };
+        BackupUtils backupUtils =
+                new BackupUtils() {
+                    @Override
+                    protected InputStream executeShellCommand(String command) throws IOException {
+                        String output = "";
+                        if (command.equals("dumpsys backup")) {
+                            output = "Backup Manager is disabled / provisioned / not pending init";
+                            mIsDumpsysCommandCalled = true;
+                        } else if (command.equals("am get-current-user")) {
+                            output = "0";
+                        }
+                        return new ByteArrayInputStream(output.getBytes("UTF-8"));
+                    }
+                };
+        backupUtils.waitForBackupInitialization();
+        assertTrue(mIsDumpsysCommandCalled);
+    }
+
+    @Test
+    public void testWaitForBackupInitialization_whenNonSystemUser() throws Exception {
+        BackupUtils backupUtils =
+                new BackupUtils() {
+                    @Override
+                    protected InputStream executeShellCommand(String command) throws IOException {
+                        String output = "";
+                        if (command.equals("dumpsys backup")) {
+                            output =
+                                    "User 10:Backup Manager is enabled / provisioned / not pending"
+                                            + " init";
+                            mIsDumpsysCommandCalled = true;
+                        } else if (command.equals("am get-current-user")) {
+                            output = "10"; // Non-system user.
+                        }
+                        return new ByteArrayInputStream(output.getBytes("UTF-8"));
+                    }
+                };
         backupUtils.waitForBackupInitialization();
         assertTrue(mIsDumpsysCommandCalled);
     }
@@ -301,6 +329,8 @@ public class BackupUtilsTest {
                         if (command.equals("dumpsys backup")) {
                             output = "Backup Manager is enabled / provisioned / not pending init";
                             mIsDumpsysCommandCalled = true;
+                        } else if (command.equals("am get-current-user")) {
+                            output = "0";
                         }
                         return new ByteArrayInputStream(output.getBytes("UTF-8"));
                     }
@@ -323,6 +353,8 @@ public class BackupUtilsTest {
                                             + "Pending init: 1\n    com.google.android.gms/.backup"
                                             + ".BackupTransportService";
                             mIsDumpsysCommandCalled = true;
+                        } else if (command.equals("am get-current-user")) {
+                            output = "0";
                         }
                         return new ByteArrayInputStream(output.getBytes("UTF-8"));
                     }
@@ -341,6 +373,8 @@ public class BackupUtilsTest {
                         if (command.equals("dumpsys backup")) {
                             output = "Backup Manager is disabled / provisioned / not pending init";
                             mIsDumpsysCommandCalled = true;
+                        } else if (command.equals("am get-current-user")) {
+                            output = "0";
                         }
                         return new ByteArrayInputStream(output.getBytes("UTF-8"));
                     }
@@ -387,6 +421,8 @@ public class BackupUtilsTest {
                 if (command.equals("dumpsys backup users")) {
                     output = "Backup Manager is running for users: " + runningUserId;
                     mIsDumpsysCommandCalled = true;
+                } else if (command.equals("am get-current-user")) {
+                    output = "0";
                 }
                 return new ByteArrayInputStream(output.getBytes("UTF-8"));
             }
@@ -396,17 +432,22 @@ public class BackupUtilsTest {
     @Test
     public void testWaitForBackupInitialization_whenEnabledAndCommandReturnsMultipleLines()
             throws Exception {
-        BackupUtils backupUtils = new BackupUtils() {
-            @Override
-            protected InputStream executeShellCommand(String command) throws IOException {
-                String output = "";
-                if (command.equals("dumpsys backup")) {
-                    output = "Backup Manager is enabled / provisioned / not pending init" + "\n...";
-                    mIsDumpsysCommandCalled = true;
-                }
-                return new ByteArrayInputStream(output.getBytes("UTF-8"));
-            }
-        };
+        BackupUtils backupUtils =
+                new BackupUtils() {
+                    @Override
+                    protected InputStream executeShellCommand(String command) throws IOException {
+                        String output = "";
+                        if (command.equals("dumpsys backup")) {
+                            output =
+                                    "Backup Manager is enabled / provisioned / not pending init"
+                                            + "\n...";
+                            mIsDumpsysCommandCalled = true;
+                        } else if (command.equals("am get-current-user")) {
+                            output = "0";
+                        }
+                        return new ByteArrayInputStream(output.getBytes("UTF-8"));
+                    }
+                };
         backupUtils.waitForBackupInitialization();
         assertTrue(mIsDumpsysCommandCalled);
     }
@@ -414,18 +455,24 @@ public class BackupUtilsTest {
     @Test
     public void testWaitForBackupInitialization_whenCommandThrows_propagatesException()
             throws Exception {
-        BackupUtils backupUtils = new BackupUtils() {
-            @Override
-            protected InputStream executeShellCommand(String command) throws IOException {
-                String output = "";
-                if (command.equals("dumpsys backup")) {
-                    mIsDumpsysCommandCalled = true;
-                    throw new IOException(String.format(
-                            "waitForBackupInitialization: Failed to run command: %s", command));
-                }
-                return new ByteArrayInputStream(output.getBytes("UTF-8"));
-            }
-        };
+        BackupUtils backupUtils =
+                new BackupUtils() {
+                    @Override
+                    protected InputStream executeShellCommand(String command) throws IOException {
+                        String output = "";
+                        if (command.equals("dumpsys backup")) {
+                            mIsDumpsysCommandCalled = true;
+                            throw new IOException(
+                                    String.format(
+                                            "waitForBackupInitialization: Failed to run command:"
+                                                    + " %s",
+                                            command));
+                        } else if (command.equals("am get-current-user")) {
+                            output = "0";
+                        }
+                        return new ByteArrayInputStream(output.getBytes("UTF-8"));
+                    }
+                };
 
         boolean isExceptionHappened = false;
         try {
@@ -445,18 +492,21 @@ public class BackupUtilsTest {
             @Override
             public void run() {
                 try {
-                    BackupUtils backupUtils = new BackupUtils() {
-                        @Override
-                        protected InputStream executeShellCommand(String command)
-                                throws IOException {
-                            String output = "";
-                            if (command.equals("dumpsys backup")) {
-                                output = "Backup Manager ???";
-                                mIsDumpsysCommandCalled = true;
-                            }
-                            return new ByteArrayInputStream(output.getBytes("UTF-8"));
-                        }
-                    };
+                    BackupUtils backupUtils =
+                            new BackupUtils() {
+                                @Override
+                                protected InputStream executeShellCommand(String command)
+                                        throws IOException {
+                                    String output = "";
+                                    if (command.equals("dumpsys backup")) {
+                                        output = "Backup Manager ???";
+                                        mIsDumpsysCommandCalled = true;
+                                    } else if (command.equals("am get-current-user")) {
+                                        output = "0";
+                                    }
+                                    return new ByteArrayInputStream(output.getBytes("UTF-8"));
+                                }
+                            };
                     backupUtils.waitForBackupInitialization();
                 } catch (IOException e) {
                     // ignore
@@ -482,17 +532,20 @@ public class BackupUtilsTest {
     @Test
     public void testWaitForBackupInitialization_whenCommandReturnsEmptyString_throwsException()
             throws Exception {
-        BackupUtils backupUtils = new BackupUtils() {
-            @Override
-            protected InputStream executeShellCommand(String command) throws IOException {
-                String output = "";
-                if (command.equals("dumpsys backup")) {
-                    // output is empty already
-                    mIsDumpsysCommandCalled = true;
-                }
-                return new ByteArrayInputStream(output.getBytes("UTF-8"));
-            }
-        };
+        BackupUtils backupUtils =
+                new BackupUtils() {
+                    @Override
+                    protected InputStream executeShellCommand(String command) throws IOException {
+                        String output = "";
+                        if (command.equals("dumpsys backup")) {
+                            // output is empty already
+                            mIsDumpsysCommandCalled = true;
+                        } else if (command.equals("am get-current-user")) {
+                            output = "0";
+                        }
+                        return new ByteArrayInputStream(output.getBytes("UTF-8"));
+                    }
+                };
 
         boolean isExceptionHappened = false;
         try {
@@ -503,6 +556,51 @@ public class BackupUtilsTest {
         }
         assertTrue(isExceptionHappened);
         assertTrue(mIsDumpsysCommandCalled);
+    }
+
+    @Test
+    public void testWaitForBackupInitialization_whenUserIdDoesNotMatch() throws Exception {
+        class TestRunnable implements Runnable {
+            @Override
+            public void run() {
+                try {
+                    BackupUtils backupUtils =
+                            new BackupUtils() {
+                                @Override
+                                protected InputStream executeShellCommand(String command)
+                                        throws IOException {
+                                    String output = "";
+                                    if (command.equals("dumpsys backup")) {
+                                        output =
+                                                "User 10:Backup Manager is enabled / provisioned /"
+                                                        + " not pending init";
+                                        mIsDumpsysCommandCalled = true;
+                                    } else if (command.equals("am get-current-user")) {
+                                        output = "11"; // User ID doesn't match.
+                                    }
+                                    return new ByteArrayInputStream(output.getBytes("UTF-8"));
+                                }
+                            };
+                    backupUtils.waitForBackupInitialization();
+                } catch (IOException e) {
+                    // ignore
+                }
+            }
+        }
+
+        TestRunnable testRunnable = new TestRunnable();
+        Thread testThread = new Thread(testRunnable);
+
+        try {
+            testThread.start();
+            RunUtil.getDefault().sleep(100);
+            assertTrue(mIsDumpsysCommandCalled);
+            assertTrue(testThread.isAlive());
+        } catch (Exception e) {
+            // ignore
+        } finally {
+            testThread.interrupt();
+        }
     }
 
     @Test
