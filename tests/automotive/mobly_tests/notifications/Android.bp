@@ -211,3 +211,31 @@ python_test_host {
         },
     },
 }
+
+python_test_host {
+    name: "NotificationsSmsHunMultipleConversations",
+    main: "test_sms_hun_multiple_conversations.py",
+    srcs: ["test_sms_hun_multiple_conversations.py"],
+    libs: [
+        "mobly",
+        "utilities",
+        "BluetoothSMSTestLibrary",
+    ],
+    test_suites: [
+        "catbox",
+    ],
+    test_options: {
+        unit_test: false,
+    },
+    device_common_data: [
+        // Package the snippet with the mobly test
+        ":AutomotiveSnippet",
+        ":PhoneSnippet",
+        "bt_notifications_config.yaml",
+    ],
+    version: {
+        py3: {
+            embedded_launcher: true,
+        },
+    },
+}

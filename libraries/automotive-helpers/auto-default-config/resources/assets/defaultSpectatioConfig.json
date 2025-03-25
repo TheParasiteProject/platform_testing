@@ -901,6 +901,11 @@
       "VALUE": "notification_body_content",
       "PACKAGE": "com.android.systemui"
     },
+    "NOTIFICATION_SMS_COUNT": {
+      "TYPE": "RESOURCE_ID",
+      "VALUE": "message_count",
+      "PACKAGE": "com.android.systemui"
+    },
     "NOTIFICATION_LIST_EMPTY": {
       "TYPE": "RESOURCE_ID",
       "VALUE": "empty_notification_text",

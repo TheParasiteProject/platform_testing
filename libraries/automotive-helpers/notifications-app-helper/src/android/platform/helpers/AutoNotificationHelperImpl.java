@@ -117,6 +117,118 @@ public class AutoNotificationHelperImpl extends AbstractStandardAppHelper
 
     /** {@inheritDoc} */
     @Override
+    public boolean checkNotificationExists(String title) {
+        open();
+        BySelector selector = By.text(title);
+        UiObject2 postedNotification = findInNotificationList(selector);
+        return postedNotification != null;
+    }
+
+    /**
+     * Setup expectations: None.
+     *
+     * <p>Find notification with specific title in notification center.
+     */
+    @Override
+    public UiObject2 findNotificationInCenterWithTitle(String title) {
+        Log.i(LOG_TAG, "Searching for notification in the notification center with title: " + title);
+
+        List<UiObject2> notifications = getNotifications();
+        for (UiObject2 notification : notifications) {
+            UiObject2 titleObj = notification.findObject(
+                getUiElementFromConfig(AutomotiveConfigConstants.NOTIFICATION_TITLE)
+            );
+            String titleText = titleObj.getText().toLowerCase();
+            if (titleObj != null && titleText.contains(title.toLowerCase())) {
+                return notification;
+            }
+        }
+
+        Log.w(LOG_TAG, "Cannot find notification in the notification center with title: " + title);
+        return null;
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    public boolean isNotificationDisplayedInCenterWithTitle(String title) {
+        Log.i(LOG_TAG, "Checking if notification in the notification center with title: " + title + " is displayed.");
+        UiObject2 notification = findNotificationInCenterWithTitle(title);
+        return notification != null;
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    public boolean isNotificationDisplayedInCenterWithContent(String content) {
+        Log.i(LOG_TAG, "Checking if notification in the notification center with content: " + content + " is displayed.");
+
+        List<UiObject2> notifications = getNotifications();
+        for (UiObject2 notification : notifications) {
+            UiObject2 contentObj = notification.findObject(
+                getUiElementFromConfig(AutomotiveConfigConstants.NOTIFICATION_CONTENT)
+            );
+            String contentText = contentObj.getText().toLowerCase();
+            if (contentObj != null && contentText.contains(content.toLowerCase())) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    public String getNotificationContent(String title) {
+        Log.i(LOG_TAG, String.format("Getting the content of notification in the notification center with title %s.", title));
+
+        UiObject2 notification = findNotificationInCenterWithTitle(title);
+        UiObject2 content = notification.findObject(
+            getUiElementFromConfig(AutomotiveConfigConstants.NOTIFICATION_CONTENT)
+        );
+        if (content == null) {
+            throw new RuntimeException(String.format("Cannot find content for notification with title '%s'.", title));
+        }
+
+        return content.getText();
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    public int getSmsNotificationCount(String title) {
+        Log.i(LOG_TAG, String.format("Getting the count of SMS notification in the notification center with title %s.", title));
+
+        UiObject2 notification = findNotificationInCenterWithTitle(title);
+        UiObject2 smsCount = notification.findObject(
+            getUiElementFromConfig(AutomotiveConfigConstants.NOTIFICATION_SMS_COUNT)
+        );
+        if (smsCount == null) {
+            throw new RuntimeException(String.format("Cannot find SMS count for notification with title '%s'.", title));
+        }
+
+        String smsCountText = smsCount.getText();
+        Log.i(LOG_TAG, "Sms count text: " + smsCountText);
+        int count = Integer.parseInt(smsCountText.split(" ")[0]);
+
+        return count;
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    public String getSmsNotificationContent(String title) {
+        Log.i(LOG_TAG, String.format("Getting the content of SMS notification in the notification center with title %s.", title));
+
+        // Click on SMS count to expand the notification and get the content. If present.
+        UiObject2 notification = findNotificationInCenterWithTitle(title);
+        UiObject2 smsCount = notification.findObject(
+            getUiElementFromConfig(AutomotiveConfigConstants.NOTIFICATION_SMS_COUNT)
+        );
+        if (smsCount != null) {
+            getSpectatioUiUtil().clickAndWait(smsCount);
+        }
+        return getNotificationContent(title);
+    }
+
+    /** {@inheritDoc} */
+    @Override
     public void tapClearAllBtn() {
         open();
         getSpectatioUiUtil().wait5Seconds();
@@ -157,63 +269,6 @@ public class AutoNotificationHelperImpl extends AbstractStandardAppHelper
         } else {
             throw new RuntimeException("Cannot find Manage button");
         }
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    public boolean checkNotificationExists(String title) {
-        open();
-        BySelector selector = By.text(title);
-        UiObject2 postedNotification = findInNotificationList(selector);
-        return postedNotification != null;
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    public boolean isNotificationDisplayedInCenterWithTitle(String title) {
-        Log.i(
-                LOG_TAG,
-                "Checking if notification with title: "
-                        + title
-                        + " is displayed in the notification center.");
-
-        List<UiObject2> notifications = getNotifications();
-        for (UiObject2 notification : notifications) {
-            UiObject2 titleObj = notification.findObject(
-                getUiElementFromConfig(AutomotiveConfigConstants.NOTIFICATION_TITLE)
-            );
-            String titleText = titleObj.getText().toLowerCase();
-            Log.i("Title: ", "" + titleText);
-            if (titleObj != null && titleText.contains(title.toLowerCase())) {
-                return true;
-            }
-        }
-
-        return false;
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    public boolean isNotificationDisplayedInCenterWithContent(String content) {
-        Log.i(
-                LOG_TAG,
-                "Checking if notification with content: "
-                        + content
-                        + " is displayed in the notification center.");
-
-        List<UiObject2> notifications = getNotifications();
-        for (UiObject2 notification : notifications) {
-            UiObject2 contentObj = notification.findObject(
-                getUiElementFromConfig(AutomotiveConfigConstants.NOTIFICATION_CONTENT)
-            );
-            String contentText = contentObj.getText().toLowerCase();
-            Log.i("Content: ", "" + contentText);
-            if (contentObj != null && contentText.contains(content.toLowerCase())) {
-                return true;
-            }
-        }
-
-        return false;
     }
 
     @Override
