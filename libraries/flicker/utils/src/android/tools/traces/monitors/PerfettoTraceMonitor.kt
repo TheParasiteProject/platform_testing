@@ -289,7 +289,7 @@ open class PerfettoTraceMonitor(val config: TraceConfig) : TraceMonitor() {
 
             if (logFrom != null) {
                 protoLogConfigBuilder.setDefaultLogFromLevel(
-                    PerfettoConfig.ProtoLogLevel.forNumber(logFrom.id)
+                    PerfettoConfig.ProtoLogLevel.forNumber(logFrom.protoMessageId)
                 )
             }
 
@@ -298,7 +298,9 @@ open class PerfettoTraceMonitor(val config: TraceConfig) : TraceMonitor() {
                     PerfettoConfig.ProtoLogGroup.newBuilder()
                         .setGroupName(groupOverride.groupName)
                         .setLogFrom(
-                            PerfettoConfig.ProtoLogLevel.forNumber(groupOverride.logFrom.id)
+                            PerfettoConfig.ProtoLogLevel.forNumber(
+                                groupOverride.logFrom.protoMessageId
+                            )
                         )
                         .setCollectStacktrace(groupOverride.collectStackTrace)
                 )
