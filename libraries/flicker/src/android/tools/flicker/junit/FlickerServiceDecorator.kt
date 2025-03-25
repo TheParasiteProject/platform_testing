@@ -193,14 +193,22 @@ class FlickerServiceDecorator(
                                 }
                             }
                         }
-                    ruleContainer
-                        .apply(
-                            method,
-                            description,
-                            testClass.onlyConstructor.newInstance(),
-                            statement,
-                        )
-                        .evaluate()
+
+                    try {
+                        ruleContainer
+                            .apply(
+                                method,
+                                description,
+                                testClass.onlyConstructor.newInstance(),
+                                statement,
+                            )
+                            .evaluate()
+                    } catch (e: Throwable) {
+                        // Failed to execute test rules, report the error in the test method's
+                        // result instead of causing a module failure due to crashing in the
+                        // getTestMethods method.
+                        innerMethodsResults[method] = e
+                    }
                 }
 
                 if (innerMethodsResults[method] == null) {
