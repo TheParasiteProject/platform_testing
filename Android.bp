@@ -481,3 +481,43 @@ test_package {
         dest: "continuous_native_tests-FILE_NAME_TAG_PLACEHOLDER.zip",
     },
 }
+
+test_package {
+    name: "continuous_native_metric_tests_soong",
+    device_first_tests: [
+    ] + select(soong_config_variable("perf", "board_perfsetup_script"), {
+        any: ["perf-setup"],
+        default: [],
+    }),
+
+    device_both_tests: [
+        "binderAddInts",
+        "binderRpcBenchmark",
+        "bionic-benchmarks",
+        "binder_thread_stats",
+        "hwuimacro",
+        "hwuimicro",
+        "inputflinger_benchmarks",
+        "libandroidfw_benchmarks",
+        "libhwbinder_benchmark",
+        "libjavacore-benchmarks",
+        "libgui_benchmarks",
+        "libpowermanager_benchmarks",
+        "libvibratorservice_benchmarks",
+        "minikin_perftests",
+        "mmapPerf",
+        "netd_benchmark",
+        "VibratorHalIntegrationBenchmark",
+        "librenderengine_bench",
+        "statsd_benchmark",
+        "surfaceflinger_microbenchmarks",
+    ],
+    tests_if_exist_device_both: [
+    ],
+
+    dist: {
+        targets: ["continuous_native_metric_tests"],
+        prepend_artifact_with_product: true,
+        dest: "continuous_native_metric_tests-FILE_NAME_TAG_PLACEHOLDER.zip",
+    },
+}
