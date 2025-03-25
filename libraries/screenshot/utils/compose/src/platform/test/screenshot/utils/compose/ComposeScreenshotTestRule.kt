@@ -137,6 +137,8 @@ class ComposeScreenshotTestRule(
 
     fun dialogScreenshotTest(
         goldenIdentifier: String,
+        shouldWaitForTheDialog: (Dialog) -> Boolean = { false },
+        frameLimit: Int = 10,
         waitForIdle: () -> Unit = {},
         dialogProvider: (Activity) -> Dialog,
     ) {
@@ -145,6 +147,8 @@ class ComposeScreenshotTestRule(
             bitmapDiffer = screenshotRule,
             matcher = matcher,
             goldenIdentifier = goldenIdentifier,
+            frameLimit = frameLimit,
+            checkDialog = shouldWaitForTheDialog,
             waitForIdle = {
                 composeRule.waitForIdle()
                 waitForIdle()
