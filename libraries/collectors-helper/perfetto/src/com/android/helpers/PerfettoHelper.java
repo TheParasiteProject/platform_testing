@@ -31,6 +31,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Random;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -59,6 +60,8 @@ public class PerfettoHelper {
     private static final String REMOVE_CMD = "rm %s";
     // Add the trace output file /data/misc/perfetto-traces/trace_output.perfetto-trace
     private static final String CREATE_FILE_CMD = "touch %s";
+    // Command to check the file size.
+    private static final String CHECK_FILE_SIZE_CMD = "wc -c %s";
     // Command to copy the perfetto output trace file to given folder.
     private static final String COPY_CMD = "cp %s %s";
     // Command to set the read permission for all users on the given file.
@@ -83,6 +86,7 @@ public class PerfettoHelper {
     private String mConfigFileName;
     private boolean mIsTextProtoConfig;
     private boolean mTrackPerfettoPidFlag;
+    private boolean mCheckEmptyMetrics = false;
     private String mTrackPerfettoRootDir = "sdcard/";
     private File mPerfettoPidFile;
 
@@ -98,8 +102,12 @@ public class PerfettoHelper {
      *                      sessions happening at the same time
      */
     public PerfettoHelper(String tmpFilePrefix) {
-        mTmpOutputFilePath = "/data/misc/perfetto-traces/" + tmpFilePrefix
-                + "trace_output.perfetto-trace";
+        mTmpOutputFilePath =
+                "/data/misc/perfetto-traces/"
+                        + tmpFilePrefix
+                        + "_trace_output_"
+                        + new Random().nextInt(100)
+                        + ".perfetto-trace";
     }
 
     /** Set content of the perfetto configuration to be used when tracing */
@@ -291,9 +299,7 @@ public class PerfettoHelper {
         Log.i(LOG_TAG, String.format("Perfetto output file cleanup - %s", output));
 
         // Create new temporary output trace file before tracing.
-        output =
-                mUIDevice.executeShellCommand(
-                        String.format(CREATE_FILE_CMD, mTmpOutputFilePath));
+        output = mUIDevice.executeShellCommand(String.format(CREATE_FILE_CMD, mTmpOutputFilePath));
         if (output.isEmpty()) {
             Log.i(LOG_TAG, "Perfetto output file create success.");
         } else {
@@ -487,6 +493,24 @@ public class PerfettoHelper {
      * @return true if the trace file copied successfully otherwise false.
      */
     private boolean copyFileOutput(String destinationFile) {
+        // Check if the perfetto trace file is empty. If yes, then do not copy the file.
+        if (mCheckEmptyMetrics) {
+            try {
+                String checkFileSizeResult =
+                        mUIDevice.executeShellCommand(
+                                String.format(CHECK_FILE_SIZE_CMD, mTmpOutputFilePath));
+                Log.i(LOG_TAG, "checkFileSizeResult = " + checkFileSizeResult);
+                String[] result = checkFileSizeResult.split("\\s+");
+                if (Integer.parseInt(result[0]) == 0) {
+                    Log.i(LOG_TAG, "Perfetto trace file is empty.");
+                    return false;
+                }
+            } catch (IOException ioe) {
+                Log.e(LOG_TAG, "Unable to check the perfetto trace file size." + ioe.getMessage());
+                return false;
+            }
+        }
+
         // Create the destination directory if it doesn't already exist.
         Path path = Paths.get(destinationFile);
         String destDirectory = path.getParent().toString();
@@ -508,8 +532,9 @@ public class PerfettoHelper {
         //       Moreover, the copied trace file may end up with different permissions, resulting
         //       in b/162072200, to prevent this, ensure the files are readable after copying
         try {
-            String copyResult = mUIDevice.executeShellCommand(String.format(
-                    COPY_CMD, mTmpOutputFilePath, destinationFile));
+            String copyResult =
+                    mUIDevice.executeShellCommand(
+                            String.format(COPY_CMD, mTmpOutputFilePath, destinationFile));
             if (!copyResult.isEmpty()) {
                 Log.e(LOG_TAG, String.format(
                         "Unable to copy perfetto output file from %s to %s due to %s",
@@ -529,9 +554,11 @@ public class PerfettoHelper {
             String removeResult = mUIDevice.executeShellCommand(String.format(
                     REMOVE_CMD, mTmpOutputFilePath));
             if (!removeResult.isEmpty()) {
-                Log.e(LOG_TAG, String.format(
-                        "Unable to remove temporary perfetto output file %s due to %s",
-                        mTmpOutputFilePath, removeResult));
+                Log.e(
+                        LOG_TAG,
+                        String.format(
+                                "Unable to remove temporary perfetto output file %s due to %s",
+                                mTmpOutputFilePath, removeResult));
                 return false;
             }
         } catch (IOException ioe) {
@@ -541,6 +568,10 @@ public class PerfettoHelper {
             return false;
         }
         return true;
+    }
+
+    public void setCheckEmptyMetrics(Boolean flag) {
+        mCheckEmptyMetrics = flag;
     }
 
     public void setPerfettoConfigRootDir(String rootDir) {
