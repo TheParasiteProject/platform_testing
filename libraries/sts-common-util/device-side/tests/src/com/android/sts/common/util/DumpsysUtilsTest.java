@@ -45,22 +45,24 @@ public class DumpsysUtilsTest {
     private String mActivityName;
     private UiDevice mUiDevice;
     private BySelector mSelector;
+    private Intent mIntent;
+    private Context mContext;
 
     @Before
-    public void setUp() {
+    public void setUp() throws Exception {
         runShellCommand("input keyevent KEYCODE_WAKEUP");
         runShellCommand("wm dismiss-keyguard");
         runShellCommand("input keyevent KEYCODE_HOME");
 
         Instrumentation instrumentation = getInstrumentation();
-        Context context = instrumentation.getContext();
+        mContext = instrumentation.getContext();
         mUiDevice = UiDevice.getInstance(instrumentation);
-        Intent intent =
-                new Intent(Settings.ACTION_SETTINGS).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        ComponentName componentName = intent.resolveActivity(context.getPackageManager());
+        mIntent =
+                new Intent(Settings.ACTION_SETTINGS)
+                        .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        ComponentName componentName = mIntent.resolveActivity(mContext.getPackageManager());
         mActivityName = componentName.flattenToString();
         mSelector = By.pkg(componentName.getPackageName());
-        context.startActivity(intent);
     }
 
     @After
@@ -72,21 +74,36 @@ public class DumpsysUtilsTest {
     @Test
     public void testActivityResumed() throws Exception {
         assertWithMessage("Activity was not resumed")
-                .that(poll(() -> DumpsysUtils.isActivityResumed(mActivityName)))
+                .that(
+                        poll(
+                                () -> {
+                                    mContext.startActivity(mIntent);
+                                    return DumpsysUtils.isActivityResumed(mActivityName);
+                                }))
                 .isTrue();
     }
 
     @Test
     public void testActivityVisible() throws Exception {
         assertWithMessage("Activity was not visible")
-                .that(poll(() -> DumpsysUtils.isActivityVisible(mActivityName)))
+                .that(
+                        poll(
+                                () -> {
+                                    mContext.startActivity(mIntent);
+                                    return DumpsysUtils.isActivityVisible(mActivityName);
+                                }))
                 .isTrue();
     }
 
     @Test
     public void testActivityLaunched() throws Exception {
         assertWithMessage("Activity was not launched")
-                .that(poll(() -> DumpsysUtils.isActivityLaunched(mActivityName)))
+                .that(
+                        poll(
+                                () -> {
+                                    mContext.startActivity(mIntent);
+                                    return DumpsysUtils.isActivityLaunched(mActivityName);
+                                }))
                 .isTrue();
     }
 }
