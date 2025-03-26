@@ -1,0 +1,13 @@
+{
+  "wm-cf": [
+    {
+      "name": "FlickerLibTest"
+    },
+    {
+      "name": "FlickerLibTestE2e"
+    },
+    {
+      "name": "FlickerLibUtilsTest"
+    }
+  ]
+}
