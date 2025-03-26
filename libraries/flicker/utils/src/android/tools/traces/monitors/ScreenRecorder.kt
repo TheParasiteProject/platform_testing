@@ -29,8 +29,6 @@ open class ScreenRecorder
 constructor(
     private val context: Context,
     private val outputFile: File = File.createTempFile("transition", "screen_recording"),
-    private val width: Int = 720,
-    private val height: Int = 1280,
 ) : TraceMonitor() {
     override val traceType = TraceType.SCREEN_RECORDING
 
@@ -38,7 +36,7 @@ constructor(
     private var recordingRunnable: ScreenRecordingRunnable? = null
 
     private fun newRecordingThread(): Thread {
-        val runnable = ScreenRecordingRunnable(outputFile, context, width, height)
+        val runnable = ScreenRecordingRunnable(outputFile, context)
         recordingRunnable = runnable
         return Thread(runnable)
     }
