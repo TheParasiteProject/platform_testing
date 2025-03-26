@@ -28,7 +28,8 @@ import java.util.function.Predicate
  * If you want to only match the window and layer with the specified ids then use
  * ExactComponentIdMatcher instead.
  */
-class FullComponentIdMatcher(val windowId: Int, val layerId: Int) : IComponentMatcher {
+class FullComponentIdMatcher(val windowId: Int, val layerId: Int, val name: String? = null) :
+    IComponentMatcher {
     /**
      * @param windows to search
      * @return if any of the components matches any of [windows]
@@ -74,8 +75,18 @@ class FullComponentIdMatcher(val windowId: Int, val layerId: Int) : IComponentMa
     override fun toActivityIdentifier() = toWindowIdentifier()
 
     /** {@inheritDoc} */
-    override fun toWindowIdentifier() = "Window#${windowId.toString(16)} & children"
+    override fun toWindowIdentifier() =
+        if (name == null) {
+            "Window#${windowId.toString(16)} & children"
+        } else {
+            "$name (Window#${windowId.toString(16)} & children)"
+        }
 
     /** {@inheritDoc} */
-    override fun toLayerIdentifier(): String = "Layer#$layerId & children"
+    override fun toLayerIdentifier(): String =
+        if (name == null) {
+            "Layer#$layerId & children"
+        } else {
+            "$name (Layer#$layerId & children)"
+        }
 }
