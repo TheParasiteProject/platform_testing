@@ -19,7 +19,7 @@ package android.platform.systemui_tapl.ui
 import android.platform.systemui_tapl.utils.DeviceUtils.sysuiResSelector
 import android.platform.systemui_tapl.utils.SETTINGS_PACKAGE
 import android.platform.test.scenario.tapl_common.Gestures
-import android.platform.test.scenario.tapl_common.Gestures.click
+import android.platform.test.scenario.tapl_common.Gestures.shortClick
 import android.platform.uiautomatorhelpers.DeviceHelpers.assertVisible
 import android.platform.uiautomatorhelpers.DeviceHelpers.waitForObj
 import android.platform.uiautomatorhelpers.WaitUtils.ensureThat
@@ -184,7 +184,7 @@ private class ClickableImpl(private val tile: UiObject2) : Clickable {
     }
 
     override fun click() {
-        click(tile, "Tile")
+        shortClick(tile, "Tile")
     }
 }
 
@@ -220,7 +220,7 @@ private open class ToggleableImpl(private val tile: UiObject2) : Toggleable {
 
     override fun toggleAndAssertToggled(extraValidation: () -> Unit) {
         val wasChecked = isChecked
-        click(tile, "Tile")
+        shortClick(tile, "Tile")
         extraValidation()
         assertCheckedStatus(!wasChecked)
     }

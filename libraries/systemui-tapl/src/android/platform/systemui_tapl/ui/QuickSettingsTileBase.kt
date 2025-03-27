@@ -19,7 +19,7 @@ package android.platform.systemui_tapl.ui
 import android.platform.systemui_tapl.utils.DeviceUtils.sysuiResSelector
 import android.platform.systemui_tapl.utils.SETTINGS_PACKAGE
 import android.platform.test.scenario.tapl_common.Gestures
-import android.platform.test.scenario.tapl_common.Gestures.click
+import android.platform.test.scenario.tapl_common.Gestures.shortClick
 import android.platform.test.util.HealthTestingUtils.waitForValueCatchingStaleObjectExceptions
 import android.platform.uiautomatorhelpers.DeviceHelpers.assertVisible
 import android.platform.uiautomatorhelpers.DeviceHelpers.waitForObj
@@ -69,7 +69,7 @@ sealed class QuickSettingsTileBase {
     /** Clicks a non-Internet tile and verifies that its checked state changes. */
     fun click() {
         val wasChecked = isChecked
-        click(tile, "Tile")
+        clickWithoutAssertions()
         assertCheckedStatus(!wasChecked)
     }
 
@@ -78,7 +78,7 @@ sealed class QuickSettingsTileBase {
      * use unless you have a very good reason to omit assertions.
      */
     fun clickWithoutAssertions() {
-        click(tile, "Tile")
+        shortClick(tile, "Tile")
     }
 
     fun assertCheckedStatus(checked: Boolean) {
@@ -88,7 +88,7 @@ sealed class QuickSettingsTileBase {
 
     /** Clicks the Internet tile and presses Done button. */
     fun clickInternetTile() {
-        click(tile, "Tile")
+        clickWithoutAssertions()
         val internetDialog = InternetDialog()
 
         internetDialog.clickOnDoneAndClose()
@@ -96,19 +96,19 @@ sealed class QuickSettingsTileBase {
 
     /** Clicks the Bluetooth tile and presses Done button. */
     fun clickBluetoothTile() {
-        click(tile, "Tile")
+        clickWithoutAssertions()
         val bluetoothDialog = BluetoothDialog()
 
         bluetoothDialog.clickOnDoneAndClose()
     }
 
     fun clickDnDIntoDialog(): AlertDialog {
-        click(tile, "Tile")
+        clickWithoutAssertions()
         return AlertDialog()
     }
 
     fun clickModesTile(): ModesDialog {
-        click(tile, "Tile")
+        clickWithoutAssertions()
         return ModesDialog()
     }
 
