@@ -123,6 +123,10 @@ class SimulatedConnectedDisplayTestRule : TestRule {
         return setupTestDisplays(displays)
     }
 
+    /** Add a single overlay display. */
+    fun setupTestDisplay(width: Int = DEFAULT_WIDTH, height: Int = DEFAULT_HEIGHT): Int =
+        setupTestDisplays(listOf(Point(width, height)))[0]
+
     private fun cleanupTestDisplays() = runBlocking {
         val displayRemovedFlow: Flow<Int> = callbackFlow {
             val listener =
