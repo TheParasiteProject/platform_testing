@@ -20,17 +20,10 @@ import android.platform.systemui_tapl.utils.DeviceUtils.sysuiResSelector
 import android.platform.systemui_tapl.utils.SETTINGS_PACKAGE
 import android.platform.test.scenario.tapl_common.Gestures
 import android.platform.test.scenario.tapl_common.Gestures.click
-import android.platform.test.scenario.tapl_common.TaplUiDevice
 import android.platform.test.util.HealthTestingUtils.waitForValueCatchingStaleObjectExceptions
-import android.platform.uiautomatorhelpers.DeviceHelpers.assertInvisible
 import android.platform.uiautomatorhelpers.DeviceHelpers.assertVisible
-import android.platform.uiautomatorhelpers.DeviceHelpers.uiDevice
 import android.platform.uiautomatorhelpers.DeviceHelpers.waitForObj
-import android.platform.uiautomatorhelpers.WaitResult
 import android.platform.uiautomatorhelpers.WaitUtils.ensureThat
-import android.platform.uiautomatorhelpers.WaitUtils.waitToBecomeTrue
-import android.platform.uiautomatorhelpers.scrollUntilFound
-import android.util.Log
 import androidx.test.uiautomator.By
 import androidx.test.uiautomator.BySelector
 import androidx.test.uiautomator.UiObject2
@@ -96,40 +89,17 @@ sealed class QuickSettingsTileBase {
     /** Clicks the Internet tile and presses Done button. */
     fun clickInternetTile() {
         click(tile, "Tile")
-        val scrollView =
-            TaplUiDevice.waitForObject(
-                    sysuiResSelector(DIALOG_RES_ID),
-                    objectName = "Internet connectivity dialog",
-                )
-                .waitForChildObject(
-                    childResourceId = SCROLL_VIEW_RES_ID,
-                    childObjectName = "Scroll view",
-                )
-                .uiObject
-        val doneButton = scrollView.scrollUntilFound(DONE_BTN) ?: error("Done button not found")
-        doneButton.click()
-        if (waitToBecomeTrue { !uiDevice.hasObject(DONE_BTN) }.result !is WaitResult.WaitSuccess) {
-            Log.d("QuickSettingsTileBase", "Retrying click due to b/339676505")
-            doneButton.click()
-        }
-        DONE_BTN.assertInvisible(errorProvider = { "Internet dialog is dismissed" })
+        val internetDialog = InternetDialog()
+
+        internetDialog.clickOnDoneAndClose()
     }
 
     /** Clicks the Bluetooth tile and presses Done button. */
     fun clickBluetoothTile() {
         click(tile, "Tile")
-        val scrollView =
-            TaplUiDevice.waitForObject(
-                    sysuiResSelector(BLUETOOTH_TILE_DIALOG_RES_ID),
-                    objectName = "Bluetooth tile dialog",
-                )
-                .waitForChildObject(
-                    childResourceId = SCROLL_VIEW_RES_ID,
-                    childObjectName = "Scroll view",
-                )
-                .uiObject
-        scrollView.scrollUntilFound(DONE_BTN)?.click() ?: error("Done button not found")
-        DONE_BTN.assertInvisible(errorProvider = { "Bluetooth tile dialog is dismissed" })
+        val bluetoothDialog = BluetoothDialog()
+
+        bluetoothDialog.clickOnDoneAndClose()
     }
 
     fun clickDnDIntoDialog(): AlertDialog {
