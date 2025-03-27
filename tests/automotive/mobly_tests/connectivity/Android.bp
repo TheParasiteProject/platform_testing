@@ -128,6 +128,28 @@ python_test_host {
 }
 
 python_test_host {
+    name: "BTMediaStatusOnMediaCenter",
+    main: "connectivity_test_disable_media_displayed_in_media_center.py",
+    srcs: ["connectivity_test_disable_media_displayed_in_media_center.py"],
+    libs: [
+        "mobly",
+        "utilities",
+        "bluetooth_test",
+    ],
+    test_suites: [
+        "catbox",
+    ],
+    test_options: {
+        unit_test: false,
+    },
+    device_common_data: [
+        // Package the snippet with the mobly test
+        ":AutomotiveSnippet",
+        ":PhoneSnippet",
+    ],
+}
+
+python_test_host {
     name: "BTDisablePhone",
     main: "connectivity_test_disable_phone.py",
     srcs: ["connectivity_test_disable_phone.py"],

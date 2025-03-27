@@ -17,34 +17,36 @@
 
   Test Steps:
   (0. Flash device)
-  1. Pair Bluetooth Device
+  1. Pair Bluetooth Device with all supported profiles
   2. Launch Settings - Bluetooth page
-  3. Tap Media button in L1
-  2. Tap Bluetooth Device name in L1
-  5. Verfy Connected (No media ) Displayed in L2
-  6. Repeat -  Disconnect - Connect Media  profile from L1 several times and verify Connected (No Media) status displayed in L2
+  3. Tap the Media button. Verify: Media Button turns to Grey
+  4. Launch Media Center from Media Widget and verify no media displayed
+  5. Repeat Enable-Disable Media profile multiple times via Media button
 
 """
 
 from mobly import asserts
 from utilities.main_utils import common_main
+from utilities.common_utils import CommonUtils
 from bluetooth_test import bluetooth_base_test
 from utilities import constants
 import logging
 
-class BluetoothDisableEnableMediaTest(bluetooth_base_test.BluetoothBaseTest):
+class BluetoothMediaStatusOnMediaCenter(bluetooth_base_test.BluetoothBaseTest):
 
-    NO_MEDIA_TAG = 'no media'
+    def setup_class(self):
+      super().setup_class()
+      self.common_utils = CommonUtils(self.target, self.discoverer)
+      super().enable_recording()
+      self.call_utils.press_home()
 
     def setup_test(self):
-        super().setup_test()
         # Pair the devices
+        self.common_utils.grant_local_mac_address_permission()
         self.bt_utils.pair_primary_to_secondary()
-        self.call_utils.wait_with_log(constants.DEVICE_CONNECT_WAIT_TIME)
         self.target_name = self.target.mbs.btGetName()
-        super().enable_recording()
 
-    def test_disable_enable_media(self):
+    def test_media_status_on_media_center(self):
         # Log BT Connection State after pairing
         bt_connection_state=self.call_utils.get_bt_connection_status_using_adb_command(self.discoverer)
         logging.info("BT State after pairing : <%s>", bt_connection_state)
@@ -59,34 +61,24 @@ class BluetoothDisableEnableMediaTest(bluetooth_base_test.BluetoothBaseTest):
               self.discoverer.mbs.isMediaPreferenceChecked(),
               "Expected media button to be unchecked after pressing it.")
 
-          # Click on device and confirm that the summary says "No media"
-          self.discoverer.mbs.pressDeviceInBluetoothSettings(self.target_name)
-          summary = self.discoverer.mbs.getDeviceSummary()
-          asserts.assert_true(
-              self.NO_MEDIA_TAG in summary,
-              ("Expected device summary (on Level Two page) to include \'%s\'" % self.NO_MEDIA_TAG)
-          )
+          # Launch media center and check media status is disconnected
+          self.call_utils.open_bluetooth_media_app()
+          asserts.assert_true(self.call_utils.is_connect_to_bluetooth_label_visible_on_bluetooth_audio_page(), "Connect to Bluetooth Label is not visible")
 
           # Go back to the bluetooth settings page and enable media via the preference button
           self.call_utils.press_home()
           self.call_utils.open_bluetooth_settings()
           self.call_utils.press_media_toggle_on_device(self.target_name)
-          self.discoverer.mbs.waitUntilConnectionStatus("Connected")
+          self.call_utils.open_bluetooth_settings_form_status_bar()
 
           # Confirm that the media button is re-enabled
           asserts.assert_true(
               self.discoverer.mbs.isMediaPreferenceChecked(),
               "Expected media button to be checked after pressing it a second time.")
 
-          # Click on the device and confirm that the summary doesn't include "media"
-          self.call_utils.open_bluetooth_settings()
-          self.discoverer.mbs.pressDeviceInBluetoothSettings(self.target_name)
-          summary = self.discoverer.mbs.getDeviceSummary()
-          asserts.assert_false(
-              self.NO_MEDIA_TAG in summary,
-          "Found unexpected \'%s\' in device summary after re-enabling media." % self.NO_MEDIA_TAG
-          )
-
+          # Launch media center and check media status is connected
+          self.call_utils.open_bluetooth_media_app()
+          asserts.assert_false(self.call_utils.is_connect_to_bluetooth_label_visible_on_bluetooth_audio_page(), "Connect to Bluetooth Label is visible")
 
 if __name__ == '__main__':
     # Take test args
