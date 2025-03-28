@@ -105,7 +105,7 @@ class ComponentNameMatcher(var component: ComponentName) : IComponentNameMatcher
         @JvmField val ROTATION = ComponentNameMatcher("", "RotationLayer")
         @JvmField val BACK_SURFACE = ComponentNameMatcher("", "BackColorSurface")
         @JvmField val IME = ComponentNameMatcher("", "InputMethod")
-        @JvmField val IME_SNAPSHOT = ComponentNameMatcher("", "IME-snapshot-surface")
+        @JvmField val IME_SCREENSHOT = ComponentNameMatcher("", "IME-screenshot-surface")
         @JvmField val SPLASH_SCREEN = ComponentNameMatcher("", "Splash Screen")
         @JvmField val SNAPSHOT = ComponentNameMatcher("", "SnapshotStartingWindow")
         @JvmField val SECONDARY_HOME_HANDLE = ComponentNameMatcher("", "SecondaryHomeHandle")
