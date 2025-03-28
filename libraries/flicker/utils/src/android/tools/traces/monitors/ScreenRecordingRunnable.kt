@@ -23,7 +23,6 @@ import android.media.MediaCodecInfo
 import android.media.MediaFormat
 import android.media.MediaMuxer
 import android.os.SystemClock
-import android.tools.datatypes.Size
 import android.tools.traces.deleteIfExists
 import android.util.DisplayMetrics
 import android.util.Log
@@ -35,42 +34,31 @@ import java.nio.ByteOrder
 import java.util.concurrent.TimeUnit
 
 /** Runnable to record the screen contents and winscope metadata */
-class ScreenRecordingRunnable(private val outputFile: File, context: Context) : Runnable {
+class ScreenRecordingRunnable(
+    private val outputFile: File,
+    context: Context,
+    private val width: Int = 720,
+    private val height: Int = 1280,
+) : Runnable {
     private val displayManager = context.getSystemService(Context.DISPLAY_SERVICE) as DisplayManager
     private val windowManager = context.getSystemService(Context.WINDOW_SERVICE) as WindowManager
     private var finished = false
     internal var isFrameRecorded = false
 
-    private val metrics: DisplayMetrics = run {
-        val metrics = DisplayMetrics()
-        windowManager.defaultDisplay.getRealMetrics(metrics)
-        metrics
-    }
-
-    private val recordingDisplaySize: Size = run {
-        val widthPixels = if (metrics.widthPixels > 0) metrics.widthPixels else 720
-        val heightPixels = if (metrics.heightPixels > 0) metrics.heightPixels else 1280
-        val isPortrait = widthPixels < heightPixels
-        val displayScaleValue =
-            if (isPortrait && heightPixels > 1280) {
-                1280.0f / heightPixels
-            } else if (!isPortrait && widthPixels > 1280) {
-                1280.0f / widthPixels
-            } else {
-                1.0f
-            }
-        val width = (widthPixels * displayScaleValue).toInt()
-        val height = (heightPixels * displayScaleValue).toInt()
-        Size.from(width, height)
-    }
+    private val metrics: DisplayMetrics
+        get() {
+            val metrics = DisplayMetrics()
+            windowManager.defaultDisplay.getRealMetrics(metrics)
+            return metrics
+        }
 
     private val encoder = createEncoder()
     private val inputSurface = encoder.createInputSurface()
     private val virtualDisplay =
         displayManager.createVirtualDisplay(
             "Recording Display",
-            recordingDisplaySize.width,
-            recordingDisplaySize.height,
+            width,
+            height,
             metrics.densityDpi,
             inputSurface,
             DisplayManager.VIRTUAL_DISPLAY_FLAG_AUTO_MIRROR,
@@ -219,12 +207,7 @@ class ScreenRecordingRunnable(private val outputFile: File, context: Context) : 
      * @return a Surface that can be used to record
      */
     private fun createEncoder(): MediaCodec {
-        val format =
-            MediaFormat.createVideoFormat(
-                MIME_TYPE_VIDEO,
-                recordingDisplaySize.width,
-                recordingDisplaySize.height,
-            )
+        val format = MediaFormat.createVideoFormat(MIME_TYPE_VIDEO, width, height)
         val displayMode = windowManager.defaultDisplay.mode
         format.setInteger(
             MediaFormat.KEY_COLOR_FORMAT,
@@ -233,8 +216,8 @@ class ScreenRecordingRunnable(private val outputFile: File, context: Context) : 
         format.setInteger(MediaFormat.KEY_BIT_RATE, BIT_RATE)
         format.setFloat(MediaFormat.KEY_FRAME_RATE, displayMode.refreshRate)
         format.setInteger(MediaFormat.KEY_I_FRAME_INTERVAL, IFRAME_INTERVAL)
-        format.setInteger(MediaFormat.KEY_WIDTH, recordingDisplaySize.width)
-        format.setInteger(MediaFormat.KEY_HEIGHT, recordingDisplaySize.height)
+        format.setInteger(MediaFormat.KEY_WIDTH, width)
+        format.setInteger(MediaFormat.KEY_HEIGHT, height)
         format.setString(MediaFormat.KEY_MIME, MIME_TYPE_VIDEO)
 
         val mediaCodec = MediaCodec.createEncoderByType(MIME_TYPE_VIDEO)
