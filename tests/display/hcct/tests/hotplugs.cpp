@@ -23,7 +23,7 @@
 namespace {
 
 constexpr int kMaxRetries = 5;
-constexpr int kInitialSetupConnectors = 2;
+constexpr int kInitialSetupConnectors = 3;
 
 class VkmsHotplugTest : public ::testing::Test {
 protected:
@@ -77,7 +77,7 @@ TEST_F(VkmsHotplugTest, DetectSingleHotplugs) {
       << " unique hotplug events, but got " << hotpluggedDisplays.size();
 }
 
-TEST_F(VkmsHotplugTest, DetectSingleDisconnectHotplugs) {
+TEST_F(VkmsHotplugTest, DetectSingleExternalDisconnectHotplugs) {
   std::unordered_set<int64_t> hotpluggedDisplays;
 
   for (int i = 0; i < kInitialSetupConnectors; ++i) {
@@ -96,6 +96,12 @@ TEST_F(VkmsHotplugTest, DetectSingleDisconnectHotplugs) {
         << retryCount << " seconds";
     ASSERT_TRUE(mHwcTester->getAndClearLatestHotplugs().empty())
         << "Hotplugs should have been cleared";
+
+    // Do not unplug the primary display because SF expects there to always be a
+    // primary display.
+    // hhttps://source.android.com/docs/core/graphics/hotplug#handling-common-scenarios
+    if (i == 0)
+      continue;
 
     mVkmsTester->ToggleConnector(i, false);
 
