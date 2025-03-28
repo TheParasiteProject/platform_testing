@@ -33,6 +33,8 @@ import androidx.test.runner.AndroidJUnit4;
 
 import com.android.helpers.PerfettoHelper;
 
+import com.google.common.truth.Truth;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.Description;
@@ -203,5 +205,27 @@ public class PerfettoTracingPerTestStrategyTest {
         strategy.testFail(mDataRecord, mTest1Desc, failureDesc);
         verify(mPerfettoHelper, times(1)).startCollecting();
         verify(mPerfettoHelper, times(0)).stopCollecting(anyLong(), anyString());
+    }
+
+    @Test
+    public void testPostedFailedMetricWhenTestFails() {
+        Bundle b = new Bundle();
+        doReturn(true).when(mPerfettoHelper).startCollecting();
+        doReturn(true).when(mPerfettoHelper).stopCollecting(anyLong(), anyString());
+        PerfettoTracingStrategy strategy = initStrategy(b);
+        // Test run start behavior
+        strategy.testRunStart(mDataRecord, mRunDesc);
+        strategy.testStart(mDataRecord, mTest1Desc, /* iteration= */ 1);
+
+        strategy.setPerfettoStartSuccess(true);
+        Failure failureDesc = new Failure(FAKE_TEST_DESCRIPTION, new Exception());
+        strategy.testFail(mDataRecord, mTest1Desc, failureDesc);
+        strategy.testEnd(mDataRecord, mTest1Desc, /* iteration= */ 1);
+
+        Truth.assertWithMessage("DataRecord should have metrics")
+                .that(mDataRecord.hasMetrics())
+                .isTrue();
+        var path = mDataRecord.createBundleFromMetrics().getString("perfetto_file_path_FAILED");
+        Truth.assertThat(path).isNotEmpty();
     }
 }
