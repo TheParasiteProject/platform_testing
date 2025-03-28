@@ -14,8 +14,11 @@
 #
 
 from abc import ABC, abstractmethod
+from impl.golden_watchers.golden_watcher_types import GoldenWatcherTypes
 
 class GoldenWatcher(ABC):
+
+    type: GoldenWatcherTypes = None
 
     @abstractmethod
     def clean(self):

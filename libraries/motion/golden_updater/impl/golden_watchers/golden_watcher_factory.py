@@ -43,7 +43,7 @@ class GoldenWatcherFactory:
                     tmpdir, f"/tmp/motion/"
                 )
 
-            case GoldenWatcherTypes.FILE:
+            case GoldenWatcherTypes.ADB:
                 if not adb_client:
                     raise ValueError("adb client not found")
 

@@ -18,7 +18,6 @@
 
 import socketserver
 import os
-import subprocess
 import sys
 import tempfile
 import webbrowser
@@ -28,6 +27,7 @@ from impl.adb_client import AdbClient
 from impl.watch_web_app_request_handler import WatchWebAppRequestHandler
 from impl.argument_parser import ArgumentParser
 from impl.token_generator import TokenGenerator
+from impl.serial_finder import ADBSerialFinder
 
 def main():
 
@@ -40,6 +40,7 @@ def main():
     android_build_top = args.android_build_top
 
     with tempfile.TemporaryDirectory() as tmpdir:
+        adb_client = None
 
         if args.atest:
             print("ATEST is running.")
@@ -58,27 +59,15 @@ def main():
                 GoldenWatcherTypes.NONE, tmpdir
             )
         else:
-            serial = args.serial
+            serial = args.serial or ADBSerialFinder.get_serial()
             if not serial:
-                devices_response = subprocess.run(
-                    ["adb", "devices"], check=True, capture_output=True
-                ).stdout.decode("utf-8")
-                lines = [s for s in devices_response.splitlines() if s.strip()]
-
-                if len(lines) == 1:
-                    print("no adb devices found")
-                    sys.exit(1)
-
-                if len(lines) > 2:
-                    print("multiple adb devices found, specify --serial")
-                    sys.exit(1)
-
-                serial = lines[1].split("\t")[0]
-
+                sys.exit(1)
             adb_client = AdbClient(serial)
             if not adb_client.run_as_root():
                 sys.exit(1)
-            golden_watcher = GoldenWatcherFactory.create_watcher(GoldenWatcherTypes.FILE, tmpdir, adb_client)
+            golden_watcher = GoldenWatcherFactory.create_watcher(
+                GoldenWatcherTypes.ADB, tmpdir, adb_client
+            )
 
         this_server_address = f"http://localhost:{args.port}"
 
@@ -87,6 +76,9 @@ def main():
         WatchWebAppRequestHandler.android_build_top = android_build_top
         WatchWebAppRequestHandler.golden_watcher = golden_watcher
         WatchWebAppRequestHandler.this_server_address = this_server_address
+        WatchWebAppRequestHandler.adb_client = adb_client
+        (WatchWebAppRequestHandler
+         .golden_watcher_cache[golden_watcher.type.value]) = golden_watcher
 
         with socketserver.TCPServer(
             ("localhost", args.port), WatchWebAppRequestHandler, golden_watcher
