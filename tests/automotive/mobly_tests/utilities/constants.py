@@ -48,6 +48,8 @@ ANSWER_CALL_TEXT = "Answer"
 ACCEPT_CALL_TEXT = "Accept"
 DISABLE_ANDROID_AUTO_POP_UP = "pm disable --user 10 com.google.android.embedded.projection"
 NOT_NOW_TEXT ="Not Now"
+MEDIA_SONG = "A normal 1H song"
+TEST_MEDIA_APP = "Test Media App"
 
 BTSNOOP_LOG_PATH_ON_DEVICE = '/data/misc/bluetooth/logs/btsnoop_hci.log'
 BTSNOOP_LAST_LOG_PATH_ON_DEVICE = (

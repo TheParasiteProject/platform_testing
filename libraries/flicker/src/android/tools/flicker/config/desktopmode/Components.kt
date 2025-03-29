@@ -30,13 +30,19 @@ object Components {
     val DESKTOP_MODE_CAPTION =
         ComponentTemplate("APP_HEADER") { ComponentNameMatcher(SYSTEMUI_PACKAGE, "caption_handle") }
 
+    const val DESKTOP_MODE_APP_NAME = "DESKTOP_MODE_APP"
+
     val DESKTOP_MODE_APP =
-        ComponentTemplate("DESKTOP_MODE_APP") { scenarioInstance: ScenarioInstance ->
+        ComponentTemplate(DESKTOP_MODE_APP_NAME) { scenarioInstance: ScenarioInstance ->
             val associatedTransition =
                 scenarioInstance.associatedTransition
                     ?: error("Can only extract DESKTOP_MODE_APP from scenario with transition")
 
-            getDesktopAppForScenario(scenarioInstance.type, associatedTransition)
+            getDesktopAppForScenario(
+                scenarioInstance.type,
+                associatedTransition,
+                DESKTOP_MODE_APP_NAME,
+            )
         }
 
     val SIMPLE_APP =
@@ -66,35 +72,36 @@ object Components {
     private fun getDesktopAppForScenario(
         type: ScenarioId,
         associatedTransition: Transition,
+        name: String,
     ): IComponentMatcher {
         return when (type) {
             ScenarioId("END_DRAG_TO_DESKTOP") -> {
                 val change =
                     associatedTransition.changes.first { it.transitMode == TransitionType.CHANGE }
-                FullComponentIdMatcher(change.windowId, change.layerId)
+                FullComponentIdMatcher(change.windowId, change.layerId, name)
             }
             ScenarioId("CLOSE_APP"),
             ScenarioId("CLOSE_LAST_APP") -> {
                 val change =
                     associatedTransition.changes.first { it.transitMode == TransitionType.CLOSE }
-                FullComponentIdMatcher(change.windowId, change.layerId)
+                FullComponentIdMatcher(change.windowId, change.layerId, name)
             }
             ScenarioId("OPEN_APP_WHEN_EXTERNAL_DISPLAY_CONNECTED"),
             ScenarioId("OPEN_UNLIMITED_APPS"),
             ScenarioId("CASCADE_APP") -> {
                 val change =
                     associatedTransition.changes.first { it.transitMode == TransitionType.OPEN }
-                FullComponentIdMatcher(change.windowId, change.layerId)
+                FullComponentIdMatcher(change.windowId, change.layerId, name)
             }
             ScenarioId("MINIMIZE_APP") -> {
                 val change =
                     associatedTransition.changes.first { it.transitMode == TransitionType.TO_BACK }
-                FullComponentIdMatcher(change.windowId, change.layerId)
+                FullComponentIdMatcher(change.windowId, change.layerId, name)
             }
             ScenarioId("MINIMIZE_LAST_APP") -> {
                 val change =
                     associatedTransition.changes.last { it.transitMode == TransitionType.TO_BACK }
-                FullComponentIdMatcher(change.windowId, change.layerId)
+                FullComponentIdMatcher(change.windowId, change.layerId, name)
             }
             ScenarioId("CORNER_RESIZE"),
             ScenarioId("CORNER_RESIZE_TO_MINIMUM_SIZE"),
@@ -112,12 +119,12 @@ object Components {
             ScenarioId("MAXIMIZE_APP_NON_RESIZABLE"),
             ScenarioId("MINIMIZE_AUTO_PIP_APP") -> {
                 val change = associatedTransition.changes.first()
-                FullComponentIdMatcher(change.windowId, change.layerId)
+                FullComponentIdMatcher(change.windowId, change.layerId, name)
             }
             ScenarioId("BRING_APPS_TO_FRONT") -> {
                 val change =
                     associatedTransition.changes.first { it.transitMode == TransitionType.TO_FRONT }
-                FullComponentIdMatcher(change.windowId, change.layerId)
+                FullComponentIdMatcher(change.windowId, change.layerId, name)
             }
             else -> error("Unsupported transition type")
         }

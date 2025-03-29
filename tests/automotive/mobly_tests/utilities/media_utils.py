@@ -157,6 +157,33 @@ class MediaUtils:
         self.discoverer.mbs.clickPreviousTrack()
         time.sleep(constants.WAIT_FOR_LOAD)
 
+    # Open Media Center app on HU
+    def open_media_center_app_on_hu(self):
+        logging.info("Open Media center app on HU")
+        self.discoverer.mbs.openMediaApp()
+
+    # Open App Menu
+    def open_media_center_app_menu(self):
+        logging.info("Open Media Center App Menu")
+        self.discoverer.mbs.openMediaAppMenuItems()
+
+    # Open Settings Page
+    def open_media_settings_page(self):
+        logging.info("Open Media Center Settings Page")
+        self.discoverer.mbs.openMediaAppSettingsPage()
+
+    # Open App
+    def open_app(self, media_app):
+        logging.info("Open Media App")
+        logging.info("Open Media App about to open the app")
+        self.discoverer.mbs.openApp(media_app)
+        logging.info("Open Media App --3")
+
+    # Select Media Track
+    def select_media_track(self, media_track):
+        logging.info("Open Media App")
+        self.discoverer.mbs.selectMediaTrack(media_track)
+
     # Open Media app on HU
     def open_media_app_on_hu(self):
         logging.info("Open Media app on HU")

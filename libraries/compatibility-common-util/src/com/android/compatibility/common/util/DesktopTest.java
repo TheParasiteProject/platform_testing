@@ -21,11 +21,11 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-/**
- * Marks the type of test with purpose of asserting Desktop requirements.
- */
+/** Marks the type of test with purpose of asserting Desktop requirements and cujs. */
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.METHOD, ElementType.TYPE})
 public @interface DesktopTest {
     String[] requirements() default {""};
+
+    String[] cujs() default {""};
 }

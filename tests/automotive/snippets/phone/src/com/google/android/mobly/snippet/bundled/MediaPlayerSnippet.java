@@ -77,6 +77,12 @@ public class MediaPlayerSnippet implements Snippet {
         mAutoMediaHelper.get().open();
     }
 
+    /** open the given app */
+    @Rpc(description = "Open the given app")
+    public void openApp(String mediaApp) {
+        mAutoMediaHelper.get().openApp(mediaApp);
+    }
+
     @Rpc(description = "Is Bluetooth Audio disconnected label present")
     public boolean isBluetoothAudioDisconnectedLabelVisible() {
         return mAutoMediaHelper.get().isBluetoothAudioDisconnectedLabelVisible();
@@ -105,6 +111,12 @@ public class MediaPlayerSnippet implements Snippet {
     @Rpc(description = "Scroll play list down")
     public void scrollPlayListDown() {
         mAutoMediaHelper.get().scrollPlayListDown();
+    }
+
+    /** Select Media Track* */
+    @Rpc(description = "Select media track")
+    public void selectMediaTrack(String songName) {
+        mAutoMediaHelper.get().selectMediaTrack(songName);
     }
 
     @Rpc(description = "Select song from playlist")

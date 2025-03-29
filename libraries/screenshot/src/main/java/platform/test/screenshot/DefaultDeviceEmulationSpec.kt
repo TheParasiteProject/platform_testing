@@ -9,6 +9,16 @@ package platform.test.screenshot
 val DeviceEmulationSpec.Companion.PhoneAndTabletFull
     get() = PhoneAndTabletFullSpec
 
+/**
+ * The configuration to verify features on desktop.
+ */
+val DeviceEmulationSpec.Companion.DesktopMinimal
+    get() = DeviceEmulationSpec.forDisplays(
+        Displays.Desktop,
+        isDarkTheme = true,
+        isLandscape = true,
+    )
+
 private val PhoneAndTabletFullSpec =
     DeviceEmulationSpec.forDisplays(Displays.Phone, Displays.Tablet)
 
@@ -119,6 +129,14 @@ object Displays {
             "external4k",
             width = 3840,
             height = 2160,
+            densityDpi = 320,
+        )
+
+    val Desktop =
+        DisplaySpec(
+            "desktop",
+            width=1920,
+            height=1080,
             densityDpi = 320,
         )
 }

@@ -35,4 +35,19 @@ public class NotificationSnippet implements Snippet {
     public boolean isNotificationDisplayedInCenterWithTitle(String title) {
         return mNotificationHelper.get().isNotificationDisplayedInCenterWithTitle(title);
     }
+
+    @Rpc(description = "Get the content of the notification.")
+    public String getNotificationContent(String title) {
+        return mNotificationHelper.get().getNotificationContent(title);
+    }
+
+    @Rpc(description = "Get the count of SMS notifications.")
+    public int getSmsNotificationCount(String title) {
+        return mNotificationHelper.get().getSmsNotificationCount(title);
+    }
+
+    @Rpc(description = "Get the content of the SMS notification.")
+    public String getSmsNotificationContent(String title) {
+        return mNotificationHelper.get().getSmsNotificationContent(title);
+    }
 }

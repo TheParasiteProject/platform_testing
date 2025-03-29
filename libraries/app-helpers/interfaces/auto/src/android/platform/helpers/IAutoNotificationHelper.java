@@ -16,13 +16,18 @@
 
 package android.platform.helpers;
 
+import androidx.test.uiautomator.UiObject2;
+
 public interface IAutoNotificationHelper extends Scrollable, IAppHelper {
+
     /**
      * Setup expectations: Notification app is open and scrolled to the bottom.
      *
-     * <p>Tap clear all button if present.
+     * <p>Find notification with specific title.
+     *
+     * @param title of the notification to be found.
      */
-    void tapClearAllBtn();
+    UiObject2 findNotificationInCenterWithTitle(String title);
 
     /**
      * Setup expectations: A notification is received.
@@ -32,6 +37,13 @@ public interface IAutoNotificationHelper extends Scrollable, IAppHelper {
      * @param title of the notification to be checked.
     */
     boolean checkNotificationExists(String title);
+
+    /**
+     * Setup expectations: Notification app is open and scrolled to the bottom.
+     *
+     * <p>Tap clear all button if present.
+     */
+    void tapClearAllBtn();
 
     /**
      * Setup expectations: A notification is received.
@@ -50,6 +62,15 @@ public interface IAutoNotificationHelper extends Scrollable, IAppHelper {
      * @param content of the notification to be checked.
      */
     boolean isNotificationDisplayedInCenterWithContent(String content);
+
+    /**
+     * Setup expectations: A notification is received.
+     *
+     * <p>Get the content of the notification.
+     *
+     * @param title of the notification.
+     */
+    String getNotificationContent(String title);
 
     /**
      * Setup expectations: A notification is received.
@@ -101,4 +122,23 @@ public interface IAutoNotificationHelper extends Scrollable, IAppHelper {
      * <p>Checks App Permissions is present
      */
     boolean checkAppPermissionsExists(String title);
+
+    /**
+     * Setup expectations: A notification is received.
+     *
+     * <p>Get the count of SMS notifications.
+     *
+     * @param title of the notification.
+     */
+    int getSmsNotificationCount(String title);
+
+    /**
+     * Setup expectations: A notification is received.
+     *
+     * <p>Get the content of the SMS notification. If SMS count is present, click on it to expand
+     * the notification and get the content.
+     *
+     * @param title of the notification.
+     */
+    String getSmsNotificationContent(String title);
 }
