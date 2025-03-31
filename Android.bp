@@ -226,11 +226,25 @@ test_package {
         default: [],
     }),
 
-    dist: {
-        targets: ["platform_tests"],
-        prepend_artifact_with_product: true,
-        dest: "tests-FILE_NAME_TAG_PLACEHOLDER.zip",
-    },
+    dists: [
+        {
+            targets: ["platform_tests"],
+            prepend_artifact_with_product: true,
+            dest: "tests-FILE_NAME_TAG_PLACEHOLDER.zip",
+        },
+        {
+            targets: ["platform_tests"],
+            prepend_artifact_with_product: true,
+            dest: "platform_tests-symbols-FILE_NAME_TAG_PLACEHOLDER.zip",
+            tag: ".symbols",
+        },
+        {
+            targets: ["platform_tests"],
+            prepend_artifact_with_product: true,
+            dest: "platform_tests-symbols-mapping-FILE_NAME_TAG_PLACEHOLDER.textproto",
+            tag: ".elf_mapping",
+        },
+    ],
 }
 
 test_package {
@@ -475,11 +489,25 @@ test_package {
         ],
         default: [],
     }),
-    dist: {
-        targets: ["continuous_native_tests"],
-        prepend_artifact_with_product: true,
-        dest: "continuous_native_tests-FILE_NAME_TAG_PLACEHOLDER.zip",
-    },
+    dists: [
+        {
+            targets: ["continuous_native_tests"],
+            prepend_artifact_with_product: true,
+            dest: "continuous_native_tests-FILE_NAME_TAG_PLACEHOLDER.zip",
+        },
+        {
+            targets: ["continuous_native_tests"],
+            prepend_artifact_with_product: true,
+            dest: "continuous_native_tests-symbols-FILE_NAME_TAG_PLACEHOLDER.zip",
+            tag: ".symbols",
+        },
+        {
+            targets: ["continuous_native_tests"],
+            prepend_artifact_with_product: true,
+            dest: "continuous_native_tests-symbols-mapping-FILE_NAME_TAG_PLACEHOLDER.textproto",
+            tag: ".elf_mapping",
+        },
+    ],
 }
 
 test_package {
@@ -515,9 +543,23 @@ test_package {
     tests_if_exist_device_both: [
     ],
 
-    dist: {
-        targets: ["continuous_native_metric_tests"],
-        prepend_artifact_with_product: true,
-        dest: "continuous_native_metric_tests-FILE_NAME_TAG_PLACEHOLDER.zip",
-    },
+    dists: [
+        {
+            targets: ["continuous_native_metric_tests"],
+            prepend_artifact_with_product: true,
+            dest: "continuous_native_metric_tests-FILE_NAME_TAG_PLACEHOLDER.zip",
+        },
+        {
+            targets: ["continuous_native_metric_tests"],
+            prepend_artifact_with_product: true,
+            dest: "continuous_native_metric_tests-symbols-FILE_NAME_TAG_PLACEHOLDER.zip",
+            tag: ".symbols",
+        },
+        {
+            targets: ["continuous_native_metric_tests"],
+            prepend_artifact_with_product: true,
+            dest: "continuous_native_metric_tests-symbols-mapping-FILE_NAME_TAG_PLACEHOLDER.textproto",
+            tag: ".elf_mapping",
+        },
+    ],
 }
