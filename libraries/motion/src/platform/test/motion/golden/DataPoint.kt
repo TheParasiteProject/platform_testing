@@ -31,6 +31,8 @@ sealed interface DataPoint<out T> {
 
     fun asJson(): Any
 
+    fun isApproximatelyEqual(expected: DataPoint<*>): Boolean
+
     companion object {
         fun <T> of(value: T?, type: DataPointType<T>): DataPoint<T> {
             return if (value != null) {
@@ -67,6 +69,11 @@ data class ValueDataPoint<T> internal constructor(val value: T & Any, val type: 
     override fun asJson() = type.toJson(this.value)
 
     override fun toString(): String = "$value (${type.typeName})"
+
+    override fun isApproximatelyEqual(expected: DataPoint<*>): Boolean =
+        if(expected is ValueDataPoint) {
+            (expected.value as? T)?.let { type.isApproximatelyEqual(value, it) } ?: false
+        } else false
 }
 
 /**
@@ -78,6 +85,9 @@ data class ValueDataPoint<T> internal constructor(val value: T & Any, val type: 
 class NullDataPoint<T> private constructor() : DataPoint<T> {
 
     override fun asJson() = JSONObject.NULL
+
+    override fun isApproximatelyEqual(expected: DataPoint<*>): Boolean =
+        expected is NullDataPoint
 
     companion object {
         internal val instance = NullDataPoint<Any>()
@@ -102,6 +112,8 @@ class NotFoundDataPoint<T> private constructor() : DataPoint<T> {
 
     override fun asJson() = JSONObject().apply { put("type", "not_found") }
 
+    override fun isApproximatelyEqual(expected: DataPoint<*>): Boolean =  expected is NotFoundDataPoint
+
     override fun toString(): String = "{{not_found}}"
 
     companion object {
@@ -119,6 +131,9 @@ class NotFoundDataPoint<T> private constructor() : DataPoint<T> {
 class UnknownType<T> private constructor() : DataPoint<T> {
 
     override fun asJson() = throw JSONException("Feature must not contain UnknownDataPoints")
+
+    override fun isApproximatelyEqual(expected: DataPoint<*>): Boolean =
+        throw NotImplementedError("Feature must not contain UnknownDataPoints")
 
     override fun toString(): String = "{{unknown_type}}"
 

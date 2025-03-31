@@ -21,6 +21,7 @@ import android.graphics.Rect
 import org.json.JSONObject
 import platform.test.motion.golden.DataPointType
 import platform.test.motion.golden.UnknownTypeException
+import platform.test.motion.isApproximatelyEqualTo
 
 fun Rect.asDataPoint() = DataPointTypes.rect.makeDataPoint(this)
 
@@ -84,6 +85,13 @@ object DataPointTypes {
                     }
                 }
             },
+            isApproximateEqual = { actual, expected ->
+                var res = true
+                for(i in actual.rawValues.indices){
+                    res = res && actual.rawValues[i].isApproximatelyEqualTo(expected.rawValues[i])
+                }
+                res
+            }
         )
     // property names match order of val
     private val cornerRadiiPropertyNames =

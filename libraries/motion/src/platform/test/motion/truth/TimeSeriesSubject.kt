@@ -23,6 +23,7 @@ import com.google.common.truth.FailureMetadata
 import com.google.common.truth.Subject
 import com.google.common.truth.Subject.Factory
 import com.google.common.truth.Truth
+import platform.test.motion.MotionTestRule
 import platform.test.motion.golden.TimeSeries
 
 /** Subject on [TimeSeries] to produce meaningful failure diffs. */
@@ -95,8 +96,14 @@ private constructor(failureMetadata: FailureMetadata, private val actual: TimeSe
 
                 val mismatchingDataPointIndices =
                     actualToExpectedDataPointIndices.filter { (actualIndex, expectedIndex) ->
-                        actualFeature.dataPoints[actualIndex] !=
-                            expectedFeature.dataPoints[expectedIndex]
+                        if(MotionTestRule.isRobolectricRuntime()){
+                            actualFeature.dataPoints[actualIndex].isApproximatelyEqual(
+                                expectedFeature.dataPoints[expectedIndex]
+                            ).not()
+                        } else {
+                            actualFeature.dataPoints[actualIndex] !=
+                                    expectedFeature.dataPoints[expectedIndex]
+                        }
                     }
 
                 if (mismatchingDataPointIndices.isNotEmpty()) {
