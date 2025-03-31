@@ -107,8 +107,8 @@ abstract class ComposeQuickSettingsTile private constructor() {
      *
      * See [Toggleable.toggleAndAssertToggled]
      */
-    fun toggleAndAssertToggled() {
-        getBehavior<Toggleable>()!!.toggleAndAssertToggled()
+    fun toggleAndAssertToggled(extraValidation: () -> Unit = {}) {
+        getBehavior<Toggleable>()!!.toggleAndAssertToggled(extraValidation)
     }
 
     /**
@@ -196,8 +196,14 @@ interface Toggleable : TileBehavior {
     /** Whether the tile is currently in its On state */
     val isChecked: Boolean
 
-    /** Toggle the tile between On/Off. Validates that the tile has changed checked state. */
-    fun toggleAndAssertToggled()
+    /**
+     * Toggle the tile between On/Off. Validates that the tile has changed checked state.
+     *
+     * [extraValidation] can be provided and will be performed immediately after clicking on the
+     * tile, before waiting for the tile to change state. This can be used for verifying ephemeral
+     * effects.
+     */
+    fun toggleAndAssertToggled(extraValidation: () -> Unit = {})
 
     /** Asserts the current checked state with a nice message. */
     fun assertCheckedStatus(checked: Boolean)
@@ -212,9 +218,10 @@ private open class ToggleableImpl(private val tile: UiObject2) : Toggleable {
     override val isChecked: Boolean
         get() = tile.isChecked
 
-    override fun toggleAndAssertToggled() {
+    override fun toggleAndAssertToggled(extraValidation: () -> Unit) {
         val wasChecked = isChecked
         click(tile, "Tile")
+        extraValidation()
         assertCheckedStatus(!wasChecked)
     }
 
