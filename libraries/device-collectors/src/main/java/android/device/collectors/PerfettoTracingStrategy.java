@@ -135,7 +135,7 @@ public abstract class PerfettoTracingStrategy {
     protected boolean mSkipTestFailureMetrics;
     private boolean mSkipTestSuccessMetrics;
     private boolean mSkipEmptyMetrics;
-    private boolean mIsTestFailed = false;
+    protected boolean mIsTestFailed = false;
     // Store the method name and invocation count to create unique file name for each trace.
     private boolean mPerfettoStartSuccess = false;
     private String mFilePathKeyPrefix = DEFAULT_FILE_PATH_KEY_PREFIX;
