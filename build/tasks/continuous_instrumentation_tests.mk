@@ -16,22 +16,8 @@
 # based on the configuration.
 
 LOCAL_PATH := $(call my-dir)
-include $(LOCAL_PATH)/tests/instrumentation_test_list.mk
--include $(wildcard vendor/*/build/tasks/tests/instrumentation_test_list.mk)
 
-my_modules := \
-    $(instrumentation_tests)
-
-my_package_name := continuous_instrumentation_tests
-
-include $(BUILD_SYSTEM)/tasks/tools/package-modules.mk
-
-.PHONY: continuous_instrumentation_tests
-continuous_instrumentation_tests : $(my_package_zip)
-
-name := $(TARGET_PRODUCT)-continuous_instrumentation_tests-FILE_NAME_TAG_PLACEHOLDER
-$(call dist-for-goals, continuous_instrumentation_tests, $(my_package_zip):$(name).zip)
-
+# TODO: Clean up the tests phony target to replace with 'phony_rule' in soong.
 # Also build this when you run "make tests".
 tests: continuous_instrumentation_tests
 
