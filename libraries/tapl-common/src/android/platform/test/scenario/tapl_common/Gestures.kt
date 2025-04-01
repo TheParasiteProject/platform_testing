@@ -18,6 +18,7 @@ package android.platform.test.scenario.tapl_common
 import android.os.SystemClock.sleep
 import android.platform.uiautomatorhelpers.BetterSwipe
 import android.platform.uiautomatorhelpers.BetterSwipe.Swipe
+import android.platform.uiautomatorhelpers.LongPressTimeoutExtender
 import android.platform.uiautomatorhelpers.WaitUtils.ensureThat
 import android.provider.Settings
 import androidx.test.platform.app.InstrumentationRegistry
@@ -79,6 +80,20 @@ object Gestures {
                 e,
             )
         }
+    }
+
+    /**
+     * Wait for the object to become clickable and enabled, then performs a short click on the
+     * object, but with extended long press duration using
+     * [LongPressTimeoutExtender.executeWithExtendedLongPressTimeout] to avoid it being mistaken
+     * with a long press.
+     *
+     * @param [uiObject] The object to click
+     * @param [objectName] Name of the object for diags
+     */
+    @JvmStatic
+    fun shortClick(uiObject: UiObject2, objectName: String) {
+        LongPressTimeoutExtender.executeWithExtendedLongPressTimeout { click(uiObject, objectName) }
     }
 
     /**
