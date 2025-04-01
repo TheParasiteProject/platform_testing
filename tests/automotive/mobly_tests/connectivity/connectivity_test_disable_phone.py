@@ -44,50 +44,52 @@ class BluetoothDisableEnablePhoneTest(bluetooth_base_test.BluetoothBaseTest):
         bt_connection_state=self.call_utils.get_bt_connection_status_using_adb_command(self.discoverer)
         logging.info("BT State after pairing : <%s>", bt_connection_state)
 
-        # Navigate to the bluetooth settings page
-        self.call_utils.open_bluetooth_settings()
-        target_name = self.target.mbs.btGetName()
-        # Disable phone for the listed paired device via the preference button
-        self.call_utils.press_phone_toggle_on_device(target_name)
+        for _ in range(2):
+          # Navigate to the bluetooth settings page
+          self.call_utils.open_bluetooth_settings()
+          target_name = self.target.mbs.btGetName()
+          # Disable phone for the listed paired device via the preference button
+          self.call_utils.press_phone_toggle_on_device(target_name)
 
 
-        # Confirm that the phone button is unchecked
-        asserts.assert_false(
-            self.discoverer.mbs.isPhonePreferenceChecked(),
-            "Expected phone button to be unchecked after pressing it.")
-        self.call_utils.wait_with_log(constants.DEFAULT_WAIT_TIME_FIVE_SECS)
+          # Confirm that the phone button is unchecked
+          asserts.assert_false(
+              self.discoverer.mbs.isPhonePreferenceChecked(),
+              "Expected phone button to be unchecked after pressing it.")
 
 
-        # Click on device and confirm that the summary says "No phone"
-        self.discoverer.mbs.pressDeviceInBluetoothSettings(target_name)
-        self.call_utils.wait_with_log(constants.WAIT_FOR_LOAD)
-        summary = self.discoverer.mbs.getDeviceSummary()
-        asserts.assert_true(
-            self.NO_PHONE_TAG in summary,
-            ("Expected device summary (on Level Two page) to include \'%s\'"
-             % self.NO_PHONE_TAG)
-        )
-        self.call_utils.wait_with_log(constants.DEFAULT_WAIT_TIME_FIVE_SECS)
+          # Click on device and confirm that the summary says "No phone"
+          self.discoverer.mbs.pressDeviceInBluetoothSettings(target_name)
+          summary = self.discoverer.mbs.getDeviceSummary()
+          asserts.assert_true(
+              self.NO_PHONE_TAG in summary,
+              ("Expected device summary (on Level Two page) to include \'%s\'"
+               % self.NO_PHONE_TAG)
+          )
+          self.call_utils.open_phone_app()
+          asserts.assert_true(
+               self.discoverer.mbs.isConnectToBluetoothDisplayed(),
+               "Connect to bluetooth message is not displayed")
 
-        # Go back to the bluetooth settings page and enable phone via the preference button
-        self.call_utils.press_home()
-        self.call_utils.open_bluetooth_settings()
-        self.call_utils.press_phone_toggle_on_device(target_name)
+          # Go back to the bluetooth settings page and enable phone via the preference button
+          self.call_utils.press_home()
+          self.call_utils.open_bluetooth_settings()
+          self.call_utils.press_phone_toggle_on_device(target_name)
+          self.discoverer.mbs.waitUntilConnectionStatus("Connected")
 
-        # Confirm that the phone button is re-enabled
-        asserts.assert_true(
-            self.discoverer.mbs.isPhonePreferenceChecked(),
-            "Expected phone button to be checked after pressing it a second time.")
+          # Confirm that the phone button is re-enabled
+          asserts.assert_true(
+              self.discoverer.mbs.isPhonePreferenceChecked(),
+              "Expected phone button to be checked after pressing it a second time.")
 
-        # Click on the device and confirm that the summary doesn't include "phone"
-        self.discoverer.mbs.pressDeviceInBluetoothSettings(target_name)
-        self.call_utils.wait_with_log(constants.WAIT_FOR_LOAD)
-        summary = self.discoverer.mbs.getDeviceSummary()
-        asserts.assert_false(
-            self.NO_PHONE_TAG in summary,
-            "Found unexpected \'%s\' in device summary after re-enabling phone."
-            % self.NO_PHONE_TAG
-        ) 
+          # Click on the device and confirm that the summary doesn't include "phone"
+          self.discoverer.mbs.pressDeviceInBluetoothSettings(target_name)
+          summary = self.discoverer.mbs.getDeviceSummary()
+          asserts.assert_false(
+              self.NO_PHONE_TAG in summary,
+              "Found unexpected \'%s\' in device summary after re-enabling phone."
+              % self.NO_PHONE_TAG
+          )
 
 
 
