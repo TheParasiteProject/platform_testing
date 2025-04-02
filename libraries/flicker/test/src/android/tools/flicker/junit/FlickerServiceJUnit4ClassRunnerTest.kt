@@ -24,6 +24,7 @@ import android.tools.device.apphelpers.BrowserAppHelper
 import android.tools.flicker.AssertionInvocationGroup
 import android.tools.flicker.FlickerConfig
 import android.tools.flicker.ScenarioInstance
+import android.tools.flicker.annotation.Debug
 import android.tools.flicker.annotation.ExpectedScenarios
 import android.tools.flicker.annotation.FlickerConfigProvider
 import android.tools.flicker.assertions.FlickerTest
@@ -63,33 +64,20 @@ class FlickerServiceJUnit4ClassRunnerTest {
         var testRuleEndTs: Instant? = null
         var testStateTs: Instant? = null
         var testRuleExecutionCount = 0
-        onTestRuleStart =
-            object : Runnable {
-                override fun run() {
-                    testRuleExecutionCount++
-                    testRuleStartTs = Instant.now()
-                }
-            }
-        onTestRuleEnd =
-            object : Runnable {
-                override fun run() {
-                    testRuleEndTs = Instant.now()
-                }
-            }
-        onTestStart =
-            object : Runnable {
-                override fun run() {
-                    testStateTs = Instant.now()
-                }
-            }
+        onTestRuleStart = Runnable {
+            testRuleExecutionCount++
+            testRuleStartTs = Instant.now()
+        }
+        onTestRuleEnd = Runnable { testRuleEndTs = Instant.now() }
+        onTestStart = Runnable { testStateTs = Instant.now() }
 
         val runner = FlickerServiceJUnit4ClassRunner(SimpleTest::class.java)
         runner.run(RunNotifier())
 
-        Truth.assertWithMessage("Test rule start running after test block")
+        Truth.assertWithMessage("Test rule start should run before test block")
             .that(testRuleStartTs)
             .isLessThan(testStateTs)
-        Truth.assertWithMessage("Test rule end running before test block")
+        Truth.assertWithMessage("Test rule end should run after test block")
             .that(testStateTs)
             .isLessThan(testRuleEndTs)
 
@@ -158,6 +146,28 @@ class FlickerServiceJUnit4ClassRunnerTest {
             )
     }
 
+    @Test
+    fun usesLocalTraceWithDebugAnnotation() {
+        val runner = FlickerServiceJUnit4ClassRunner(DebugTest::class.java)
+        val notifier = Mockito.mock(RunNotifier::class.java)
+        runner.run(notifier)
+
+        Truth.assertThat(runner.testCount()).isEqualTo(3)
+        Mockito.verify(notifier, Mockito.never()).fireTestFailure(ArgumentMatchers.any())
+
+        for (expectedMethod in
+            listOf(
+                "test",
+                "MY_CUSTOM_SCENARIO::myBlockingAssertion",
+                "DetectedExpectedScenarios",
+            )) {
+            Mockito.verify(notifier, Mockito.times(1))
+                .fireTestStarted(
+                    ArgumentMatchers.argThat { it.methodName.contains(expectedMethod) }
+                )
+        }
+    }
+
     /** Below are all the mock test classes uses for testing purposes */
     @RunWith(FlickerServiceJUnit4ClassRunner::class)
     open class SimpleTest {
@@ -224,6 +234,59 @@ class FlickerServiceJUnit4ClassRunnerTest {
                                             }
                                         }
                                     } to AssertionInvocationGroup.NON_BLOCKING,
+                                ),
+                            enabled = true,
+                        )
+                    )
+            }
+        }
+    }
+
+    /** Below are all the mock test classes uses for testing purposes */
+    @RunWith(FlickerServiceJUnit4ClassRunner::class)
+    open class DebugTest {
+        val instrumentation: Instrumentation = InstrumentationRegistry.getInstrumentation()
+        private val testApp: BrowserAppHelper = BrowserAppHelper(instrumentation)
+
+        @Test
+        @ExpectedScenarios(["MY_CUSTOM_SCENARIO"])
+        @Debug("testdata/quickswitch.winscope.zip")
+        fun test() {
+            onTestStart?.run()
+            testApp.open()
+        }
+
+        companion object {
+            @FlickerConfigProvider
+            @JvmStatic
+            fun flickerConfigProvider(): FlickerConfig {
+                return FlickerConfig()
+                    .use(
+                        FlickerConfigEntry(
+                            scenarioId = ScenarioId("MY_CUSTOM_SCENARIO"),
+                            extractor =
+                                object : ScenarioExtractor {
+                                    override fun extract(reader: Reader): List<TraceSlice> {
+                                        return listOf(
+                                            TraceSlice(Timestamps.min(), Timestamps.max())
+                                        )
+                                    }
+                                },
+                            assertions =
+                                mapOf(
+                                    object : AssertionTemplate("myBlockingAssertion") {
+                                        override fun doEvaluate(
+                                            scenarioInstance: ScenarioInstance,
+                                            flicker: FlickerTest,
+                                        ) {
+                                            // Check to make sure we are running this assertion on
+                                            // the debug trace
+                                            flicker.assertLayersStart {
+                                                Truth.assertThat(this.timestamp.unixNanos)
+                                                    .isEqualTo(1743439123983024119)
+                                            }
+                                        }
+                                    } to AssertionInvocationGroup.BLOCKING
                                 ),
                             enabled = true,
                         )
