@@ -29,6 +29,7 @@ object Defaults {
      * See http://go/motion-testing#debug-video for instructions.
      */
     fun captureScreenshots(): Boolean {
-        return "true" == InstrumentationRegistry.getArguments().getString("captureScreenshots")
+        return "true" == InstrumentationRegistry.getArguments().getString("captureScreenshots") ||
+            MotionTestRule.isRobolectricRuntime()
     }
 }
