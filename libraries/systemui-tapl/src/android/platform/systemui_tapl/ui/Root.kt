@@ -101,11 +101,10 @@ class Root private constructor() {
     ): NotificationShade {
         traceSection("Opening notification shade via swipe") {
             val device = uiDevice
-            val width = device.displayWidth.toFloat()
             val height = device.displayHeight.toFloat()
             BetterSwipe.swipe(
-                PointF(width / 2, height * heightFraction),
-                PointF(width / 2, height),
+                PointF(notificationSwipeX, height * heightFraction),
+                PointF(notificationSwipeX, height),
                 swipeDuration,
             )
             waitForShadeToOpen()
@@ -118,11 +117,8 @@ class Root private constructor() {
      * an app.
      */
     fun openNotificationShadeViaSwipeFromTop(): NotificationShade {
-        val device = uiDevice
-        // Swipe in first quarter to avoid desktop windowing app handle interactions.
-        val swipeXCoordinate = (device.displayWidth / 4).toFloat()
-        val height = device.displayHeight.toFloat()
-        BetterSwipe.swipe(PointF(swipeXCoordinate, 0f), PointF(swipeXCoordinate, height))
+        val height = uiDevice.displayHeight.toFloat()
+        BetterSwipe.swipe(PointF(notificationSwipeX, 0f), PointF(notificationSwipeX, height))
         waitForShadeToOpen()
         return NotificationShade()
     }
@@ -475,6 +471,7 @@ class Root private constructor() {
         private val FOOTER_SELECTOR = sysuiResSelector("qs_footer_actions")
         private const val SCREENSHOT_POST_TIMEOUT_MSEC: Long = 20000
         private val GLOBAL_SCREENSHOT_SELECTOR = sysuiResSelector("screenshot_actions")
+        private val notificationSwipeX = (uiDevice.displayWidth / 4).toFloat()
 
         /** Returns an instance of Root. */
         @JvmStatic
