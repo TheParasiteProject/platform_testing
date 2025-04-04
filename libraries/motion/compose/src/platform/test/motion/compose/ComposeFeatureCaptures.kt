@@ -69,10 +69,11 @@ fun TimeSeriesCaptureScope<SemanticsNodeInteractionsProvider>.feature(
     matcher: SemanticsMatcher,
     capture: FeatureCapture<SemanticsNode, *>,
     name: String = capture.name,
+    useUnmergedTree: Boolean = false
 ) {
     on({
         try {
-            it.onNode(matcher).fetchSemanticsNode()
+            it.onNode(matcher, useUnmergedTree = useUnmergedTree).fetchSemanticsNode()
         } catch (e: AssertionError) {
             null
         }
