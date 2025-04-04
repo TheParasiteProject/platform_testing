@@ -290,3 +290,30 @@ python_test_host {
         },
     },
 }
+
+python_test_host {
+    name: "BluetoothForgetDeviceFromSettingsTest",
+    main: "connectivity_test_forget_remove_device_from_settings.py",
+    srcs: ["connectivity_test_forget_remove_device_from_settings.py"],
+    libs: [
+        "mobly",
+        "utilities",
+        "bluetooth_test",
+    ],
+    test_suites: [
+        "catbox",
+    ],
+    test_options: {
+        unit_test: false,
+    },
+    device_common_data: [
+        // Package the snippet with the mobly test
+        ":AutomotiveSnippet",
+        ":PhoneSnippet",
+    ],
+    version: {
+        py3: {
+            embedded_launcher: true,
+        },
+    },
+}
