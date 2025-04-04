@@ -41,7 +41,17 @@ import java.util.function.Supplier;
 public class PerfettoTracingPerClassStrategy extends PerfettoTracingStrategy {
     private static final String STRATEGY_IDENTIFIER = "per_class";
 
-    private List<String> mFileList = new ArrayList<>();
+    private static final class TraceResult {
+        public final String mPath;
+        public final boolean mHasFailure;
+
+        TraceResult(String path, boolean hasFailure) {
+            mPath = path;
+            mHasFailure = hasFailure;
+        }
+    }
+
+    private final List<TraceResult> mResults = new ArrayList<>();
     private Description mLastDescription;
 
     PerfettoTracingPerClassStrategy(Instrumentation instr) {
@@ -118,7 +128,7 @@ public class PerfettoTracingPerClassStrategy extends PerfettoTracingStrategy {
                             return;
                         }
 
-                        mFileList.add(path.toString());
+                        mResults.add(new TraceResult(path.toString(), mIsTestFailed));
                         if (isTestRunEnd) {
                             uploadMetrics(dataRecord);
                         }
@@ -129,9 +139,14 @@ public class PerfettoTracingPerClassStrategy extends PerfettoTracingStrategy {
 
     private void uploadMetrics(DataRecord dataRecord) {
         int counter = 0;
-        for (String filePath : mFileList) {
-            String metricName = getFilePathKeyPrefix() + counter++;
-            dataRecord.addStringMetric(metricName, filePath);
+        for (TraceResult result : mResults) {
+            var metricName = new StringBuilder(getFilePathKeyPrefix());
+            if (result.mHasFailure) {
+                metricName.append("_FAILED");
+            }
+            metricName.append("_").append(counter++);
+
+            dataRecord.addStringMetric(metricName.toString(), result.mPath);
         }
     }
 
