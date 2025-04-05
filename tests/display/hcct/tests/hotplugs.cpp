@@ -126,8 +126,10 @@ TEST_F(VkmsHotplugTest, DetectSingleExternalDisconnectHotplugs) {
     hotpluggedDisplays.insert(receivedHotplugs[0].first);
   }
 
-  EXPECT_EQ(kInitialSetupConnectors, hotpluggedDisplays.size())
-      << "Expected " << kInitialSetupConnectors
+  int expectedDisconnectHotplugs = kInitialSetupConnectors - 1;
+
+  EXPECT_EQ(expectedDisconnectHotplugs, hotpluggedDisplays.size())
+      << "Expected " << expectedDisconnectHotplugs
       << " unique hotplug events, but got " << hotpluggedDisplays.size();
 }
 

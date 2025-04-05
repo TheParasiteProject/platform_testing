@@ -25,10 +25,10 @@ import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
-import java.lang.reflect.Array.getDouble
 import org.json.JSONObject
 import platform.test.motion.golden.DataPointType
 import platform.test.motion.golden.UnknownTypeException
+import platform.test.motion.isApproximatelyEqualTo
 
 fun Dp.asDataPoint() = DataPointTypes.dp.makeDataPoint(this)
 
@@ -54,6 +54,9 @@ object DataPointTypes {
                 }
             },
             valueToJson = { it.value },
+            isApproximateEqual = { actual, expected ->
+                actual.value.isApproximatelyEqualTo(expected.value)
+            }
         )
 
     val intSize: DataPointType<IntSize> =
@@ -85,7 +88,7 @@ object DataPointTypes {
                     put("x", it.x)
                     put("y", it.y)
                 }
-            },
+            }
         )
 
     val dpSize: DataPointType<DpSize> =
@@ -102,6 +105,10 @@ object DataPointTypes {
                     put("height", it.height.value)
                 }
             },
+             isApproximateEqual = { actual, expected ->
+                 actual.width.value.isApproximatelyEqualTo(expected.width.value) &&
+                 actual.height.value.isApproximatelyEqualTo(expected.height.value)
+            }
         )
 
     val dpOffset: DataPointType<DpOffset> =
@@ -118,6 +125,10 @@ object DataPointTypes {
                     put("y", it.y.value)
                 }
             },
+            isApproximateEqual = { actual, expected ->
+                actual.x.value.isApproximatelyEqualTo(expected.x.value) &&
+                        actual.y.value.isApproximatelyEqualTo(expected.y.value)
+            }
         )
 
     val offset: DataPointType<Offset> =
@@ -143,5 +154,14 @@ object DataPointTypes {
                         }
                 }
             },
+            isApproximateEqual = { actual, expected ->
+                when(expected){
+                    Offset.Unspecified -> actual == Offset.Unspecified
+                    Offset.Infinite -> actual == Offset.Infinite
+                    Offset.Zero -> actual.x.isApproximatelyEqualTo(0f) && actual.y.isApproximatelyEqualTo(0f)
+                    else -> actual.x.isApproximatelyEqualTo(expected.x)
+                            && actual.y.isApproximatelyEqualTo(expected.y)
+                }
+            }
         )
 }

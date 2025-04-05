@@ -33,11 +33,14 @@ import androidx.test.runner.AndroidJUnit4;
 
 import com.android.helpers.PerfettoHelper;
 
+import com.google.common.truth.Truth;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.Description;
 import org.junit.runner.Result;
 import org.junit.runner.RunWith;
+import org.junit.runner.notification.Failure;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.mockito.Spy;
@@ -61,6 +64,9 @@ public class PerfettoTracingPerClassStrategyTest {
     @Mock private PerfettoTracingStrategy.WakeLockContext mWakeLockContext;
     @Mock private PerfettoTracingStrategy.WakeLockAcquirer mWakelLockAcquirer;
     @Mock private PerfettoTracingStrategy.WakeLockReleaser mWakeLockReleaser;
+
+    private static final Description FAKE_TEST_DESCRIPTION =
+            Description.createTestDescription("class", "method");
 
     @Before
     public void setUp() {
@@ -212,5 +218,28 @@ public class PerfettoTracingPerClassStrategyTest {
         verify(dataRecord, times(0)).addStringMetric(anyString(), anyString());
         strategy.testRunEnd(dataRecord, new Result());
         verify(dataRecord, times(2)).addStringMetric(anyString(), anyString());
+    }
+
+    @Test
+    public void testPostedFailedMetricWhenTestFails() {
+        Bundle b = new Bundle();
+        doReturn(true).when(mPerfettoHelper).startCollecting();
+        doReturn(true).when(mPerfettoHelper).stopCollecting(anyLong(), anyString());
+        PerfettoTracingStrategy strategy = initStrategy(b);
+        // Test run start behavior
+        strategy.testRunStart(mDataRecord, mRunDesc);
+        strategy.testStart(mDataRecord, mTest1Desc, /* iteration= */ 1);
+
+        strategy.setPerfettoStartSuccess(true);
+        Failure failureDesc = new Failure(FAKE_TEST_DESCRIPTION, new Exception());
+        strategy.testFail(mDataRecord, mTest1Desc, failureDesc);
+        strategy.testEnd(mDataRecord, mTest1Desc, /* iteration= */ 1);
+        strategy.testRunEnd(mDataRecord, null);
+
+        Truth.assertWithMessage("DataRecord should have metrics")
+                .that(mDataRecord.hasMetrics())
+                .isTrue();
+        var path = mDataRecord.createBundleFromMetrics().getString("perfetto_file_path_FAILED_0");
+        Truth.assertThat(path).isNotEmpty();
     }
 }

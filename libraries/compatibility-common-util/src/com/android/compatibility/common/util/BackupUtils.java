@@ -46,6 +46,8 @@ public abstract class BackupUtils {
     private static final String LOCAL_TRANSPORT_PACKAGE = "com.android.localtransport";
     public static final String LOCAL_TRANSPORT_TOKEN = "1";
 
+    private static final int USER_SYSTEM = 0;
+
     private static final int BACKUP_PROVISIONING_TIMEOUT_SECONDS = 30;
     private static final int BACKUP_PROVISIONING_POLL_INTERVAL_SECONDS = 1;
     private static final long BACKUP_SERVICE_INIT_TIMEOUT_SECS = TimeUnit.MINUTES.toSeconds(2);
@@ -53,7 +55,7 @@ public abstract class BackupUtils {
     private static final Pattern BACKUP_MANAGER_CURRENTLY_ENABLE_STATUS_PATTERN =
             Pattern.compile("^Backup Manager currently (enabled|disabled)$");
     private static final String MATCH_LINE_BACKUP_MANAGER_IS_NOT_PENDING_INIT =
-            "(?s)" + "^Backup Manager is .* not pending init.*";  // DOTALL
+            "Backup Manager is .* not pending init.*"; // DOTALL
     private static final String MATCH_LINE_ONLY_GMS_BACKUP_TRANSPORT_PENDING_INIT =
             "(?s)" + ".*Pending init: 1.*com.google.android.gms/.backup.BackupTransportService.*";
 
@@ -322,6 +324,16 @@ public abstract class BackupUtils {
                 .contains("currently activated");
     }
 
+    /** Returns the current user ID obtained from "am get-current-user". */
+    public int getCurrentUserId() throws IOException {
+        String out = getShellCommandOutput("am get-current-user");
+        try {
+            return Integer.parseInt(out.trim());
+        } catch (NumberFormatException e) {
+            throw new RuntimeException("Failed to parse user id", e);
+        }
+    }
+
     private String getLineString(InputStream inputStream) throws IOException {
         BufferedReader reader =
                 new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8));
@@ -340,13 +352,22 @@ public abstract class BackupUtils {
         return reader.lines().collect(joining());
     }
 
+    private String getPatternForBackupManagerIsNotPendingInit(int userId) {
+        String userIdPrefix = "";
+        if (userId != USER_SYSTEM) {
+            userIdPrefix = "User " + userId + ":";
+        }
+        return "(?s)^" + userIdPrefix + MATCH_LINE_BACKUP_MANAGER_IS_NOT_PENDING_INIT;
+    }
+
     /** Blocks until all backup transports has initialised */
     public void waitForBackupInitialization() throws IOException {
+        int userId = getCurrentUserId();
         long tryUntilNanos = System.nanoTime()
                 + TimeUnit.SECONDS.toNanos(BACKUP_PROVISIONING_TIMEOUT_SECONDS);
         while (System.nanoTime() < tryUntilNanos) {
             String output = getLineString(executeShellCommand("dumpsys backup"));
-            if (output.matches(MATCH_LINE_BACKUP_MANAGER_IS_NOT_PENDING_INIT)) {
+            if (output.matches(getPatternForBackupManagerIsNotPendingInit(userId))) {
                 return;
             }
             try {
@@ -364,11 +385,12 @@ public abstract class BackupUtils {
      * initialised yet.
      */
     public void waitForNonGmsTransportInitialization() throws IOException {
+        int userId = getCurrentUserId();
         long tryUntilNanos =
                 System.nanoTime() + TimeUnit.SECONDS.toNanos(BACKUP_PROVISIONING_TIMEOUT_SECONDS);
         while (System.nanoTime() < tryUntilNanos) {
             String output = getAllLinesString(executeShellCommand("dumpsys backup"));
-            if (output.matches(MATCH_LINE_BACKUP_MANAGER_IS_NOT_PENDING_INIT)) {
+            if (output.matches(getPatternForBackupManagerIsNotPendingInit(userId))) {
                 return;
             }
             if (output.matches(MATCH_LINE_ONLY_GMS_BACKUP_TRANSPORT_PENDING_INIT)) {

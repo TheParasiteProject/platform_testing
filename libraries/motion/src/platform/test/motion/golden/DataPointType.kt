@@ -31,6 +31,9 @@ class DataPointType<T>(
     val typeName: String,
     private val jsonToValue: (jsonValue: Any) -> T,
     private val valueToJson: (T) -> Any,
+    private val isApproximateEqual: (T, T) -> Boolean = { actual, expected ->
+        expected == actual
+    },
     internal val ensureImmutable: (T & Any) -> T & Any = { it },
 ) {
     fun makeDataPoint(nativeValue: T?): DataPoint<T> {
@@ -51,6 +54,9 @@ class DataPointType<T>(
     }
 
     fun toJson(value: T): Any = valueToJson(value)
+
+    fun isApproximatelyEqual(actual: T, expected: T): Boolean = isApproximateEqual(actual, expected)
+
 
     override fun toString(): String {
         return typeName

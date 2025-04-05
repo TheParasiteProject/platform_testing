@@ -14,22 +14,9 @@
  * limitations under the License.
  */
 
-package platform.test.motion
+package android.tools.flicker.annotation
 
-import androidx.test.platform.app.InstrumentationRegistry
-
-object Defaults {
-
-    /**
-     * Whether the environment is configured to capture screenshots.
-     *
-     * To request debug screenshots when running tests, set the instrumentation argument
-     * `captureScreenshots=true`.
-     *
-     * See http://go/motion-testing#debug-video for instructions.
-     */
-    fun captureScreenshots(): Boolean {
-        return "true" == InstrumentationRegistry.getArguments().getString("captureScreenshots") ||
-            MotionTestRule.isRobolectricRuntime()
-    }
-}
+// TODO: Add lint rules to make sure these annotations are never merged in
+@Target(AnnotationTarget.FUNCTION)
+@Retention(AnnotationRetention.RUNTIME)
+annotation class Debug(val debugTraceFilePath: String)

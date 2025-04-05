@@ -77,8 +77,6 @@ public abstract class PerfettoTracingStrategy {
     public static final String ARGUMENT_FILE_PATH_KEY_PREFIX = "perfetto_file_path_key_prefix";
     // Perfetto file path key prefix
     protected static final String DEFAULT_FILE_PATH_KEY_PREFIX = "perfetto_file_path";
-    // Perfetto file path key prefix for failed tests
-    protected static final String FAILED_FILE_PATH_KEY_PREFIX = "perfetto_failed_file_path";
     // Argument to get custom time in millisecs to wait before dumping the trace.
     // This has to be at least the dump interval time set in the trace config file
     // or greater than that. Otherwise, we will miss trace information from the test.
@@ -137,7 +135,7 @@ public abstract class PerfettoTracingStrategy {
     protected boolean mSkipTestFailureMetrics;
     private boolean mSkipTestSuccessMetrics;
     private boolean mSkipEmptyMetrics;
-    private boolean mIsTestFailed = false;
+    protected boolean mIsTestFailed = false;
     // Store the method name and invocation count to create unique file name for each trace.
     private boolean mPerfettoStartSuccess = false;
     private String mFilePathKeyPrefix = DEFAULT_FILE_PATH_KEY_PREFIX;
@@ -326,7 +324,7 @@ public abstract class PerfettoTracingStrategy {
             String metricName) {
         if (stopPerfettoTracing(path)) {
             if (mIsTestFailed) {
-                record.addStringMetric(FAILED_FILE_PATH_KEY_PREFIX, path.toString());
+                record.addStringMetric(metricName + "_FAILED", path.toString());
             } else {
                 record.addStringMetric(metricName, path.toString());
             }

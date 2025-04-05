@@ -19,7 +19,9 @@ package platform.test.motion
 import android.graphics.Bitmap
 import platform.test.motion.filmstrip.Filmstrip
 import platform.test.motion.filmstrip.MotionScreenshot
-import platform.test.motion.filmstrip.VideoRenderer
+import platform.test.motion.filmstrip.Mp4VideoFileExporter
+import platform.test.motion.filmstrip.ScreenshotExporter
+import platform.test.motion.filmstrip.ScreenshotZipExporter
 import platform.test.motion.golden.TimeSeries
 
 /**
@@ -37,8 +39,8 @@ internal constructor(
 ) {
     /** Visual filmstrip of the animation. */
     val filmstrip: Filmstrip?
-    /** Renders the screenshots as an MP4 video. */
-    val videoRenderer: VideoRenderer?
+    /** Exports the screenshots as either an MP4 video or a Zip File. */
+    val screenshotExporter: ScreenshotExporter?
 
     init {
         if (screenshots != null) {
@@ -47,15 +49,15 @@ internal constructor(
                     MotionScreenshot(frameId, bitmap)
                 }
             filmstrip = Filmstrip(motionScreenshots)
-            videoRenderer =
+            screenshotExporter =
                 if (MotionTestRule.isRobolectricRuntime()) {
-                    null
+                    ScreenshotZipExporter(motionScreenshots)
                 } else {
-                    VideoRenderer(motionScreenshots)
+                    Mp4VideoFileExporter(motionScreenshots)
                 }
         } else {
             filmstrip = null
-            videoRenderer = null
+            screenshotExporter = null
         }
     }
 

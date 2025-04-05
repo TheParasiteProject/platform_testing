@@ -194,6 +194,28 @@ python_test_host {
 }
 
 python_test_host {
+    name: "BTDisableFromPhone",
+    main: "connectivity_test_disable_from_phone.py",
+    srcs: ["connectivity_test_disable_from_phone.py"],
+    libs: [
+        "mobly",
+        "utilities",
+        "bluetooth_test",
+    ],
+    test_suites: [
+        "catbox",
+    ],
+    test_options: {
+        unit_test: false,
+    },
+    device_common_data: [
+        // Package the snippet with the mobly test
+        ":AutomotiveSnippet",
+        ":PhoneSnippet",
+    ],
+}
+
+python_test_host {
     name: "BTProfilesTest",
     main: "connectivity_test_bluetooth_profile.py",
     srcs: ["connectivity_test_bluetooth_profile.py"],
@@ -246,6 +268,33 @@ python_test_host {
     name: "BluetoothDisableMediaAfterReconnectTest",
     main: "connectivity_test_disconnected_media_after_reconnect.py",
     srcs: ["connectivity_test_disconnected_media_after_reconnect.py"],
+    libs: [
+        "mobly",
+        "utilities",
+        "bluetooth_test",
+    ],
+    test_suites: [
+        "catbox",
+    ],
+    test_options: {
+        unit_test: false,
+    },
+    device_common_data: [
+        // Package the snippet with the mobly test
+        ":AutomotiveSnippet",
+        ":PhoneSnippet",
+    ],
+    version: {
+        py3: {
+            embedded_launcher: true,
+        },
+    },
+}
+
+python_test_host {
+    name: "BluetoothForgetDeviceFromSettingsTest",
+    main: "connectivity_test_forget_remove_device_from_settings.py",
+    srcs: ["connectivity_test_forget_remove_device_from_settings.py"],
     libs: [
         "mobly",
         "utilities",

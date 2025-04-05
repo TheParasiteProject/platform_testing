@@ -16,6 +16,7 @@
 
 package platform.test.motion
 
+import android.os.Build
 import android.util.Log
 import com.google.common.truth.FailureMetadata
 import com.google.common.truth.Subject
@@ -149,13 +150,16 @@ class MotionTestRule<Toolkit>(
         metadata.put("deviceLocalPath", goldenFilePath)
         metadata.put("result", result.name)
 
-        recordedMotion.videoRenderer?.let { videoRenderer ->
+        recordedMotion.screenshotExporter?.let { screenshotExporter ->
             try {
-                val videoFile =
-                    goldenFile.resolveSibling("${goldenFile.nameWithoutExtension}.$VIDEO_EXTENSION")
+                // file name is of the form {testMethodName}.actual.{extension}
+                val file =
+                    goldenFile.resolveSibling(
+                        "${goldenFile.nameWithoutExtension}.${screenshotExporter.fileExtension}"
+                    )
 
-                videoRenderer.renderToFile(videoFile.absolutePath)
-                metadata.put("videoLocation", videoFile.relativeTo(goldenFilePath))
+                screenshotExporter.exportToFile(file)
+                metadata.put("videoLocation", file.relativeTo(goldenFilePath))
             } catch (e: Exception) {
                 Log.e(TAG, "Failed to render motion test video", e)
             }
@@ -173,7 +177,7 @@ class MotionTestRule<Toolkit>(
     }
 
     private fun getGoldenFilePath(): File {
-        return if (isRobolectricRuntime()) File("/tmp/motion")
+        return if (isRobolectricRuntime() && isGradle()) File("/tmp/motion")
         else File(goldenPathManager.deviceLocalPath)
     }
 
@@ -187,14 +191,16 @@ class MotionTestRule<Toolkit>(
     companion object {
         private const val JSON_EXTENSION = "json"
         private const val JSON_ACTUAL_EXTENSION = "actual.${JSON_EXTENSION}"
-        private const val VIDEO_EXTENSION = "mp4"
         private const val JSON_INDENTATION = 2
         private val GOLDEN_IDENTIFIER_REGEX = "^[A-Za-z0-9_-]+$".toRegex()
         private const val TAG = "MotionTestRule"
 
         fun isRobolectricRuntime(): Boolean {
-            return this::class.java.getClassLoader().javaClass.getName().contains("robolectric")
+            return Build.FINGERPRINT.contains("robolectric")
         }
+
+        fun isGradle() =
+            System.getProperty("java.class.path")?.contains("gradle-worker.jar") ?: false
     }
 }
 

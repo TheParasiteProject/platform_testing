@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2024 The Android Open Source Project
+ * Copyright (C) 2025 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,23 +24,27 @@ import android.media.MediaFormat.KEY_COLOR_FORMAT
 import android.media.MediaFormat.KEY_FRAME_RATE
 import android.media.MediaMuxer
 import android.view.Surface
+import java.io.File
 import platform.test.motion.golden.TimestampFrameId
 
 /** Produces an MP4 based on the [screenshots]. */
-class VideoRenderer(private val screenshots: List<MotionScreenshot>) {
+class Mp4VideoFileExporter(private val screenshots: List<MotionScreenshot>) : ScreenshotExporter {
+
+    init {
+        require(screenshots.isNotEmpty()) { "Filmstrip must have at least one screenshot" }
+    }
 
     private var screenshotWidth = screenshots.maxOf { it.bitmap.width }.roundUpToNextMultipleOf16()
     private var screenshotHeight =
         screenshots.maxOf { it.bitmap.height }.roundUpToNextMultipleOf16()
 
-    /**
-     * Creates an MP4 file at [path], which will contain all screenshots.
-     *
-     * [bitsPerPixel] is used to estimate the bitrate needed.
-     */
-    fun renderToFile(path: String, bitsPerPixel: Float = 0.25f) {
-        require(screenshots.isNotEmpty()) { "Filmstrip must have at least one screenshot" }
-        val muxer = MediaMuxer(path, MediaMuxer.OutputFormat.MUXER_OUTPUT_MPEG_4)
+    // used to estimate the bitrate needed.
+    private val bitsPerPixel: Float = 0.25f
+    override val fileExtension: String = VIDEO_EXTENSION
+
+    /** Creates an MP4 file at [file], which will contain all screenshots. */
+    override fun exportToFile(file: File) {
+        val muxer = MediaMuxer(file.absolutePath, MediaMuxer.OutputFormat.MUXER_OUTPUT_MPEG_4)
 
         val bitrate = (screenshotWidth * screenshotHeight * bitsPerPixel * FRAME_RATE).toInt()
         val mime = "video/avc"
@@ -56,7 +60,6 @@ class VideoRenderer(private val screenshots: List<MotionScreenshot>) {
         codec.start()
 
         encodeScreenshotsInVideo(codec, muxer, surface)
-
         codec.stop()
         codec.release()
         muxer.stop()
@@ -152,6 +155,7 @@ class VideoRenderer(private val screenshots: List<MotionScreenshot>) {
         const val FRAME_DURATION = 16L
         const val FRAME_RATE = 1000f / FRAME_DURATION
         const val DEQUEUE_TIMEOUT_US = 10_000L
+        private const val VIDEO_EXTENSION = "mp4"
 
         private fun Int.roundUpToNextMultipleOf16(): Int = (this + 15) and 0xF.inv()
     }

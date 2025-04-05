@@ -55,7 +55,6 @@ import androidx.compose.ui.unit.dp
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.google.common.truth.IterableSubject
 import com.google.common.truth.Truth.assertThat
-import kotlin.time.Duration.Companion.milliseconds
 import kotlinx.coroutines.launch
 import org.junit.Rule
 import org.junit.Test
@@ -69,6 +68,7 @@ import platform.test.motion.golden.DataPointTypes
 import platform.test.motion.golden.NotFoundDataPoint
 import platform.test.motion.golden.ValueDataPoint
 import platform.test.motion.testing.createGoldenPathManager
+import kotlin.time.Duration.Companion.milliseconds
 
 @RunWith(AndroidJUnit4::class)
 class ComposeToolkitTest {

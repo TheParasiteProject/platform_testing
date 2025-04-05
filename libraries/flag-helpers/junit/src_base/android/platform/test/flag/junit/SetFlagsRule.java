@@ -715,10 +715,12 @@ public final class SetFlagsRule implements TestRule {
                 throw new FlagSetException(
                         flag.fullFlagName(),
                         "This flag was locked when it was read outside of the test code; likely"
-                                + " during initialization of the test class. To fix this error,"
-                                + " move test fixture initialization code into your"
-                                + " @Before-annotated setup method, and ensure you are using"
-                                + " @EnableFlags() and @DisableFlags() to set flags.",
+                            + " during initialization of the test class, or due some action"
+                            + " performed in a previous tests that have repercussion in this one"
+                            + " (lack of test isolation). To fix this error, move test fixture"
+                            + " initialization code into your @Before-annotated setup method, and"
+                            + " ensure you are using @EnableFlags() and @DisableFlags() to set"
+                            + " flags.",
                         firstReadOutsideTest);
             }
             if (!isFlagsClassMonitored(flag)) {
