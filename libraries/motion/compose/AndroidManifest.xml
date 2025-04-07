@@ -16,7 +16,15 @@
   -->
 
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     package="platform.test.motion.compose">
 
-  <application><activity android:name="androidx.activity.ComponentActivity" /></application>
+  <application>
+    <activity
+        android:name="androidx.activity.ComponentActivity"
+        android:exported="true"
+        android:theme="@android:style/Theme.Material.Light.NoActionBar"
+        tools:replace="android:theme"
+        />
+  </application>
 </manifest>
