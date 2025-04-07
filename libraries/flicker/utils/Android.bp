@@ -26,11 +26,31 @@ filegroup {
     ],
 }
 
-java_library {
+filegroup {
+    name: "flickerlib-utils-src",
+    srcs: [
+        "src/android/tools/TracingExtensions.kt",
+        "src/android/tools/function/Predicate.kt",
+        "src/android/tools/io/TraceType.kt",
+        "src/android/tools/io/Consts.kt",
+        "src/android/tools/LogConsts.kt",
+    ],
+}
+
+filegroup {
+    name: "flickerlib-perfetto-src",
+    srcs: [
+        ":flickerlib-utils-src",
+        "src/android/tools/traces/parsers/perfetto/Args.kt",
+        "src/android/tools/traces/parsers/perfetto/TraceProcessorSession*",
+    ],
+}
+
+android_library {
     name: "flickerlib-helpers",
     platform_apis: true,
     optimize: {
-        enabled: false
+        enabled: false,
     },
     srcs: [
         ":flickerlib-helpers-src",
@@ -43,20 +63,17 @@ java_library {
 }
 
 java_library {
-    name: "flickerlib-parsers",
+    name: "flickerlib-perfetto",
     platform_apis: true,
     kotlincflags: [
         "-Xmulti-platform",
         "-opt-in=kotlin.ExperimentalMultiplatform",
     ],
     optimize: {
-        enabled: false
+        enabled: false,
     },
     srcs: [
-        "src/android/tools/**/*.kt",
-    ],
-    exclude_srcs: [
-        ":flickerlib-helpers-src",
+        ":flickerlib-perfetto-src",
     ],
     static_libs: [
         "androidx.benchmark_benchmark-macro",
@@ -66,5 +83,27 @@ java_library {
         "//frameworks/libs/systemui:view_capture_proto",
         "WindowManager-Shell-proto",
         "com_android_wm_shell_flags_lib",
+    ],
+}
+
+android_library {
+    name: "flickerlib-parsers",
+    platform_apis: true,
+    optimize: {
+        enabled: false,
+    },
+    srcs: [
+        "src/android/tools/**/*.kt",
+    ],
+    exclude_srcs: [
+        ":flickerlib-helpers-src",
+        ":flickerlib-perfetto-src",
+    ],
+    static_libs: [
+        "flickerlib-perfetto",
+        "androidx.media3.media3-common",
+        "androidx.media3.media3-effect",
+        "androidx.media3.media3-transformer",
+        "androidx.media3.media3-muxer",
     ],
 }

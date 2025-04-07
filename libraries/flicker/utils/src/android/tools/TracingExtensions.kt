@@ -16,15 +16,13 @@
 
 package android.tools
 
-import android.tools.traces.formatRealTimestamp
+import android.os.Trace
+import android.tools.function.Predicate
 
-const val MILLISECOND_AS_NANOSECONDS: Long = 1000000
-const val SECOND_AS_NANOSECONDS: Long = 1000000000
-const val MINUTE_AS_NANOSECONDS: Long = 60000000000
-const val HOUR_AS_NANOSECONDS: Long = 3600000000000
-const val DAY_AS_NANOSECONDS: Long = 86400000000000
-
-val Timestamps: TimestampFactory = TimestampFactory { formatRealTimestamp(it) }
-
-var Cache: ICache = CacheImpl()
-    internal set
+fun <T> withTracing(name: String, predicate: Predicate<T>): T =
+    try {
+        Trace.beginSection(name)
+        predicate.invoke()
+    } finally {
+        Trace.endSection()
+    }
