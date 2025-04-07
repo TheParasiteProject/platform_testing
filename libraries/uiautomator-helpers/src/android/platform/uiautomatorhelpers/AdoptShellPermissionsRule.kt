@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package android.platform.systemui_tapl.permissions.rule
+package android.platform.uiautomatorhelpers
 
 import android.app.UiAutomation
 import android.util.Log
@@ -27,7 +27,7 @@ import org.junit.runner.Description
  *
  * @see
  *   cts/common/device-side/util-axt/src/com/android/compatibility/common/util/AdoptShellPermissionsRule.java
- * @see UiAutomation.adoptShellPermissionIdentity
+ * @see android.app.UiAutomation.adoptShellPermissionIdentity
  */
 class AdoptShellPermissionsRule(
     vararg permissions: String,
@@ -46,7 +46,7 @@ class AdoptShellPermissionsRule(
         for (permission in permissionSet) {
             uiAutomation.adoptShellPermissionIdentity(permission)
         }
-        Log.d("AdoptShellPermissionsRule", "Adopted identities=${permissionSet}")
+        Log.d("AdoptShellPermissionsRule", "Adopted identities=$permissionSet")
     }
 
     override fun finished(description: Description?) {
