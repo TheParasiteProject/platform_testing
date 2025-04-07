@@ -71,18 +71,29 @@ public class OpenAppFromMediaCenterTest {
 
     @Test
     public void testOpenMediaAppFromMediaAppAppgrid() {
-        // Use preinstalled "Bluetooth Audio" app
-        mAutoAppGridHelper.get().open();
-        assertTrue("AppGrid is not open", mAutoAppGridHelper.get().isAppInForeground());
+        mAutoHomeHelper.get().openMediaWidget();
+        assertTrue("Radio app not launched", mMediaCenterHelper.get().isRadioAppLaunched());
+        mMediaCenterHelper.get().openMediaAppMenuItems();
         mMediaCenterHelper.get().openApp(DEFAULT_MEDIA_APP);
-        assertTrue("Not a media app",
+        assertTrue(
+                "Not a media app",
+                mMediaCenterHelper.get().getMediaAppTitle().equals(getDefaultMediaAppName()));
+    }
+
+    @Test
+    public void testOpenMediaAppFromAppgrid() {
+        mAutoAppGridHelper.get().open();
+        assertTrue("App Grid is not open", mAutoAppGridHelper.get().isAppInForeground());
+        mMediaCenterHelper.get().openApp(DEFAULT_MEDIA_APP);
+        assertTrue(
+                "Not a media app",
                 mMediaCenterHelper.get().getMediaAppTitle().equals(getDefaultMediaAppName()));
     }
 
     @Test
     public void testMediaAppPresentInMediaGrid() {
         mAutoAppGridHelper.get().open();
-        assertTrue("AppGrid is not open", mAutoAppGridHelper.get().isAppInForeground());
+        assertTrue("App Grid is not open", mAutoAppGridHelper.get().isAppInForeground());
         mMediaCenterHelper.get().openApp(DEFAULT_MEDIA_APP);
         mMediaCenterHelper.get().openMediaAppMenuItems();
         assertTrue("Incorrect Media apps in Grid",

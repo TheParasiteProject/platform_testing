@@ -40,6 +40,8 @@ import java.util.regex.Pattern;
 /** Helper class for functional test for Mediacenter test */
 public class MediaCenterHelperImpl extends AbstractStandardAppHelper implements IAutoMediaHelper {
 
+    private static final String LOG_TAG = MediaCenterHelperImpl.class.getSimpleName();
+
     private MediaSessionManager mMediaSessionManager;
     private UiAutomation mUiAutomation;
 
@@ -77,8 +79,9 @@ public class MediaCenterHelperImpl extends AbstractStandardAppHelper implements 
      */
     @Override
     public void exit() {
+        Log.i(LOG_TAG, "Going to the Homescreen");
         getSpectatioUiUtil().pressHome();
-        getSpectatioUiUtil().wait1Second();
+        getSpectatioUiUtil().waitNSeconds(5);
     }
 
     /**
@@ -129,6 +132,7 @@ public class MediaCenterHelperImpl extends AbstractStandardAppHelper implements 
     }
 
     private void openMediaApp() {
+        Log.i(LOG_TAG, "Opening the media application");
         getSpectatioUiUtil().pressHome();
         getSpectatioUiUtil().waitForIdle();
         getSpectatioUiUtil()
@@ -140,15 +144,17 @@ public class MediaCenterHelperImpl extends AbstractStandardAppHelper implements 
      * {@inheritDoc}
      */
     public void playMedia() {
-        if (!isPlaying()) {
-            BySelector playButtonSelector =
-                    getUiElementFromConfig(AutomotiveConfigConstants.PLAY_PAUSE_BUTTON);
-            UiObject2 playButton = getSpectatioUiUtil().findUiObject(playButtonSelector);
-            getSpectatioUiUtil()
-                    .validateUiObject(playButton, AutomotiveConfigConstants.PLAY_PAUSE_BUTTON);
-            getSpectatioUiUtil().clickAndWait(playButton);
-            getSpectatioUiUtil().wait5Seconds();
+        Log.i(LOG_TAG, "Playing the media song");
+        if (isPlaying()) {
+            return;
         }
+        BySelector playButtonSelector =
+                getUiElementFromConfig(AutomotiveConfigConstants.PLAY_PAUSE_BUTTON);
+        UiObject2 playButton = getSpectatioUiUtil().findUiObject(playButtonSelector);
+        getSpectatioUiUtil()
+                .validateUiObject(playButton, AutomotiveConfigConstants.PLAY_PAUSE_BUTTON);
+        getSpectatioUiUtil().clickAndWait(playButton);
+        getSpectatioUiUtil().waitForIdle();
     }
 
     /**
@@ -163,13 +169,14 @@ public class MediaCenterHelperImpl extends AbstractStandardAppHelper implements 
                         playButtonHomeScreen,
                         AutomotiveConfigConstants.PLAY_PAUSE_BUTTON_HOME_SCREEN);
         getSpectatioUiUtil().clickAndWait(playButtonHomeScreen);
-        getSpectatioUiUtil().wait5Seconds();
+        getSpectatioUiUtil().waitForIdle();
     }
 
     /**
      * {@inheritDoc}
      */
     public void pauseMedia() {
+        Log.i(LOG_TAG, "Pausing the song");
         if (!isPlaying()) {
             playMedia();
         }
@@ -179,18 +186,20 @@ public class MediaCenterHelperImpl extends AbstractStandardAppHelper implements 
         getSpectatioUiUtil()
                 .validateUiObject(pauseButton, AutomotiveConfigConstants.PLAY_PAUSE_BUTTON);
         getSpectatioUiUtil().clickAndWait(pauseButton);
-        getSpectatioUiUtil().wait5Seconds();
+        getSpectatioUiUtil().waitForIdle();
+        Log.i(LOG_TAG, "Song should be paused");
     }
 
     /** {@inheritDoc} */
     public void clickNextTrack() {
+        Log.i(LOG_TAG, "Click the next track");
         BySelector nextTrackButtonSelector =
                 getUiElementFromConfig(AutomotiveConfigConstants.NEXT_BUTTON);
         UiObject2 nextTrackButton = getSpectatioUiUtil().findUiObject(nextTrackButtonSelector);
         getSpectatioUiUtil()
                 .validateUiObject(nextTrackButton, AutomotiveConfigConstants.NEXT_BUTTON);
         getSpectatioUiUtil().clickAndWait(nextTrackButton);
-        getSpectatioUiUtil().wait5Seconds();
+        getSpectatioUiUtil().waitForIdle();
     }
 
     /**
@@ -206,13 +215,14 @@ public class MediaCenterHelperImpl extends AbstractStandardAppHelper implements 
                         nextTrackHomeScreenButton,
                         AutomotiveConfigConstants.NEXT_BUTTON_HOME_SCREEN);
         getSpectatioUiUtil().clickAndWait(nextTrackHomeScreenButton);
-        getSpectatioUiUtil().wait5Seconds();
+        getSpectatioUiUtil().waitForIdle();
     }
 
     /**
      * {@inheritDoc}
      */
     public void clickPreviousTrack() {
+        Log.i(LOG_TAG, "Click the previous track");
         BySelector previousTrackButtonSelector =
                 getUiElementFromConfig(AutomotiveConfigConstants.PREVIOUS_BUTTON);
         UiObject2 previousTrackMediaCenterButton =
@@ -221,7 +231,7 @@ public class MediaCenterHelperImpl extends AbstractStandardAppHelper implements 
                 .validateUiObject(
                         previousTrackMediaCenterButton, AutomotiveConfigConstants.PREVIOUS_BUTTON);
         getSpectatioUiUtil().clickAndWait(previousTrackMediaCenterButton);
-        getSpectatioUiUtil().wait5Seconds();
+        getSpectatioUiUtil().waitForIdle();
     }
 
     /**
@@ -365,12 +375,11 @@ public class MediaCenterHelperImpl extends AbstractStandardAppHelper implements 
      */
     @Override
     public void minimizeNowPlaying() {
-        Log.d("media_test", "Trying to minimize now");
+        Log.i(LOG_TAG, "Minizing the Now Playing");
         getSpectatioUiUtil().wait5Seconds();
         BySelector trackNameSelector = getUiElementFromConfig(AutomotiveConfigConstants.TRACK_NAME);
         UiObject2 trackNameText = getSpectatioUiUtil().findUiObject(trackNameSelector);
         if (trackNameText != null) {
-            Log.d("media_test", "Trying to swipe now ");
             trackNameText.swipe(Direction.DOWN, 1.0f, 500);
         }
     }
@@ -381,6 +390,7 @@ public class MediaCenterHelperImpl extends AbstractStandardAppHelper implements 
      */
     @Override
     public void maximizeNowPlaying() {
+        Log.i(LOG_TAG, "Maximizing the Now Playing");
         BySelector trackNameSelector =
                 getUiElementFromConfig(AutomotiveConfigConstants.MINIMIZED_MEDIA_CONTROLS);
         UiObject2 trackNameText = getSpectatioUiUtil().findUiObject(trackNameSelector);
@@ -410,6 +420,7 @@ public class MediaCenterHelperImpl extends AbstractStandardAppHelper implements 
      */
     @Override
     public boolean isPlaying() {
+        Log.i(LOG_TAG, "Checking if the song is playing");
         List<MediaController> controllers = mMediaSessionManager.getActiveSessions(null);
         if (controllers.size() == 0) {
             throw new RuntimeException("Unable to find Media Controller");
@@ -420,6 +431,7 @@ public class MediaCenterHelperImpl extends AbstractStandardAppHelper implements 
 
     @Override
     public boolean isPaused() {
+        Log.i(LOG_TAG, "Checking if the song is paused");
         List<MediaController> controllers = mMediaSessionManager.getActiveSessions(null);
         if (controllers.size() == 0) {
             throw new RuntimeException("Unable to find Media Controller");
