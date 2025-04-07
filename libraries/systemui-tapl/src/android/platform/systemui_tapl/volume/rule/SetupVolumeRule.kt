@@ -15,8 +15,9 @@
  */
 package android.platform.systemui_tapl.volume.rule
 
+import android.Manifest
 import android.media.AudioManager
-import android.platform.systemui_tapl.permissions.rule.AdoptShellPermissionsRule
+import android.platform.uiautomatorhelpers.AdoptShellPermissionsRule
 import android.util.Log
 import org.junit.rules.TestWatcher
 import org.junit.runner.Description
@@ -37,7 +38,7 @@ class SetupVolumeRule(
     ) : this(audioManager, testVolumes.toList())
 
     private val adoptShellPermissionRule =
-        AdoptShellPermissionsRule(android.Manifest.permission.MANAGE_NOTIFICATIONS)
+        AdoptShellPermissionsRule(Manifest.permission.MANAGE_NOTIFICATIONS)
 
     private lateinit var originalVolumes: Collection<Volume>
 
