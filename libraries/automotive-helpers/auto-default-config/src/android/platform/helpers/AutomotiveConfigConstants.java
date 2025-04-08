@@ -580,8 +580,11 @@ public class AutomotiveConfigConstants {
     public static final String NETWORK_PALETTE_WIFI = "NETWORK_PALETTE_WIFI";
     public static final String NETWORK_PALETTE_SUMMARY = "NETWORK_PALETTE_SUMMARY";
     public static final String NETWORK_PALETTE_SWITCH_WIDGET = "NETWORK_PALETTE_SWITCH_WIDGET";
+    public static final String TURN_WIFI_AUTOMATICALLY_TOGGLE = "TURN_WIFI_AUTOMATICALLY_TOGGLE";
     public static final String CONNECTED_WIFI = "CONNECTED_WIFI";
     public static final String FORGET_WIFI = "FORGET_WIFI";
+    public static final String WIFI_PREFERENCES = "WIFI_PREFERENCES";
+    public static final String JOIN_OTHER_NETWORK = "JOIN_OTHER_NETWORK";
     public static final String CLOCK_TIME = "CLOCK_TIME";
     public static final String DATE_COMMAND = "DATE_COMMAND";
     public static final String ADAPTIVE_BRIGHTNESS_COMMAND = "ADAPTIVE_BRIGHTNESS_COMMAND";
