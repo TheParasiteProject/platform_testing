@@ -339,6 +339,12 @@ public class DialerSnippet implements Snippet {
         return mDialerHelper.get().verifyDialerSettings();
     }
 
+    /** Validates whether connect to bluetooth message in dialer is displayed or not */
+    @Rpc(description = "is connect to bluetooth message is displayed ")
+    public boolean isConnectToBluetoothDisplayed() {
+        return mDialerHelper.get().isConnectToBluetoothDisplayed();
+    }
+
     @Override
     public void shutdown() {}
 }
