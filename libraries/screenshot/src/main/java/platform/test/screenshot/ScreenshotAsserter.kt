@@ -18,14 +18,12 @@ package platform.test.screenshot
 
 import android.graphics.Bitmap
 import android.graphics.Rect
-import android.view.Display.DEFAULT_DISPLAY
 import androidx.test.runner.screenshot.Screenshot
 import platform.test.screenshot.matchers.BitmapMatcher
 import platform.test.screenshot.matchers.PixelPerfectMatcher
 
 interface ScreenshotAsserter {
     fun assertGoldenImage(goldenId: String, areas: List<Rect>)
-
     fun assertGoldenImage(goldenId: String)
 }
 
@@ -54,31 +52,5 @@ data class ScreenshotAsserterConfig(
      * The [Bitmap] produced by [captureStrategy] will be recycled immediately after assertions are
      * completed. Therefore, do not retain references to created [Bitmap]s.
      */
-    val captureStrategy: BitmapSupplier = DEFAULT_SCREENSHOT_CAPTURE,
-) {
-    var displayId: Int = DEFAULT_DISPLAY
-        private set(value) {
-            require(captureStrategy == DEFAULT_SCREENSHOT_CAPTURE) {
-                "display ID can only be set when default capture strategy is in use"
-            }
-            field = value
-        }
-
-    constructor(
-        matcher: BitmapMatcher = PixelPerfectMatcher(),
-        beforeScreenshot: () -> Unit = {},
-        afterScreenshot: () -> Unit = {},
-        displayId: Int,
-    ) : this(
-        matcher = matcher,
-        beforeScreenshot = beforeScreenshot,
-        afterScreenshot = afterScreenshot,
-        captureStrategy = DEFAULT_SCREENSHOT_CAPTURE,
-    ) {
-        this.displayId = displayId
-    }
-
-    companion object {
-        val DEFAULT_SCREENSHOT_CAPTURE = { Screenshot.capture().bitmap }
-    }
-}
+    val captureStrategy: BitmapSupplier = { Screenshot.capture().bitmap }
+)

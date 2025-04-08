@@ -24,16 +24,14 @@ import android.graphics.Color
 import android.graphics.Rect
 import android.platform.uiautomatorhelpers.DeviceHelpers.shell
 import android.provider.Settings.System
-import android.view.Display.DEFAULT_DISPLAY
 import androidx.annotation.VisibleForTesting
-import androidx.core.graphics.createBitmap
 import androidx.test.platform.app.InstrumentationRegistry
+import androidx.test.runner.screenshot.Screenshot
 import com.android.internal.app.SimpleIconFactory
 import java.io.FileNotFoundException
 import org.junit.rules.TestRule
 import org.junit.runner.Description
 import org.junit.runners.model.Statement
-import platform.test.screenshot.ScreenshotAsserterConfig.Companion.DEFAULT_SCREENSHOT_CAPTURE
 import platform.test.screenshot.matchers.BitmapMatcher
 import platform.test.screenshot.matchers.MSSIMMatcher
 import platform.test.screenshot.matchers.MatchResult
@@ -308,7 +306,6 @@ internal constructor(
             .setOnBeforeScreenshot(config.beforeScreenshot)
             .setOnAfterScreenshot(config.afterScreenshot)
             .setScreenshotProvider(config.captureStrategy)
-            .setDisplayId(config.displayId)
             .build()
     }
 
@@ -351,26 +348,16 @@ internal constructor(
 
 typealias BitmapSupplier = () -> Bitmap
 
-/** Implements a screenshot asserter based on the ScreenshotRule. */
-class ScreenshotRuleAsserter
-private constructor(
-    private val rule: ScreenshotTestRule,
-    private val beforeScreenshot: Runnable?,
-    private val afterScreenshot: Runnable?,
-    private val screenShotter: BitmapSupplier,
-    private val matcher: BitmapMatcher,
-    private val targetDisplayId: Int,
-) : ScreenshotAsserter {
-    init {
-        require(screenShotter == DEFAULT_SCREENSHOT_CAPTURE || targetDisplayId == DEFAULT_DISPLAY) {
-            "DEFAULT_SCREENSHOT_CAPTURE must be used when non default display ID is set."
-        }
-    }
+/** Implements a screenshot asserter based on the ScreenshotRule */
+class ScreenshotRuleAsserter private constructor(private val rule: ScreenshotTestRule) :
+    ScreenshotAsserter {
+    // use the most constraining matcher as default
+    private var matcher: BitmapMatcher = PixelPerfectMatcher()
+    private var beforeScreenshot: Runnable? = null
+    private var afterScreenshot: Runnable? = null
 
-    private val displayScreenShotter: (Int) -> Bitmap = { _displayId ->
-        InstrumentationRegistry.getInstrumentation().uiAutomation.takeScreenshot(_displayId)
-            ?: createBitmap(0, 0)
-    }
+    // use the instrumentation screenshot as default
+    private var screenShotter: BitmapSupplier = { Screenshot.capture().bitmap }
 
     private var pointerLocationSetting: Int
         get() = shell("settings get system ${System.POINTER_LOCATION}").trim().toIntOrNull() ?: 0
@@ -392,7 +379,7 @@ private constructor(
         runBeforeScreenshot()
         var actual: Bitmap? = null
         try {
-            actual = captureScreenshot(targetDisplayId)
+            actual = screenShotter()
             rule.assertBitmapAgainstGolden(actual, goldenId, matcher)
         } finally {
             actual?.recycle()
@@ -405,20 +392,13 @@ private constructor(
         runBeforeScreenshot()
         var actual: Bitmap? = null
         try {
-            actual = captureScreenshot(targetDisplayId)
+            actual = screenShotter()
             rule.assertBitmapAgainstGolden(actual, goldenId, matcher, areas)
         } finally {
             actual?.recycle()
             runAfterScreenshot()
         }
     }
-
-    private fun captureScreenshot(displayId: Int): Bitmap =
-        if (screenShotter != DEFAULT_SCREENSHOT_CAPTURE) {
-            screenShotter()
-        } else {
-            displayScreenShotter(displayId)
-        }
 
     private fun runBeforeScreenshot() {
         // Disable Sensitive Content Redaction
@@ -444,47 +424,25 @@ private constructor(
 
     @Deprecated("Use ScreenshotAsserterFactory instead")
     class Builder(private val rule: ScreenshotTestRule) {
-        private var matcher: BitmapMatcher? = null
-        private var screenshotProvider: BitmapSupplier? = null
-        private var beforeScreenshot: Runnable? = null
-        private var afterScreenshot: Runnable? = null
-        private var displayId: Int? = null
+        private var asserter = ScreenshotRuleAsserter(rule)
 
-        fun withMatcher(matcher: BitmapMatcher): Builder = apply { this.matcher = matcher }
+        fun withMatcher(matcher: BitmapMatcher): Builder = apply { asserter.matcher = matcher }
 
         /**
          * The [Bitmap] produced by [screenshotProvider] will be recycled immediately after
          * assertions are completed. Therefore, do not retain references to created [Bitmap]s.
          */
         fun setScreenshotProvider(screenshotProvider: BitmapSupplier): Builder = apply {
-            require(displayId == null || displayId == DEFAULT_DISPLAY) {
-                "Custom screenshot provider is unsupported when a display ID is specified."
-            }
-            this.screenshotProvider = screenshotProvider
+            asserter.screenShotter = screenshotProvider
         }
 
-        fun setOnBeforeScreenshot(run: Runnable): Builder = apply { this.beforeScreenshot = run }
-
-        fun setOnAfterScreenshot(run: Runnable): Builder = apply { this.afterScreenshot = run }
-
-        fun setDisplayId(displayId: Int): Builder = apply {
-            require(
-                screenshotProvider == null || screenshotProvider == DEFAULT_SCREENSHOT_CAPTURE
-            ) {
-                "Display ID is unsupported when a custom screenshot provider is used"
-            }
-            this.displayId = displayId
+        fun setOnBeforeScreenshot(run: Runnable): Builder = apply {
+            asserter.beforeScreenshot = run
         }
 
-        fun build(): ScreenshotAsserter =
-            ScreenshotRuleAsserter(
-                rule = rule,
-                beforeScreenshot = beforeScreenshot,
-                afterScreenshot = afterScreenshot,
-                screenShotter = screenshotProvider ?: DEFAULT_SCREENSHOT_CAPTURE,
-                matcher = matcher ?: PixelPerfectMatcher(),
-                targetDisplayId = displayId ?: DEFAULT_DISPLAY,
-            )
+        fun setOnAfterScreenshot(run: Runnable): Builder = apply { asserter.afterScreenshot = run }
+
+        fun build(): ScreenshotAsserter = asserter.also { asserter = ScreenshotRuleAsserter(rule) }
     }
 }
 
