@@ -64,6 +64,13 @@ public class AutoNotificationHelperImpl extends AbstractStandardAppHelper
 
     /** {@inheritDoc} */
     @Override
+    public void exit() {
+        getSpectatioUiUtil().pressHome();
+        getSpectatioUiUtil().wait1Second();
+    }
+
+    /** {@inheritDoc} */
+    @Override
     public String getLauncherName() {
         throw new UnsupportedOperationException("Operation not supported.");
     }
@@ -80,25 +87,26 @@ public class AutoNotificationHelperImpl extends AbstractStandardAppHelper
         // Nothing to dismiss
     }
 
-    /** {@inheritDoc} */
+    /**
+     * Setup expectation: None.
+     *
+     * <p>Open notification, do nothing if notification is already open.
+     */
     @Override
-    public void openNotificationCenter() {
-        if (isAppInForeground())
-            return;
-
-        getSpectatioUiUtil().executeShellCommand(
-            getCommandFromConfig(AutomotiveConfigConstants.OPEN_NOTIFICATIONS_COMMAND)
-        );
-        getSpectatioUiUtil().waitNSeconds(2000);
+    public void open() {
+        if (!isAppInForeground()) {
+            getSpectatioUiUtil().executeShellCommand(
+                getCommandFromConfig(AutomotiveConfigConstants.OPEN_NOTIFICATIONS_COMMAND)
+            );
+            getSpectatioUiUtil().wait1Second();
+        }
     }
 
-    /** {@inheritDoc} */
-    @Override
-    public void exitNotificationCenter() {
-        getSpectatioUiUtil().pressHome();
-        getSpectatioUiUtil().waitNSeconds(2000);
-    }
-
+    /**
+     * Setup expectations: None
+     *
+     * <p>Check if notification app is in foreground by checking if the notification list exists.
+     */
     @Override
     public boolean isAppInForeground() {
         BySelector notificationViewSelector = getUiElementFromConfig(
@@ -107,15 +115,25 @@ public class AutoNotificationHelperImpl extends AbstractStandardAppHelper
         return getSpectatioUiUtil().hasUiElement(notificationViewSelector);
     }
 
+    /** {@inheritDoc} */
+    @Override
+    public boolean checkNotificationExists(String title) {
+        open();
+        BySelector selector = By.text(title);
+        UiObject2 postedNotification = findInNotificationList(selector);
+        return postedNotification != null;
+    }
+
+    /**
+     * Setup expectations: None.
+     *
+     * <p>Find notification with specific title in notification center.
+     */
     @Override
     public UiObject2 findNotificationInCenterWithTitle(String title) {
         Log.i(LOG_TAG, "Searching for notification in the notification center with title: " + title);
 
-        openNotificationCenter();
-        List<UiObject2> notifications = getSpectatioUiUtil().findUiObjects(
-            getUiElementFromConfig(AutomotiveConfigConstants.NOTIFICATION_BODY)
-        );
-
+        List<UiObject2> notifications = getNotifications();
         for (UiObject2 notification : notifications) {
             UiObject2 titleObj = notification.findObject(
                 getUiElementFromConfig(AutomotiveConfigConstants.NOTIFICATION_TITLE)
@@ -130,39 +148,11 @@ public class AutoNotificationHelperImpl extends AbstractStandardAppHelper
         return null;
     }
 
-    public UiObject2 findInNotificationList(BySelector selector) {
-        Log.i(LOG_TAG, "Searching for notification in the notification center with title.");
-
-        openNotificationCenter();
-        UiObject2 notification = getSpectatioUiUtil().findUiObject(selector);
-        if (notification != null) {
-            return notification;
-        }
-
-        UiObject2 notificationList = getSpectatioUiUtil().findUiObject(mScrollableElementSelector);
-        if (notificationList != null && notificationList.isScrollable()) {
-            String scrollDescription = String.format("Scroll on notification list to find %s", selector);
-            notification = mScrollUtility.scrollAndFindUiObject(
-                    mScrollAction,
-                    mScrollDirection,
-                    mForwardButtonSelector,
-                    mBackwardButtonSelector,
-                    mScrollableElementSelector,
-                    selector,
-                    scrollDescription
-            );
-        }
-
-        return notification;
-    }
-
     /** {@inheritDoc} */
     @Override
     public boolean isNotificationDisplayedInCenterWithTitle(String title) {
         Log.i(LOG_TAG, "Checking if notification in the notification center with title: " + title + " is displayed.");
-        // UiObject2 notification = findNotificationInCenterWithTitle(title);
-        BySelector selector = By.text(title);
-        UiObject2 notification = findInNotificationList(selector);
+        UiObject2 notification = findNotificationInCenterWithTitle(title);
         return notification != null;
     }
 
@@ -170,6 +160,18 @@ public class AutoNotificationHelperImpl extends AbstractStandardAppHelper
     @Override
     public boolean isNotificationDisplayedInCenterWithContent(String content) {
         Log.i(LOG_TAG, "Checking if notification in the notification center with content: " + content + " is displayed.");
+
+        List<UiObject2> notifications = getNotifications();
+        for (UiObject2 notification : notifications) {
+            UiObject2 contentObj = notification.findObject(
+                getUiElementFromConfig(AutomotiveConfigConstants.NOTIFICATION_CONTENT)
+            );
+            String contentText = contentObj.getText().toLowerCase();
+            if (contentObj != null && contentText.contains(content.toLowerCase())) {
+                return true;
+            }
+        }
+
         return false;
     }
 
@@ -227,112 +229,46 @@ public class AutoNotificationHelperImpl extends AbstractStandardAppHelper
 
     /** {@inheritDoc} */
     @Override
-    public void removeNotification(String title) {
-        Log.i(LOG_TAG, "Removing notification with title: " + title);
+    public void tapClearAllBtn() {
+        open();
+        getSpectatioUiUtil().wait5Seconds();
 
-        openNotificationCenter();
-        BySelector selector = By.text(title);
-        UiObject2 notification = findInNotificationList(selector);
-        getSpectatioUiUtil().swipeRight(notification);
-        getSpectatioUiUtil().waitNSeconds(2000);
-    }
+        UiObject2 empty_notification = getSpectatioUiUtil().findUiObject(
+            getUiElementFromConfig(AutomotiveConfigConstants.NOTIFICATION_LIST_EMPTY)
+        );
+        if (empty_notification != null)
+            return;
 
-    /** {@inheritDoc} */
-    @Override
-    public void clickClearAllBtn() {
-        Log.i(LOG_TAG, "Clicking on clear all button.");
-
-        openNotificationCenter();
         BySelector clearButtonSelector = getUiElementFromConfig(AutomotiveConfigConstants.CLEAR_ALL_BUTTON);
-        if (findInNotificationList(clearButtonSelector) != null) {
+        if (checkIfClearAllButtonExist(clearButtonSelector)) {
             UiObject2 clear_all_btn = getSpectatioUiUtil().findUiObject(clearButtonSelector);
             getSpectatioUiUtil().clickAndWait(clear_all_btn);
         } else {
-            throw new RuntimeException("Cannot find 'Clear All' button");
+            throw new RuntimeException("Cannot find Clear All button");
         }
     }
 
     /** {@inheritDoc} */
     @Override
     public void clickManageBtn() {
-        Log.i(LOG_TAG, "Clicking on manage button.");
+        open();
+        getSpectatioUiUtil().wait5Seconds();
 
-        openNotificationCenter();
-        BySelector manageButtonSelector = getUiElementFromConfig(AutomotiveConfigConstants.MANAGE_BUTTON);
-        if (findInNotificationList(manageButtonSelector) != null) {
+        UiObject2 empty_notification = getSpectatioUiUtil().findUiObject(
+            getUiElementFromConfig(AutomotiveConfigConstants.NOTIFICATION_LIST_EMPTY)
+        );
+        if (empty_notification != null)
+            return;
+
+        BySelector manageButtonSelector =
+                getUiElementFromConfig(AutomotiveConfigConstants.MANAGE_BUTTON);
+        if (checkIfManageButtonExist(manageButtonSelector)) {
             UiObject2 manage_btn = getSpectatioUiUtil().findUiObject(manageButtonSelector);
             getSpectatioUiUtil().clickAndWaitUntilNewWindowAppears(manage_btn);
+            Log.i(LOG_TAG, String.format("Clicked the manage button"));
         } else {
-            throw new RuntimeException("Cannot find 'Manage' button");
+            throw new RuntimeException("Cannot find Manage button");
         }
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    public boolean isNotificationSettingsOpened() {
-        Log.i(LOG_TAG, String.format("Checking if notification settings is opened."));
-
-        List<UiObject2> settingsObj = getSpectatioUiUtil().findUiObjects(
-            getUiElementFromConfig(AutomotiveConfigConstants.NOTIFICATION_SETTINGS_LAYOUT)
-        );
-        for (UiObject2 settings : settingsObj) {
-            UiObject2 settingsTitle = settings.findObject(
-                getUiElementFromConfig(AutomotiveConfigConstants.NOTIFICATION_SETTINGS_TITLE)
-            );
-            if (settingsTitle != null) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    @Override
-    public boolean isRecentNotification() {
-        Log.i(LOG_TAG, "Check if notification is present under recent category.");
-
-        openNotificationCenter();
-        BySelector recentNotificationsPanel = getUiElementFromConfig(AutomotiveConfigConstants.RECENT_NOTIFICATIONS);
-        UiObject2 recentNotificationLayOut = getSpectatioUiUtil().findUiObject(recentNotificationsPanel);
-        getSpectatioUiUtil().validateUiObject(
-            recentNotificationLayOut,
-            AutomotiveConfigConstants.RECENT_NOTIFICATIONS
-        );
-
-        // TODO: Don't hardcode the notification title.
-        BySelector testNotification =
-                getUiElementFromConfig(AutomotiveConfigConstants.TEST_NOTIFICATION);
-        UiObject2 testNotificationLayout =
-                getSpectatioUiUtil()
-                        .findUiObjectInGivenElement(recentNotificationLayOut, testNotification);
-        return testNotificationLayout != null;
-    }
-
-    @Override
-    public boolean isOlderNotification() {
-        Log.i(LOG_TAG, "Check if notification is present under older category.");
-
-        openNotificationCenter();
-        BySelector olderNotificationsPanel = getUiElementFromConfig(AutomotiveConfigConstants.OLDER_NOTIFICATIONS);
-        UiObject2 olderNotificationLayOut = getSpectatioUiUtil().findUiObject(olderNotificationsPanel);
-        getSpectatioUiUtil().validateUiObject(
-            olderNotificationLayOut,
-            AutomotiveConfigConstants.OLDER_NOTIFICATIONS
-        );
-
-        // TODO: Don't hardcode the notification title.
-        BySelector testNotification =
-                getUiElementFromConfig(AutomotiveConfigConstants.TEST_NOTIFICATION);
-        UiObject2 testNotificationLayout =
-                getSpectatioUiUtil()
-                        .findUiObjectInGivenElement(olderNotificationLayOut, testNotification);
-        return testNotificationLayout != null;
-    }
-
-     @Override
-    public void clickOnCheckRecentPermissions(String title) {
-        BySelector notificationSelector = By.text(title);
-        UiObject2 notification = getSpectatioUiUtil().findUiObject(notificationSelector);
-        getSpectatioUiUtil().clickAndWait(notification);
     }
 
     @Override
@@ -340,7 +276,58 @@ public class AutoNotificationHelperImpl extends AbstractStandardAppHelper
         return getSpectatioUiUtil().hasUiElement(title);
     }
 
-    // TODO: Remove this method as it is not used anywhere.
+    @Override
+    public void clickOnCheckRecentPermissions(String title) {
+        BySelector notificationSelector = By.text(title);
+        UiObject2 notification = getSpectatioUiUtil().findUiObject(notificationSelector);
+        getSpectatioUiUtil().clickAndWait(notification);
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    public void removeNotification(String title) {
+        getSpectatioUiUtil().wait5Seconds();
+        open();
+        UiObject2 postedNotification = getSpectatioUiUtil().findUiObject(By.text(title));
+        getSpectatioUiUtil()
+                .validateUiObject(
+                        postedNotification,
+                        String.format("Unable to get the posted notification."));
+        getSpectatioUiUtil().swipeRight(postedNotification);
+        getSpectatioUiUtil().wait5Seconds();
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    public boolean isNotificationSettingsOpened() {
+        Log.i(LOG_TAG, String.format("Verifying if the Notification Settings are opened"));
+        BySelector notificationLayoutSelector =
+                getUiElementFromConfig(AutomotiveConfigConstants.NOTIFICATION_SETTINGS_LAYOUT);
+        List<UiObject2> notificationLayoutList =
+                getSpectatioUiUtil().findUiObjects(notificationLayoutSelector);
+        getSpectatioUiUtil()
+                .validateUiObjects(
+                        notificationLayoutList,
+                        AutomotiveConfigConstants.NOTIFICATION_SETTINGS_LAYOUT);
+
+        BySelector notificationSettingsSelector =
+                getUiElementFromConfig(AutomotiveConfigConstants.NOTIFICATION_SETTINGS_TITLE);
+        UiObject2 notificationPageObj = null;
+        for (int i = 0; i < notificationLayoutList.size(); i++) {
+            notificationPageObj =
+                    getSpectatioUiUtil()
+                            .findUiObjectInGivenElement(
+                                    notificationLayoutList.get(i), notificationSettingsSelector);
+            if (notificationPageObj != null) {
+                break;
+            }
+        }
+
+        getSpectatioUiUtil()
+                .validateUiObject(notificationPageObj, String.format("notification page"));
+        return notificationPageObj != null;
+    }
+
     @Override
     public boolean scrollDownOnePage() {
         UiObject2 notification_list = getSpectatioUiUtil().findUiObject(mScrollableElementSelector);
@@ -371,6 +358,82 @@ public class AutoNotificationHelperImpl extends AbstractStandardAppHelper
                             String.format("Scroll up one page on notification list"));
         }
         return swipeResult;
+    }
+
+    @Override
+    public boolean isRecentNotification() {
+        BySelector recentNotificationsPanel =
+                getUiElementFromConfig(AutomotiveConfigConstants.RECENT_NOTIFICATIONS);
+        UiObject2 recentNotificationLayOut =
+                getSpectatioUiUtil().findUiObject(recentNotificationsPanel);
+        getSpectatioUiUtil()
+                .validateUiObject(
+                        recentNotificationLayOut, AutomotiveConfigConstants.RECENT_NOTIFICATIONS);
+        BySelector testNotification =
+                getUiElementFromConfig(AutomotiveConfigConstants.TEST_NOTIFICATION);
+        UiObject2 testNotificationLayout =
+                getSpectatioUiUtil()
+                        .findUiObjectInGivenElement(recentNotificationLayOut, testNotification);
+        return testNotificationLayout != null;
+    }
+
+    @Override
+    public boolean isOlderNotification() {
+        BySelector olderNotificationsPanel =
+                getUiElementFromConfig(AutomotiveConfigConstants.OLDER_NOTIFICATIONS);
+        UiObject2 olderNotificationLayOut =
+                getSpectatioUiUtil().findUiObject(olderNotificationsPanel);
+        getSpectatioUiUtil()
+                .validateUiObject(
+                        olderNotificationLayOut, AutomotiveConfigConstants.OLDER_NOTIFICATIONS);
+        BySelector testNotification =
+                getUiElementFromConfig(AutomotiveConfigConstants.TEST_NOTIFICATION);
+        UiObject2 testNotificationLayout =
+                getSpectatioUiUtil()
+                        .findUiObjectInGivenElement(olderNotificationLayOut, testNotification);
+        return testNotificationLayout != null;
+    }
+
+    private List<UiObject2> getNotifications() {
+        open();
+        List<UiObject2> notifications = getSpectatioUiUtil().findUiObjects(
+            getUiElementFromConfig(AutomotiveConfigConstants.NOTIFICATION_BODY)
+        );
+        Log.i("Notifications: ", "" + notifications);
+        return notifications;
+    }
+
+    private UiObject2 findInNotificationList(BySelector selector) {
+        UiObject2 notification_list = getSpectatioUiUtil().findUiObject(mScrollableElementSelector);
+        UiObject2 object = null;
+        if (isAppInForeground() && notification_list != null) {
+            object = getSpectatioUiUtil().findUiObject(selector);
+            if (object != null) return object;
+            if (notification_list.isScrollable()) {
+                object =
+                        mScrollUtility.scrollAndFindUiObject(
+                                mScrollAction,
+                                mScrollDirection,
+                                mForwardButtonSelector,
+                                mBackwardButtonSelector,
+                                mScrollableElementSelector,
+                                selector,
+                                String.format("Scroll on notification list to find %s", selector));
+            }
+        }
+        return object;
+    }
+
+    private boolean checkIfClearAllButtonExist(BySelector selector) {
+        open();
+        UiObject2 clr_btn = findInNotificationList(selector);
+        return clr_btn != null;
+    }
+
+    private boolean checkIfManageButtonExist(BySelector selector) {
+        open();
+        UiObject2 manage_btn = findInNotificationList(selector);
+        return manage_btn != null;
     }
 
 }

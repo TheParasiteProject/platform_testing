@@ -110,19 +110,18 @@ public class DrivingOptimizedAppsTest {
         mAppGridHelper.get().openApp("Contacts");
         mContactHelper.get().dismissInitialDialogs();
         assertTrue(
-            "Contacts is not open",
-            mAppGridHelper.get().checkPackageInForeground(AutomotiveConfigConstants.CONTACTS_PACKAGE)
-        );
+                "Contacts is not open",
+                mAppGridHelper
+                        .get()
+                        .checkPackageInForeground(AutomotiveConfigConstants.CONTACTS_PACKAGE));
         disableDrivingMode();
         mFacetBarHelper.get().clickOnFacetIcon(IAutoFacetBarHelper.FACET_BAR.NOTIFICATION);
         assertTrue(
-            "Recent permission is not notified.",
-            mNotificationHelper.get().isNotificationDisplayedInCenterWithTitle(NOTIFICATION_TITLE)
-        );
+                "Recent Permission is not Notified",
+                mNotificationHelper.get().checkNotificationExists(NOTIFICATION_TITLE));
         mNotificationHelper.get().clickOnCheckRecentPermissions(NOTIFICATION_TITLE);
         assertTrue(
-            "App permissions page is not launched",
-            mNotificationHelper.get().checkAppPermissionsExists(APP_PERMISSIONS)
-        );
+                "App Permissions page is not launched",
+                mNotificationHelper.get().checkAppPermissionsExists(APP_PERMISSIONS));
     }
 }
