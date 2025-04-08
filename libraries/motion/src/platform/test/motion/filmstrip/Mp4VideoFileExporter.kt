@@ -66,60 +66,89 @@ class Mp4VideoFileExporter(private val screenshots: List<MotionScreenshot>) : Sc
         muxer.release()
     }
 
+    // The encoder uses the system clock of the [unlockCanvasAndPost] call as frame time.
+    // However, this is arbitrary, as encoding happens as fast as possible. To avoid the extra
+    // complexity of video bitmap format conversion that would be required when using
+    // [queueInputBuffer] instead (which would allow specifying the presentation time), this
+    // will override the presentation time when muxing instead.
+    private fun calculateFramePresentationTimesUs(): List<Long> = buildList {
+        add(0L)
+        var presentationTimeUs = 0L
+        screenshots
+            .zipWithNext { first, second ->
+                if (first.frameId is TimestampFrameId && second.frameId is TimestampFrameId) {
+                    second.frameId.milliseconds - first.frameId.milliseconds
+                } else {
+                    // Exactly one frame for before / after
+                    FRAME_DURATION
+                }
+            }
+            .forEach { frameDurationMillis ->
+                presentationTimeUs += frameDurationMillis * 1000L
+                add(presentationTimeUs)
+            }
+    }
+
+    private fun renderNextScreenshot(
+        surface: Surface,
+        screenshotIterator: Iterator<MotionScreenshot>,
+    ) {
+        surface.lockCanvas(null).also { canvas ->
+            val screenshot = screenshotIterator.next()
+            canvas.drawBitmap(screenshot.bitmap, 0.0f, 0.0f, null)
+            surface.unlockCanvasAndPost(canvas)
+        }
+    }
+
     private fun encodeScreenshotsInVideo(encoder: MediaCodec, muxer: MediaMuxer, surface: Surface) {
         val bufferInfo = MediaCodec.BufferInfo()
         val screenshotIterator = screenshots.iterator()
         var isEndOfStream = false
         var videoTrackIndex = -1
+        val framePresentationTimesUsIterator = calculateFramePresentationTimesUs().iterator()
 
-        // The encoder uses the system clock of the [unlockCanvasAndPost] call as frame time.
-        // However, this is arbitrary, as encoding happens as fast as possible. To avoid the extra
-        // complexity of video bitmap format conversion that would be required when using
-        // [queueInputBuffer] instead (which would allow specifying the presentation time), this
-        // will override the presentation time when muxing instead.
-        val framePresentationTimesUsIterator =
-            buildList {
-                    add(0L)
-                    var presentationTimeUs = 0L
-                    screenshots
-                        .zipWithNext { first, second ->
-                            if (
-                                first.frameId is TimestampFrameId &&
-                                    second.frameId is TimestampFrameId
-                            ) {
-                                second.frameId.milliseconds - first.frameId.milliseconds
-                            } else {
-                                // Exactly one frame for before / after
-                                FRAME_DURATION
-                            }
-                        }
-                        .forEach { frameDurationMillis ->
-                            presentationTimeUs += frameDurationMillis * 1000L
-                            add(presentationTimeUs)
-                        }
-                }
-                .iterator()
-
-        while (true) {
+        // If the end-of-stream flag is set, end the loop
+        while (bufferInfo.flags and MediaCodec.BUFFER_FLAG_END_OF_STREAM == 0) {
             if (screenshotIterator.hasNext()) {
-                surface.lockCanvas(null).also { canvas ->
-                    val screenshot = screenshotIterator.next()
-                    canvas.drawBitmap(screenshot.bitmap, 0.0f, 0.0f, null)
-                    surface.unlockCanvasAndPost(canvas)
-                }
+                renderNextScreenshot(surface, screenshotIterator)
             } else if (!isEndOfStream) {
                 encoder.signalEndOfInputStream()
                 isEndOfStream = true
             }
 
-            val outputBufferIndex = encoder.dequeueOutputBuffer(bufferInfo, DEQUEUE_TIMEOUT_US)
-            if (outputBufferIndex == MediaCodec.INFO_TRY_AGAIN_LATER) {
-                // No output available yet.
-                continue
-            } else if (outputBufferIndex == MediaCodec.INFO_OUTPUT_FORMAT_CHANGED) {
-                videoTrackIndex = muxer.addTrack(encoder.outputFormat)
+            processEncoderOutput(
+                bufferInfo,
+                encoder,
+                muxer,
+                framePresentationTimesUsIterator,
+                videoTrackIndex,
+            ) { format ->
+                videoTrackIndex = muxer.addTrack(format)
                 muxer.start()
-            } else if (outputBufferIndex >= 0) {
+            }
+        }
+    }
+
+    private fun processEncoderOutput(
+        bufferInfo: MediaCodec.BufferInfo,
+        encoder: MediaCodec,
+        muxer: MediaMuxer,
+        framePresentationTimesUsIterator: Iterator<Long>,
+        videoTrackIndex: Int,
+        onOutputFormatChanged: (MediaFormat) -> Unit,
+    ) {
+
+        val outputBufferIndex = encoder.dequeueOutputBuffer(bufferInfo, DEQUEUE_TIMEOUT_US)
+        when {
+            outputBufferIndex == MediaCodec.INFO_TRY_AGAIN_LATER -> {
+                // No output available yet.
+                return
+            }
+            outputBufferIndex == MediaCodec.INFO_OUTPUT_FORMAT_CHANGED -> {
+                onOutputFormatChanged(encoder.outputFormat)
+                return
+            }
+            outputBufferIndex >= 0 -> {
                 val encodedDataBuffer =
                     encoder.getOutputBuffer(outputBufferIndex)
                         ?: throw RuntimeException("encoderOutputBuffer $outputBufferIndex was null")
@@ -144,7 +173,8 @@ class Mp4VideoFileExporter(private val screenshots: List<MotionScreenshot>) : Sc
                 if (bufferInfo.flags and MediaCodec.BUFFER_FLAG_END_OF_STREAM != 0) {
                     return
                 }
-            } else {
+            }
+            else -> {
                 throw AssertionError("Unexpected dequeueOutputBuffer response $outputBufferIndex")
             }
         }
