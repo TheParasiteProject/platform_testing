@@ -19,6 +19,8 @@ package platform.test.screenshot
 import platform.test.screenshot.matchers.MSSIMMatcher
 import platform.test.screenshot.matchers.PixelPerfectMatcher
 
+val PerfectMatcher by lazy { PixelPerfectMatcher() }
+
 /**
  * The [BitmapMatcher][platform.test.screenshot.matchers.BitmapMatcher] that should be used for
  * screenshot *unit* tests.
@@ -32,7 +34,7 @@ val UnitTestBitmapMatcher =
         // TODO(b/237511747): Run our screenshot presubmit tests on arm64 instead so that we can
         // do pixel perfect matching both at presubmit time and at development time with actual
         // devices.
-        PixelPerfectMatcher()
+        PerfectMatcher
     } else {
         MSSIMMatcher()
     }

@@ -42,6 +42,7 @@ import platform.test.screenshot.FontsRule
 import platform.test.screenshot.GoldenPathManager
 import platform.test.screenshot.HardwareRenderingRule
 import platform.test.screenshot.MaterialYouColorsRule
+import platform.test.screenshot.PerfectMatcher
 import platform.test.screenshot.ScreenshotActivity
 import platform.test.screenshot.ScreenshotAsserterFactory
 import platform.test.screenshot.ScreenshotTestRule
@@ -53,6 +54,7 @@ import platform.test.screenshot.dialogScreenshotTest
 class ComposeScreenshotTestRule(
     private val emulationSpec: DeviceEmulationSpec,
     pathManager: GoldenPathManager,
+    enforcePerfectPixelMatch: Boolean = false,
     private val screenshotRule: ScreenshotTestRule = ScreenshotTestRule(pathManager),
 ) : TestRule, BitmapDiffer by screenshotRule, ScreenshotAsserterFactory by screenshotRule {
     private val colorsRule = MaterialYouColorsRule()
@@ -72,7 +74,12 @@ class ComposeScreenshotTestRule(
             .around(colorsRule)
             .around(hardwareRenderingRule)
             .around(commonRule)
-    private val matcher = UnitTestBitmapMatcher
+    private val matcher = if (enforcePerfectPixelMatch) {
+        PerfectMatcher
+    }  else {
+        UnitTestBitmapMatcher
+    }
+
     private val isRobolectric = Build.FINGERPRINT.contains("robolectric")
 
     override fun apply(base: Statement, description: Description): Statement {
