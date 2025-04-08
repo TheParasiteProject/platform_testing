@@ -21,6 +21,20 @@ import androidx.test.uiautomator.UiObject2;
 public interface IAutoNotificationHelper extends Scrollable, IAppHelper {
 
     /**
+     * Setup expectations: None.
+     *
+     * <p>Open notification center.
+     */
+    void openNotificationCenter();
+
+    /**
+     * Setup expectations: None.
+     *
+     * <p>Exit notification center.
+     */
+    void exitNotificationCenter();
+
+    /**
      * Setup expectations: Notification app is open and scrolled to the bottom.
      *
      * <p>Find notification with specific title.
@@ -28,22 +42,6 @@ public interface IAutoNotificationHelper extends Scrollable, IAppHelper {
      * @param title of the notification to be found.
      */
     UiObject2 findNotificationInCenterWithTitle(String title);
-
-    /**
-     * Setup expectations: A notification is received.
-     *
-     * <p>Check whether notification has been posted.
-     *
-     * @param title of the notification to be checked.
-    */
-    boolean checkNotificationExists(String title);
-
-    /**
-     * Setup expectations: Notification app is open and scrolled to the bottom.
-     *
-     * <p>Tap clear all button if present.
-     */
-    void tapClearAllBtn();
 
     /**
      * Setup expectations: A notification is received.
@@ -84,7 +82,14 @@ public interface IAutoNotificationHelper extends Scrollable, IAppHelper {
     /**
      * Setup expectations: Notification app is open and scrolled to the bottom.
      *
-     * <p>Tap manange button if present.
+     * <p>Click clear all button if present.
+     */
+    void clickClearAllBtn();
+
+    /**
+     * Setup expectations: Notification app is open and scrolled to the bottom.
+     *
+     * <p>Click manange button if present.
      */
     void clickManageBtn();
 

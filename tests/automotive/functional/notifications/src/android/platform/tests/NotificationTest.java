@@ -23,6 +23,7 @@ import android.platform.helpers.HelperAccessor;
 import android.platform.helpers.IAutoNotificationHelper;
 import android.platform.helpers.IAutoNotificationMockingHelper;
 
+import android.util.Log;
 import androidx.test.runner.AndroidJUnit4;
 
 import org.junit.After;
@@ -36,6 +37,7 @@ public class NotificationTest {
     private HelperAccessor<IAutoNotificationHelper> mNotificationHelper;
     private HelperAccessor<IAutoNotificationMockingHelper> mNotificationMockingHelper;
 
+    private static final String LOG_TAG = NotificationTest.class.getSimpleName();
     private static String NOTIFICATION_TITLE = "AUTO TEST NOTIFICATION";
 
     public NotificationTest() {
@@ -43,77 +45,108 @@ public class NotificationTest {
         mNotificationMockingHelper = new HelperAccessor<>(IAutoNotificationMockingHelper.class);
     }
 
-
     @Before
-    public void clearAllNotification() {
+    public void setup() {
         mNotificationMockingHelper.get().clearAllNotification();
     }
 
     @After
-    public void exit() {
-        mNotificationHelper.get().exit();
+    public void teardown() {
+        mNotificationHelper.get().exitNotificationCenter();
     }
 
     @Test
     public void testOpenCloseNotification() {
-        mNotificationHelper.get().open();
+        Log.i(LOG_TAG, "Act: Open notification center.");
+        mNotificationHelper.get().openNotificationCenter();
+
+        Log.i(LOG_TAG, "Assert: Notification center is open.");
         assertTrue("Notification did not open.", mNotificationHelper.get().isAppInForeground());
-        mNotificationHelper.get().exit();
+
+        Log.i(LOG_TAG, "Act: Exit notification center.");
+        mNotificationHelper.get().exitNotificationCenter();
+
+        Log.i(LOG_TAG, "Assert: Notification center is closed.");
         assertFalse("Notification did not close.", mNotificationHelper.get().isAppInForeground());
     }
 
     @Test
-    public void testClearAllNotification() {
+    public void testPostNotification() {
+        Log.i(LOG_TAG, "Act: Post notification.");
         mNotificationMockingHelper.get().postNotifications(1);
-        mNotificationHelper.get().tapClearAllBtn();
-        mNotificationHelper.get().exit();
-        assertFalse(
-                "Notifications were not cleared.",
-                mNotificationHelper.get().isNotificationDisplayedInCenterWithTitle(NOTIFICATION_TITLE));
+
+        Log.i(LOG_TAG, "Assert: Notification is displayed.");
+        assertTrue(
+            "Unable to find posted notification.",
+            mNotificationHelper.get().isNotificationDisplayedInCenterWithTitle(NOTIFICATION_TITLE)
+        );
     }
 
     @Test
-    public void testPostNotification() {
+    public void testClearAllNotification() {
+        Log.i(LOG_TAG, "Arrange: Post notification.");
         mNotificationMockingHelper.get().postNotifications(1);
-        assertTrue(
-                "Unable to find posted notification.",
-                mNotificationHelper.get().checkNotificationExists(NOTIFICATION_TITLE));
+
+        Log.i(LOG_TAG, "Act: Clear all notifications.");
+        mNotificationHelper.get().clickClearAllBtn();
+
+        Log.i(LOG_TAG, "Assert: Notification is cleared.");
+        assertFalse(
+            "Notifications were not cleared.",
+            mNotificationHelper.get().isNotificationDisplayedInCenterWithTitle(NOTIFICATION_TITLE)
+        );
     }
 
     @Test
     public void testSwipeAwayNotification() {
-        mNotificationHelper.get().tapClearAllBtn();
+        Log.i(LOG_TAG, "Arrange: Post notification.");
         mNotificationMockingHelper.get().postNotifications(1);
-        assertTrue(
-                "Unable to find posted notification.",
-                mNotificationHelper.get().checkNotificationExists(NOTIFICATION_TITLE));
-        mNotificationHelper.get().removeNotification(NOTIFICATION_TITLE);
-        assertFalse(
-                "Notifications were not cleared.",
-                mNotificationHelper.get().isNotificationDisplayedInCenterWithTitle(NOTIFICATION_TITLE));
-    }
 
-    @Test
-    public void testManageButton() {
-        mNotificationMockingHelper.get().postNotifications(1);
-        mNotificationHelper.get().clickManageBtn();
-        assertTrue(
-                "Notification Settings did not open.",
-                mNotificationHelper.get().isNotificationSettingsOpened());
+        Log.i(LOG_TAG, "Act: Swipe away notification.");
+        mNotificationHelper.get().removeNotification(NOTIFICATION_TITLE);
+
+        Log.i(LOG_TAG, "Assert: Notification is swiped away.");
+        assertFalse(
+            "Notifications were not cleared.",
+            mNotificationHelper.get().isNotificationDisplayedInCenterWithTitle(NOTIFICATION_TITLE)
+        );
     }
 
     @Test
     public void testRecentAndOlderNotifications() {
-        mNotificationHelper.get().tapClearAllBtn();
+        Log.i(LOG_TAG, "Arrange: Post notification.");
         mNotificationMockingHelper.get().postNotifications(1);
-        mNotificationHelper.get().open();
+
+        Log.i(LOG_TAG, "Assert: Notification is present under recent category.");
         assertTrue(
-                "Notification are not present under recent category",
-                mNotificationHelper.get().isRecentNotification());
-        mNotificationHelper.get().exit();
-        mNotificationHelper.get().open();
+            "Notification are not present under recent category",
+            mNotificationHelper.get().isRecentNotification()
+        );
+
+        Log.i(LOG_TAG, "Act: Exit and opennotification center.");
+        mNotificationHelper.get().exitNotificationCenter();
+        mNotificationHelper.get().openNotificationCenter();
+
+        Log.i(LOG_TAG, "Assert: Notification is present under older category.");
         assertTrue(
-                "Notification are not present under older category",
-                mNotificationHelper.get().isOlderNotification());
+            "Notification are not present under older category",
+            mNotificationHelper.get().isOlderNotification()
+        );
     }
+
+    @Test
+    public void testManageButton() {
+        Log.i(LOG_TAG, "Arrange: Post notification.");
+        mNotificationMockingHelper.get().postNotifications(1);
+
+        Log.i(LOG_TAG, "Act: Click on manage button.");
+        mNotificationHelper.get().clickManageBtn();
+
+        Log.i(LOG_TAG, "Assert: Notification settings is opened.");
+        assertTrue(
+            "Notification Settings did not open.",
+            mNotificationHelper.get().isNotificationSettingsOpened()
+        );
+    }
+
 }
