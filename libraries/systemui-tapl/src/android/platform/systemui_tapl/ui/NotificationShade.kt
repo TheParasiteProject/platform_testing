@@ -16,6 +16,7 @@
 
 package android.platform.systemui_tapl.ui
 
+import android.hardware.display.DisplayManager
 import android.os.SystemClock
 import android.platform.helpers.CommonUtils
 import android.platform.systemui_tapl.utils.DeviceUtils.LONG_WAIT
@@ -29,24 +30,28 @@ import android.platform.uiautomatorhelpers.DeviceHelpers.assertVisible
 import android.platform.uiautomatorhelpers.DeviceHelpers.betterSwipe
 import android.platform.uiautomatorhelpers.DeviceHelpers.context
 import android.platform.uiautomatorhelpers.DeviceHelpers.uiDevice
+import android.platform.uiautomatorhelpers.DeviceHelpers.waitForObj
 import android.platform.uiautomatorhelpers.FLING_GESTURE_INTERPOLATOR
-import android.platform.uiautomatorhelpers.TracingUtils.trace
+import android.view.Display.DEFAULT_DISPLAY
 import android.view.WindowManager
+import android.view.WindowManager.LayoutParams.TYPE_APPLICATION
 import android.view.WindowMetrics
 import androidx.test.uiautomator.By
 import androidx.test.uiautomator.BySelector
 import androidx.test.uiautomator.Direction
 import androidx.test.uiautomator.UiObject2
 import androidx.test.uiautomator.Until
+import com.android.app.tracing.traceSection
 import com.android.launcher3.tapl.LauncherInstrumentation
 import com.android.systemui.Flags
 import com.google.common.truth.StandardSubjectBuilder
 import com.google.common.truth.Truth.assertThat
 import com.google.common.truth.Truth.assertWithMessage
+import java.time.Duration
 import kotlin.math.floor
 
 /** System UI test automation object representing the notification shade. */
-class NotificationShade internal constructor() {
+class NotificationShade internal constructor(val displayId: Int = DEFAULT_DISPLAY) {
     init {
         if (CommonUtils.isSplitShade()) {
             val qsBounds = quickSettingsContainer.visibleBounds
@@ -57,6 +62,16 @@ class NotificationShade internal constructor() {
                 .that(qsBounds.right <= notificationBounds.left)
                 .isTrue()
         }
+    }
+
+    private val displayContext by lazy {
+        if (displayId == DEFAULT_DISPLAY) return@lazy context
+
+        // We create a new window context to get accurate bounds for overlay displays
+        val displayManager = context.getSystemService(DisplayManager::class.java)
+            ?: error("Couldn't get DisplayManager")
+        val display = displayManager.getDisplay(displayId)
+        return@lazy context.createWindowContext(display, TYPE_APPLICATION, null)
     }
 
     /* fromLockscreen= */
@@ -139,7 +154,7 @@ class NotificationShade internal constructor() {
                 objectName = "Clear All button",
             )
             .click()
-        waitForShadeToClose()
+        waitForShadeToClose(displayId)
         Root.get().goHomeViaKeycode()
     }
 
@@ -185,33 +200,39 @@ class NotificationShade internal constructor() {
     fun close() {
         val device = uiDevice
         // Swipe in first quarter to avoid desktop windowing app handle interactions.
-        val swipeXCoordinate = device.displayWidth / 4
-        device.betterSwipe(
+        val swipeXCoordinate = device.getDisplayWidth(displayId) / 4
+        betterSwipe(
             startX = swipeXCoordinate,
             startY = screenBottom,
             endX = swipeXCoordinate,
             endY = 0,
             interpolator = FLING_GESTURE_INTERPOLATOR,
+            displayId = displayId,
         )
-        waitForShadeToClose()
+        waitForShadeToClose(displayId)
     }
 
     /** Closes the shade with the back button. */
     fun closeWithBackButton() {
         LauncherInstrumentation().pressBack()
-        waitForShadeToClose()
+        waitForShadeToClose(displayId)
     }
+
+    private val notificationShadeScrollContainer: UiObject2
+        get() =
+            waitForObj(
+                sysuiResSelector(UI_SCROLLABLE_ELEMENT_ID, displayId),
+                Duration.ofMillis(UI_RESPONSE_TIMEOUT_MSECS)
+            ) { "Can't find notification shade scroll container." }
 
     // UiDevice#getDisplayHeight() excludes insets.
     private val screenBottom: Int
         get() {
             val mWindowMetrics: WindowMetrics =
-                context
-                    .getSystemService<WindowManager>(WindowManager::class.java)!!
-                    .getMaximumWindowMetrics()
+                displayContext.getSystemService(WindowManager::class.java)!!.maximumWindowMetrics
 
             // UiDevice#getDisplayHeight() excludes insets.
-            return mWindowMetrics.getBounds().height() - 1
+            return mWindowMetrics.bounds.height() - 1
         }
 
     /** Scrolls the shade down. */
@@ -276,7 +297,6 @@ class NotificationShade internal constructor() {
         get() = QSHeader()
 
     companion object {
-        private val QS_HEADER_SELECTOR = sysuiResSelector("split_shade_status_bar")
         private const val WAIT_TIME = 10_000L
         private const val UI_EMPTY_SHADE_VIEW_ID = "no_notifications"
         private val UI_SETTINGS_BUTTON_ID =
@@ -316,20 +336,16 @@ class NotificationShade internal constructor() {
                     UI_RESPONSE_TIMEOUT_MSECS,
                 ) ?: error("Can't find qs container.")
 
-        private val notificationShadeScrollContainer: UiObject2
-            get() =
-                uiDevice.wait(
-                    Until.findObject(sysuiResSelector(UI_SCROLLABLE_ELEMENT_ID)),
-                    UI_RESPONSE_TIMEOUT_MSECS,
-                ) ?: error("Can't find notification shade scroll container.")
-
         @JvmStatic
-        fun waitForShadeToClose() {
-            trace("waitForShadeToClose") {
+        @JvmOverloads
+        fun waitForShadeToClose(displayId: Int = DEFAULT_DISPLAY) {
+            traceSection("waitForShadeToClose") {
                 // QS header view used in all configurations of Notification shade.
-                QS_HEADER_SELECTOR.assertInvisible { "Notification shade didn't close" }
+                sysuiResSelector("split_shade_status_bar", displayId).assertInvisible {
+                    "Notification shade didn't close"
+                }
                 // Asserts on new QS resId.
-                sysuiResSelector("shade_header_root").assertInvisible {
+                sysuiResSelector("shade_header_root", displayId).assertInvisible {
                     "Notification shade didn't close"
                 }
             }
