@@ -925,7 +925,7 @@
     },
     "NOTIFICATION_SETTINGS_LAYOUT": {
       "TYPE": "RESOURCE_ID",
-      "VALUE": "car_ui_toolbar_title"
+      "VALUE": "car_ui_base_layout_content_container"
     },
     "NOTIFICATION_SETTINGS_TITLE": {
       "TYPE": "TEXT",
