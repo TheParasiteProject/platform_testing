@@ -2021,7 +2021,7 @@
     },
     "LOCATION_SETTINGS_RECENTLY_ACCESSED_MAPS": {
       "TYPE": "TEXT",
-      "VALUE": "Maps"
+      "VALUE": "Google Maps"
     },
     "LOCATION_SETTINGS_VIEW_ALL": {
       "TYPE": "TEXT",
