@@ -19,8 +19,10 @@ package android.platform.tests;
 import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertTrue;
 
+import android.platform.helpers.AutomotiveConfigConstants;
 import android.platform.helpers.HelperAccessor;
 import android.platform.helpers.IAutoSettingHelper;
+import android.platform.helpers.IAutoUISettingsHelper;
 import android.platform.helpers.SettingsConstants;
 
 import androidx.test.runner.AndroidJUnit4;
@@ -33,8 +35,10 @@ import org.junit.runner.RunWith;
 @RunWith(AndroidJUnit4.class)
 public class WifiSettingTest {
     private HelperAccessor<IAutoSettingHelper> mSettingHelper;
+    private HelperAccessor<IAutoUISettingsHelper> mSettingsUIHelper;
 
     public WifiSettingTest() throws Exception {
+        mSettingsUIHelper = new HelperAccessor<>(IAutoUISettingsHelper.class);
         mSettingHelper = new HelperAccessor<>(IAutoSettingHelper.class);
     }
 
@@ -65,5 +69,28 @@ public class WifiSettingTest {
         mSettingHelper.get().turnOnOffHotspot(true);
         assertTrue(mSettingHelper.get().isHotspotOn());
         mSettingHelper.get().turnOnOffHotspot(false);
+    }
+
+    @Test
+    public void testWifiPreferences() {
+        assertTrue(
+                "Wi-Fi Preferences option is not displayed",
+                mSettingsUIHelper.get().hasUIElement(AutomotiveConfigConstants.WIFI_PREFERENCES));
+        mSettingHelper.get().openMenuWith("Wi‑Fi preferences");
+        assertTrue(
+                "Turn on Wi‑Fi automatically is not displayed",
+                mSettingHelper.get().checkMenuExists("Turn on Wi‑Fi automatically"));
+        assertTrue(
+                "Turn on Wi-Fi automatically toggle is not displayed",
+                mSettingsUIHelper
+                        .get()
+                        .hasUIElement(AutomotiveConfigConstants.TURN_WIFI_AUTOMATICALLY_TOGGLE));
+    }
+
+    @Test
+    public void testJoinOtherNetwork() {
+        assertTrue(
+                "Join other network option is not displayed",
+                mSettingsUIHelper.get().hasUIElement(AutomotiveConfigConstants.JOIN_OTHER_NETWORK));
     }
 }
