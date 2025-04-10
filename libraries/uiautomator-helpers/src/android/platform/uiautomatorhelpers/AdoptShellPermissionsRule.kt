@@ -35,7 +35,7 @@ class AdoptShellPermissionsRule(
         InstrumentationRegistry.getInstrumentation().uiAutomation,
 ) : TestWatcher() {
 
-    private val permissionSet: Set<String> = permissions.toSet()
+    private val permissionSet = permissions.toSet()
 
     init {
         require(permissionSet.isNotEmpty())
@@ -43,9 +43,7 @@ class AdoptShellPermissionsRule(
 
     override fun starting(description: Description?) {
         super.starting(description)
-        for (permission in permissionSet) {
-            uiAutomation.adoptShellPermissionIdentity(permission)
-        }
+        uiAutomation.adoptShellPermissionIdentity(*permissionSet.toTypedArray())
         Log.d("AdoptShellPermissionsRule", "Adopted identities=$permissionSet")
     }
 
