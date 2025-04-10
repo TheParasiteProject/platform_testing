@@ -248,7 +248,7 @@ test_package {
 }
 
 test_package {
-    name: "continuous_native_tests_soong",
+    name: "continuous_native_tests",
     device_first_tests: [
         "adbd_test",
         "keystore2_test",
@@ -511,7 +511,7 @@ test_package {
 }
 
 test_package {
-    name: "continuous_native_metric_tests_soong",
+    name: "continuous_native_metric_tests",
     device_first_tests: [
     ] + select(soong_config_variable("perf", "board_perfsetup_script"), {
         any: ["perf-setup"],
@@ -565,7 +565,7 @@ test_package {
 }
 
 test_package {
-    name: "continuous_instrumentation_tests_soong",
+    name: "continuous_instrumentation_tests",
 
     tests: [
         "HelloWorldTests",
@@ -695,7 +695,7 @@ test_package {
 }
 
 test_package {
-    name: "continuous_instrumentation_metric_tests_soong",
+    name: "continuous_instrumentation_metric_tests",
 
     tests: [
         "AconfigPerfTests",
