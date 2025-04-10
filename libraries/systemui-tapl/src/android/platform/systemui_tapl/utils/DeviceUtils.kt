@@ -16,6 +16,7 @@
 
 package android.platform.systemui_tapl.utils
 
+import android.view.Display.DEFAULT_DISPLAY
 import androidx.test.uiautomator.By
 import androidx.test.uiautomator.BySelector
 import java.time.Duration
@@ -29,10 +30,11 @@ object DeviceUtils {
     @JvmField val SHORT_WAIT: Duration = Duration.ofMillis(1_500)
     @JvmField val LONG_WAIT: Duration = Duration.ofMillis(10_000)
 
-    /** Returns a [BySelector] of a resource in sysui package. */
+    /** Returns a [BySelector] of a resource in sysui package on a given display id. */
     @JvmStatic
-    fun sysuiResSelector(resourceId: String): BySelector =
-        By.pkg(SYSUI_PACKAGE).res(SYSUI_PACKAGE, resourceId)
+    @JvmOverloads
+    fun sysuiResSelector(resourceId: String, displayId: Int = DEFAULT_DISPLAY): BySelector =
+        By.displayId(displayId).pkg(SYSUI_PACKAGE).res(SYSUI_PACKAGE, resourceId)
 
     /** Returns a [BySelector] of a resource in settings package. */
     @JvmStatic

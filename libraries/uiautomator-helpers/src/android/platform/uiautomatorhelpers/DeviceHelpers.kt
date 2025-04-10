@@ -29,6 +29,7 @@ import android.platform.uiautomatorhelpers.WaitUtils.waitForNullable
 import android.platform.uiautomatorhelpers.WaitUtils.waitForPossibleEmpty
 import android.platform.uiautomatorhelpers.WaitUtils.waitForValueToSettle
 import android.util.Log
+import android.view.Display.DEFAULT_DISPLAY
 import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.uiautomator.BySelector
 import androidx.test.uiautomator.UiDevice
@@ -369,12 +370,14 @@ object DeviceHelpers {
         endX: Int,
         endY: Int,
         interpolator: TimeInterpolator = FLING_GESTURE_INTERPOLATOR,
+        displayId: Int = DEFAULT_DISPLAY,
     ) {
         trace("Swiping ($startX,$startY) -> ($endX,$endY)") {
             BetterSwipe.swipe(
                 PointF(startX.toFloat(), startY.toFloat()),
                 PointF(endX.toFloat(), endY.toFloat()),
                 interpolator = interpolator,
+                displayId = displayId,
             )
         }
     }
