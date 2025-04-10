@@ -16,6 +16,8 @@
 
 package {
     default_applicable_licenses: ["Android-Apache-2.0"],
+    default_team: "trendy_team_android_platform_performance_testing",
+
 }
 
 java_library {
@@ -65,7 +67,7 @@ java_library {
     ],
     static_libs: [
         "app-helpers-common-interfaces",
-        "androidx.annotation_annotation"
+        "androidx.annotation_annotation",
     ],
     srcs: ["handheld/**/*.java"],
     sdk_version: "test_current",
