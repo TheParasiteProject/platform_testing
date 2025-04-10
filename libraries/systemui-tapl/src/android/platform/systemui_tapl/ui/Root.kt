@@ -32,6 +32,7 @@ import android.platform.uiautomatorhelpers.DeviceHelpers.assertInvisible
 import android.platform.uiautomatorhelpers.DeviceHelpers.assertVisible
 import android.platform.uiautomatorhelpers.DeviceHelpers.betterSwipe
 import android.platform.uiautomatorhelpers.DeviceHelpers.uiDevice
+import android.view.Display.DEFAULT_DISPLAY
 import android.view.InputDevice
 import android.view.InputEvent
 import android.view.KeyCharacterMap
@@ -47,14 +48,17 @@ import com.android.app.tracing.traceSection
 import com.android.launcher3.tapl.LauncherInstrumentation
 import com.android.launcher3.tapl.Workspace
 import com.google.common.truth.Truth.assertThat
-import java.time.Duration
+import com.google.common.truth.Truth.assertWithMessage
 import org.junit.Assert
+import java.time.Duration
 
 /**
  * The root class for System UI test automation objects. All System UI test automation objects are
  * produced by this class or other System UI test automation objects.
+ *
+ * @param displayId The ID of the display to interact with.
  */
-class Root private constructor() {
+class Root private constructor(val displayId: Int = DEFAULT_DISPLAY) {
 
     /**
      * Opens the notification shade. Use this if there is no need to assert the way of opening it.
@@ -78,6 +82,13 @@ class Root private constructor() {
 
     /** Opens the notification shade via two fingers wipe. */
     fun openNotificationShadeViaTwoFingersSwipe(): NotificationShade {
+        assertWithMessage(
+            "two finger swipe is only supported on the default display, because it relies on " +
+                    "UiObject#performTwoPointerGesture, and UiObject has no concept of displayId " +
+                    "(unlike UiObject2)"
+        )
+            .that(displayId)
+            .isEqualTo(DEFAULT_DISPLAY)
         return openNotificationShadeViaTwoFingersSwipe(Duration.ofMillis(300))
     }
 
@@ -101,14 +112,15 @@ class Root private constructor() {
     ): NotificationShade {
         traceSection("Opening notification shade via swipe") {
             val device = uiDevice
-            val height = device.displayHeight.toFloat()
+            val height = device.getDisplayHeight(displayId).toFloat()
             BetterSwipe.swipe(
                 PointF(notificationSwipeX, height * heightFraction),
                 PointF(notificationSwipeX, height),
                 swipeDuration,
+                displayId = displayId,
             )
             waitForShadeToOpen()
-            return NotificationShade()
+            return NotificationShade(displayId)
         }
     }
 
@@ -117,10 +129,14 @@ class Root private constructor() {
      * an app.
      */
     fun openNotificationShadeViaSwipeFromTop(): NotificationShade {
-        val height = uiDevice.displayHeight.toFloat()
-        BetterSwipe.swipe(PointF(notificationSwipeX, 0f), PointF(notificationSwipeX, height))
+        val height = uiDevice.getDisplayHeight(displayId).toFloat()
+        BetterSwipe.swipe(
+            PointF(notificationSwipeX, 0f),
+            PointF(notificationSwipeX, height),
+            displayId = displayId,
+        )
         waitForShadeToOpen()
-        return NotificationShade()
+        return NotificationShade(displayId)
     }
 
     /** Opens the notification shade via swipe. */
@@ -146,6 +162,9 @@ class Root private constructor() {
         waitForShadeToOpen()
         return NotificationShade()
     }
+
+    private val notificationSwipeX: Float
+        get() = uiDevice.getDisplayWidth(displayId) / 4f
 
     /**
      * Finds a HUN by its identity. Fails if the notification can't be found.
@@ -178,8 +197,8 @@ class Root private constructor() {
     fun ensureNoHeadsUpNotification(identity: NotificationIdentity) {
         Assert.assertTrue(
             "HUN state Assertion usage error: Notification: ${identity.title} " +
-                "| You can only assert the HUN State of a notification that has an action " +
-                "button.",
+                    "| You can only assert the HUN State of a notification that has an action " +
+                    "button.",
             identity.hasAction,
         )
         Assert.assertThrows(IllegalStateException::class.java) {
@@ -288,11 +307,11 @@ class Root private constructor() {
     /** Verifies that status bar is hidden by checking StatusBar's clock icon whether it exists. */
     fun verifyStatusBarIsHidden() {
         assertThat(
-                uiDevice.wait(
-                    Until.gone(sysuiResSelector(StatusBar.CLOCK_ID)),
-                    SHORT_TIMEOUT.toLong(),
-                )
+            uiDevice.wait(
+                Until.gone(sysuiResSelector(StatusBar.CLOCK_ID)),
+                SHORT_TIMEOUT.toLong(),
             )
+        )
             .isTrue()
     }
 
@@ -366,6 +385,23 @@ class Root private constructor() {
         KeyboardBacklightIndicatorDialog.CONTAINER_SELECTOR.assertInvisible()
     }
 
+    fun waitForShadeToOpen() {
+        val qsHeaderSelector =
+            if (com.android.systemui.Flags.sceneContainer()) {
+                sysuiResSelector("shade_header_root", displayId)
+            } else {
+                sysuiResSelector("split_shade_status_bar", displayId)
+            }
+
+        // Note that this duplicates the tracing done by assertVisible, but with a better name.
+        traceSection("waitForShadeToOpen") {
+            qsHeaderSelector.assertVisible(
+                timeout = NOTIFICATION_SHADE_OPEN_TIMEOUT,
+                errorProvider = { "Notification shade didn't open" },
+            )
+        }
+    }
+
     private fun injectEventSync(event: InputEvent): Boolean {
         return InstrumentationRegistry.getInstrumentation()
             .uiAutomation
@@ -420,7 +456,7 @@ class Root private constructor() {
 
     /** Opens the tutorial by swiping. */
     fun openTutorialViaSwipe(): OneHandModeTutorial {
-        NotificationShade.waitForShadeToClose()
+        NotificationShade.waitForShadeToClose(displayId)
         val windowMetrics: WindowMetrics =
             DeviceHelpers.context
                 .getSystemService(WindowManager::class.java)!!
@@ -433,14 +469,14 @@ class Root private constructor() {
                     WindowInsets.Type.navigationBars() or WindowInsets.Type.displayCutout()
                 )
                 .bottom
-        NotificationShade.waitForShadeToClose()
+        NotificationShade.waitForShadeToClose(displayId)
         uiDevice.betterSwipe(
             displayBounds.width() / 2,
             displayBounds.height() - Math.round(bottomMandatoryGestureHeight * 2.5f),
             displayBounds.width() / 2,
             displayBounds.height(),
         )
-        NotificationShade.waitForShadeToClose()
+        NotificationShade.waitForShadeToClose(displayId)
         return OneHandModeTutorial()
     }
 
@@ -459,34 +495,20 @@ class Root private constructor() {
     }
 
     companion object {
-        private val QS_HEADER_SELECTOR =
-            if (com.android.systemui.Flags.sceneContainer()) {
-                sysuiResSelector("shade_header_root")
-            } else {
-                sysuiResSelector("split_shade_status_bar")
-            }
         private val NOTIFICATION_SHADE_OPEN_TIMEOUT = Duration.ofSeconds(20)
         private const val LONG_TIMEOUT = 2000
         private const val SHORT_TIMEOUT = 500
         private val FOOTER_SELECTOR = sysuiResSelector("qs_footer_actions")
         private const val SCREENSHOT_POST_TIMEOUT_MSEC: Long = 20000
         private val GLOBAL_SCREENSHOT_SELECTOR = sysuiResSelector("screenshot_actions")
-        private val notificationSwipeX = (uiDevice.displayWidth / 4).toFloat()
 
-        /** Returns an instance of Root. */
+        /**
+         * Returns an instance of Root.
+         *
+         * @param displayId The display ID used for UI operations. Defaults to the default display.
+         */
         @JvmStatic
-        fun get(): Root {
-            return Root()
-        }
-
-        private fun waitForShadeToOpen() {
-            // Note that this duplicates the tracing done by assertVisible, but with a better name.
-            traceSection("waitForShadeToOpen") {
-                QS_HEADER_SELECTOR.assertVisible(
-                    timeout = NOTIFICATION_SHADE_OPEN_TIMEOUT,
-                    errorProvider = { "Notification shade didn't open" },
-                )
-            }
-        }
+        @JvmOverloads
+        fun get(displayId: Int = DEFAULT_DISPLAY): Root = Root(displayId)
     }
 }
