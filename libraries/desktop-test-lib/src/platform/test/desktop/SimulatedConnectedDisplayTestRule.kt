@@ -92,11 +92,11 @@ class SimulatedConnectedDisplayTestRule : TestRule {
             awaitClose { displayManager.unregisterDisplayListener(listener) }
         }
 
-        // Displays are created with bottom-right gravity so that scenarios which swipe/drag on the
-        // main display can use the left side safely, without accidentally dragging the new overlay
+        // `disable_window_interaction` is used to let interaction not get obstructed by
+        // OverlayDisplayWindow and let it go through to the window or surface behind it.
         val displaySettings =
             displays.joinToString(separator = ";") { size ->
-                "${size.x}x${size.y}/$DEFAULT_DENSITY,gravity_bottom_right"
+                "${size.x}x${size.y}/$DEFAULT_DENSITY,disable_window_interaction"
             }
 
         // Add the overlay displays
