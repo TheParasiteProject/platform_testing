@@ -44,8 +44,11 @@ import androidx.test.platform.app.InstrumentationRegistry
 import com.google.common.truth.Truth
 import org.junit.After
 import org.junit.Before
+import org.junit.Rule
 import org.junit.Test
+import org.junit.rules.TestRule
 import org.junit.runner.RunWith
+import org.junit.runners.model.Statement
 
 /**
  * Contains an integration test running a flicker service test using
@@ -59,6 +62,29 @@ class FullServiceRunTest {
     private val wmHelper = WindowManagerStateHelper(instrumentation)
     private val testApp = MessagingAppHelper(instrumentation)
 
+    @get:Rule
+    val myRule = TestRule { base, _ ->
+        object : Statement() {
+            @Throws(Throwable::class)
+            override fun evaluate() {
+                functionalTestRuleCalled = true
+                base.evaluate()
+            }
+        }
+    }
+
+    @Rule
+    @JvmField
+    val cleanUp = TestRule { base, _ ->
+        object : Statement() {
+            @Throws(Throwable::class)
+            override fun evaluate() {
+                fieldTestRuleCalled = true
+                base.evaluate()
+            }
+        }
+    }
+
     @Before
     fun setup() {
         // Nothing to do
@@ -67,6 +93,12 @@ class FullServiceRunTest {
     @ExpectedScenarios(["ENTIRE_TRACE"])
     @Test
     fun openApp() {
+        Truth.assertWithMessage("Functional test rule should have been called")
+            .that(functionalTestRuleCalled)
+            .isTrue()
+        Truth.assertWithMessage("Field test rule should have been called")
+            .that(fieldTestRuleCalled)
+            .isTrue()
         testApp.launchViaIntent(wmHelper)
     }
 
@@ -76,6 +108,9 @@ class FullServiceRunTest {
     }
 
     companion object {
+        private var functionalTestRuleCalled = false
+        private var fieldTestRuleCalled = false
+
         @JvmStatic
         @FlickerConfigProvider
         fun flickerConfigProvider(): FlickerConfig =
