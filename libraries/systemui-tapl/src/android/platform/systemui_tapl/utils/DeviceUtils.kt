@@ -23,7 +23,7 @@ import java.time.Duration
 
 const val SYSUI_PACKAGE = "com.android.systemui"
 const val SETTINGS_PACKAGE = "com.android.settings"
-private const val LAUNCHER_PACKAGE = "com.google.android.apps.nexuslauncher"
+const val LAUNCHER_PACKAGE = "com.google.android.apps.nexuslauncher"
 private const val ANDROID_PACKAGE = "android"
 
 object DeviceUtils {
