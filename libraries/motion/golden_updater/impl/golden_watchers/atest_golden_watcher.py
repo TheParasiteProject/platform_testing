@@ -5,6 +5,8 @@ import gzip
 import shutil
 from impl.cached_golden import CachedGolden
 from impl.golden_watchers.golden_watcher import GoldenWatcher
+import itertools
+
 
 class AtestGoldenWatcher(GoldenWatcher):
 
@@ -55,10 +57,16 @@ class AtestGoldenWatcher(GoldenWatcher):
             golden = CachedGolden(filename, local_file)
 
             if golden.video_location:
-                for video_filename in glob.iglob(
-                    f"{self.atest_latest_dir}/**/{golden_name}.actual*.mp4*",
-                    recursive=True,
-                ):
+                mp4Pattern = f"{self.atest_latest_dir}/**/{golden_name}.actual*.mp4*"
+                zipPattern = f"{self.atest_latest_dir}/**/{golden_name}.actual*.zip*"
+
+                # Create iterators for each pattern
+                mp4_iterator = glob.iglob(mp4Pattern, recursive=True)
+                zip_iterator = glob.iglob(zipPattern, recursive=True)
+
+                # Chain the iterators together
+                combined_iter = itertools.chain(mp4_iterator, zip_iterator)
+                for video_filename in combined_iter:
 
                     local_video_file = os.path.join(
                         self.temp_dir, golden.video_location

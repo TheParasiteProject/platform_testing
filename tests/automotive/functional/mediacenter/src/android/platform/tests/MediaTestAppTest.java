@@ -37,13 +37,13 @@ import org.junit.runner.RunWith;
 
 @RunWith(AndroidJUnit4.class)
 public class MediaTestAppTest {
+
     private static final String MEDIA_APP = "media-app";
     private static final String TEST_MEDIA_APP = "Test Media App";
     private static final String DEFAULT_SONG_NAME = "A normal 1H song";
 
     @ClassRule
-    public static StringOption mMediaTestApp =
-            new StringOption(MEDIA_APP).setRequired(false);
+    public static StringOption mMediaTestApp = new StringOption(MEDIA_APP).setRequired(false);
 
     public static String mDefaultSongName = new String(DEFAULT_SONG_NAME);
 
@@ -61,7 +61,8 @@ public class MediaTestAppTest {
         sMediaCenterHelper.get().openMediaAppMenuItems();
         String mediaAppName = TEST_MEDIA_APP;
         if (mMediaTestApp != null
-                && mMediaTestApp.get() != null && !mMediaTestApp.get().isEmpty()) {
+                && mMediaTestApp.get() != null
+                && !mMediaTestApp.get().isEmpty()) {
             mediaAppName = mMediaTestApp.get();
         }
         sMediaCenterHelper.get().openApp(mediaAppName);
@@ -98,5 +99,29 @@ public class MediaTestAppTest {
                 "Song playing has not been changed",
                 currentSong,
                 sMediaCenterHelper.get().getMediaTrackName());
+    }
+
+    @Test
+    public void testMediaPlayStateAfterGoingToHomeScreen() {
+        sMediaCenterHelper.get().playMedia();
+        sMediaCenterHelper.get().selectMediaTrack(mDefaultSongName);
+        assertTrue("Song is not playing", sMediaCenterHelper.get().isPlaying());
+        sMediaCenterHelper.get().exit();
+        assertTrue(sAutoHomeHelper.get().hasMediaWidget());
+        assertTrue("Song is not playing", sMediaCenterHelper.get().isPlaying());
+        sAutoHomeHelper.get().openMediaWidget();
+        assertTrue("Song is not playing", sMediaCenterHelper.get().isPlaying());
+    }
+
+    @Test
+    public void testMediaPauseStateAfterGoingToHomeScreen() {
+        sMediaCenterHelper.get().playMedia();
+        sMediaCenterHelper.get().pauseMedia();
+        assertTrue("Song is playing, it should be paused", sMediaCenterHelper.get().isPaused());
+        sMediaCenterHelper.get().exit();
+        assertTrue(sAutoHomeHelper.get().hasMediaWidget());
+        assertTrue("Song is playing, it should be paused", sMediaCenterHelper.get().isPaused());
+        sAutoHomeHelper.get().openMediaWidget();
+        assertTrue("Song is playing, it should be paused", sMediaCenterHelper.get().isPaused());
     }
 }

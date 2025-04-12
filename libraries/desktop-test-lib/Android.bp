@@ -20,13 +20,17 @@ package {
 
 java_library {
     name: "desktop-test-lib",
-    libs: [
+    static_libs: [
         "androidx.test.runner",
         "androidx.test.rules",
         "kotlin-stdlib",
         "kotlinx_coroutines",
+        "mockito-target-minus-junit4",
+        "uiautomator-helpers",
+        "truth",
     ],
     srcs: [
         "src/**/*.kt",
+        "src/**/*.java",
     ],
 }

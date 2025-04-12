@@ -925,4 +925,12 @@ public class DialHelperImpl extends AbstractStandardAppHelper implements IAutoDi
                 getUiElementFromConfig(AutomotiveConfigConstants.DIALER_SETTINGS_BUTTON);
         return getSpectatioUiUtil().hasUiElement(dialerSettingsSelector);
     }
+
+    /** {@inheritDoc} */
+    @Override
+    public boolean isConnectToBluetoothDisplayed() {
+        BySelector dialerSettingsSelector =
+                getUiElementFromConfig(AutomotiveConfigConstants.CONNECT_TO_BLUETOOTH);
+        return getSpectatioUiUtil().hasUiElement(dialerSettingsSelector);
+    }
 }

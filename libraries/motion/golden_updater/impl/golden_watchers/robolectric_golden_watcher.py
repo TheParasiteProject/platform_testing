@@ -25,6 +25,16 @@ class RobolectricGoldenWatcher(GoldenWatcher):
             self.copy_file(filename, local_file)
             golden = CachedGolden(filename, local_file)
             self.cached_goldens[filename] = golden
+            if golden.video_location:
+                filepath = os.path.join(self.latest_dir,
+                                        f"{golden.test_class_name}/{baseFilename}.screenshots.zip")
+                if os.path.isfile(filepath):
+                    local_video_file = os.path.join(
+                        self.temp_dir, golden.video_location
+                    )
+                    self.copy_file(
+                        filepath, local_video_file
+                    )
 
     def copy_file(self, source, target):
         os.makedirs(os.path.dirname(target), exist_ok=True)

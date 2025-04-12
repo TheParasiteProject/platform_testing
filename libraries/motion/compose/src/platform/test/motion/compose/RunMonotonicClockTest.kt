@@ -18,7 +18,6 @@ package platform.test.motion.compose
 
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.TestMonotonicFrameClock
-import androidx.compose.ui.util.fastForEach
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.test.TestCoroutineScheduler
 import kotlinx.coroutines.test.TestScope
@@ -49,11 +48,7 @@ fun runMonotonicClockTest(block: suspend MonotonicClockTestScope.() -> Unit) = r
             )
 
         // Run the test
-        try {
-            scope.block()
-        } finally {
-            scope.tearDownOperations.fastForEach { it.invoke() }
-        }
+        scope.block()
     }
 }
 
@@ -68,31 +63,4 @@ class MonotonicClockTestScope(
     testScope: CoroutineScope,
     val testScheduler: TestCoroutineScheduler,
     val backgroundScope: CoroutineScope,
-) : CoroutineScope by testScope {
-    internal val tearDownOperations = mutableListOf<() -> Unit>()
-
-    /**
-     * Registers a cleanup action [block] to be executed after the main test code within
-     * [runMonotonicClockTest] completes, either successfully or due to an exception.
-     *
-     * This is useful for ensuring resources are released, listeners are unregistered, or
-     * subscriptions are cancelled, regardless of the test outcome. The actions are executed in the
-     * order they were added.
-     *
-     * Example Usage:
-     * ```kotlin
-     * @Test
-     * fun myTest() = runMonotonicClockTest {
-     *     val myResource = acquireResource()
-     *     doOnTearDown { myResource.release() }
-     *
-     *     // ... test code using myResource ...
-     * }
-     * ```
-     *
-     * @param block The cleanup action to be performed.
-     */
-    fun doOnTearDown(block: () -> Unit) {
-        tearDownOperations += block
-    }
-}
+) : CoroutineScope by testScope

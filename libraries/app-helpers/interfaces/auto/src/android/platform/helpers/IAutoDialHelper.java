@@ -426,4 +426,11 @@ public interface IAutoDialHelper extends IAppHelper, Scrollable {
      * <p>This method is used to check if dialer settings is present in dialer page
      */
     boolean verifyDialerSettings();
+
+    /**
+     * Setup expectations: The phone app is open
+     *
+     * <p>This method is used to check if connect to bluetooth message is present in dialer page
+     */
+    boolean isConnectToBluetoothDisplayed();
 }

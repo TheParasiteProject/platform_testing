@@ -4,8 +4,10 @@ import json
 import mimetypes
 import shutil
 from os import path
+import pathlib
 import os
 from impl.constants import GOLDEN_ACCESS_TOKEN_HEADER
+from impl.zip_to_video_converter import ZipToVideoConverter
 
 class WatchWebAppRequestHandler(http.server.BaseHTTPRequestHandler):
     secret_token = None
@@ -102,9 +104,23 @@ class WatchWebAppRequestHandler(http.server.BaseHTTPRequestHandler):
                 "Content-type", mime_type or mimetypes.guess_type(resolved_path)[0]
             )
             self.add_standard_headers()
-            self.end_headers()
-            with open(resolved_path, "rb") as f:
-                self.wfile.write(f.read())
+
+            if resolved_path.endswith("screenshots.zip"):
+
+                if ZipToVideoConverter.process_single_zip(pathlib.Path(resolved_path)):
+                    video_path = resolved_path.replace("zip","mp4")
+                    if pathlib.Path(video_path).is_file() :
+                        self.send_header(
+                            "Content-type", "video/mp4"
+                        )
+                        self.end_headers()
+                        with open(video_path, "rb") as f:
+                            self.wfile.write(f.read())
+
+            else :
+                self.end_headers()
+                with open(resolved_path, "rb") as f:
+                    self.wfile.write(f.read())
 
         else:
             self.send_error(404)

@@ -41,6 +41,7 @@ public class SettingsSystemHelperImpl extends AbstractStandardAppHelper
     private BySelector mForwardButtonSelector;
     private BySelector mScrollableElementSelector;
     private ScrollDirection mScrollDirection;
+    private static final int TWENTY_SECONDS_WAIT_TIME = 20000;
 
     public SettingsSystemHelperImpl(Instrumentation instr) {
         super(instr);
@@ -361,6 +362,10 @@ public class SettingsSystemHelperImpl extends AbstractStandardAppHelper
     @Override
     public boolean verifyUsageinGB(String option) {
         boolean isUsageinGB = false;
+        BySelector scrollSelector =
+                getUiElementFromConfig(
+                        AutomotiveConfigConstants.SETTINGS_UI_SUB_SETTING_SCROLL_ELEMENT);
+        getSpectatioUiUtil().waitForUiObject(scrollSelector, TWENTY_SECONDS_WAIT_TIME);
         List<UiObject2> scrollElements =
                 getSpectatioUiUtil()
                         .findUiObjects(

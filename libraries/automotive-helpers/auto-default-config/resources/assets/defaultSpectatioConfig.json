@@ -2021,7 +2021,7 @@
     },
     "LOCATION_SETTINGS_RECENTLY_ACCESSED_MAPS": {
       "TYPE": "TEXT",
-      "VALUE": "Maps"
+      "VALUE": "Google Maps"
     },
     "LOCATION_SETTINGS_VIEW_ALL": {
       "TYPE": "TEXT",
@@ -2153,6 +2153,11 @@
       "TYPE": "TEXT",
       "VALUE": "Permission manager"
     },
+    "TURN_WIFI_AUTOMATICALLY_TOGGLE": {
+      "TYPE": "RESOURCE_ID",
+      "VALUE": "switch_widget",
+      "PACKAGE": "android"
+    },
     "BLUETOOTH_CONNECTED_DISCONNECTED_TEXT": {
       "TYPE": "MULTIPLE",
       "SPECIFIERS": [
@@ -2273,6 +2278,14 @@
           }
         }
       ]
+    },
+    "WIFI_PREFERENCES": {
+      "TYPE": "TEXT",
+      "VALUE": "Wi‑Fi preferences"
+    },
+    "JOIN_OTHER_NETWORK": {
+      "TYPE": "TEXT",
+      "VALUE": "Join other network"
     },
     "PHONE_CARD_DIALER_BUTTON": {
       "TYPE": "MULTIPLE",

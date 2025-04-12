@@ -488,7 +488,7 @@ public class SettingHelperImpl extends AbstractStandardAppHelper implements IAut
     /** {@inheritDoc} */
     @Override
     public boolean isRecentAppDisplayedInLocationSettings(String app) {
-        UiObject2 recentApp = getSpectatioUiUtil().findUiObject("Maps");
+        UiObject2 recentApp = getSpectatioUiUtil().findUiObject("Google Maps");
         getSpectatioUiUtil()
                 .validateUiObject(recentApp, String.format("Recently accessed app - %s", app));
         UiObject2 recentAppsTime = recentApp.getParent();

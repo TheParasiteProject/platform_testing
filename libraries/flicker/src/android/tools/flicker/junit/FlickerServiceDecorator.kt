@@ -25,6 +25,7 @@ import android.tools.flicker.FlickerService
 import android.tools.flicker.FlickerServiceResultsCollector.Companion.FLICKER_ASSERTIONS_COUNT_KEY
 import android.tools.flicker.ScenarioInstance
 import android.tools.flicker.Utils.captureTrace
+import android.tools.flicker.annotation.Debug
 import android.tools.flicker.annotation.ExpectedScenarios
 import android.tools.flicker.annotation.FlickerConfigProvider
 import android.tools.flicker.assertions.ScenarioAssertion
@@ -32,6 +33,7 @@ import android.tools.flicker.config.FlickerConfig
 import android.tools.flicker.config.ScenarioId
 import android.tools.io.Reader
 import android.tools.traces.getDefaultFlickerOutputDir
+import android.tools.traces.io.TraceReaderUtils.getTraceReaderFromAsset
 import android.tools.traces.now
 import androidx.test.platform.app.InstrumentationRegistry
 import com.google.common.truth.Truth
@@ -115,94 +117,40 @@ class FlickerServiceDecorator(
 
         if (shouldComputeTestMethods()) {
             for (method in innerMethods) {
-                if (!innerMethodsResults.containsKey(method)) {
-                    val description = createTestDescription(testClass.javaClass.name, method.name)
-                    val statement =
-                        object : Statement() {
-                            override fun evaluate() {
-                                var methodResult: Throwable? =
-                                    null // TODO: Maybe don't use null but wrap in another object
-                                val reader =
-                                    captureTrace(testClassName, getDefaultFlickerOutputDir()) {
-                                        writer ->
-                                        try {
-                                            Utils.notifyRunnerProgress(
-                                                testClassName,
-                                                "Running setup",
-                                                instrumentation,
-                                            )
-                                            val befores =
-                                                testClass.getAnnotatedMethods(Before::class.java)
-                                            befores.forEach { it.invokeExplosively(test) }
-
-                                            Utils.notifyRunnerProgress(
-                                                testClassName,
-                                                "Running transition",
-                                                instrumentation,
-                                            )
-
-                                            val traceStartTime = now()
-                                            Utils.notifyRunnerProgress(
-                                                testClassName,
-                                                "Setting trace start time to :: $traceStartTime",
-                                                instrumentation,
-                                            )
-
-                                            writer.setTransitionStartTime(traceStartTime)
-                                            method.invokeExplosively(test)
-
-                                            val traceEndTime = now()
-                                            Utils.notifyRunnerProgress(
-                                                testClassName,
-                                                "Setting trace end time to :: $traceEndTime",
-                                                instrumentation,
-                                            )
-                                            writer.setTransitionEndTime(traceEndTime)
-
-                                            Utils.notifyRunnerProgress(
-                                                testClassName,
-                                                "Running teardown",
-                                                instrumentation,
-                                            )
-                                            val afters =
-                                                testClass.getAnnotatedMethods(After::class.java)
-                                            afters.forEach { it.invokeExplosively(test) }
-                                        } catch (e: Throwable) {
-                                            methodResult = e
-                                        } finally {
-                                            innerMethodsResults[method] = methodResult
-                                        }
-                                    }
-                                if (methodResult == null) {
-                                    Utils.notifyRunnerProgress(
-                                        testClassName,
-                                        "Computing Flicker service tests",
-                                        instrumentation,
-                                    )
-                                    try {
-                                        flickerServiceMethodsFor[method] =
-                                            computeFlickerServiceTests(
-                                                reader,
-                                                testClassName,
-                                                method,
-                                            )
-                                    } catch (e: Throwable) {
-                                        // Failed to compute flicker service methods
-                                        innerMethodsResults[method] = e
-                                    }
-                                }
-                            }
+                // Check we haven't already executed the test, captured the trace, and computed the
+                // test methods to inject before executing the test, to avoid executing it multiple
+                // times.
+                if (
+                    !innerMethodsResults.containsKey(method) &&
+                        !flickerServiceMethodsFor.containsKey(method)
+                ) {
+                    val debugAnnotation =
+                        if (method.annotations.any { it is Debug }) {
+                            method.getAnnotation(Debug::class.java)
+                        } else {
+                            null
                         }
 
+                    val description = createTestDescription(testClass.javaClass.name, method.name)
+
                     try {
-                        ruleContainer
-                            .apply(
-                                method,
-                                description,
-                                testClass.onlyConstructor.newInstance(),
-                                statement,
-                            )
-                            .evaluate()
+                        val reader =
+                            if (debugAnnotation != null) {
+                                getTraceReaderFromAsset(
+                                    testClassName,
+                                    debugAnnotation.debugTraceFilePath,
+                                )
+                            } else {
+                                captureTestTrace(test, method, description, ruleContainer)
+                            }
+
+                        Utils.notifyRunnerProgress(
+                            testClassName,
+                            "Computing Flicker service tests",
+                            instrumentation,
+                        )
+                        flickerServiceMethodsFor[method] =
+                            computeFlickerServiceTests(reader, testClassName, method)
                     } catch (e: Throwable) {
                         // Failed to execute test rules, report the error in the test method's
                         // result instead of causing a module failure due to crashing in the
@@ -212,12 +160,72 @@ class FlickerServiceDecorator(
                 }
 
                 if (innerMethodsResults[method] == null) {
+                    // No errors occurred, add the computed test methods
                     testMethods.addAll(flickerServiceMethodsFor[method]!!)
                 }
             }
         }
 
         return testMethods
+    }
+
+    private fun captureTestTrace(
+        test: Any,
+        method: FrameworkMethod,
+        description: Description,
+        ruleContainer: RuleContainer,
+    ): Reader {
+        // Capture the entire test, including test rules, before and after blocks. This is to ensure
+        // we have the entire trace for debugging later. We then tag the trace with a start and end
+        // time to know where the main method starts and stops to only process that data.
+        return captureTrace(testClassName, getDefaultFlickerOutputDir()) { writer ->
+            val innerStatement =
+                object : Statement() {
+                    override fun evaluate() {
+                        val befores = testClass.getAnnotatedMethods(Before::class.java)
+                        befores.forEach { it.invokeExplosively(test) }
+
+                        Utils.notifyRunnerProgress(testClassName, "Running setup", instrumentation)
+
+                        Utils.notifyRunnerProgress(
+                            testClassName,
+                            "Running transition",
+                            instrumentation,
+                        )
+
+                        val traceStartTime = now()
+                        Utils.notifyRunnerProgress(
+                            testClassName,
+                            "Setting trace start time to :: $traceStartTime",
+                            instrumentation,
+                        )
+
+                        writer.setTransitionStartTime(traceStartTime)
+                        method.invokeExplosively(test)
+
+                        val traceEndTime = now()
+                        Utils.notifyRunnerProgress(
+                            testClassName,
+                            "Setting trace end time to :: $traceEndTime",
+                            instrumentation,
+                        )
+                        writer.setTransitionEndTime(traceEndTime)
+
+                        Utils.notifyRunnerProgress(
+                            testClassName,
+                            "Running teardown",
+                            instrumentation,
+                        )
+
+                        val afters = testClass.getAnnotatedMethods(After::class.java)
+                        afters.forEach { it.invokeExplosively(test) }
+                    }
+                }
+
+            ruleContainer
+                .apply(method, description, testClass.onlyConstructor.newInstance(), innerStatement)
+                .evaluate()
+        }
     }
 
     // TODO: Common with LegacyFlickerServiceDecorator, might be worth extracting this up
@@ -248,7 +256,13 @@ class FlickerServiceDecorator(
                     (method as InjectedTestCase).execute(description)
                 } else {
                     if (innerMethodsResults.containsKey(method)) {
+                        // Test failed to execute when computing the test methods to inject, so we
+                        // don't have a correct trace to run tests on.
+                        // Throw the execution error as the test result.
                         innerMethodsResults[method]?.let { throw it }
+                    } else if (flickerServiceMethodsFor.containsKey(method)) {
+                        // We already executed this method to capture the trace for the tests, we
+                        // don't need to execute it again, so do nothing and just pass the test.
                     } else {
                         inner?.getMethodInvoker(method, test)?.evaluate()
                     }
