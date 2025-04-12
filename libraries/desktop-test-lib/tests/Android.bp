@@ -1,4 +1,3 @@
-//
 // Copyright (C) 2025 The Android Open Source Project
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -12,25 +11,31 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-//
 
 package {
+    default_team: "trendy_team_desktop_experiences",
     default_applicable_licenses: ["Android-Apache-2.0"],
 }
 
-java_library {
-    name: "desktop-test-lib",
-    static_libs: [
-        "androidx.test.runner",
-        "androidx.test.rules",
-        "kotlin-stdlib",
-        "kotlinx_coroutines",
-        "mockito-target-minus-junit4",
-        "uiautomator-helpers",
-        "truth",
+android_test {
+    name: "DesktopTestLibTests",
+
+    platform_apis: true,
+    test_suites: ["general-tests"],
+
+    srcs: ["src/**/*.kt"],
+
+    libs: [
+        "android.test.runner.stubs.system",
+        "android.test.base.stubs.system",
     ],
-    srcs: [
-        "src/**/*.kt",
-        "src/**/*.java",
+    static_libs: [
+        "androidx.test.rules",
+        "mockito-target-minus-junit4",
+        "platform-test-annotations",
+        "desktop-test-lib",
+        "kotlinx_coroutines",
+        "truth",
+        "kotlin-test",
     ],
 }

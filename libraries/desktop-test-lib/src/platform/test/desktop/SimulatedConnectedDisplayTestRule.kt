@@ -35,7 +35,7 @@ import org.junit.rules.TestRule
 import org.junit.runner.Description
 import org.junit.runners.model.Statement
 
-/** A TestRule to manage multiple simulated connected overlay displays. */
+/** A [TestRule] to manage multiple simulated connected overlay displays. */
 class SimulatedConnectedDisplayTestRule : TestRule {
 
     private val context = InstrumentationRegistry.getInstrumentation().targetContext
@@ -101,7 +101,7 @@ class SimulatedConnectedDisplayTestRule : TestRule {
 
         // Add the overlay displays
         Settings.Global.putString(
-            InstrumentationRegistry.getInstrumentation().context.contentResolver,
+            context.contentResolver,
             Settings.Global.OVERLAY_DISPLAY_DEVICES,
             displaySettings,
         )
@@ -110,7 +110,7 @@ class SimulatedConnectedDisplayTestRule : TestRule {
                 addedDisplays.add(displayId)
             }
         } ?: error("Timed out waiting for displays to be added.")
-        addedDisplays
+        addedDisplays.toList()
     }
 
     /**
@@ -153,7 +153,7 @@ class SimulatedConnectedDisplayTestRule : TestRule {
         // topology), it will be complicated as re-adding overlay display would lead to different
         // displayId and topology could not be restored easily.
         Settings.Global.putString(
-            InstrumentationRegistry.getInstrumentation().context.contentResolver,
+            context.contentResolver,
             Settings.Global.OVERLAY_DISPLAY_DEVICES,
             null,
         )
