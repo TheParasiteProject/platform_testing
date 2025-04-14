@@ -382,14 +382,18 @@ class Root private constructor(val displayId: Int = DEFAULT_DISPLAY) {
         KeyboardBacklightIndicatorDialog.CONTAINER_SELECTOR.assertInvisible()
     }
 
-    fun waitForShadeToOpen() {
-        val qsHeaderSelector =
-            if (com.android.systemui.Flags.sceneContainer()) {
-                sysuiResSelector("shade_header_root", displayId)
-            } else {
-                sysuiResSelector("split_shade_status_bar", displayId)
-            }
+    fun assertShadeNotVisible() {
+        qsHeaderSelector.assertInvisible { "Notification shade should not be visible" }
+    }
 
+    private val qsHeaderSelector =
+        if (com.android.systemui.Flags.sceneContainer()) {
+            sysuiResSelector("shade_header_root", displayId)
+        } else {
+            sysuiResSelector("split_shade_status_bar", displayId)
+        }
+
+    fun waitForShadeToOpen() {
         // Note that this duplicates the tracing done by assertVisible, but with a better name.
         traceSection("waitForShadeToOpen") {
             qsHeaderSelector.assertVisible(
