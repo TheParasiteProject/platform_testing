@@ -33,13 +33,14 @@ class ArtifactSaverRule : TestWatcher() {
 
         try {
             if (DeviceDumpParser.lastWmTraceData.isNotEmpty()) {
-                val fileName = getClassAndMethodName(description) + "lastWmDump.winscope"
+                val fileName = getClassAndMethodName(description) + "_winscopeLastWmDump.winscope"
                 val file = ArtifactSaver.artifactFile(fileName)
                 file.writeBytes(DeviceDumpParser.lastWmTraceData)
             }
 
             if (DeviceDumpParser.lastLayersTraceData.isNotEmpty()) {
-                val fileName = getClassAndMethodName(description) + "lastLayersDump.winscope"
+                val fileName =
+                    getClassAndMethodName(description) + "_winscopeLastLayersDump.winscope"
                 val file = ArtifactSaver.artifactFile(fileName)
                 file.writeBytes(DeviceDumpParser.lastLayersTraceData)
             }
