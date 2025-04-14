@@ -280,4 +280,11 @@ public interface IAutoPrivacySettingsHelper extends IAppHelper {
      * <p>This method checks if CarInformation is displayed in other permissions settings page
      */
     boolean isCarInformationUIElementDisplayed();
+
+    /**
+     * Setup expectation: Unblock the Message displayed
+     *
+     * <p>This method will click on unblock button
+     */
+    void unblockButton();
 }

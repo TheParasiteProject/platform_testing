@@ -303,4 +303,22 @@ public interface IAutoMapsHelper extends IAppHelper {
      * <p>
      */
     void closeDialog();
+
+    /**
+     * SetUp expectation : Maps alert diaglog box is open
+     *
+     * <p>Click on While using the app on diaglog box opened
+     *
+     * <p>
+     */
+    void clickMapsWhileUsingAppButton();
+
+    /**
+     * SetUp expectation : Maps keyboard is open
+     *
+     * <p>Click on speech to text button
+     *
+     * <p>
+     */
+    void clickSpeechToText();
 }

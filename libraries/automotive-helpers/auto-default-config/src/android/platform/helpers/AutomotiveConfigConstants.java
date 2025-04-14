@@ -696,6 +696,7 @@ public class AutomotiveConfigConstants {
     public static final String PERMISSION_ALLOW = "PERMISSION_ALLOW";
     public static final String PERMISSION_MESSAGE = "PERMISSION_MESSAGE";
     public static final String CANCEL = "CANCEL";
+    public static final String UNBLOCK = "UNBLOCK";
     public static final String RADIO_BUTTON = "RADIO_BUTTON";
     public static final String PRIVACY_PERMISSION_MANAGER = "PRIVACY_PERMISSION_MANAGER";
     public static final String ALLOW_WHILE_USING_APP = "PERMISSION_ALLOW_WHILE_USING_APP";
