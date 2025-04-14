@@ -24,6 +24,7 @@ import android.platform.uiautomatorhelpers.DeviceHelpers.assertVisible
 import android.platform.uiautomatorhelpers.DeviceHelpers.waitForObj
 import android.platform.uiautomatorhelpers.WaitUtils.ensureThat
 import android.text.TextUtils
+import android.view.Display.DEFAULT_DISPLAY
 import androidx.test.uiautomator.By
 import androidx.test.uiautomator.BySelector
 import androidx.test.uiautomator.UiObject2
@@ -37,7 +38,7 @@ import kotlin.reflect.KClass
  * needed. There are also convenience methods for calling [click], [toggleAndAssertToggled], and
  * [longPress]. These methods will fail the test if the tile doesn't support that interaction.
  */
-abstract class ComposeQuickSettingsTile private constructor() {
+abstract class ComposeQuickSettingsTile private constructor(val displayId: Int = DEFAULT_DISPLAY) {
     /**
      * Representation of the tile object. This should be made to retrieve the object every time (if
      * possible) to prevent stale objects.
@@ -124,8 +125,11 @@ abstract class ComposeQuickSettingsTile private constructor() {
 
     companion object {
         /** Create a [ComposeQuickSettingsTile] wrapper from a fixed [tile] ui object. */
-        fun createFrom(tile: UiObject2): ComposeQuickSettingsTile {
-            return object : ComposeQuickSettingsTile() {
+        fun createFrom(
+            tile: UiObject2,
+            displayId: Int = DEFAULT_DISPLAY,
+        ): ComposeQuickSettingsTile {
+            return object : ComposeQuickSettingsTile(displayId) {
                 override val tile: UiObject2
                     get() = tile
             }
@@ -135,21 +139,25 @@ abstract class ComposeQuickSettingsTile private constructor() {
          * Create a [ComposeQuickSettingsTile] wrapper based on a [selector]. The wrapper will
          * re-fetch the ui object every time it's needed, giving more flexibility in case of stale.
          */
-        fun createFrom(selector: BySelector): ComposeQuickSettingsTile {
-            return object : ComposeQuickSettingsTile() {
+        fun createFrom(
+            selector: BySelector,
+            displayId: Int = DEFAULT_DISPLAY,
+        ): ComposeQuickSettingsTile {
+            return object : ComposeQuickSettingsTile(displayId) {
                 override val tile: UiObject2
                     get() = waitForObj(selector)
             }
         }
 
         /** See https://hsv.googleplex.com/4910828112314368?node=37 */
-        fun smallTileSelector(description: String): BySelector {
-            return sysuiResSelector(SMALL_TILE_TAG).descStartsWith(description)
+        fun smallTileSelector(description: String, displayId: Int = DEFAULT_DISPLAY): BySelector {
+            return sysuiResSelector(SMALL_TILE_TAG, displayId).descStartsWith(description)
         }
 
         /** See https://hsv.googleplex.com/4910828112314368?node=28 */
-        fun largeTileSelector(description: String): BySelector {
-            return sysuiResSelector(LARGE_TILE_TAG).hasChild(By.textStartsWith(description))
+        fun largeTileSelector(description: String, displayId: Int = DEFAULT_DISPLAY): BySelector {
+            return sysuiResSelector(LARGE_TILE_TAG, displayId)
+                .hasChild(By.displayId(displayId).textStartsWith(description))
         }
 
         fun UiObject2.assertIsTile() {
@@ -246,9 +254,11 @@ private class LongPressableImpl(private val tile: UiObject2) : LongPressable {
     }
 
     override fun longPress(expectedSettingsPackage: String?) {
-        Gestures.longClickDownUp(tile, "Quick settings tile") {
+        Gestures.longClickDownUp(tile, "Quick settings tile", tile.displayId) {
             val packageName = expectedSettingsPackage ?: SETTINGS_PACKAGE
-            By.pkg(packageName).assertVisible { "$packageName didn't appear" }
+            By.displayId(tile.displayId).pkg(packageName).assertVisible {
+                "$packageName didn't appear"
+            }
         }
     }
 }

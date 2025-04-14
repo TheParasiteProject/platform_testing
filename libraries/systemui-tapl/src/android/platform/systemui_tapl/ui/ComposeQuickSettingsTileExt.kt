@@ -18,15 +18,15 @@ package android.platform.systemui_tapl.ui
 
 fun ComposeQuickSettingsTile.clickInternetTileToOpenDialog(): InternetDialog {
     click()
-    return InternetDialog()
+    return InternetDialog(displayId)
 }
 
 fun ComposeQuickSettingsTile.clickBluetoothTileToOpenDialog(): BluetoothDialog {
     click()
-    return BluetoothDialog()
+    return BluetoothDialog(displayId)
 }
 
 fun ComposeQuickSettingsTile.clickModesTileToOpenDialog(): ModesDialog {
     click()
-    return ModesDialog()
+    return ModesDialog(displayId)
 }
