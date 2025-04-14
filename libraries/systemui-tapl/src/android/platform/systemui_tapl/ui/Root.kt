@@ -224,7 +224,7 @@ class Root private constructor(val displayId: Int = DEFAULT_DISPLAY) {
 
     /** Gets status bar. */
     val statusBar: StatusBar
-        get() = StatusBar()
+        get() = StatusBar(displayId)
 
     /** Gets an alert dialog. */
     val alertDialog: AlertDialog
