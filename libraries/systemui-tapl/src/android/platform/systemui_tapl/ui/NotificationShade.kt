@@ -68,8 +68,9 @@ class NotificationShade internal constructor(val displayId: Int = DEFAULT_DISPLA
         if (displayId == DEFAULT_DISPLAY) return@lazy context
 
         // We create a new window context to get accurate bounds for overlay displays
-        val displayManager = context.getSystemService(DisplayManager::class.java)
-            ?: error("Couldn't get DisplayManager")
+        val displayManager =
+            context.getSystemService(DisplayManager::class.java)
+                ?: error("Couldn't get DisplayManager")
         val display = displayManager.getDisplay(displayId)
         return@lazy context.createWindowContext(display, TYPE_APPLICATION, null)
     }
@@ -218,11 +219,18 @@ class NotificationShade internal constructor(val displayId: Int = DEFAULT_DISPLA
         waitForShadeToClose(displayId)
     }
 
+    private val quickSettingsContainer: UiObject2
+        get() =
+            uiDevice.wait(
+                Until.findObject(sysuiResSelector(UI_QS_CONTAINER_ID, displayId)),
+                UI_RESPONSE_TIMEOUT_MSECS,
+            ) ?: error("Can't find qs container.")
+
     private val notificationShadeScrollContainer: UiObject2
         get() =
             waitForObj(
                 sysuiResSelector(UI_SCROLLABLE_ELEMENT_ID, displayId),
-                Duration.ofMillis(UI_RESPONSE_TIMEOUT_MSECS)
+                Duration.ofMillis(UI_RESPONSE_TIMEOUT_MSECS),
             ) { "Can't find notification shade scroll container." }
 
     // UiDevice#getDisplayHeight() excludes insets.
@@ -328,13 +336,6 @@ class NotificationShade internal constructor(val displayId: Int = DEFAULT_DISPLA
 
         private val isShowingFooter: Boolean
             get() = uiDevice.hasObject(sysuiResSelector(UI_SETTINGS_BUTTON_ID))
-
-        private val quickSettingsContainer: UiObject2
-            get() =
-                uiDevice.wait(
-                    Until.findObject(sysuiResSelector(UI_QS_CONTAINER_ID)),
-                    UI_RESPONSE_TIMEOUT_MSECS,
-                ) ?: error("Can't find qs container.")
 
         @JvmStatic
         @JvmOverloads
