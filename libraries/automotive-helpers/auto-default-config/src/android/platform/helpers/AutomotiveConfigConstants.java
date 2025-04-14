@@ -636,7 +636,13 @@ public class AutomotiveConfigConstants {
             "SETTINGS_UI_SUB_SETTING_SCROLL_ELEMENT";
     public static final String SETTINGS_PERMISSIONS_BACK_BUTTON =
             "SETTINGS_PERMISSIONS_BACK_BUTTON";
-
+    public static final String CAR_INFORMATION = "CAR_INFORMATION";
+    public static final String PRIVACY_OTHER_PERMISSIONS = "PRIVACY_OTHER_PERMISSIONS";
+    public static final String PERMISSION_USED_BY_SYSTEM = "PERMISSION_USED_BY_SYSTEM";
+    public static final String PRIVACY_SETTINGS_SCROLL_WAIT_TIME =
+            "PRIVACY_SETTINGS_SCROLL_WAIT_TIME";
+    public static final String PRIVACY_SETTINGS_SCROLL_MARGIN = "PRIVACY_SETTINGS_SCROLL_MARGIN";
+    public static final String PRIVACY_SETTINGS_SCROLL_ACTION = "PRIVACY_SETTINGS_SCROLL_ACTION";
     // Storage Settings
     public static final String STORAGE_SYSTEM_SUB_SETTINGS = "STORAGE_SYSTEM_SUB_SETTINGS";
     public static final String STORAGE_MUSIC_AUDIO_SETTINGS = "STORAGE_MUSIC_AUDIO_SETTINGS";

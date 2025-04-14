@@ -266,4 +266,18 @@ public interface IAutoPrivacySettingsHelper extends IAppHelper {
      * <p>Click on Mic
      */
     void clickMicroPhoneOnScreen();
+
+    /**
+     * Setup expectation: Manager Permission - Privacy Settings is open
+     *
+     * <p>This method clicks on other permissions.
+     */
+    void clickOtherPermissionsPage();
+
+    /**
+     * Setup expectation: Manager Permission- other permissions settings page is open
+     *
+     * <p>This method checks if CarInformation is displayed in other permissions settings page
+     */
+    boolean isCarInformationUIElementDisplayed();
 }
