@@ -21,6 +21,7 @@ import android.platform.uiautomatorhelpers.BetterSwipe.Swipe
 import android.platform.uiautomatorhelpers.LongPressTimeoutExtender
 import android.platform.uiautomatorhelpers.WaitUtils.ensureThat
 import android.provider.Settings
+import android.view.Display.DEFAULT_DISPLAY
 import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.uiautomator.StaleObjectException
 import androidx.test.uiautomator.UiObject2
@@ -107,13 +108,14 @@ object Gestures {
     fun longClickDownUp(
         uiObject: UiObject2,
         objectName: String,
+        displayId: Int = DEFAULT_DISPLAY,
         whileHoldingFn: (Swipe.() -> Unit),
     ) {
         try {
             waitForObjectEnabled(uiObject, objectName)
             waitForObjectLongClickable(uiObject, objectName)
             val context = InstrumentationRegistry.getInstrumentation().targetContext
-            BetterSwipe.swipe(uiObject.visibleCenter) {
+            BetterSwipe.swipe(uiObject.visibleCenter, displayId) {
 
                 // press for twice the long press timeout, just to make sure.
                 val longPressMsec =
@@ -138,6 +140,6 @@ object Gestures {
      * attempted.
      */
     private fun clickNow(uiObject: UiObject2) {
-        BetterSwipe.swipe(uiObject.visibleCenter)
+        BetterSwipe.swipe(uiObject.visibleCenter, uiObject.displayId)
     }
 }

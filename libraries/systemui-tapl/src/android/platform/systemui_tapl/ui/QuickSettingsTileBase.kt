@@ -24,6 +24,7 @@ import android.platform.test.util.HealthTestingUtils.waitForValueCatchingStaleOb
 import android.platform.uiautomatorhelpers.DeviceHelpers.assertVisible
 import android.platform.uiautomatorhelpers.DeviceHelpers.waitForObj
 import android.platform.uiautomatorhelpers.WaitUtils.ensureThat
+import android.view.Display.DEFAULT_DISPLAY
 import androidx.test.uiautomator.By
 import androidx.test.uiautomator.BySelector
 import androidx.test.uiautomator.UiObject2
@@ -31,7 +32,7 @@ import com.android.systemui.Flags
 import com.google.common.truth.Truth.assertWithMessage
 
 /** Base class for tiles in Quick Settings and Quick Quick Settings */
-sealed class QuickSettingsTileBase {
+sealed class QuickSettingsTileBase(val displayId: Int = DEFAULT_DISPLAY) {
     protected abstract val tile: UiObject2
 
     /**
@@ -43,7 +44,7 @@ sealed class QuickSettingsTileBase {
                 if (Flags.qsUiRefactorComposeFragment()) {
                     tile.contentDescription
                 } else {
-                    tile.waitForObj(QuickQuickSettings.UI_TILE_LABEL_SELECTOR).text
+                    tile.waitForObj(QuickQuickSettings.tileLabelSelector(displayId)).text
                 }
             assertWithMessage("Tile label should not be null").that(label).isNotNull()
             return label
@@ -89,7 +90,7 @@ sealed class QuickSettingsTileBase {
     /** Clicks the Internet tile and presses Done button. */
     fun clickInternetTile() {
         clickWithoutAssertions()
-        val internetDialog = InternetDialog()
+        val internetDialog = InternetDialog(displayId)
 
         internetDialog.clickOnDoneAndClose()
     }
@@ -97,7 +98,7 @@ sealed class QuickSettingsTileBase {
     /** Clicks the Bluetooth tile and presses Done button. */
     fun clickBluetoothTile() {
         clickWithoutAssertions()
-        val bluetoothDialog = BluetoothDialog()
+        val bluetoothDialog = BluetoothDialog(displayId)
 
         bluetoothDialog.clickOnDoneAndClose()
     }
@@ -109,14 +110,14 @@ sealed class QuickSettingsTileBase {
 
     fun clickModesTile(): ModesDialog {
         clickWithoutAssertions()
-        return ModesDialog()
+        return ModesDialog(displayId)
     }
 
     /** Long-clicks the tile and verifies that Settings app appears, unless otherwise specified */
     fun longClick(expectedSettingsPackage: String? = null) {
-        Gestures.longClickDownUp(tile, "Quick settings tile") {
+        Gestures.longClickDownUp(tile, "Quick settings tile", displayId) {
             val packageName = expectedSettingsPackage ?: SETTINGS_PACKAGE
-            By.pkg(packageName).assertVisible { "$packageName didn't appear" }
+            By.displayId(displayId).pkg(packageName).assertVisible { "$packageName didn't appear" }
         }
     }
 
@@ -134,8 +135,9 @@ sealed class QuickSettingsTileBase {
  * It keeps track of the tile by its selector, instead of the UiObject2 in case it moves in the
  * middle of the test.
  */
-class QuickSettingsTile internal constructor(private val selector: BySelector) :
-    QuickSettingsTileBase() {
+class QuickSettingsTile
+internal constructor(private val selector: BySelector, displayId: Int = DEFAULT_DISPLAY) :
+    QuickSettingsTileBase(displayId) {
 
     override val tile: UiObject2
         get() = waitForObj(selector)
@@ -146,5 +148,6 @@ class QuickSettingsTile internal constructor(private val selector: BySelector) :
  *
  * As these are retrieved by the position, they are associated with the actual object.
  */
-class QuickQuickSettingsTile internal constructor(override val tile: UiObject2) :
-    QuickSettingsTileBase()
+class QuickQuickSettingsTile
+internal constructor(override val tile: UiObject2, displayId: Int = DEFAULT_DISPLAY) :
+    QuickSettingsTileBase(displayId)

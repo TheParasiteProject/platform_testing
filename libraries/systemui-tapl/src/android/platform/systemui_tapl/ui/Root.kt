@@ -50,8 +50,8 @@ import com.android.launcher3.tapl.LauncherInstrumentation
 import com.android.launcher3.tapl.Workspace
 import com.google.common.truth.Truth.assertThat
 import com.google.common.truth.Truth.assertWithMessage
-import org.junit.Assert.assertThrows
 import java.time.Duration
+import org.junit.Assert.assertThrows
 
 /**
  * The root class for System UI test automation objects. All System UI test automation objects are
@@ -164,6 +164,8 @@ class Root private constructor(val displayId: Int = DEFAULT_DISPLAY) {
         return NotificationShade()
     }
 
+    private val footerSelector = sysuiResSelector("qs_footer_actions", displayId)
+
     private val notificationSwipeX: Float
         get() = uiDevice.getDisplayWidth(displayId) / 4f
 
@@ -215,11 +217,11 @@ class Root private constructor(val displayId: Int = DEFAULT_DISPLAY) {
         // Quick Settings isn't always open when this is complete. Explicitly wait for the Quick
         // Settings footer to make sure that the buttons are accessible when the bar is open and
         // this call is complete.
-        FOOTER_SELECTOR.assertVisible()
+        footerSelector.assertVisible()
         // Wait an extra bit for the animation to complete. If we return to early, future callers
         // that are trying to find the location of the footer will get incorrect coordinates
         device.waitForIdle(LONG_TIMEOUT)
-        return QuickSettings()
+        return QuickSettings(displayId)
     }
 
     /** Gets status bar. */
@@ -403,6 +405,16 @@ class Root private constructor(val displayId: Int = DEFAULT_DISPLAY) {
         }
     }
 
+    fun pressBackOnDisplay() {
+        if (displayId == DEFAULT_DISPLAY) {
+            LauncherInstrumentation().pressBack()
+        } else {
+            // replicate UiDevice#pressBack() for a display other than DEFAULT_DISPLAY
+            sendKey(KeyEvent.KEYCODE_BACK, 0, SystemClock.uptimeMillis())
+            uiDevice.waitForWindowUpdate(null, LONG_TIMEOUT)
+        }
+    }
+
     fun pressHomeOnDisplay() {
         if (displayId == DEFAULT_DISPLAY) {
             uiDevice.pressHome()
@@ -505,7 +517,6 @@ class Root private constructor(val displayId: Int = DEFAULT_DISPLAY) {
         private val NOTIFICATION_SHADE_OPEN_TIMEOUT = Duration.ofSeconds(20)
         private const val LONG_TIMEOUT: Long = 2000
         private const val SHORT_TIMEOUT: Long = 500
-        private val FOOTER_SELECTOR = sysuiResSelector("qs_footer_actions")
         private const val SCREENSHOT_POST_TIMEOUT_MSEC: Long = 20000
         private val GLOBAL_SCREENSHOT_SELECTOR = sysuiResSelector("screenshot_actions")
 

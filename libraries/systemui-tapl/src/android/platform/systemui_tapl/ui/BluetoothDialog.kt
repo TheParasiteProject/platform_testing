@@ -24,28 +24,30 @@ import android.platform.uiautomatorhelpers.WaitResult
 import android.platform.uiautomatorhelpers.WaitUtils.waitToBecomeTrue
 import android.platform.uiautomatorhelpers.scrollUntilFound
 import android.util.Log
+import android.view.Display.DEFAULT_DISPLAY
 
 /** Wrapper representing the BluetoothDialog that opens when the QS Tile is clicked */
-class BluetoothDialog internal constructor() {
+class BluetoothDialog internal constructor(displayId: Int = DEFAULT_DISPLAY) {
     val scrollView =
         waitForObj(
-            sysuiResSelector(SCROLL_VIEW_RES_ID)
-                .hasParent(sysuiResSelector(BLUETOOTH_TILE_DIALOG_RES_ID))
+            sysuiResSelector(SCROLL_VIEW_RES_ID, displayId)
+                .hasParent(sysuiResSelector(BLUETOOTH_TILE_DIALOG_RES_ID, displayId))
         )
+
+    val doneBtn = sysuiResSelector("done_button", displayId)
 
     /** Finds the done button, clicks on it and asserts that the dialog has closed. */
     fun clickOnDoneAndClose() {
-        val doneButton = scrollView.scrollUntilFound(DONE_BTN) ?: error("Done button not found")
+        val doneButton = scrollView.scrollUntilFound(doneBtn) ?: error("Done button not found")
         doneButton.click()
-        if (waitToBecomeTrue { !uiDevice.hasObject(DONE_BTN) }.result !is WaitResult.WaitSuccess) {
+        if (waitToBecomeTrue { !uiDevice.hasObject(doneBtn) }.result !is WaitResult.WaitSuccess) {
             Log.d("QuickSettingsTileBase", "Retrying click due to b/339676505")
             doneButton.click()
         }
-        DONE_BTN.assertInvisible(errorProvider = { "Bluetooth tile dialog is dismissed" })
+        doneBtn.assertInvisible(errorProvider = { "Bluetooth tile dialog is dismissed" })
     }
 
     private companion object {
-        val DONE_BTN = sysuiResSelector("done_button")
         const val SCROLL_VIEW_RES_ID = "scroll_view"
         const val BLUETOOTH_TILE_DIALOG_RES_ID = "root"
     }
