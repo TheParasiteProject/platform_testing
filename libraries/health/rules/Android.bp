@@ -56,9 +56,11 @@ java_library {
         "junit",
         "androidx.test.runner",
         "kotlin-reflect",
+        "launcher-aosp-tapl",
     ],
     srcs: [
         "src/android/platform/test/rule/AnnotationUtils.kt",
+        "src/android/platform/test/rule/ExtendedLongPressTimeoutRule.kt",
         "src/android/platform/test/rule/LimitDevicesRule.kt",
         "src/android/platform/test/rule/TestAnnotationScanner.kt",
     ],
