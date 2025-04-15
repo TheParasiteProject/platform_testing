@@ -26,6 +26,7 @@ import android.hardware.input.VirtualMouseConfig
 import android.os.Handler
 import android.os.Looper
 import android.platform.uiautomatorhelpers.AdoptShellPermissionsRule
+import android.util.Log
 import android.view.Display.DEFAULT_DISPLAY
 import androidx.test.platform.app.InstrumentationRegistry
 import kotlin.time.Duration
@@ -143,12 +144,18 @@ class DesktopMouseTestRule() : TestRule {
         private fun disableMouseScaling() {
             for (display in displayManager.displays) {
                 displayIdsWithMouseScalingDisabled += display.displayId
-                // TODO: b/405848641 - Disable mouse scaling.
+                inputManager.setMouseScalingEnabled(false, display.displayId)
             }
         }
 
         override fun after() {
-            // TODO: b/405848641 -  Re-enable mouse scaling.
+            for (displayId in displayIdsWithMouseScalingDisabled) {
+                try {
+                    inputManager.setMouseScalingEnabled(true, displayId)
+                } catch (e: Exception) {
+                    Log.e(TAG, "Failed to restore mouse scaling for display#$displayId", e)
+                }
+            }
             virtualMouse?.close()
             virtualDevice?.close()
             virtualMouse = null
@@ -160,6 +167,7 @@ class DesktopMouseTestRule() : TestRule {
     private companion object {
         const val VIRTUAL_MOUSE_VENDOR_ID = 123
         const val VIRTUAL_MOUSE_PRODUCT_ID = 456
+        const val TAG = "DesktopMouseTestRule"
         val TIMEOUT: Duration = 10.seconds
         val PERMISSIONS =
             arrayOf(
@@ -168,6 +176,7 @@ class DesktopMouseTestRule() : TestRule {
                 Manifest.permission.CREATE_VIRTUAL_DEVICE,
                 Manifest.permission.INJECT_EVENTS,
                 "android.permission.MANAGE_DISPLAYS",
+                Manifest.permission.SET_POINTER_SPEED,
             )
     }
 }
