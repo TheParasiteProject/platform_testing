@@ -19,6 +19,7 @@ package android.platform.tests;
 import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertTrue;
 
+import android.platform.helpers.AutomotiveConfigConstants;
 import android.platform.helpers.HelperAccessor;
 import android.platform.helpers.IAutoAppGridHelper;
 
@@ -29,6 +30,11 @@ import org.junit.runner.RunWith;
 
 @RunWith(AndroidJUnit4.class)
 public class AppGridTest {
+
+    private static final String SMS_APP = "SMS";
+    private static final String BLUETOOTH_APP = "Bluetooth Audio";
+    private static final String PHONE_APP = "Phone";
+    private static final String NEWS_APP = "News";
 
     private HelperAccessor<IAutoAppGridHelper> mAppGridHelper;
 
@@ -70,5 +76,61 @@ public class AppGridTest {
             assertFalse("Scrolling did not work.", mAppGridHelper.get().isAtBeginning());
             mAppGridHelper.get().scrollBackward();
         }
+    }
+
+    @Test
+    public void testLaunchBluetoothAudio() {
+        // Make sure app grid is not open before testing.
+        mAppGridHelper.get().exit();
+        mAppGridHelper.get().open();
+
+        mAppGridHelper.get().openApp(BLUETOOTH_APP);
+        assertTrue(
+                "Bluetooth Audio app is not opened",
+                mAppGridHelper
+                        .get()
+                        .checkPackageInForeground(AutomotiveConfigConstants.MEDIA_CENTER_PACKAGE));
+    }
+
+    @Test
+    public void testLaunchPhone() {
+        // Make sure app grid is not open before testing.
+        mAppGridHelper.get().exit();
+        mAppGridHelper.get().open();
+
+        mAppGridHelper.get().openApp(PHONE_APP);
+        assertTrue(
+                "Phone app is not opened",
+                mAppGridHelper
+                        .get()
+                        .checkPackageInForeground(AutomotiveConfigConstants.DIAL_PACKAGE));
+    }
+
+    @Test
+    public void testLaunchSMS() {
+        // Make sure app grid is not open before testing.
+        mAppGridHelper.get().exit();
+        mAppGridHelper.get().open();
+
+        mAppGridHelper.get().openApp(SMS_APP);
+        assertTrue(
+                "SMS app is not opened",
+                mAppGridHelper
+                        .get()
+                        .checkPackageInForeground(AutomotiveConfigConstants.SMS_PACKAGE));
+    }
+
+    @Test
+    public void testLaunchNews() {
+        // Make sure app grid is not open before testing.
+        mAppGridHelper.get().exit();
+        mAppGridHelper.get().open();
+
+        mAppGridHelper.get().openApp(NEWS_APP);
+        assertTrue(
+                "News app is not opened",
+                mAppGridHelper
+                        .get()
+                        .checkPackageInForeground(AutomotiveConfigConstants.MEDIA_CENTER_PACKAGE));
     }
 }
