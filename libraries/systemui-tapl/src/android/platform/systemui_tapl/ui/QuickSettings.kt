@@ -61,8 +61,8 @@ class QuickSettings internal constructor(val displayId: Int = DEFAULT_DISPLAY) {
 
     /** Presses Settings button to open Settings. */
     fun openSettings() {
-        waitForObj(sysuiResSelector(SETTINGS_BUTTON_RES_ID)).click()
-        By.pkg(SETTINGS_PACKAGE).assertVisible()
+        waitForObj(sysuiResSelector(SETTINGS_BUTTON_RES_ID, displayId)).click()
+        By.displayId(displayId).pkg(SETTINGS_PACKAGE).assertVisible()
     }
 
     /** Opens the user selection panel by clicking User Switch button. */
