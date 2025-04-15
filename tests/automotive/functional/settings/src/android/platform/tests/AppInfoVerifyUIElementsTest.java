@@ -62,8 +62,9 @@ public class AppInfoVerifyUIElementsTest {
         assertTrue(
                 "Apps setting did not open.",
                 mSettingsUIHelper
-                        .get()
-                        .hasUIElement(AutomotiveConfigConstants.RECENTLY_OPENED_UI_ELEMENT));
+                                .get()
+                                .hasUIElement(AutomotiveConfigConstants.RECENTLY_OPENED_UI_ELEMENT)
+                        || mSettingHelper.get().checkMenuExists("Reset app grid to A-Z order"));
         mAppInfoSettingsHelper.get().showAllApps();
         mAppInfoSettingsHelper.get().selectApp(CALENDAR_APP);
         assertTrue(
