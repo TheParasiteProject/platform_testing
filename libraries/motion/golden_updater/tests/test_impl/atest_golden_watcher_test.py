@@ -83,7 +83,7 @@ class AtestGoldenWatcherTest(unittest.TestCase):
   @patch('glob.iglob')
   @patch.object(AtestGoldenWatcher, 'copy_file')
   def test_refresh_golden_files_with_videos(self, mock_copy_file, mock_iglob):
-    mock_iglob.side_effect = [[filenameA, filenameB, filenameC], [filenameF], [filenameE], [filenameD]]
+    mock_iglob.side_effect = [[filenameA, filenameB, filenameC], [filenameF], [], [filenameE], [], [], [filenameD]]
     golden1 = FakeGolden(video_location1)
     golden2 = FakeGolden(video_location2)
     golden3 = FakeGolden(video_location3)
@@ -98,8 +98,11 @@ class AtestGoldenWatcherTest(unittest.TestCase):
     calls = [
       call(f"{atestWatcher.atest_latest_dir}//**/*.actual*json*", recursive=True),
       call(f"{atestWatcher.atest_latest_dir}/**/test_method_1.actual*.mp4*", recursive=True),
+      call(f"{atestWatcher.atest_latest_dir}/**/test_method_1.actual*.zip*", recursive=True),
       call(f"{atestWatcher.atest_latest_dir}/**/test_method_2.actual*.mp4*", recursive=True),
-      call(f"{atestWatcher.atest_latest_dir}/**/test_method_3.actual*.mp4*", recursive=True)
+      call(f"{atestWatcher.atest_latest_dir}/**/test_method_2.actual*.zip*", recursive=True),
+      call(f"{atestWatcher.atest_latest_dir}/**/test_method_3.actual*.mp4*", recursive=True),
+      call(f"{atestWatcher.atest_latest_dir}/**/test_method_3.actual*.zip*", recursive=True)
     ]
     mock_iglob.assert_has_calls(calls)
 
@@ -128,7 +131,7 @@ class AtestGoldenWatcherTest(unittest.TestCase):
       filenameC: golden3
     }
 
-    self.assertEqual(mock_iglob.call_count, 4)
+    self.assertEqual(mock_iglob.call_count, 7)
     self.assertEqual(len(fake_cached_golden.calls), 3)
     self.assertEqual(mock_copy_file.call_count, 6)
     self.assertEqual(atestWatcher.cached_goldens, expected_cached_goldens)
