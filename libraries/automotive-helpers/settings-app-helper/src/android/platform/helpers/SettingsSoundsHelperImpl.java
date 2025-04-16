@@ -80,13 +80,6 @@ public class SettingsSoundsHelperImpl extends AbstractStandardAppHelper
                 ScrollDirection.valueOf(
                         getActionFromConfig(
                                 AutomotiveConfigConstants.SOUND_SETTINGS_LIST_SCROLL_DIRECTION));
-        mScrollUtility.setScrollValues(
-                Integer.valueOf(
-                        getActionFromConfig(
-                                AutomotiveConfigConstants.SOUND_SETTINGS_SCROLL_MARGIN)),
-                Integer.valueOf(
-                        getActionFromConfig(
-                                AutomotiveConfigConstants.SOUND_SETTINGS_SCROLL_WAIT_TIME)));
     }
 
     /** {@inheritDoc} */
