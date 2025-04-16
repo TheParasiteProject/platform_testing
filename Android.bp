@@ -710,6 +710,7 @@ test_package {
         "ContentCapturePerfTests",
         "CoroutineTracingPerfTests",
         "DocumentsUIAppPerfTests",
+        "InputPerfTests",
         "MtpServicePerfTests",
         "RsBlasBenchmark",
         "ImageProcessingJB",
