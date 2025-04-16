@@ -15,6 +15,7 @@
 
 class FakeGolden:
 
-   def __init__(self, video_location=None, device_local_path=None):
+   def __init__(self, video_location=None, device_local_path=None, test_class_name=None):
       self.video_location=video_location
       self.device_local_path=device_local_path
+      self.test_class_name=test_class_name

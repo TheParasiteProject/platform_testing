@@ -14,7 +14,7 @@
 #
 
 import unittest
-from unittest.mock import patch, Mock
+from unittest.mock import patch, Mock, call
 import sys
 import os
 
@@ -57,6 +57,40 @@ class RobolectricGoldenWatcherTest(unittest.TestCase):
       [[fileNameG, localFileG]]
     )
     self.assertEqual(watcher.cached_goldens[fileNameG], golden)
+
+  @patch('glob.iglob')
+  @patch.object(RobolectricGoldenWatcher, 'copy_file')
+  @patch('hashlib.md5')
+  @patch('os.path.isfile')
+  def test_refresh_golden_files_with_video_file(self, mock_is_file, mock_hash_func, mock_copy_file, mock_iglob):
+    mock_is_file.return_value = True
+    mock_iglob.return_value = [fileNameG]
+    mock_hash = Mock()
+    mock_hash_func.return_value = mock_hash
+    mock_hash.hexdigest.return_value = time_hash_value
+    fake_cached_golden = FakeCachedGolden()
+    golden=FakeGolden(video_location3, test_class_name=test_class_name)
+    fake_cached_golden.goldens.append(golden)
+
+    #Not invoking refresh_golden_files explicitly as it is being called in the constructor
+    watcher = RobolectricGoldenWatcher(temp_dir, atest_latest_dir, fake_cached_golden)
+
+    mock_iglob.assert_called_once_with(f"{atest_latest_dir}//**/*.actual.json", recursive=True)
+    mock_hash_func.assert_called_once()
+
+    mock_copy_file.assert_has_calls(
+      [
+        call(fileNameG, localFileG),
+        call(robo_video_file_path, f"{temp_dir}/{video_location3}")
+      ]
+    )
+    self.assertEqual(
+      fake_cached_golden.calls,
+      [[fileNameG, localFileG]]
+    )
+    self.assertEqual(watcher.cached_goldens[fileNameG], golden)
+    mock_is_file.assert_called_once_with(robo_video_file_path)
+
 
   @patch('shutil.copyfile')
   @patch.object(RobolectricGoldenWatcher, 'refresh_golden_files')
