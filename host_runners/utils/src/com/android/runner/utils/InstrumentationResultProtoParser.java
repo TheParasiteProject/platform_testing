@@ -23,7 +23,7 @@ import com.android.commands.am.InstrumentationData.SessionStatus;
 import com.android.commands.am.InstrumentationData.TestStatus;
 import com.android.ddmlib.IShellOutputReceiver;
 import com.android.ddmlib.testrunner.ITestRunListener;
-import com.android.ddmlib.testrunner.InstrumentationResultParser;
+import com.android.tradefed.result.ddmlib.InstrumentationResultParser;
 
 import com.google.protobuf.InvalidProtocolBufferException;
 
