@@ -392,9 +392,9 @@ class LayerTraceEntrySubjectTest {
         val subject =
             LayersTraceSubject(trace, reader)
                 .getEntryBySystemUpTime(1253267561044, byElapsedTimestamp = true)
-        val region = subject.visibleRegion(ComponentNameMatcher.IME_SNAPSHOT)
+        val region = subject.visibleRegion(ComponentNameMatcher.IME_SCREENSHOT)
         region.isEmpty()
-        subject.isInvisible(ComponentNameMatcher.IME_SNAPSHOT)
+        subject.isInvisible(ComponentNameMatcher.IME_SCREENSHOT)
     }
 
     @Test

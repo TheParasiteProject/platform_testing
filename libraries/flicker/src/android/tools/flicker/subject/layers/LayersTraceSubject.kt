@@ -344,7 +344,7 @@ constructor(val trace: LayersTrace, override val reader: Reader? = null) :
             listOf(
                 ComponentNameMatcher.SPLASH_SCREEN,
                 ComponentNameMatcher.SNAPSHOT,
-                ComponentNameMatcher.IME_SNAPSHOT,
+                ComponentNameMatcher.IME_SCREENSHOT,
                 ComponentNameMatcher.PIP_CONTENT_OVERLAY,
                 ComponentNameMatcher.EDGE_BACK_GESTURE_HANDLER,
                 ComponentNameMatcher.COLOR_FADE,
