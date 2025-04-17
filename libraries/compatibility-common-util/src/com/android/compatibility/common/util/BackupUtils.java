@@ -24,12 +24,15 @@ import static java.util.stream.Collectors.joining;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.io.Closeables;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
+import com.google.errorprone.annotations.FormatMethod;
+import com.google.errorprone.annotations.FormatString;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
+import java.util.Locale;
 import java.util.Scanner;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
@@ -68,6 +71,12 @@ public abstract class BackupUtils {
     @CanIgnoreReturnValue
     protected abstract InputStream executeShellCommand(String command) throws IOException;
 
+    @FormatMethod
+    protected final InputStream executeShellCommand(
+            @FormatString String commandTemplate, Object... commandArgs) throws IOException {
+        return executeShellCommand(String.format(Locale.ENGLISH, commandTemplate, commandArgs));
+    }
+
     public void executeShellCommandSync(String command) throws IOException {
         StreamUtil.drainAndClose(new InputStreamReader(executeShellCommand(command)));
     }
@@ -77,6 +86,12 @@ public abstract class BackupUtils {
         String result = StreamUtil.readInputStream(inputStream);
         Closeables.closeQuietly(inputStream);
         return result;
+    }
+
+    @FormatMethod
+    protected final String getShellCommandOutput(
+            @FormatString String commandTemplate, Object... commandArgs) throws IOException {
+        return getShellCommandOutput(String.format(Locale.ENGLISH, commandTemplate, commandArgs));
     }
 
     /** Executes shell command "bmgr backupnow <package>" and assert success. */
@@ -123,8 +138,7 @@ public abstract class BackupUtils {
     }
 
     public boolean isLocalTransportSelected() throws IOException {
-        return getShellCommandOutput("bmgr list transports")
-                .contains("* " + getLocalTransportName());
+        return isLocalTransportSelectedForUser(getCurrentUserId());
     }
 
     /**
@@ -132,12 +146,12 @@ public abstract class BackupUtils {
      * transport and returns {@code true} if the local transport is the selected one.
      */
     public boolean isLocalTransportSelectedForUser(int userId) throws IOException {
-        return getShellCommandOutput(String.format("bmgr --user %d list transports", userId))
+        return getShellCommandOutput("bmgr --user %d list transports", userId)
                 .contains("* " + getLocalTransportName());
     }
 
     public boolean isBackupEnabled() throws IOException {
-        return getShellCommandOutput("bmgr enabled").contains("currently enabled");
+        return isBackupEnabledForUser(getCurrentUserId());
     }
 
     /**
@@ -145,7 +159,7 @@ public abstract class BackupUtils {
      * user {@code userId}.
      */
     public boolean isBackupEnabledForUser(int userId) throws IOException {
-        return getShellCommandOutput(String.format("bmgr --user %d enabled", userId))
+        return getShellCommandOutput("bmgr --user %d enabled", userId)
                 .contains("currently enabled");
     }
 
@@ -163,9 +177,8 @@ public abstract class BackupUtils {
                 ? LOCAL_TRANSPORT_NAME : LOCAL_TRANSPORT_NAME_PRE_Q;
     }
 
-    /** Executes "bmgr backupnow <package>" and returns an {@link InputStream} for its output. */
     private InputStream backupNow(String packageName) throws IOException {
-        return executeShellCommand("bmgr backupnow " + packageName);
+        return backupNowForUser(packageName, getCurrentUserId());
     }
 
     /**
@@ -173,8 +186,7 @@ public abstract class BackupUtils {
      * output.
      */
     private InputStream backupNowForUser(String packageName, int userId) throws IOException {
-        return executeShellCommand(
-                String.format("bmgr --user %d backupnow %s", userId, packageName));
+        return executeShellCommand("bmgr --user %d backupnow %s", userId, packageName);
     }
 
     /**
@@ -228,12 +240,8 @@ public abstract class BackupUtils {
         }
     }
 
-    /**
-     * Executes "bmgr restore <token> <packageName>" and returns an {@link InputStream} for its
-     * output.
-     */
     private InputStream restore(String token, String packageName) throws IOException {
-        return executeShellCommand(String.format("bmgr restore %s %s", token, packageName));
+        return restoreForUser(token, packageName, getCurrentUserId());
     }
 
     /**
@@ -242,8 +250,7 @@ public abstract class BackupUtils {
      */
     private InputStream restoreForUser(String token, String packageName, int userId)
             throws IOException {
-        return executeShellCommand(
-                String.format("bmgr --user %d restore %s %s", userId, token, packageName));
+        return executeShellCommand("bmgr --user %d restore %s %s", userId, token, packageName);
     }
 
     /**
@@ -286,8 +293,9 @@ public abstract class BackupUtils {
 
     // Copied over from BackupQuotaTest
     public boolean enableBackup(boolean enable) throws Exception {
+        int userId = getCurrentUserId();
         boolean previouslyEnabled;
-        String output = getLineString(executeShellCommand("bmgr enabled"));
+        String output = getLineString(executeShellCommand("bmgr --user %d enabled", userId));
         Matcher matcher = BACKUP_MANAGER_CURRENTLY_ENABLE_STATUS_PATTERN.matcher(output.trim());
         if (matcher.find()) {
             previouslyEnabled = "enabled".equals(matcher.group(1));
@@ -295,7 +303,7 @@ public abstract class BackupUtils {
             throw new RuntimeException("non-parsable output setting bmgr enabled: " + output);
         }
 
-        Closeables.closeQuietly(executeShellCommand("bmgr enable " + enable));
+        Closeables.closeQuietly(executeShellCommand("bmgr --user %d enable %s", userId, enable));
         return previouslyEnabled;
     }
 
@@ -320,7 +328,7 @@ public abstract class BackupUtils {
      * the user {@code userId}.
      */
     public boolean isBackupActivatedForUser(int userId) throws IOException {
-        return getShellCommandOutput(String.format("bmgr --user %d activated", userId))
+        return getShellCommandOutput("bmgr --user %d activated", userId)
                 .contains("currently activated");
     }
 
@@ -430,9 +438,7 @@ public abstract class BackupUtils {
      */
     public boolean userHasBackupTransport(String transport, int userId) throws IOException {
         String output =
-                getLineString(
-                        executeShellCommand(
-                                String.format("bmgr --user %d list transports", userId)));
+                getLineString(executeShellCommand("bmgr --user %d list transports", userId));
         for (String t : output.split("\n")) {
             // Parse out the '*' character used to denote the selected transport.
             t = t.replace("*", "").trim();
