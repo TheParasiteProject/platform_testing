@@ -28,6 +28,10 @@ import android.hardware.display.DisplayTopology.dpToPx
 import android.hardware.display.DisplayTopologyGraph
 import android.hardware.input.InputManager
 import android.hardware.input.VirtualMouse
+import android.hardware.input.VirtualMouseButtonEvent
+import android.hardware.input.VirtualMouseButtonEvent.ACTION_BUTTON_PRESS
+import android.hardware.input.VirtualMouseButtonEvent.ACTION_BUTTON_RELEASE
+import android.hardware.input.VirtualMouseButtonEvent.BUTTON_PRIMARY
 import android.hardware.input.VirtualMouseConfig
 import android.hardware.input.VirtualMouseRelativeEvent
 import android.os.Handler
@@ -67,7 +71,7 @@ class DesktopMouseTestRule() : TestRule {
     private val context = InstrumentationRegistry.getInstrumentation().targetContext
     private val displayManager = context.getSystemService(DisplayManager::class.java)
     private val inputManager = context.getSystemService(InputManager::class.java)
-    private val resourceTracker = ResourceTracker(fakeAssociationRule, displayManager, inputManager)
+    private val resourceTracker = ResourceTracker()
     private val ruleChain =
         RuleChain.outerRule(adoptShellPermissionsTestRule)
             .around(fakeAssociationRule)
@@ -80,12 +84,7 @@ class DesktopMouseTestRule() : TestRule {
      * Internal test rule that tracks created virtual mouse and modified display topology and
      * ensures they are properly closed / restored after the test.
      */
-    private class ResourceTracker(
-        private val fakeAssociationRule: FakeAssociationRule,
-        private val displayManager: DisplayManager,
-        private val inputManager: InputManager,
-    ) : ExternalResource() {
-        private val context = InstrumentationRegistry.getInstrumentation().targetContext
+    private inner class ResourceTracker() : ExternalResource() {
         private val virtualDeviceManager =
             context.getSystemService(VirtualDeviceManager::class.java)
 
@@ -152,9 +151,7 @@ class DesktopMouseTestRule() : TestRule {
                 ?: error("Timed out waiting for input device to be added.")
 
             disableMouseScaling()
-            // TODO: b/399523818 - Ensure cursor starts on DEFAULT_DISPLAY
-            // TODO: b/380001108 - Adds util method (move, drag) for test writer to interact with
-            //  the VirtualMouse
+            ensureCursorStartsOnDefaultDisplay()
         }
 
         private fun disableMouseScaling() {
@@ -162,6 +159,11 @@ class DesktopMouseTestRule() : TestRule {
                 displayIdsWithMouseScalingDisabled += display.displayId
                 inputManager.setMouseScalingEnabled(false, display.displayId)
             }
+        }
+
+        private fun ensureCursorStartsOnDefaultDisplay() {
+            val display = displayManager.getDisplay(DEFAULT_DISPLAY)
+            move(DEFAULT_DISPLAY, display.width / 2, display.height / 2)
         }
 
         override fun after() {
@@ -178,6 +180,26 @@ class DesktopMouseTestRule() : TestRule {
             virtualDevice = null
             super.after()
         }
+    }
+
+    fun startDrag() {
+        resourceTracker.requireVirtualMouse.sendButtonEvent(
+            VirtualMouseButtonEvent.Builder()
+                .setAction(ACTION_BUTTON_PRESS)
+                .setButtonCode(BUTTON_PRIMARY)
+                .build()
+        )
+        Thread.sleep(MOUSE_INPUT_DELAY.inWholeMilliseconds)
+    }
+
+    fun stopDrag() {
+        resourceTracker.requireVirtualMouse.sendButtonEvent(
+            VirtualMouseButtonEvent.Builder()
+                .setAction(ACTION_BUTTON_RELEASE)
+                .setButtonCode(BUTTON_PRIMARY)
+                .build()
+        )
+        Thread.sleep(MOUSE_INPUT_DELAY.inWholeMilliseconds)
     }
 
     /**
