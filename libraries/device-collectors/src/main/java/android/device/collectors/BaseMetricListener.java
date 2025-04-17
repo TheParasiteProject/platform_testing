@@ -85,6 +85,8 @@ public class BaseMetricListener extends InstrumentationRunListener {
     public static final String EXCLUDE_FILTER_GROUP_KEY = "exclude-filter-group";
     // Argument passed to AndroidJUnitRunner to make it log-only, we shouldn't collect on log only.
     public static final String ARGUMENT_LOG_ONLY = "log";
+    // Same as log, but makes it more explicit that we are disabling metric collection.
+    public static final String ARGUMENT_DISABLE_METRIC_COLLECTION = "disable";
     // Collect metric every nth iteration of a test with the same name.
     public static final String COLLECT_ITERATION_INTERVAL = "collect_iteration_interval";
 
@@ -101,7 +103,7 @@ public class BaseMetricListener extends InstrumentationRunListener {
     private Bundle mArgsBundle = null;
     private final List<String> mIncludeFilters;
     private final List<String> mExcludeFilters;
-    private boolean mLogOnly = false;
+    private boolean mDisableMetricCollection = false;
     // Store the method name and invocation count.
     private Map<String, Integer> mTestIdInvocationCount = new HashMap<>();
     private int mCollectIterationInterval = 1;
@@ -130,7 +132,7 @@ public class BaseMetricListener extends InstrumentationRunListener {
     public final void testRunStarted(Description description) throws Exception {
         Trace.beginSection(this.getClass().getSimpleName() + ":testRunStarted");
         setUp();
-        if (!mLogOnly) {
+        if (!mDisableMetricCollection) {
             try {
                 mRunData = createDataRecord();
                 onTestRunStart(mRunData, description);
@@ -146,7 +148,7 @@ public class BaseMetricListener extends InstrumentationRunListener {
     @Override
     public final void testRunFinished(Result result) throws Exception {
         Trace.beginSection(this.getClass().getSimpleName() + ":testRunFinished");
-        if (!mLogOnly) {
+        if (!mDisableMetricCollection) {
             try {
                 onTestRunEnd(mRunData, result);
             } catch (RuntimeException e) {
@@ -475,10 +477,19 @@ public class BaseMetricListener extends InstrumentationRunListener {
             // Reset to collect for all the iterations.
             mCollectIterationInterval = 1;
         }
-        String logOnly = args.getString(ARGUMENT_LOG_ONLY);
-        if (logOnly != null) {
-            mLogOnly = Boolean.parseBoolean(logOnly);
+        final Boolean logOnly = getBooleanArg(ARGUMENT_LOG_ONLY, false);
+        final Boolean disableMetricCollection =
+                getBooleanArg(ARGUMENT_DISABLE_METRIC_COLLECTION, false);
+        mDisableMetricCollection = logOnly || disableMetricCollection;
+    }
+
+    private Boolean getBooleanArg(String key, Boolean defaultValue) {
+        Bundle args = getArgsBundle();
+        String value = args.getString(key);
+        if (value == null) {
+            return defaultValue;
         }
+        return Boolean.parseBoolean(value);
     }
 
     /**
@@ -524,7 +535,7 @@ public class BaseMetricListener extends InstrumentationRunListener {
      * @return True if the collector should run.
      */
     private boolean shouldRun(Description desc) {
-        if (mLogOnly) {
+        if (mDisableMetricCollection) {
             return false;
         }
 
