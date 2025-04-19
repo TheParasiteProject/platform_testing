@@ -18,23 +18,27 @@ package android.platform.systemui_tapl.ui
 import android.platform.uiautomatorhelpers.DeviceHelpers.assertInvisible
 import android.platform.uiautomatorhelpers.DeviceHelpers.assertVisible
 import android.platform.uiautomatorhelpers.DeviceHelpers.waitForObj
+import android.view.Display.DEFAULT_DISPLAY
 import androidx.test.uiautomator.By
 import androidx.test.uiautomator.UiObject2
-import com.android.launcher3.tapl.LauncherInstrumentation
 import java.time.Duration
 
 /** System UI test automation object representing the modes list dialog. */
-class ModesDialog internal constructor() {
+class ModesDialog internal constructor(val displayId: Int = DEFAULT_DISPLAY) {
+
+    private val uiDialogTitle = By.displayId(displayId).res(UI_DIALOG_TITLE_ID)
+    private val modesStateOn = By.displayId(displayId).res("stateOn")
+    private val modesStateOff = By.displayId(displayId).res("stateOff")
 
     init {
-        UI_DIALOG_TITLE.assertVisible()
+        uiDialogTitle.assertVisible()
     }
 
     /* Dismisses the dialog by the Back gesture */
     fun dismiss() {
         // Press back to dismiss the dialog
-        LauncherInstrumentation().pressBack()
-        UI_DIALOG_TITLE.assertInvisible()
+        Root.get(displayId).pressBackOnDisplay()
+        uiDialogTitle.assertInvisible()
     }
 
     private fun getModeTile(modeName: String): UiObject2 {
@@ -48,7 +52,7 @@ class ModesDialog internal constructor() {
     fun verifyModeState(modeName: String, isOn: Boolean) {
         val modeTile = getModeTile(modeName)
         modeTile.waitForObj(
-            if (isOn) MODE_STATE_ON_SELECTOR else MODE_STATE_OFF_SELECTOR,
+            if (isOn) modesStateOn else modesStateOff,
             errorProvider = { "Tile not in correct state, wanted ${if (isOn) "On" else "Off"}" },
         )
     }
@@ -56,10 +60,7 @@ class ModesDialog internal constructor() {
     companion object {
         private const val UI_DIALOG_TITLE_ID = "modes_title"
         private const val UI_ALERT_DIALOG_NEGATIVE_BUTTON_ID = "button2"
-        private val UI_DIALOG_TITLE = By.res(UI_DIALOG_TITLE_ID)
         private val MODE_NAME_SELECTOR = By.res("name")
-        private val MODE_STATE_ON_SELECTOR = By.res("stateOn")
-        private val MODE_STATE_OFF_SELECTOR = By.res("stateOff")
         private val UI_RESPONSE_TIMEOUT = Duration.ofSeconds(3)
     }
 }

@@ -68,8 +68,9 @@ class NotificationShade internal constructor(val displayId: Int = DEFAULT_DISPLA
         if (displayId == DEFAULT_DISPLAY) return@lazy context
 
         // We create a new window context to get accurate bounds for overlay displays
-        val displayManager = context.getSystemService(DisplayManager::class.java)
-            ?: error("Couldn't get DisplayManager")
+        val displayManager =
+            context.getSystemService(DisplayManager::class.java)
+                ?: error("Couldn't get DisplayManager")
         val display = displayManager.getDisplay(displayId)
         return@lazy context.createWindowContext(display, TYPE_APPLICATION, null)
     }
@@ -89,13 +90,13 @@ class NotificationShade internal constructor(val displayId: Int = DEFAULT_DISPLA
     /** Check whether QuickSettings are expanded in the NotificationShade. */
     fun assertQuickSettingsExpanded() {
         assertWithMessage("QuickQuickSettings is visible")
-            .waitUntilGone(QuickQuickSettings.UI_QUICK_QUICK_SETTINGS_CONTAINER_SELECTOR)
+            .waitUntilGone(QuickQuickSettings.qsContainerSelector(displayId))
     }
 
     /** Check whether QuickSettings are collapsed in the NotificationShade. */
     fun assertQuickSettingsCollapsed() {
         assertWithMessage("QuickQuickSettings not visible, shade is not collapsed")
-            .waitUntilVisible(QuickQuickSettings.UI_QUICK_QUICK_SETTINGS_CONTAINER_SELECTOR)
+            .waitUntilVisible(QuickQuickSettings.qsContainerSelector(displayId))
     }
 
     fun verifyIsEmpty() {
@@ -218,11 +219,18 @@ class NotificationShade internal constructor(val displayId: Int = DEFAULT_DISPLA
         waitForShadeToClose(displayId)
     }
 
+    private val quickSettingsContainer: UiObject2
+        get() =
+            waitForObj(
+                sysuiResSelector(UI_QS_CONTAINER_ID, displayId),
+                Duration.ofMillis(UI_RESPONSE_TIMEOUT_MSECS),
+            ) { "Can't find qs container." }
+
     private val notificationShadeScrollContainer: UiObject2
         get() =
             waitForObj(
                 sysuiResSelector(UI_SCROLLABLE_ELEMENT_ID, displayId),
-                Duration.ofMillis(UI_RESPONSE_TIMEOUT_MSECS)
+                Duration.ofMillis(UI_RESPONSE_TIMEOUT_MSECS),
             ) { "Can't find notification shade scroll container." }
 
     // UiDevice#getDisplayHeight() excludes insets.
@@ -264,20 +272,21 @@ class NotificationShade internal constructor(val displayId: Int = DEFAULT_DISPLA
     fun openQuickSettings(): QuickSettings {
         val device = uiDevice
         // Swipe in first quarter to avoid desktop windowing app handle interactions.
-        val swipeXCoordinate = device.displayWidth / 4
-        device.betterSwipe(
+        val swipeXCoordinate = device.getDisplayWidth(displayId) / 4
+        betterSwipe(
             startX = swipeXCoordinate,
             startY = 0,
             endX = swipeXCoordinate,
-            endY = device.displayHeight,
+            endY = device.getDisplayHeight(displayId),
+            displayId = displayId,
         )
-        SystemClock.sleep(SHORT_TIMEOUT.toLong())
-        return QuickSettings()
+        SystemClock.sleep(SHORT_TIMEOUT)
+        return QuickSettings(displayId)
     }
 
     /** Returns Quick Settings (aka expanded Quick Settings) or fails if it's not visible. */
     val quickSettings: QuickSettings
-        get() = QuickSettings()
+        get() = QuickSettings(displayId)
 
     /**
      * Returns the visible UMO, or fails if it's not visible.
@@ -307,7 +316,7 @@ class NotificationShade internal constructor(val displayId: Int = DEFAULT_DISPLA
         private const val SHORT_TRANSITION_WAIT: Long = 1500
         private const val UI_NOTIFICATION_LIST_ID = "notification_stack_scroller"
         private const val SCROLL_TIMES = 3
-        private const val SHORT_TIMEOUT = 500
+        private const val SHORT_TIMEOUT: Long = 500
         const val NOTIFICATION_MAX_HIERARCHY_DEPTH = 4
         const val EXPANDABLE_NOTIFICATION_ROW = "expandableNotificationRow"
         const val SHELF_ID = "notificationShelf"
@@ -328,13 +337,6 @@ class NotificationShade internal constructor(val displayId: Int = DEFAULT_DISPLA
 
         private val isShowingFooter: Boolean
             get() = uiDevice.hasObject(sysuiResSelector(UI_SETTINGS_BUTTON_ID))
-
-        private val quickSettingsContainer: UiObject2
-            get() =
-                uiDevice.wait(
-                    Until.findObject(sysuiResSelector(UI_QS_CONTAINER_ID)),
-                    UI_RESPONSE_TIMEOUT_MSECS,
-                ) ?: error("Can't find qs container.")
 
         @JvmStatic
         @JvmOverloads

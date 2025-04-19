@@ -23,8 +23,6 @@ import static android.platform.test.util.HealthTestingUtils.waitForValueCatching
 import static android.platform.uiautomatorhelpers.DeviceHelpers.getUiDevice;
 import static android.platform.uiautomatorhelpers.WaitUtils.ensureThat;
 
-import static androidx.test.uiautomator.Until.findObject;
-
 import static com.android.settingslib.flags.Flags.newStatusBarIcons;
 import static com.android.systemui.Flags.statusBarChipsModernization;
 
@@ -79,9 +77,15 @@ public class StatusBar {
     static final String VIBRATE_ICON_DESC_PREFIX_STRING = "Ringer vibrate";
     private final List<String> mStatusBarViewIds =
             List.of(DATE_ID, CLOCK_ID, WIFI_ICON_ID, BATTERY_ID, BATTERY_LEVEL_TEXT_ID);
+    private final int mDisplayId;
 
-    StatusBar() {
+    StatusBar(int displayId) {
+        mDisplayId = displayId;
         verifyClockIsVisible();
+    }
+
+    private BySelector statusBarSelector(String resourceId) {
+        return sysuiResSelector(resourceId, mDisplayId);
     }
 
     private static List<UiObject2> getNotificationIconsObjects() {
@@ -145,8 +149,9 @@ public class StatusBar {
         }
     }
 
-    private static UiObject2 getBatteryIndication() {
-        return getUiDevice().wait(findObject(sysuiResSelector(BATTERY_ID)), 1000);
+    public UiObject2 getBatteryIndication() {
+        return DeviceHelpers.waitForObj(
+                statusBarSelector(BATTERY_ID), LONG_WAIT, () -> "Battery should be visible.");
     }
 
     /** Assert that clock indicator is visible. */
@@ -257,14 +262,16 @@ public class StatusBar {
     }
 
     /** Returns the clock time value on StatusBar. Experimental. */
+    public UiObject2 getClock() {
+        return DeviceHelpers.INSTANCE.waitForObj(
+                /* UiDevice= */ getUiDevice(),
+                /* selector= */ statusBarSelector(CLOCK_ID),
+                /* timeout= */ SHORT_WAIT,
+                /* errorProvider= */ () -> "Clock not found.");
+    }
+
     public String getClockTime() {
-        UiObject2 clockTime =
-                DeviceHelpers.INSTANCE.waitForObj(
-                        /* UiDevice= */ getUiDevice(),
-                        /* selector= */ sysuiResSelector(CLOCK_ID),
-                        /* timeout= */ SHORT_WAIT,
-                        /* errorProvider= */ () -> "Clock not found.");
-        return clockTime.getText();
+        return getClock().getText();
     }
 
     /** Returns the position of views in StatusBar. */

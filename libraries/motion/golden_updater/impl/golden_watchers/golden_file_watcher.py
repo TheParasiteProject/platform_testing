@@ -1,3 +1,18 @@
+# Copyright 2025, The Android Open Source Project
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+
 import os
 import hashlib
 from impl.cached_golden import CachedGolden
@@ -5,12 +20,13 @@ from impl.golden_watchers.golden_watcher import GoldenWatcher
 
 class GoldenFileWatcher(GoldenWatcher):
 
-    def __init__(self, temp_dir, adb_client):
+    def __init__(self, temp_dir, adb_client, cached_golden_service=CachedGolden):
         self.temp_dir = temp_dir
         self.adb_client = adb_client
 
         # name -> CachedGolden
         self.cached_goldens = {}
+        self.cached_golden_service=cached_golden_service
         self.refresh_golden_files()
 
     def clean(self):
@@ -24,7 +40,7 @@ class GoldenFileWatcher(GoldenWatcher):
         for golden_remote_file in updated_goldens:
             local_file = self.adb_pull(golden_remote_file)
 
-            golden = CachedGolden(golden_remote_file, local_file)
+            golden = self.cached_golden_service(golden_remote_file, local_file)
             if golden.video_location:
                 self.adb_pull_image(golden.device_local_path, golden.video_location)
 

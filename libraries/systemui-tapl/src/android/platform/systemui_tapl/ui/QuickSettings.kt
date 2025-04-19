@@ -29,6 +29,7 @@ import android.platform.uiautomatorhelpers.DeviceHelpers.uiDevice
 import android.platform.uiautomatorhelpers.DeviceHelpers.waitForFirstObj
 import android.platform.uiautomatorhelpers.DeviceHelpers.waitForObj
 import android.platform.uiautomatorhelpers.scrollUntilFound
+import android.view.Display.DEFAULT_DISPLAY
 import androidx.test.uiautomator.By
 import androidx.test.uiautomator.BySelector
 import androidx.test.uiautomator.Direction
@@ -36,16 +37,20 @@ import androidx.test.uiautomator.UiSelector
 import java.util.regex.Pattern
 
 /** System UI test automation object representing quick settings in the notification shade. */
-class QuickSettings internal constructor() {
+class QuickSettings internal constructor(val displayId: Int = DEFAULT_DISPLAY) {
     // TODO(279061302): Remove TaplUiObject after BetterSwipe has a scroll wrapper.
     private val pager: TaplUiObject
 
     private val clazzNamePattern = Pattern.compile("android\\.widget\\.((Switch)|(Button))")
 
+    private val qsContainer = sysuiResSelector("quick_settings_panel", displayId)
+    private val footerSelector = sysuiResSelector("qs_footer_actions", displayId)
+    private val pagerUISelector = sysuiResSelector(PAGER_UI_OBJECT_RES_ID, displayId)
+
     init {
-        UI_QUICK_SETTINGS_CONTAINER_ID.assertVisible { "Quick settings didn't open" }
-        FOOTER_SELECTOR.assertVisible()
-        pager = TaplUiDevice.waitForObject(PAGER_UI_OBJECT_SELECTOR, "QS pager")
+        qsContainer.assertVisible { "Quick settings didn't open" }
+        footerSelector.assertVisible()
+        pager = TaplUiDevice.waitForObject(pagerUISelector, "QS pager")
     }
 
     /** Presses Power button to open the power panel. */
@@ -56,8 +61,8 @@ class QuickSettings internal constructor() {
 
     /** Presses Settings button to open Settings. */
     fun openSettings() {
-        waitForObj(sysuiResSelector(SETTINGS_BUTTON_RES_ID)).click()
-        By.pkg(SETTINGS_PACKAGE).assertVisible()
+        waitForObj(sysuiResSelector(SETTINGS_BUTTON_RES_ID, displayId)).click()
+        By.displayId(displayId).pkg(SETTINGS_PACKAGE).assertVisible()
     }
 
     /** Opens the user selection panel by clicking User Switch button. */
@@ -70,17 +75,18 @@ class QuickSettings internal constructor() {
     /** Finds a tile by the prefix of its description */
     fun findTile(tileDesc: String): QuickSettingsTile {
         // Select by title_label https://hsv.googleplex.com/5476758214148096?node=57
-        val titleLabelSelector = sysuiResSelector("tile_label").textStartsWith(tileDesc)
-        val tileSelector = By.clazz(clazzNamePattern).hasDescendant(titleLabelSelector, 3)
+        val titleLabelSelector = sysuiResSelector("tile_label", displayId).textStartsWith(tileDesc)
+        val tileSelector =
+            By.displayId(displayId).clazz(clazzNamePattern).hasDescendant(titleLabelSelector, 3)
         waitForObj(tileSelector)
-        return QuickSettingsTile(tileSelector)
+        return QuickSettingsTile(tileSelector, displayId)
     }
 
     fun findComposeTile(tileDesc: String): ComposeQuickSettingsTile {
-        val smallTileSelector = ComposeQuickSettingsTile.smallTileSelector(tileDesc)
-        val largeTileSelector = ComposeQuickSettingsTile.largeTileSelector(tileDesc)
+        val smallTileSelector = ComposeQuickSettingsTile.smallTileSelector(tileDesc, displayId)
+        val largeTileSelector = ComposeQuickSettingsTile.largeTileSelector(tileDesc, displayId)
         val (_, selector) = waitForFirstObj(smallTileSelector, largeTileSelector)
-        return ComposeQuickSettingsTile.createFrom(selector)
+        return ComposeQuickSettingsTile.createFrom(selector, displayId)
     }
 
     /** Returns the brightness slider. */
@@ -112,7 +118,7 @@ class QuickSettings internal constructor() {
     /** Swipes up back to QQS or closes shade in case of split shade. */
     fun close() {
         swipeUp()
-        UI_QUICK_SETTINGS_CONTAINER_ID.assertInvisible()
+        qsContainer.assertInvisible()
     }
 
     fun swipeLeft() {
@@ -120,18 +126,16 @@ class QuickSettings internal constructor() {
     }
 
     private fun swipeUp() {
-        val displayWidth = uiDevice.displayWidth
-        val displayHeight = uiDevice.displayHeight
+        val displayWidth = uiDevice.getDisplayWidth(displayId)
+        val displayHeight = uiDevice.getDisplayHeight(displayId)
         BetterSwipe.swipe(
             PointF((displayWidth / 2).toFloat(), displayHeight.toFloat() - 1f),
             PointF((displayWidth / 2).toFloat(), 0f),
+            displayId = displayId,
         )
     }
 
     companion object {
-        private val UI_QUICK_SETTINGS_CONTAINER_ID = sysuiResSelector("quick_settings_panel")
-        private val FOOTER_SELECTOR = sysuiResSelector("qs_footer_actions")
-
         // https://hsv.googleplex.com/5291196806070272?node=109
         private const val POWER_BTN_RES_ID = "pm_lite"
 
@@ -145,7 +149,6 @@ class QuickSettings internal constructor() {
         private val PAGER_SELECTOR =
             UiSelector().className(PAGER_CLASS_NAME).resourceId(PAGER_RES_ID)
         private const val PAGER_UI_OBJECT_RES_ID = "qs_pager"
-        private val PAGER_UI_OBJECT_SELECTOR = sysuiResSelector(PAGER_UI_OBJECT_RES_ID)
 
         fun textFeedbackSelector(tileName: String): BySelector {
             return DeviceUtils.sysuiResSelector("text_feedback")

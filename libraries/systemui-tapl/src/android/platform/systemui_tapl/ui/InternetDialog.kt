@@ -24,27 +24,32 @@ import android.platform.uiautomatorhelpers.WaitResult
 import android.platform.uiautomatorhelpers.WaitUtils.waitToBecomeTrue
 import android.platform.uiautomatorhelpers.scrollUntilFound
 import android.util.Log
+import android.view.Display.DEFAULT_DISPLAY
 import androidx.test.uiautomator.UiObject2
 
 /** Wrapper representing the InternetDialog that opens when the QS Tile is clicked */
-class InternetDialog internal constructor() {
+class InternetDialog internal constructor(displayId: Int = DEFAULT_DISPLAY) {
     private val scrollView: UiObject2 =
-        waitForObj(sysuiResSelector(SCROLL_VIEW_RES_ID).hasParent(sysuiResSelector(DIALOG_RES_ID)))
+        waitForObj(
+            sysuiResSelector(SCROLL_VIEW_RES_ID, displayId)
+                .hasParent(sysuiResSelector(DIALOG_RES_ID, displayId))
+        )
+
+    val doneBtn = sysuiResSelector("done_button", displayId)
 
     /** Finds the done button, clicks on it and asserts that the dialog has closed. */
     fun clickOnDoneAndClose() {
-        val doneButton = scrollView.scrollUntilFound(DONE_BTN) ?: error("Done button not found")
+        val doneButton = scrollView.scrollUntilFound(doneBtn) ?: error("Done button not found")
         doneButton.click()
-        if (waitToBecomeTrue { !uiDevice.hasObject(DONE_BTN) }.result !is WaitResult.WaitSuccess) {
+        if (waitToBecomeTrue { !uiDevice.hasObject(doneBtn) }.result !is WaitResult.WaitSuccess) {
             Log.d("QuickSettingsTileBase", "Retrying click due to b/339676505")
             doneButton.click()
         }
-        DONE_BTN.assertInvisible(errorProvider = { "Internet dialog is dismissed" })
+        doneBtn.assertInvisible(errorProvider = { "Internet dialog is dismissed" })
     }
 
     private companion object {
         const val DIALOG_RES_ID = "internet_connectivity_dialog"
         const val SCROLL_VIEW_RES_ID = "scroll_view"
-        val DONE_BTN = sysuiResSelector("done_button")
     }
 }

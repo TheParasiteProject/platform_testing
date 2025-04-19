@@ -26,6 +26,7 @@ import android.platform.systemui_tapl.controller.NotificationIdentity
 import android.platform.systemui_tapl.ui.ExpandedBubbleStack.Companion.BUBBLE_EXPANDED_VIEW
 import android.platform.systemui_tapl.utils.DeviceUtils.LONG_WAIT
 import android.platform.systemui_tapl.utils.DeviceUtils.sysuiResSelector
+import android.platform.systemui_tapl.utils.LAUNCHER_PACKAGE
 import android.platform.uiautomatorhelpers.BetterSwipe
 import android.platform.uiautomatorhelpers.DeviceHelpers
 import android.platform.uiautomatorhelpers.DeviceHelpers.assertInvisible
@@ -49,8 +50,8 @@ import com.android.launcher3.tapl.LauncherInstrumentation
 import com.android.launcher3.tapl.Workspace
 import com.google.common.truth.Truth.assertThat
 import com.google.common.truth.Truth.assertWithMessage
-import org.junit.Assert
 import java.time.Duration
+import org.junit.Assert.assertThrows
 
 /**
  * The root class for System UI test automation objects. All System UI test automation objects are
@@ -83,10 +84,10 @@ class Root private constructor(val displayId: Int = DEFAULT_DISPLAY) {
     /** Opens the notification shade via two fingers wipe. */
     fun openNotificationShadeViaTwoFingersSwipe(): NotificationShade {
         assertWithMessage(
-            "two finger swipe is only supported on the default display, because it relies on " +
+                "two finger swipe is only supported on the default display, because it relies on " +
                     "UiObject#performTwoPointerGesture, and UiObject has no concept of displayId " +
                     "(unlike UiObject2)"
-        )
+            )
             .that(displayId)
             .isEqualTo(DEFAULT_DISPLAY)
         return openNotificationShadeViaTwoFingersSwipe(Duration.ofMillis(300))
@@ -163,6 +164,8 @@ class Root private constructor(val displayId: Int = DEFAULT_DISPLAY) {
         return NotificationShade()
     }
 
+    private val footerSelector = sysuiResSelector("qs_footer_actions", displayId)
+
     private val notificationSwipeX: Float
         get() = uiDevice.getDisplayWidth(displayId) / 4f
 
@@ -195,13 +198,14 @@ class Root private constructor(val displayId: Int = DEFAULT_DISPLAY) {
      */
     // TODO(b/295209746): More robust (and more performant) assertion for "HUN does not appear"
     fun ensureNoHeadsUpNotification(identity: NotificationIdentity) {
-        Assert.assertTrue(
-            "HUN state Assertion usage error: Notification: ${identity.title} " +
+        assertWithMessage(
+                "HUN state Assertion usage error: Notification: ${identity.title} " +
                     "| You can only assert the HUN State of a notification that has an action " +
-                    "button.",
-            identity.hasAction,
-        )
-        Assert.assertThrows(IllegalStateException::class.java) {
+                    "button."
+            )
+            .that(identity.hasAction)
+            .isTrue()
+        assertThrows(IllegalStateException::class.java) {
             findHeadsUpNotification(identity, assertIsHunState = false)
         }
     }
@@ -213,16 +217,16 @@ class Root private constructor(val displayId: Int = DEFAULT_DISPLAY) {
         // Quick Settings isn't always open when this is complete. Explicitly wait for the Quick
         // Settings footer to make sure that the buttons are accessible when the bar is open and
         // this call is complete.
-        FOOTER_SELECTOR.assertVisible()
+        footerSelector.assertVisible()
         // Wait an extra bit for the animation to complete. If we return to early, future callers
         // that are trying to find the location of the footer will get incorrect coordinates
-        device.waitForIdle(LONG_TIMEOUT.toLong())
-        return QuickSettings()
+        device.waitForIdle(LONG_TIMEOUT)
+        return QuickSettings(displayId)
     }
 
     /** Gets status bar. */
     val statusBar: StatusBar
-        get() = StatusBar()
+        get() = StatusBar(displayId)
 
     /** Gets an alert dialog. */
     val alertDialog: AlertDialog
@@ -306,12 +310,7 @@ class Root private constructor(val displayId: Int = DEFAULT_DISPLAY) {
 
     /** Verifies that status bar is hidden by checking StatusBar's clock icon whether it exists. */
     fun verifyStatusBarIsHidden() {
-        assertThat(
-            uiDevice.wait(
-                Until.gone(sysuiResSelector(StatusBar.CLOCK_ID)),
-                SHORT_TIMEOUT.toLong(),
-            )
-        )
+        assertThat(uiDevice.wait(Until.gone(sysuiResSelector(StatusBar.CLOCK_ID)), SHORT_TIMEOUT))
             .isTrue()
     }
 
@@ -372,10 +371,10 @@ class Root private constructor(val displayId: Int = DEFAULT_DISPLAY) {
         LockScreen.LOCKSCREEN_SELECTOR.assertInvisible()
     }
 
-    // TODO (b/277105514): Determine whether this is an idiomatic method of determing visibility.
+    // TODO (b/277105514): Determine whether this is an idiomatic method of determining visibility.
     /** Asserts that launcher is visible. */
     fun assertLauncherVisible() {
-        By.pkg("com.google.android.apps.nexuslauncher").assertVisible()
+        By.displayId(displayId).pkg(LAUNCHER_PACKAGE).assertVisible()
     }
 
     val keyboardBacklightIndicatorDialog: KeyboardBacklightIndicatorDialog
@@ -385,14 +384,18 @@ class Root private constructor(val displayId: Int = DEFAULT_DISPLAY) {
         KeyboardBacklightIndicatorDialog.CONTAINER_SELECTOR.assertInvisible()
     }
 
-    fun waitForShadeToOpen() {
-        val qsHeaderSelector =
-            if (com.android.systemui.Flags.sceneContainer()) {
-                sysuiResSelector("shade_header_root", displayId)
-            } else {
-                sysuiResSelector("split_shade_status_bar", displayId)
-            }
+    fun assertShadeNotVisible() {
+        qsHeaderSelector.assertInvisible { "Notification shade should not be visible" }
+    }
 
+    private val qsHeaderSelector =
+        if (com.android.systemui.Flags.sceneContainer()) {
+            sysuiResSelector("shade_header_root", displayId)
+        } else {
+            sysuiResSelector("split_shade_status_bar", displayId)
+        }
+
+    fun waitForShadeToOpen() {
         // Note that this duplicates the tracing done by assertVisible, but with a better name.
         traceSection("waitForShadeToOpen") {
             qsHeaderSelector.assertVisible(
@@ -402,18 +405,42 @@ class Root private constructor(val displayId: Int = DEFAULT_DISPLAY) {
         }
     }
 
+    fun pressBackOnDisplay() {
+        if (displayId == DEFAULT_DISPLAY) {
+            LauncherInstrumentation().pressBack()
+        } else {
+            // replicate UiDevice#pressBack() for a display other than DEFAULT_DISPLAY
+            sendKey(KeyEvent.KEYCODE_BACK, 0, SystemClock.uptimeMillis())
+            uiDevice.waitForWindowUpdate(null, LONG_TIMEOUT)
+        }
+    }
+
+    fun pressHomeOnDisplay() {
+        if (displayId == DEFAULT_DISPLAY) {
+            uiDevice.pressHome()
+        } else {
+            // replicate UiDevice#pressHome() for a display other than DEFAULT_DISPLAY
+            sendKey(KeyEvent.KEYCODE_HOME, 0, SystemClock.uptimeMillis())
+            uiDevice.waitForWindowUpdate(LAUNCHER_PACKAGE, LONG_TIMEOUT)
+        }
+    }
+
     private fun injectEventSync(event: InputEvent): Boolean {
         return InstrumentationRegistry.getInstrumentation()
             .uiAutomation
             .injectInputEvent(event, true)
     }
 
-    private fun sendKey(keyCode: Int, metaState: Int, eventTime: Long): Boolean {
-        val downEvent =
-            KeyEvent(
+    private fun createKeyEvent(
+        keyCode: Int,
+        metaState: Int,
+        eventTime: Long,
+        action: Int,
+    ): KeyEvent =
+        KeyEvent(
                 eventTime,
                 eventTime,
-                KeyEvent.ACTION_DOWN,
+                action,
                 keyCode,
                 0,
                 metaState,
@@ -422,20 +449,12 @@ class Root private constructor(val displayId: Int = DEFAULT_DISPLAY) {
                 0,
                 InputDevice.SOURCE_KEYBOARD,
             )
+            .apply { this.displayId = this@Root.displayId }
+
+    private fun sendKey(keyCode: Int, metaState: Int, eventTime: Long): Boolean {
+        val downEvent = createKeyEvent(keyCode, metaState, eventTime, KeyEvent.ACTION_DOWN)
         if (injectEventSync(downEvent)) {
-            val upEvent =
-                KeyEvent(
-                    eventTime,
-                    eventTime,
-                    KeyEvent.ACTION_UP,
-                    keyCode,
-                    0,
-                    metaState,
-                    KeyCharacterMap.VIRTUAL_KEYBOARD,
-                    0,
-                    0,
-                    InputDevice.SOURCE_KEYBOARD,
-                )
+            val upEvent = createKeyEvent(keyCode, metaState, eventTime, KeyEvent.ACTION_UP)
             if (injectEventSync(upEvent)) {
                 return true
             }
@@ -496,9 +515,8 @@ class Root private constructor(val displayId: Int = DEFAULT_DISPLAY) {
 
     companion object {
         private val NOTIFICATION_SHADE_OPEN_TIMEOUT = Duration.ofSeconds(20)
-        private const val LONG_TIMEOUT = 2000
-        private const val SHORT_TIMEOUT = 500
-        private val FOOTER_SELECTOR = sysuiResSelector("qs_footer_actions")
+        private const val LONG_TIMEOUT: Long = 2000
+        private const val SHORT_TIMEOUT: Long = 500
         private const val SCREENSHOT_POST_TIMEOUT_MSEC: Long = 20000
         private val GLOBAL_SCREENSHOT_SELECTOR = sysuiResSelector("screenshot_actions")
 
@@ -507,8 +525,6 @@ class Root private constructor(val displayId: Int = DEFAULT_DISPLAY) {
          *
          * @param displayId The display ID used for UI operations. Defaults to the default display.
          */
-        @JvmStatic
-        @JvmOverloads
-        fun get(displayId: Int = DEFAULT_DISPLAY): Root = Root(displayId)
+        @JvmStatic @JvmOverloads fun get(displayId: Int = DEFAULT_DISPLAY): Root = Root(displayId)
     }
 }

@@ -23,6 +23,7 @@ import android.platform.uiautomatorhelpers.DeviceHelpers.assertVisibility
 import android.platform.uiautomatorhelpers.DeviceHelpers.assertVisible
 import android.platform.uiautomatorhelpers.DeviceHelpers.waitForFirstObj
 import android.platform.uiautomatorhelpers.DeviceHelpers.waitForObj
+import android.view.Display.DEFAULT_DISPLAY
 import androidx.test.uiautomator.UiObject2
 import com.android.systemui.Flags
 
@@ -34,18 +35,17 @@ import com.android.systemui.Flags
  *
  * https://hsv.googleplex.com/4814389392703488?node=15#
  */
-class QuickQuickSettings internal constructor() {
+class QuickQuickSettings internal constructor(val displayId: Int = DEFAULT_DISPLAY) {
 
+    private val qsTileLayoutSelector = sysuiResSelector("qqs_tile_layout", displayId)
     private val qqsTilesContainer: UiObject2
 
     init {
-        UI_QUICK_QUICK_SETTINGS_CONTAINER_SELECTOR.assertVisible(timeout = LONG_WAIT) {
+        qsContainerSelector(displayId).assertVisible(timeout = LONG_WAIT) {
             "Quick quick settings not visible"
         }
         qqsTilesContainer =
-            waitForObj(UI_QQS_TILE_LAYOUT_SELECTOR) {
-                "Quick quick settings does not have a tile layout"
-            }
+            waitForObj(qsTileLayoutSelector) { "Quick quick settings does not have a tile layout" }
     }
 
     /**
@@ -58,16 +58,16 @@ class QuickQuickSettings internal constructor() {
         val uiTiles = qqsTilesContainer.children
         if (!Flags.qsUiRefactorComposeFragment()) {
             uiTiles.forEach { tile ->
-                tile.assertVisibility(UI_TILE_LABEL_SELECTOR, visible = true)
+                tile.assertVisibility(tileLabelSelector(displayId), visible = true)
             }
         }
-        return uiTiles.map { QuickQuickSettingsTile(it) }
+        return uiTiles.map { QuickQuickSettingsTile(it, displayId) }
     }
 
     fun getVisibleComposeTiles(): List<ComposeQuickSettingsTile> {
         val uiChildren = qqsTilesContainer.children
-        val largeTileSelector = sysuiResSelector(ComposeQuickSettingsTile.LARGE_TILE_TAG)
-        val smallTileSelector = sysuiResSelector(ComposeQuickSettingsTile.SMALL_TILE_TAG)
+        val largeTileSelector = sysuiResSelector(ComposeQuickSettingsTile.LARGE_TILE_TAG, displayId)
+        val smallTileSelector = sysuiResSelector(ComposeQuickSettingsTile.SMALL_TILE_TAG, displayId)
         val uiTiles =
             uiChildren.map { child ->
                 val (tile, _) =
@@ -77,16 +77,16 @@ class QuickQuickSettings internal constructor() {
                 tile.assertIsTile()
                 tile
             }
-        return uiTiles.map { ComposeQuickSettingsTile.createFrom(it) }
+        return uiTiles.map { ComposeQuickSettingsTile.createFrom(it, displayId) }
     }
 
     companion object {
-        @JvmField
-        val UI_QUICK_QUICK_SETTINGS_CONTAINER_SELECTOR = sysuiResSelector("quick_qs_panel")
-        // https://hsv.googleplex.com/4814389392703488?node=16#
-        private val UI_QQS_TILE_LAYOUT_SELECTOR = sysuiResSelector("qqs_tile_layout")
-        @JvmField
-        // https://hsv.googleplex.com/4814389392703488?node=22#
-        val UI_TILE_LABEL_SELECTOR = sysuiResSelector("tile_label")
+        @JvmStatic
+        fun qsContainerSelector(displayId: Int = DEFAULT_DISPLAY) =
+            sysuiResSelector("quick_qs_panel", displayId)
+
+        @JvmStatic
+        fun tileLabelSelector(displayId: Int = DEFAULT_DISPLAY) =
+            sysuiResSelector("tile_label", displayId)
     }
 }

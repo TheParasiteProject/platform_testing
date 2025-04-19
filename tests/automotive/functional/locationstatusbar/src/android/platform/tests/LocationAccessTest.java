@@ -34,6 +34,7 @@ public class LocationAccessTest {
 
     private HelperAccessor<IAutoSettingsLocationHelper> mSettingLocationHelper;
     private HelperAccessor<IAutoSettingHelper> mSettingHelper;
+    private final String APP_NAME = "Google Maps";
 
     public LocationAccessTest() {
         mSettingHelper = new HelperAccessor<>(IAutoSettingHelper.class);
@@ -61,7 +62,7 @@ public class LocationAccessTest {
                 mSettingHelper.get().checkMenuExists("Allowed all the time"));
         assertTrue(
                 "Recently accessed app is not displaying",
-                mSettingHelper.get().checkMenuExists("Maps"));
+                mSettingHelper.get().checkMenuExists(APP_NAME));
     }
 
     @Test
@@ -80,6 +81,6 @@ public class LocationAccessTest {
                 mSettingHelper.get().checkMenuExists("Recently accessed"));
         assertTrue(
                 "Recently accessed app is not displaying",
-                mSettingHelper.get().checkMenuExists("Maps"));
+                mSettingHelper.get().checkMenuExists(APP_NAME));
     }
 }
