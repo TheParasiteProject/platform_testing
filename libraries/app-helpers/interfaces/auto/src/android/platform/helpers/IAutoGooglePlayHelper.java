@@ -33,6 +33,13 @@ public interface IAutoGooglePlayHelper extends IAppHelper, Scrollable {
     void searchApp(String appName);
 
     /**
+     * Setup expectations: Google keyboard is open.
+     *
+     * <p>This method is used to click on search button in keyboard.
+     */
+    void clickKeyboardSearch();
+
+    /**
      * Setup expectations: Google Play app is open.
      *
      * <p>This method is used to install a app.
