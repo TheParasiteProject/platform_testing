@@ -41,6 +41,7 @@ public class JsonConfigConstants {
     public static final String CLICKABLE = "CLICKABLE";
     public static final String TEXT = "TEXT";
     public static final String TEXT_CONTAINS = "TEXT_CONTAINS";
+    public static final String TEXT_MATCHES = "TEXT_MATCHES";
     public static final String DESCRIPTION = "DESCRIPTION";
     public static final String DESCRIPTION_CONTAINS = "DESCRIPTION_CONTAINS";
     public static final String CLASS = "CLASS";

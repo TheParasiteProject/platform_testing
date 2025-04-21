@@ -47,6 +47,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
+import java.util.regex.Pattern;
 
 public class SpectatioUiUtil {
     private static final String LOG_TAG = SpectatioUiUtil.class.getSimpleName();
@@ -1221,6 +1222,7 @@ public class SpectatioUiUtil {
                     JsonConfigConstants.SCROLLABLE,
                     JsonConfigConstants.TEXT,
                     JsonConfigConstants.TEXT_CONTAINS,
+                    JsonConfigConstants.TEXT_MATCHES,
                     JsonConfigConstants.DESCRIPTION,
                     JsonConfigConstants.DESCRIPTION_CONTAINS,
                     JsonConfigConstants.CLASS,
@@ -1253,6 +1255,8 @@ public class SpectatioUiUtil {
                 return uiObject.getText().equalsIgnoreCase(expected);
             case JsonConfigConstants.TEXT_CONTAINS:
                 return uiObject.getText().contains(expected);
+            case JsonConfigConstants.TEXT_MATCHES:
+                return Pattern.matches(expected, uiObject.getText());
             case JsonConfigConstants.DESCRIPTION:
                 return uiObject.getContentDescription().equalsIgnoreCase(expected);
             case JsonConfigConstants.DESCRIPTION_CONTAINS:
