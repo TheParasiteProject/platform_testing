@@ -18,16 +18,21 @@ package android.platform.test.flag.junit;
 
 import android.annotation.SuppressLint;
 import android.app.UiAutomation;
+import android.os.flagging.AconfigPackage;
 import android.platform.test.flag.util.Flag;
 import android.platform.test.flag.util.FlagReadException;
 import android.provider.DeviceConfig;
 
 import androidx.test.platform.app.InstrumentationRegistry;
 
+import com.android.modules.utils.build.SdkLevel;
+
 import com.google.common.base.CaseFormat;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Set;
 
 /** A {@code IFlagsValueProvider} which provides flag values from device side. */
@@ -36,7 +41,7 @@ public class DeviceFlagsValueProvider implements IFlagsValueProvider {
             "android.permission.READ_DEVICE_CONFIG";
 
     private static final Set<String> VALID_BOOLEAN_VALUE = Set.of("true", "false");
-
+    private final Map<String, AconfigPackage> mAconfigPackageMap = new HashMap();
     private final UiAutomation mUiAutomation;
 
     public static CheckFlagsRule createCheckFlagsRule() {
@@ -81,6 +86,33 @@ public class DeviceFlagsValueProvider implements IFlagsValueProvider {
             throw new FlagReadException(
                     flag, "Flag name is not the expected format {packageName}.{flagName}.");
         }
+
+        // If the flag is read_write, and the test is running on B+ devices
+        // read the flag value through public API
+        // This should not happen on the release build
+        boolean isReadOnlyFlag = verifyIfFlagReadOnly(parsedFlag);
+        if (SdkLevel.isAtLeastB() && !isReadOnlyFlag) {
+            AconfigPackage aconfigPackage =
+                    mAconfigPackageMap.computeIfAbsent(
+                            parsedFlag.packageName(),
+                            p -> {
+                                try {
+                                    return AconfigPackage.load(p);
+                                } catch (Exception e) {
+                                    return null;
+                                }
+                            });
+            // If the flag package or the flag is missing, consider the flag as false
+            // The test to test the flag off behavior should be executed
+            if (aconfigPackage != null) {
+                return aconfigPackage.getBooleanFlagValue(
+                        parsedFlag.simpleFlagName(), false /* default */);
+            } else {
+                return false;
+            }
+        }
+
+        // If the test is running on devices before B or the flag is read_only
         String className = parsedFlag.flagsClassName();
         String simpleFlagName = parsedFlag.simpleFlagName();
 
@@ -131,6 +163,29 @@ public class DeviceFlagsValueProvider implements IFlagsValueProvider {
         }
         throw new FlagReadException(
                 flag.fullFlagName(), String.format("Value %s is not a valid boolean.", property));
+    }
+
+    private static boolean verifyIfFlagReadOnly(Flag flag) {
+        String fullFlagName = flag.fullFlagName();
+        String packageName = flag.flagsClassPackageName();
+        String fakeFeatureFlagsImplClassName = "FakeFeatureFlagsImpl";
+        String isFlagReadOnlyMethodName = "isFlagReadOnly";
+
+        try {
+            Class<?> fakeFeatureFlagsImplClass =
+                    Class.forName(
+                            String.format("%s.%s", packageName, fakeFeatureFlagsImplClassName));
+            Method method =
+                    fakeFeatureFlagsImplClass.getMethod(isFlagReadOnlyMethodName, String.class);
+            boolean result = (Boolean) method.invoke(null, fullFlagName);
+            return result;
+        } catch (NoSuchMethodException e) {
+            // If the flag is generated under exported mode, then it doesn't have this method
+            // return false;
+            throw new FlagReadException(fullFlagName, e);
+        } catch (ReflectiveOperationException e) {
+            throw new FlagReadException(fullFlagName, e);
+        }
     }
 
     @Override

@@ -67,23 +67,27 @@ public class CustomFeatureFlags implements FeatureFlags {
                 Flags.FLAG_FLAG_FINALIZED);
     }
 
-    public boolean isFlagReadOnlyOptimized(String flagName) {
-        return mReadOnlyFlagSet.contains(flagName);
+    public static boolean isFlagReadOnlyOptimized(String flagName) {
+        return READ_ONLY_FLAGS_SET.contains(flagName);
     }
 
-    private Set<String> mReadOnlyFlagSet =
+    public static boolean isFlagReadOnly(String flagName) {
+        return READ_ONLY_FLAGS_SET.contains(flagName);
+    }
+
+    private static final Set<String> READ_ONLY_FLAGS_SET =
             new HashSet<>(Arrays.asList(Flags.FLAG_RO_ENABLED, Flags.FLAG_RO_DISABLED, ""));
 
-    private Map<String, Integer> mFinalizedFlags =
+    private static final Map<String, Integer> FINALIZED_FLAGS =
             new HashMap<>(
                     Map.ofEntries(
                             Map.entry(Flags.FLAG_FLAG_FINALIZED, 36),
                             Map.entry("", Integer.MAX_VALUE)));
 
-    public boolean isFlagFinalized(String flagName) {
-        if (!mFinalizedFlags.containsKey(flagName)) {
+    public static boolean isFlagFinalized(String flagName) {
+        if (!FINALIZED_FLAGS.containsKey(flagName)) {
             return false;
         }
-        return 99 >= mFinalizedFlags.get(flagName);
+        return 99 >= FINALIZED_FLAGS.get(flagName);
     }
 }
