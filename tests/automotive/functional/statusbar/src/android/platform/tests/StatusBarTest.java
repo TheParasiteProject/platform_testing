@@ -25,6 +25,7 @@ import android.platform.helpers.IAutoStatusBarHelper;
 import android.platform.test.rules.ConditionalIgnore;
 import android.platform.test.rules.ConditionalIgnoreRule;
 import android.platform.test.rules.IgnoreOnPortrait;
+import android.util.Log;
 
 import androidx.test.runner.AndroidJUnit4;
 
@@ -40,6 +41,8 @@ public class StatusBarTest {
     private HelperAccessor<IAutoHomeHelper> mHomeHelper;
     private HelperAccessor<IAutoStatusBarHelper> mStatusBarHelper;
 
+    private static final String LOG_TAG = StatusBarTest.class.getSimpleName();
+
     public StatusBarTest() {
         mHomeHelper = new HelperAccessor<>(IAutoHomeHelper.class);
         mStatusBarHelper = new HelperAccessor<>(IAutoStatusBarHelper.class);
@@ -47,28 +50,34 @@ public class StatusBarTest {
 
     @Test
     public void testToverifyDefaultStatusbar() {
+        Log.i(LOG_TAG, "Assert:  Bluetooth Button is not displayed.");
         assertTrue("Bluetooth Button is not displayed", mHomeHelper.get().hasBluetoothButton());
+        Log.i(LOG_TAG, "Assert:  Network Button is not displayed.");
         assertTrue("Network Button is not displayed", mHomeHelper.get().hasNetworkButton());
+        Log.i(LOG_TAG, "Assert:  Brightness Button is not displayed.");
         assertTrue("Brightness Button is not displayed", mHomeHelper.get().hasDisplayBrightness());
     }
 
     @Test
     public void testToVerifyChangeToDayMode() {
+        Log.i(LOG_TAG, "Assert: Able to change to day mode");
         assertTrue("Unable to change to day mode", mStatusBarHelper.get().changeToDayMode());
-        // Constant value is 1 for Night mode no
+        Log.i(LOG_TAG, "Assert: Constant value is 1 for Night mode no");
         assertEquals(1, mStatusBarHelper.get().getCurrentDisplayMode());
     }
 
     @Test
     public void testToVerifyChangeToNightMode() {
+        Log.i(LOG_TAG, "Assert: Able to change to night day mode");
         assertTrue("Unable to change to night mode", mStatusBarHelper.get().changeToNightMode());
-        // Constant value is 2 for Night mode yes
+        Log.i(LOG_TAG, "Assert: Constant value is 2 for Night mode yes");
         assertEquals(2, mStatusBarHelper.get().getCurrentDisplayMode());
     }
 
     @Test
     @ConditionalIgnore(condition = IgnoreOnPortrait.class)
     public void testClockTime() {
+        Log.i(LOG_TAG, "Assert: Clock time is displayed on Status Bar.");
         assertEquals(
                 "Clock time in Status bar is not displayed",
                 mStatusBarHelper.get().getClockTime(),
