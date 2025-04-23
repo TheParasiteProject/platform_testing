@@ -1938,6 +1938,11 @@
       "VALUE": "summary",
       "PACKAGE": "android"
     },
+    "RECENT_APPS_THUMBNAIL": {
+      "TYPE": "RESOURCE_ID",
+      "VALUE": "task_thumbnail",
+      "PACKAGE": "com.android.car.carlauncher"
+    },
     "CONTACT_NAME_TITLE": {
       "TYPE": "RESOURCE_ID",
       "VALUE": "title",

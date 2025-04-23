@@ -84,4 +84,25 @@ public interface IAutoAppGridHelper extends IAppHelper {
      * <p>Press home button.
      */
     void goToHomePage();
+
+    /**
+     * Setup expectations: Go To Home.
+     *
+     * <p>Long press app grid facet button.
+     */
+    void longTapAllAppsButton();
+
+    /**
+     * Setup expectations: Go To Home.
+     *
+     * <p>Press app grid facet button.
+     */
+    void singleTapAllAppsButton();
+
+    /**
+     * Setup expectations: Recent AppS creen is displayed.
+     *
+     * <p>Validates Recent App Screen is displaying.
+     */
+    boolean isRecentsScreenLaunched();
 }
