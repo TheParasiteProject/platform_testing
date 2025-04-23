@@ -48,6 +48,7 @@ java_library {
     static_libs: [
         "androidx.test.rules",
         "flag-junit-base",
+        "modules-utils-build",
     ],
     libs: [
         "framework-configinfrastructure.stubs.module_lib",

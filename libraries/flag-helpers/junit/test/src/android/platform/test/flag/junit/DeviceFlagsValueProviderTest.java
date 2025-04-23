@@ -57,12 +57,8 @@ public final class DeviceFlagsValueProviderTest {
     }
 
     @Test
-    public void getBoolean_notBooleanFlag_throwException() {
-        assertThrows(
-                FlagReadException.class,
-                () ->
-                        mFlagsValueProvider.getBoolean(
-                                "android.platform.test.flag.junit.flag_name_2"));
+    public void getBoolean_notBooleanFlag_returnFalse() {
+        assertTrue(!mFlagsValueProvider.getBoolean("android.platform.test.flag.junit.flag_name_2"));
     }
 
     @Test
@@ -91,5 +87,17 @@ public final class DeviceFlagsValueProviderTest {
     @Test
     public void getBoolean_fromLegacyBooleanFlag() throws Exception {
         assertTrue(mFlagsValueProvider.getBoolean("my_namespace/flag1"));
+    }
+
+    @Test
+    public void getBoolean_getReadOnlyFlags() throws Exception {
+        assertTrue(mFlagsValueProvider.getBoolean(Flags.FLAG_RO_ENABLED));
+        assertTrue(!mFlagsValueProvider.getBoolean(Flags.FLAG_RO_DISABLED));
+    }
+
+    @Test
+    public void getBoolean_getReadWriteFlags() throws Exception {
+        assertTrue(!mFlagsValueProvider.getBoolean(Flags.FLAG_FLAG_NAME3));
+        assertTrue(!mFlagsValueProvider.getBoolean(Flags.FLAG_FLAG_NAME4));
     }
 }
