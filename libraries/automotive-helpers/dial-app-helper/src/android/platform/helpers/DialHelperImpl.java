@@ -427,6 +427,7 @@ public class DialHelperImpl extends AbstractStandardAppHelper implements IAutoDi
         openSearchContact();
         UiObject2 searchBox = getSearchBox();
         searchBox.setText(contact);
+        getSpectatioUiUtil().wait15Seconds(); // Wait for the Search results to appear
     }
 
     /** {@inheritDoc} */
@@ -434,6 +435,7 @@ public class DialHelperImpl extends AbstractStandardAppHelper implements IAutoDi
         openSearchContact();
         UiObject2 searchBox = getSearchBox();
         searchBox.setText(number);
+        getSpectatioUiUtil().wait15Seconds(); // Wait for the Search results to appear
     }
 
     /** {@inheritDoc} */
