@@ -19,25 +19,32 @@ package platform.test.desktop
 import android.Manifest
 import android.companion.virtual.VirtualDeviceManager
 import android.companion.virtual.VirtualDeviceParams
+import android.graphics.Point
 import android.graphics.PointF
 import android.graphics.RectF
 import android.hardware.display.DisplayManager
 import android.hardware.display.DisplayTopology
+import android.hardware.display.DisplayTopology.dpToPx
 import android.hardware.display.DisplayTopologyGraph
 import android.hardware.input.InputManager
 import android.hardware.input.VirtualMouse
 import android.hardware.input.VirtualMouseConfig
+import android.hardware.input.VirtualMouseRelativeEvent
 import android.os.Handler
 import android.os.Looper
 import android.platform.uiautomatorhelpers.AdoptShellPermissionsRule
+import android.platform.uiautomatorhelpers.WaitUtils
 import android.util.Log
-import android.util.SizeF
 import android.view.Display.DEFAULT_DISPLAY
+import android.view.DisplayInfo
 import androidx.annotation.VisibleForTesting
 import androidx.test.platform.app.InstrumentationRegistry
+import kotlin.math.abs
 import kotlin.math.max
 import kotlin.math.min
+import kotlin.math.roundToInt
 import kotlin.time.Duration
+import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.callbackFlow
@@ -59,7 +66,8 @@ class DesktopMouseTestRule() : TestRule {
     private val fakeAssociationRule = FakeAssociationRule()
     private val context = InstrumentationRegistry.getInstrumentation().targetContext
     private val displayManager = context.getSystemService(DisplayManager::class.java)
-    private val resourceTracker = ResourceTracker(fakeAssociationRule, displayManager)
+    private val inputManager = context.getSystemService(InputManager::class.java)
+    private val resourceTracker = ResourceTracker(fakeAssociationRule, displayManager, inputManager)
     private val ruleChain =
         RuleChain.outerRule(adoptShellPermissionsTestRule)
             .around(fakeAssociationRule)
@@ -75,9 +83,9 @@ class DesktopMouseTestRule() : TestRule {
     private class ResourceTracker(
         private val fakeAssociationRule: FakeAssociationRule,
         private val displayManager: DisplayManager,
+        private val inputManager: InputManager,
     ) : ExternalResource() {
         private val context = InstrumentationRegistry.getInstrumentation().targetContext
-        private val inputManager = context.getSystemService(InputManager::class.java)
         private val virtualDeviceManager =
             context.getSystemService(VirtualDeviceManager::class.java)
 
@@ -173,6 +181,141 @@ class DesktopMouseTestRule() : TestRule {
     }
 
     /**
+     * Moves the mouse cursor to the `(targetXPx, targetYPx)` on target display. If the target
+     * display is different from the current display, it finds a path and moves the cursor across
+     * display(s).
+     *
+     * NOTE: While InputManager APIs are using PointF for both get/set, the underlying
+     * implementation is actually using Int. For example, evdev injection only supports Int.
+     * Therefore, it's currently not possible to move to a floating point coordinates.
+     *
+     * @param targetDisplayId The ID of the destination display.
+     * @param targetX The target X (PX) coordinate relative to the target display.
+     * @param targetY The target Y (PX) coordinate relative to the target display.
+     */
+    fun move(targetDisplayId: Int, targetXPx: Int, targetYPx: Int) {
+        val currentCursorDisplayId = getCursorDisplayId()
+
+        if (targetDisplayId != currentCursorDisplayId) {
+            moveToDisplay(currentCursorDisplayId, targetDisplayId)
+        }
+
+        val currentPosition = getCursorPosition(targetDisplayId).roundToInt()
+        performSteppedMove(Point(targetXPx, targetYPx) - currentPosition)
+
+        WaitUtils.ensureThat {
+            val finalPosition = getCursorPosition(targetDisplayId).roundToInt()
+            val delta = finalPosition - Point(targetXPx, targetYPx)
+            // As mentioned in the javadoc above, InputManager API doesn't support floating-point
+            // movements. Hence, with all the floating-point calculation above, there might be
+            // slight difference (within `FLOATING_ROUND_CORRECTION`) in the final cursor position.
+            delta.dx <= FLOATING_ROUNDING_CORRECTION && delta.dy <= FLOATING_ROUNDING_CORRECTION
+        }
+    }
+
+    private fun moveToDisplay(startingDisplayId: Int, targetDisplayId: Int) {
+        var currentCursorDisplayId = startingDisplayId
+        val topology =
+            checkNotNull(displayManager.displayTopology) { "DisplayTopology must be available." }
+        val displayAbsoluteBounds = topology.absoluteBounds
+        val topologyGraph = topology.graph
+        val path = findPath(currentCursorDisplayId, targetDisplayId, topologyGraph)
+
+        path.forEach { (nextDisplayId, position) ->
+            val dpi = getDpiForDisplay(currentCursorDisplayId)
+            val currentBounds = displayAbsoluteBounds[currentCursorDisplayId]
+            val nextBounds = displayAbsoluteBounds[nextDisplayId]
+
+            // Calculate where to cross and the crossing delta
+            val crossingDetail = calculateCrossingDetailsDp(currentBounds, nextBounds, position)
+            // Cursor moves in PX, however there's no notion of global PX bounds since density
+            // of each displays could be different, and there's only global DP bounds.
+            // Therefore, to solve the calculation, first convert globalDP -> localDP, then
+            // apply DP->PX conversion.
+            val edgeIntersectionPx =
+                PointF(
+                    dpToPx(crossingDetail.targetPointDp.x - currentBounds.left, dpi),
+                    dpToPx(crossingDetail.targetPointDp.y - currentBounds.top, dpi),
+                )
+            val crossingDeltaPx =
+                DeltaF(
+                    dpToPx(crossingDetail.toCrossDxDp, dpi),
+                    dpToPx(crossingDetail.toCrossDyDp, dpi),
+                )
+
+            val currentPosition = getCursorPosition(currentCursorDisplayId)
+            // Move to the center of the edge intersection.
+            val toBorderDeltaPx = edgeIntersectionPx - currentPosition
+            performSteppedMove(toBorderDeltaPx.roundToInt())
+
+            // Perform a small move to cross the boundary
+            performSteppedMove(crossingDeltaPx.roundToInt())
+            // Validate cursor crossed display
+            WaitUtils.ensureThat { getCursorDisplayId() == nextDisplayId }
+            currentCursorDisplayId = nextDisplayId
+        }
+    }
+
+    /**
+     * Divides delta to multiple small movements
+     *
+     * @param deltaPx delta movement, either dx or dy must be non-zero
+     * @param maxSteps the maximum number of times move events would be sent
+     */
+    private fun performSteppedMove(deltaPx: Delta, maxSteps: Int = MAX_MOUSE_MOVE_STEPS_COUNT) {
+        if (deltaPx.dx == 0 && deltaPx.dy == 0) return
+        // Find ideal number of steps to move a number of PX
+        val idealSteps = max(abs(deltaPx.dx), abs(deltaPx.dy)) / MIN_PX_PER_STEP
+
+        // Limit the number of steps while ensuring it's not zero
+        val steps = max(1, min(maxSteps, idealSteps))
+        val stepX = deltaPx.dx / steps
+        val stepY = deltaPx.dy / steps
+        repeat(steps) { moveInternal(Delta(stepX, stepY)) }
+
+        // Move any remaining delta
+        val remainingDx = deltaPx.dx - (stepX * steps)
+        val remainingDy = deltaPx.dy - (stepY * steps)
+        moveInternal(Delta(remainingDx, remainingDy))
+    }
+
+    private fun moveInternal(deltaPx: Delta) {
+        resourceTracker.requireVirtualMouse.sendRelativeEvent(
+            VirtualMouseRelativeEvent.Builder()
+                .setRelativeX(deltaPx.dx.toFloat())
+                .setRelativeY(deltaPx.dy.toFloat())
+                .build()
+        )
+        Thread.sleep(MOUSE_INPUT_DELAY.inWholeMilliseconds)
+    }
+
+    private fun getCursorPosition(displayId: Int): PointF =
+        checkNotNull(inputManager.getCursorPosition(displayId)) {
+            "Cursor is not on display#$displayId"
+        }
+
+    private fun getCursorDisplayId(): Int {
+        // Query cursor position on all displays and find the one with non-null values
+        // This is a hack since getCursorPosition API, doesn't directly provide the displayId it's
+        // currently at.
+        for (display in displayManager.displays) {
+            val cursorPosition = inputManager.getCursorPosition(display.displayId)
+            if (cursorPosition != null) {
+                return display.displayId
+            }
+        }
+        throw NoCursorFoundException("Cursor doesn't exist on any display")
+    }
+
+    private fun getDpiForDisplay(displayId: Int): Int {
+        val display =
+            checkNotNull(displayManager.getDisplay(displayId)) { "Display#$displayId not found" }
+        val displayInfo = DisplayInfo()
+        display.getDisplayInfo(displayInfo)
+        return displayInfo.logicalDensityDpi
+    }
+
+    /**
      * Representing details on how to cross from one display to another based on their adjacency
      * relation.
      *
@@ -182,7 +325,10 @@ class DesktopMouseTestRule() : TestRule {
      *   already on the `targetPointDp.
      */
     @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
-    data class DisplayCrossingDetail(val targetPointDp: PointF, private val toCrossDeltaDp: SizeF) {
+    data class DisplayCrossingDetail(
+        val targetPointDp: PointF,
+        private val toCrossDeltaDp: DeltaF,
+    ) {
 
         // Sample explanation
         //
@@ -201,10 +347,10 @@ class DesktopMouseTestRule() : TestRule {
         //  X = center of the intersection (`targetPointDp`)
 
         val toCrossDxDp: Float
-            get() = toCrossDeltaDp.width
+            get() = toCrossDeltaDp.dx
 
         val toCrossDyDp: Float
-            get() = toCrossDeltaDp.height
+            get() = toCrossDeltaDp.dy
     }
 
     @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
@@ -233,6 +379,14 @@ class DesktopMouseTestRule() : TestRule {
         }
     }
 
+    data class DeltaF(val dx: Float, val dy: Float) {
+        fun roundToInt() = Delta(dx.roundToInt(), dy.roundToInt())
+    }
+
+    data class Delta(val dx: Int, val dy: Int)
+
+    class NoCursorFoundException(message: String) : Exception(message)
+
     class NoPathFoundException(message: String) : Exception(message)
 
     companion object {
@@ -247,10 +401,10 @@ class DesktopMouseTestRule() : TestRule {
         fun findPath(
             startId: Int,
             endId: Int,
-            displayTopologyGraph: DisplayTopologyGraph,
+            topologyGraph: DisplayTopologyGraph,
         ): List<AdjacentDisplay> {
             if (startId == endId) return listOf()
-            val adjacencyGraph = displayTopologyGraph.displayNodes.associateBy { it.displayId }
+            val adjacencyGraph = topologyGraph.displayNodes.associateBy { it.displayId }
             val queue = ArrayDeque<Int>().apply { add(startId) }
             val visited = mutableSetOf(startId)
             // Maps display id to its parent in the context of `startId`->`endIf` traversal.
@@ -311,32 +465,39 @@ class DesktopMouseTestRule() : TestRule {
                 AdjacentDisplay.Position.RIGHT -> // target is to the right of source
                 DisplayCrossingDetail(
                         PointF(source.right, (overlapTop + overlapBottom) / 2f),
-                        SizeF(offset, 0f),
+                        DeltaF(offset, 0f),
                     )
                 AdjacentDisplay.Position.LEFT -> // target is to the left of source
                 DisplayCrossingDetail(
                         PointF(source.left, (overlapTop + overlapBottom) / 2f),
-                        SizeF(-offset, 0f),
+                        DeltaF(-offset, 0f),
                     )
                 AdjacentDisplay.Position.BOTTOM -> // target is below source
                 DisplayCrossingDetail(
                         PointF((overlapLeft + overlapRight) / 2f, source.bottom),
-                        SizeF(0f, offset),
+                        DeltaF(0f, offset),
                     )
                 AdjacentDisplay.Position.TOP -> // target is above source
                 DisplayCrossingDetail(
                         PointF((overlapLeft + overlapRight) / 2f, source.top),
-                        SizeF(0f, -offset),
+                        DeltaF(0f, -offset),
                     )
             }
         }
 
         @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
         const val MOUSE_CROSS_DISPLAY_OFFSET_DP = 5.0f
+        private const val FLOATING_ROUNDING_CORRECTION = 1f
+        private const val MIN_PX_PER_STEP = 1
+        private const val MAX_MOUSE_MOVE_STEPS_COUNT = 20
         private const val VIRTUAL_MOUSE_VENDOR_ID = 123
         private const val VIRTUAL_MOUSE_PRODUCT_ID = 456
         private const val TAG = "DesktopMouseTestRule"
+
+        // Mimics UiAutomator delay for injecting MotionEvent
+        private val MOUSE_INPUT_DELAY = 5.milliseconds
         private val TIMEOUT: Duration = 10.seconds
+
         private val PERMISSIONS =
             arrayOf(
                 Manifest.permission.ASSOCIATE_COMPANION_DEVICES,
@@ -346,5 +507,11 @@ class DesktopMouseTestRule() : TestRule {
                 "android.permission.MANAGE_DISPLAYS",
                 Manifest.permission.SET_POINTER_SPEED,
             )
+
+        private fun PointF.roundToInt() = Point(x.roundToInt(), y.roundToInt())
+
+        private operator fun Point.minus(other: Point) = Delta(x - other.x, y - other.y)
+
+        private operator fun PointF.minus(other: PointF) = DeltaF(x - other.x, y - other.y)
     }
 }
