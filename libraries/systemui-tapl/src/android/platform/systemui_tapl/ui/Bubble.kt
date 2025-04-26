@@ -25,6 +25,7 @@ import android.platform.uiautomatorhelpers.BetterSwipe
 import android.platform.uiautomatorhelpers.DeviceHelpers.context
 import android.platform.uiautomatorhelpers.DeviceHelpers.hasObject
 import android.platform.uiautomatorhelpers.DeviceHelpers.uiDevice
+import android.platform.uiautomatorhelpers.DeviceHelpers.waitForNullableObj
 import android.platform.uiautomatorhelpers.DeviceHelpers.waitForPossibleEmpty
 import android.platform.uiautomatorhelpers.PRECISE_GESTURE_INTERPOLATOR
 import android.view.WindowInsets
@@ -33,7 +34,6 @@ import androidx.test.uiautomator.UiObject2
 import com.android.wm.shell.Flags
 import com.google.common.truth.Truth.assertWithMessage
 import java.time.Duration
-import java.time.temporal.ChronoUnit
 
 /**
  * System UI test automation object representing a notification bubble, specifically the view
@@ -96,17 +96,21 @@ class Bubble internal constructor(private val bubbleView: UiObject2) {
         val insets =
             windowMetrics.windowInsets.getInsetsIgnoringVisibility(
                 WindowInsets.Type.mandatorySystemGestures() or
-                    WindowInsets.Type.navigationBars() or
-                    WindowInsets.Type.displayCutout()
+                        WindowInsets.Type.navigationBars() or
+                        WindowInsets.Type.displayCutout()
             )
         val destination =
             Point(windowMetrics.bounds.width() / 2, (windowMetrics.bounds.height() - insets.bottom))
-        BetterSwipe.swipe(
-            bubbleView.visibleCenter,
-            destination,
-            duration = Duration.of(700, ChronoUnit.MILLIS),
-            interpolator = PRECISE_GESTURE_INTERPOLATOR,
-        )
+        // drag to bottom of the screen, wait for dismiss view to appear, drag to dismiss view
+        BetterSwipe.swipe(bubbleView.visibleCenter) {
+            to(destination, interpolator = PRECISE_GESTURE_INTERPOLATOR)
+            // Make dismiss view optional in case the EDU view was shown and first swipe hid that.
+            // We will do a second swipe to actually dismiss.
+            val dismissView = waitForNullableObj(DISMISS_VIEW)
+            if (dismissView != null) {
+                to(dismissView.visibleCenter, interpolator = PRECISE_GESTURE_INTERPOLATOR)
+            }
+        }
     }
 
     override fun equals(other: Any?): Boolean {
@@ -121,6 +125,7 @@ class Bubble internal constructor(private val bubbleView: UiObject2) {
         val FIND_OBJECT_TIMEOUT = Duration.ofSeconds(20)
         val BUBBLE_VIEW = sysuiResSelector("bubble_view")
         val BUBBLE_BAR_VIEWS = launcherResSelector("bubble_view")
+        private val DISMISS_VIEW = sysuiResSelector("dismiss_view")
         private val STACK_EXPAND_TIMEOUT = Duration.ofSeconds(1)
         private val BUBBLE_STACK_EDUCATION = sysuiResSelector("stack_education_layout")
 
