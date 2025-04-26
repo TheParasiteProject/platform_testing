@@ -23,6 +23,7 @@ import android.platform.helpers.IAutoStatusBarHelper;
 import android.platform.test.rules.ConditionalIgnore;
 import android.platform.test.rules.ConditionalIgnoreRule;
 import android.platform.test.rules.IgnoreOnPortrait;
+import android.util.Log;
 
 import androidx.test.runner.AndroidJUnit4;
 
@@ -35,6 +36,7 @@ public class CurrentDateTimeTest {
     @Rule public ConditionalIgnoreRule rule = new ConditionalIgnoreRule();
 
     private HelperAccessor<IAutoStatusBarHelper> mStatusBarHelper;
+    private static final String LOG_TAG = CurrentDateTimeTest.class.getSimpleName();
 
     public CurrentDateTimeTest() {
         mStatusBarHelper = new HelperAccessor<>(IAutoStatusBarHelper.class);
@@ -43,6 +45,7 @@ public class CurrentDateTimeTest {
     @Test
     @ConditionalIgnore(condition = IgnoreOnPortrait.class)
     public void testCurrentTime() {
+        Log.i(LOG_TAG, "Assert: Current local time");
         assertEquals(
                 "Current local Time",
                 mStatusBarHelper.get().getClockTime(),
@@ -53,6 +56,7 @@ public class CurrentDateTimeTest {
 
     @Test
     public void testCurrentTimeZone() {
+        Log.i(LOG_TAG, "Assert: Current local time zone");
         assertEquals(
                 "Current local Time Zone",
                 mStatusBarHelper.get().getCurrentTimeZone(),

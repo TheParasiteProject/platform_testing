@@ -19,6 +19,7 @@ import static junit.framework.Assert.assertTrue;
 
 import android.platform.helpers.HelperAccessor;
 import android.platform.helpers.IAutoStatusBarHelper;
+import android.util.Log;
 
 import androidx.test.runner.AndroidJUnit4;
 
@@ -30,6 +31,7 @@ import org.junit.runner.RunWith;
 @RunWith(AndroidJUnit4.class)
 public class BluetoothPaletteTest {
     private HelperAccessor<IAutoStatusBarHelper> mStatusBarHelper;
+    private static final String LOG_TAG = BluetoothPaletteTest.class.getSimpleName();
 
     public BluetoothPaletteTest() {
         mStatusBarHelper = new HelperAccessor<>(IAutoStatusBarHelper.class);
@@ -42,10 +44,13 @@ public class BluetoothPaletteTest {
 
     @Test
     public void testDefaultStatusOfBlueToothPalette() {
+        Log.i(LOG_TAG, "Act: Turn on Bluettooth.");
         mStatusBarHelper.get().turnOnOffBluetooth(true);
+        Log.i(LOG_TAG, "Assert: Bluetooth toggle button is displayed");
         assertTrue(
                 "Bluetooth toggle button is not displayed",
                 mStatusBarHelper.get().hasBluetoothSwitch());
+        Log.i(LOG_TAG, "Assert: Bluetooth toggle button ON message is displayed");
         assertTrue(
                 "Bluetooth toggle button ON message is not displayed",
                 mStatusBarHelper.get().hasToggleOnMessage());
@@ -55,16 +60,21 @@ public class BluetoothPaletteTest {
 
     @Test
     public void testBluetoothDisableMessage() {
+        Log.i(LOG_TAG, "Act: Turn off Bluettooth.");
         mStatusBarHelper.get().turnOnOffBluetooth(false);
+        Log.i(LOG_TAG, "Assert: Bluetooth toggle OFF message is displayed");
         assertTrue(
                 "Bluetooth toggle button OFF message is not displayed ",
                 mStatusBarHelper.get().hasToggleOffMessage());
+        Log.i(LOG_TAG, "Act: Turn ON Bluettooth.");
         mStatusBarHelper.get().turnOnOffBluetooth(true);
     }
 
     @Test
     public void testOpenBluetoothSettings() {
+        Log.i(LOG_TAG, "Act: Open Bluetooth Settings");
         mStatusBarHelper.get().openBluetoothSettings();
+        Log.i(LOG_TAG, "Assert: Bluetooth settings page title is displayed");
         assertTrue(
                 "Bluetooth settings page title is not displayed",
                 mStatusBarHelper.get().hasBluetoothSettingsPageTitle());

@@ -22,6 +22,7 @@ import static junit.framework.Assert.assertTrue;
 import android.platform.helpers.HelperAccessor;
 import android.platform.helpers.IAutoHomeHelper;
 import android.platform.helpers.IAutoStatusBarHelper;
+import android.util.Log;
 
 import androidx.test.runner.AndroidJUnit4;
 
@@ -35,6 +36,7 @@ public class BrightnessPaletteTest {
 
     private HelperAccessor<IAutoHomeHelper> mHomeHelper;
     private HelperAccessor<IAutoStatusBarHelper> mStatusBarHelper;
+    private static final String LOG_TAG = BrightnessPaletteTest.class.getSimpleName();
 
     public BrightnessPaletteTest() {
         mHomeHelper = new HelperAccessor<>(IAutoHomeHelper.class);
@@ -43,35 +45,38 @@ public class BrightnessPaletteTest {
 
     @Before
     public void openBrightnessPalette() {
+        Log.i(LOG_TAG, "Act: Brightness palette is open");
         mHomeHelper.get().openBrightnessPalette();
     }
 
     @Test
     public void testBrightnessPaletteIsDisplayed() {
+        Log.i(LOG_TAG, "Assert: Brightness palette is open");
         assertTrue(
                 "Brightness palette did not open", mHomeHelper.get().hasDisplayBrightessPalette());
     }
 
     @Test
     public void testAdaptiveBrightnessSettingIsDisplayed() {
+        Log.i(LOG_TAG, "Assert: Adaptive brightness is open");
         assertTrue("Adaptive brightness did not open", mHomeHelper.get().hasAdaptiveBrightness());
     }
 
     @Test
     public void testAdaptiveBrightnessToggleSwitch() {
-        // Default Adaptive brightness is OFF
+        Log.i(LOG_TAG, "Assert: Default Adaptive brightness is OFF");
         assertFalse(
                 "Adaptive brightness toggle switch in ON ",
                 mStatusBarHelper.get().isAdaptiveBrightnessOn());
-        // Turn On Adaptive Brightness Toggle Switch
+        Log.i(LOG_TAG, "Act: Turn On Adaptive Brightness Toggle Switch");
         mStatusBarHelper.get().clickOnAdaptiveBrightnessToggleSwitch();
-        // Verify the Adaptive brightness Turned ON
+        Log.i(LOG_TAG, "Assert: Default Adaptive brightness is ON");
         assertTrue(
                 "Adaptive brightness toggle switch in OFF",
                 mStatusBarHelper.get().isAdaptiveBrightnessOn());
-        // return the Adaptive brightness switch to default state "OFF"
+        Log.i(LOG_TAG, "Act: Turn Off Adaptive Brightness Toggle Switch");
         mStatusBarHelper.get().clickOnAdaptiveBrightnessToggleSwitch();
-        // Verify Default Adaptive brightness state is "OFF"
+        Log.i(LOG_TAG, "Assert: Default Adaptive brightness is OFF");
         assertFalse(
                 "Adaptive brightness toggle switch in ON ",
                 mStatusBarHelper.get().isAdaptiveBrightnessOn());

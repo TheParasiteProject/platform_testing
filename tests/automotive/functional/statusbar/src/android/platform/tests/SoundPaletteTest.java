@@ -21,6 +21,7 @@ import android.platform.helpers.AutomotiveConfigConstants;
 import android.platform.helpers.HelperAccessor;
 import android.platform.helpers.IAutoSettingHelper;
 import android.platform.helpers.IAutoStatusBarHelper;
+import android.util.Log;
 
 import androidx.test.runner.AndroidJUnit4;
 
@@ -33,6 +34,8 @@ import org.junit.runner.RunWith;
 public class SoundPaletteTest {
     private HelperAccessor<IAutoStatusBarHelper> mStatusBarHelper;
     private HelperAccessor<IAutoSettingHelper> mSettingHelper;
+
+    private static final String LOG_TAG = SoundPaletteTest.class.getSimpleName();
 
     public SoundPaletteTest() {
         mSettingHelper = new HelperAccessor<>(IAutoSettingHelper.class);
@@ -53,18 +56,26 @@ public class SoundPaletteTest {
 
     @Test
     public void testSoundPaletteOnStatusBar() {
+        Log.i(LOG_TAG, "Act: Open Sound Palette On Status Bar.");
         mStatusBarHelper.get().openSoundPaletteOnStatusBar();
+        Log.i(LOG_TAG, "Assert: In-call Volume is displayed");
         assertTrue(
                 "In-call Volume is not displayed on Sound Palette",
                 mStatusBarHelper.get().isUIButtonPresentOnSoundPalette(AutomotiveConfigConstants.SOUND_SETTING_INCALL));
+        Log.i(LOG_TAG, "Assert: Media Volume is displayed on Sound Palette");
         assertTrue(
-                "Media Voulme is not displayed on Sound Palette",
-                mStatusBarHelper.get().isUIButtonPresentOnSoundPalette(AutomotiveConfigConstants.SOUND_PALETTE_MEDIA));
+                "Media Volume is not displayed on Sound Palette",
+                mStatusBarHelper
+                        .get()
+                        .isUIButtonPresentOnSoundPalette(
+                                AutomotiveConfigConstants.SOUND_PALETTE_MEDIA));
+        Log.i(LOG_TAG, "Assert: Navigation Volume is displayed on Sound Palette");
         assertTrue(
                 "Navigation Volume is not displayed on Sound Palette",
                 mStatusBarHelper
                         .get()
                         .isUIButtonPresentOnSoundPalette(AutomotiveConfigConstants.SOUND_PALETTE_NAVIGATION));
+        Log.i(LOG_TAG, "Assert: Sound Settings Volume is displayed on Sound Palette");
         assertTrue(
                 "Sound Settings is not displayed on Sound Palette",
                 mStatusBarHelper
@@ -74,8 +85,11 @@ public class SoundPaletteTest {
 
     @Test
     public void testSoundSettingsButton() {
+        Log.i(LOG_TAG, "Act: Open Sound Palette On Status Bar.");
         mStatusBarHelper.get().openSoundPaletteOnStatusBar();
+        Log.i(LOG_TAG, "Act: Open Sound Settings");
         mStatusBarHelper.get().openSoundSettings();
+        Log.i(LOG_TAG, "Assert: Sound Settings is opened");
         assertTrue(
                 "Sound settings page is not opened",
                 mStatusBarHelper.get().hasSoundSettingsPageTitle());

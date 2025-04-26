@@ -22,8 +22,11 @@ import android.content.Context
 import android.os.Build
 import android.os.UserHandle
 import android.view.Display
+import android.view.View
 import android.view.WindowManagerGlobal
+import androidx.core.text.TextUtilsCompat
 import androidx.test.platform.app.InstrumentationRegistry
+import java.util.Locale
 import org.junit.Assume
 import org.junit.rules.TestRule
 import org.junit.runner.Description
@@ -64,7 +67,7 @@ class DeviceEmulationRule(private val spec: DeviceEmulationSpec) : TestRule {
             override fun evaluate() {
                 Assume.assumeFalse(
                     "Skipping test: ${description.displayName}, because skip-dark-theme is true.",
-                    skipDarkTheme == "true" && spec.isDarkTheme
+                    skipDarkTheme == "true" && spec.isDarkTheme,
                 )
                 beforeTest()
                 base.evaluate()
@@ -86,9 +89,25 @@ class DeviceEmulationRule(private val spec: DeviceEmulationSpec) : TestRule {
                 runtimeEnvironment.getDeclaredMethod("setQualifiers", String::class.java)
             val scaledWidth = width * 160 / density
             val scaledHeight = height * 160 / density
-            val darkMode = if (spec.isDarkTheme) "night" else "notnight"
-            val qualifier = "w${scaledWidth}dp-h${scaledHeight}dp-${darkMode}-${density}dpi"
-            setQualifiers.invoke(null, qualifier)
+            setQualifiers.invoke(
+                null,
+                buildString {
+                    if (spec.locale != null) {
+                        append("${spec.localeQualifier}-")
+
+                        // Note: rtl only works is supportsRtl is specified by your test manifest
+                        when (TextUtilsCompat.getLayoutDirectionFromLocale(spec.locale)) {
+                            View.LAYOUT_DIRECTION_LTR -> append("ldltr-")
+                            View.LAYOUT_DIRECTION_RTL -> append("ldrtl-")
+                        }
+                    }
+
+                    append("w${scaledWidth}dp-")
+                    append("h${scaledHeight}dp-")
+                    append(if (spec.isDarkTheme) "night-" else "notnight-")
+                    append("${density}dpi")
+                },
+            )
         } else {
             val curNightMode =
                 if (spec.isDarkTheme) {
@@ -167,19 +186,20 @@ class DeviceEmulationRule(private val spec: DeviceEmulationSpec) : TestRule {
 }
 
 /** The specification of a device display to be used in a screenshot test. */
-data class DisplaySpec(
-    val name: String,
-    val width: Int,
-    val height: Int,
-    val densityDpi: Int,
-)
+data class DisplaySpec(val name: String, val width: Int, val height: Int, val densityDpi: Int)
 
 /** The specification of a device emulation. */
-data class DeviceEmulationSpec(
+data class DeviceEmulationSpec
+@JvmOverloads
+constructor(
     val display: DisplaySpec,
     val isDarkTheme: Boolean = false,
     val isLandscape: Boolean = false,
+    val locale: Locale? = null,
 ) {
+    val localeQualifier: String?
+        get() = locale?.run { "b+${toLanguageTag().replace("-", "+").substringBefore("+u+nu")}" }
+
     companion object {
         /**
          * Return a list of [DeviceEmulationSpec] for each of the [displays].
@@ -224,5 +244,6 @@ data class DeviceEmulationSpec(
         append(display.name)
         if (isDarkTheme) append("_dark")
         if (isLandscape) append("_landscape")
+        if (locale != null) append("_${locale.toLanguageTag()}")
     }
 }
