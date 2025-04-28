@@ -79,7 +79,7 @@ class WindowManagerStateSubjectTest {
     fun canDetectAboveAppWindowVisibility_isVisible() {
         WindowManagerTraceSubject(trace, reader)
             .getEntryByElapsedTimestamp(traceFirstFrameTimestamp)
-            .containsAboveAppWindow(ComponentNameMatcher.NAV_BAR)
+            .containsAboveAppWindow(ComponentNameMatcher.NAV_BAR_LEGACY)
             .containsAboveAppWindow(TestComponents.SCREEN_DECOR_OVERLAY)
             .containsAboveAppWindow(ComponentNameMatcher.STATUS_BAR)
     }
@@ -97,8 +97,8 @@ class WindowManagerStateSubjectTest {
 
         assertFail("NavigationBar") {
             subject
-                .containsAboveAppWindow(ComponentNameMatcher.NAV_BAR)
-                .isNonAppWindowInvisible(ComponentNameMatcher.NAV_BAR)
+                .containsAboveAppWindow(ComponentNameMatcher.NAV_BAR_LEGACY)
+                .isNonAppWindowInvisible(ComponentNameMatcher.NAV_BAR_LEGACY)
         }
     }
 
