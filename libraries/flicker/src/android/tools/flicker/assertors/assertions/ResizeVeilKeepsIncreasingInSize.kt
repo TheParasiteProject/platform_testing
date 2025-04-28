@@ -36,7 +36,7 @@ class ResizeVeilKeepsIncreasingInSize(private val component: ComponentTemplate) 
                     it.name.contains("Resize veil")
             }
             layerList.zipWithNext { previous, current ->
-                current.visibleRegion.coversAtLeast(previous.visibleRegion.region)
+                current.visibleRegion.notSmallerThan(previous.visibleRegion.region)
             }
         }
     }
