@@ -31,6 +31,7 @@ import android.platform.systemui_tapl.controller.NotificationIdentity.Type.GROUP
 import android.platform.systemui_tapl.controller.NotificationIdentity.Type.INBOX
 import android.platform.systemui_tapl.controller.NotificationIdentity.Type.MEDIA
 import android.platform.systemui_tapl.controller.NotificationIdentity.Type.MESSAGING_STYLE
+import android.platform.systemui_tapl.ui.NotificationShade.Companion.SHELF_BG_ID
 import android.platform.systemui_tapl.ui.NotificationShade.Companion.SHELF_ID
 import android.platform.systemui_tapl.utils.DeviceUtils.LONG_WAIT
 import android.platform.systemui_tapl.utils.DeviceUtils.androidResSelector
@@ -45,6 +46,7 @@ import android.platform.uiautomatorhelpers.DeviceHelpers.waitForNullableObjects
 import android.platform.uiautomatorhelpers.DeviceHelpers.waitForObj
 import android.platform.uiautomatorhelpers.WaitUtils.ensureThat
 import android.platform.uiautomatorhelpers.WaitUtils.retryIfStale
+import android.platform.uiautomatorhelpers.WaitUtils.waitFor
 import androidx.test.uiautomator.By
 import androidx.test.uiautomator.BySelector
 import androidx.test.uiautomator.Direction
@@ -130,6 +132,14 @@ open class NotificationStack internal constructor(val fromLockscreen: Boolean) {
 
     fun getShelfBounds(): Rect {
         return waitForObj(NOTIFICATION_SHELF_SELECTOR).visibleBounds
+    }
+
+    fun getShelfBackgroundBounds(): Rect {
+        val shelf = waitForObj(NOTIFICATION_SHELF_SELECTOR)
+        return waitFor("$NOTIFICATION_SHELF_BG_SELECTOR not found") {
+                shelf.findObject(NOTIFICATION_SHELF_BG_SELECTOR)
+            }
+            .visibleBounds
     }
 
     /** Returns the [NotificationShelf] if visible, otherwise [null]. */
@@ -412,6 +422,9 @@ open class NotificationStack internal constructor(val fromLockscreen: Boolean) {
         private const val MAX_FIND_NOTIFICATION_ATTEMPTS = 15
         private val NOTIFICATION_SHELF_SELECTOR =
             sysuiResSelector(SHELF_ID).maxDepth(NotificationShade.NOTIFICATION_MAX_HIERARCHY_DEPTH)
+        private val NOTIFICATION_SHELF_BG_SELECTOR =
+            sysuiResSelector(SHELF_BG_ID)
+                .maxDepth(NotificationShade.NOTIFICATION_MAX_HIERARCHY_DEPTH)
         private val NOTIFICATION_STACK_SCROLLER = sysuiResSelector("notification_stack_scroller")
         private val BIG_PICTURE_SELECTOR = androidResSelector("big_picture")
         private val MESSAGE_ICON_CONTAINER_SELECTOR = androidResSelector("message_icon_container")
