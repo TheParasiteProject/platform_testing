@@ -269,4 +269,27 @@ public class AppGridHelperImpl extends AbstractStandardAppHelper implements IAut
         getSpectatioUiUtil().pressHome();
         getSpectatioUiUtil().wait1Second();
     }
+
+    @Override
+    public void longTapAllAppsButton() {
+        BySelector appGridFacetSelector =
+                getUiElementFromConfig(AutomotiveConfigConstants.APP_GRID_FACET_BUTTON);
+        UiObject2 appGridFacet = getSpectatioUiUtil().findUiObject(appGridFacetSelector);
+        getSpectatioUiUtil().longPress(appGridFacet);
+    }
+
+    @Override
+    public void singleTapAllAppsButton() {
+        BySelector appGridFacetSelector =
+                getUiElementFromConfig(AutomotiveConfigConstants.APP_GRID_FACET_BUTTON);
+        UiObject2 appGridFacet = getSpectatioUiUtil().findUiObject(appGridFacetSelector);
+        getSpectatioUiUtil().clickAndWait(appGridFacet);
+    }
+
+    @Override
+    public boolean isRecentsScreenLaunched() {
+        BySelector recentAppsThumbnailSelector =
+                getUiElementFromConfig(AutomotiveConfigConstants.RECENT_APPS_THUMBNAIL);
+        return getSpectatioUiUtil().hasUiElement(recentAppsThumbnailSelector);
+    }
 }

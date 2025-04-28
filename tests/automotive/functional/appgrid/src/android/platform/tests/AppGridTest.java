@@ -22,14 +22,19 @@ import static junit.framework.Assert.assertTrue;
 import android.platform.helpers.AutomotiveConfigConstants;
 import android.platform.helpers.HelperAccessor;
 import android.platform.helpers.IAutoAppGridHelper;
+import android.platform.test.rules.ConditionalIgnore;
+import android.platform.test.rules.ConditionalIgnoreRule;
+import android.platform.test.rules.IgnoreOnPortrait;
 
 import androidx.test.runner.AndroidJUnit4;
 
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
 @RunWith(AndroidJUnit4.class)
 public class AppGridTest {
+    @Rule public ConditionalIgnoreRule rule = new ConditionalIgnoreRule();
 
     private static final String SMS_APP = "SMS";
     private static final String BLUETOOTH_APP = "Bluetooth Audio";
@@ -132,5 +137,17 @@ public class AppGridTest {
                 mAppGridHelper
                         .get()
                         .checkPackageInForeground(AutomotiveConfigConstants.MEDIA_CENTER_PACKAGE));
+    }
+
+    @Test
+    @ConditionalIgnore(condition = IgnoreOnPortrait.class)
+    public void testRecentAppsDisplaying() {
+        mAppGridHelper.get().open();
+        mAppGridHelper.get().openApp(PHONE_APP);
+        mAppGridHelper.get().longTapAllAppsButton();
+        assertTrue(
+                "Recents Screen is not launched", mAppGridHelper.get().isRecentsScreenLaunched());
+        mAppGridHelper.get().singleTapAllAppsButton();
+        assertFalse("Recents Screen is not closed", mAppGridHelper.get().isRecentsScreenLaunched());
     }
 }
