@@ -18,18 +18,30 @@ package platform.test.screenshot.utils.compose
 
 import android.app.Activity
 import android.app.Dialog
+import android.content.res.Configuration
 import android.os.Build
+import android.os.LocaleList
+import android.view.ContextThemeWrapper
+import android.view.View
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.remember
 import androidx.compose.ui.focus.FocusManager
+import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.platform.ViewRootForTest
 import androidx.compose.ui.test.SemanticsNodeInteraction
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onRoot
+import androidx.compose.ui.unit.LayoutDirection
+import androidx.core.text.TextUtilsCompat
 import com.android.compose.theme.PlatformTheme
+import java.util.Locale
 import java.util.concurrent.TimeUnit
 import org.junit.rules.RuleChain
 import org.junit.rules.TestRule
@@ -74,11 +86,12 @@ class ComposeScreenshotTestRule(
             .around(colorsRule)
             .around(hardwareRenderingRule)
             .around(commonRule)
-    private val matcher = if (enforcePerfectPixelMatch) {
-        PerfectMatcher
-    }  else {
-        UnitTestBitmapMatcher
-    }
+    private val matcher =
+        if (enforcePerfectPixelMatch) {
+            PerfectMatcher
+        } else {
+            UnitTestBitmapMatcher
+        }
 
     private val isRobolectric = Build.FINGERPRINT.contains("robolectric")
 
@@ -104,6 +117,8 @@ class ComposeScreenshotTestRule(
         val activity = composeRule.activity
         activity.mainExecutor.execute { activity.window.setDecorFitsSystemWindows(false) }
 
+        emulationSpec.locale?.let { Locale.setDefault(it) }
+
         // Set the content using the AndroidComposeRule to make sure that the Activity is set up
         // correctly.
         if (content != null) {
@@ -111,18 +126,20 @@ class ComposeScreenshotTestRule(
 
             composeRule.setContent {
                 val focusManager = LocalFocusManager.current.also { focusManager = it }
+                CustomLocale(locale = emulationSpec.locale) {
+                    PlatformTheme {
+                        Surface(color = MaterialTheme.colorScheme.background) {
+                            content()
 
-                PlatformTheme {
-                    Surface(color = MaterialTheme.colorScheme.background) {
-                        content()
-
-                        // Clear the focus early. This disposable effect will run after any
-                        // DisposableEffect in content() but will run before layout/drawing, so
-                        // clearing focus early here will make sure we never draw a focused effect.
-                        if (clearFocus) {
-                            DisposableEffect(Unit) {
-                                focusManager.clearFocus()
-                                onDispose {}
+                            // Clear the focus early. This disposable effect will run after any
+                            // DisposableEffect in content() but will run before layout/drawing, so
+                            // clearing focus early here will make sure we never draw a focused
+                            // effect.
+                            if (clearFocus) {
+                                DisposableEffect(Unit) {
+                                    focusManager.clearFocus()
+                                    onDispose {}
+                                }
                             }
                         }
                     }
@@ -163,4 +180,44 @@ class ComposeScreenshotTestRule(
             dialogProvider = dialogProvider,
         )
     }
+}
+
+@Composable
+fun CustomLocale(locale: Locale?, content: @Composable () -> Unit) {
+    if (locale == null) {
+        return content()
+    }
+    // Override the local context with the locale so that string resources get translated to the
+    // right language.
+    val previousConfiguration = LocalConfiguration.current
+    val configuration =
+        remember(previousConfiguration, locale) {
+            Configuration().apply {
+                updateFrom(previousConfiguration)
+                setLocales(LocaleList(locale))
+            }
+        }
+    val previousContext = LocalContext.current
+    val context =
+        remember(previousContext, configuration) {
+            ContextThemeWrapper(previousContext, 0).apply {
+                applyOverrideConfiguration(configuration)
+            }
+        }
+
+    val direction =
+        remember(locale) {
+            if (TextUtilsCompat.getLayoutDirectionFromLocale(locale) == View.LAYOUT_DIRECTION_RTL) {
+                LayoutDirection.Rtl
+            } else {
+                LayoutDirection.Ltr
+            }
+        }
+
+    CompositionLocalProvider(
+        LocalContext provides context,
+        LocalConfiguration provides configuration,
+        LocalLayoutDirection provides direction,
+        content = content,
+    )
 }
