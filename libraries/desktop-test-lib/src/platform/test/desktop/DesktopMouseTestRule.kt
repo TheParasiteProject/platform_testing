@@ -452,9 +452,9 @@ class DesktopMouseTestRule() : TestRule {
 
                 val currentNode = adjacencyGraph[currentId] ?: continue
                 // Check neighbors
-                for (adjacentDisplay in currentNode.adjacentDisplays()) {
-                    val neighborId = adjacentDisplay.displayId()
-                    val position = adjacentDisplay.position()
+                for (adjacentDisplay in currentNode.adjacentDisplays) {
+                    val neighborId = adjacentDisplay.displayId
+                    val position = adjacentDisplay.position
                     if (neighborId in visited) continue
                     visited.add(neighborId)
                     parentMap[neighborId] =
