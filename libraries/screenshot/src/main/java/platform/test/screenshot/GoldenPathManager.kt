@@ -29,6 +29,7 @@ private const val RESOLUTION_TAG = "resolution"
 private const val DISPLAY_TAG = "display"
 private const val THEME_TAG = "theme"
 private const val ORIENTATION_TAG = "orientation"
+private const val LOCALE_TAG = "locale"
 
 /**
  * Class to manage Directory structure of golden files.
@@ -57,7 +58,7 @@ constructor(
     val appContext: Context,
     val assetsPathRelativeToBuildRoot: String = "assets",
     var deviceLocalPath: String = getDeviceOutputDirectory(appContext),
-    val pathConfig: PathConfig = getSimplePathConfig()
+    val pathConfig: PathConfig = getSimplePathConfig(),
 ) {
 
     init {
@@ -100,7 +101,7 @@ sealed class PathElementBase {
 data class PathElementNoContext(
     override val attr: String,
     override val isDir: Boolean,
-    val func: (() -> String)
+    val func: (() -> String),
 ) : PathElementBase()
 
 /*
@@ -111,7 +112,7 @@ data class PathElementNoContext(
 data class PathElementWithContext(
     override val attr: String,
     override val isDir: Boolean,
-    val func: ((Context) -> String)
+    val func: ((Context) -> String),
 ) : PathElementBase()
 
 /*
@@ -125,10 +126,20 @@ class PathConfig(vararg elems: PathElementBase) {
     public fun resolveRelativePath(context: Context): String {
         return data
             .map {
-                when (it) {
-                    is PathElementWithContext -> it.func(context)
-                    is PathElementNoContext -> it.func()
-                } + if (it.isDir) "/" else "_"
+                val subPathString =
+                    when (it) {
+                        is PathElementWithContext -> it.func(context)
+                        is PathElementNoContext -> it.func()
+                    }
+                val separator =
+                    if (it.isDir) {
+                        "/"
+                    } else if (subPathString.isNotEmpty()) {
+                        "_"
+                    } else {
+                        ""
+                    }
+                subPathString + separator
             }
             .joinToString("")
     }
@@ -145,7 +156,7 @@ fun getDefaultPathConfig(): PathConfig {
         PathElementNoContext(MODEL_TAG, true, ::getDeviceModel),
         PathElementNoContext(API_TAG, true, ::getAPIVersion),
         PathElementWithContext(SIZE_TAG, true, ::getScreenSize),
-        PathElementWithContext(RESOLUTION_TAG, true, ::getScreenResolution)
+        PathElementWithContext(RESOLUTION_TAG, true, ::getScreenResolution),
     )
 }
 
@@ -170,7 +181,7 @@ fun getDeviceVariantPathConfig(variant: String): PathConfig {
 /** The [PathConfig] that should be used when emulating a device using the [DeviceEmulationRule]. */
 fun getEmulatedDevicePathConfig(emulationSpec: DeviceEmulationSpec): PathConfig {
     // Returns a path of the form
-    // "/display_name/(light|dark)_(portrait|landscape)_golden_identifier.png".
+    // "/display_name/(light|dark)_(portrait|landscape)(_locale-if-non-null)_{goldenIdentifier}.png".
     return PathConfig(
         PathElementNoContext(DISPLAY_TAG, isDir = true) { emulationSpec.display.name },
         PathElementNoContext(THEME_TAG, isDir = false) {
@@ -178,6 +189,13 @@ fun getEmulatedDevicePathConfig(emulationSpec: DeviceEmulationSpec): PathConfig 
         },
         PathElementNoContext(ORIENTATION_TAG, isDir = false) {
             if (emulationSpec.isLandscape) "landscape" else "portrait"
+        },
+        PathElementNoContext(LOCALE_TAG, isDir = false) {
+            if (emulationSpec.locale != null) {
+                emulationSpec.locale.toLanguageTag()
+            } else {
+                ""
+            }
         },
     )
 }
