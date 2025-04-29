@@ -31,7 +31,6 @@ import static com.google.common.truth.Truth.assertWithMessage;
 
 import static org.junit.Assume.assumeFalse;
 
-import android.app.Flags;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.platform.helpers.foldable.UnfoldAnimationTestingUtils;
@@ -67,7 +66,7 @@ public class StatusBar {
     private static final String DATA_SAVER_ICON_DESC = "Data Saver is on";
     // https://hsv.googleplex.com/6227911158792192?node=18
     static final String DOCK_DEFEND_ICON_SUFFIX_STRING = "charging paused for battery protection";
-    static final String DND_ICON_DESC = Flags.modesUi() ? "Do Not Disturb is on" : "Do Not Disturb";
+    static final String DND_ICON_DESC = "Do Not Disturb is on";
     private static final String WIFI_ICON_ID = "wifi_combo";
     private static final String ONGOING_ACTIVITY_CHIP_ICON_ID = "ongoing_activity_chip_primary";
     // Corresponds to ScreenRecordChipViewModel.KEY
