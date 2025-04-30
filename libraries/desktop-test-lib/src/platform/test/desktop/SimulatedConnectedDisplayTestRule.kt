@@ -89,22 +89,23 @@ class SimulatedConnectedDisplayTestRule : TestRule {
             val handler = Handler(Looper.getMainLooper())
             displayManager.registerDisplayListener(listener, handler)
 
+            // `disable_window_interaction` is used to let interaction not get obstructed by
+            // OverlayDisplayWindow and let it go through to the window or surface behind it.
+            val displaySettings =
+                displays.joinToString(separator = ";") { size ->
+                    "${size.x}x${size.y}/$DEFAULT_DENSITY,disable_window_interaction"
+                }
+
+            // Add the overlay displays
+            Settings.Global.putString(
+                context.contentResolver,
+                Settings.Global.OVERLAY_DISPLAY_DEVICES,
+                displaySettings,
+            )
+
             awaitClose { displayManager.unregisterDisplayListener(listener) }
         }
 
-        // `disable_window_interaction` is used to let interaction not get obstructed by
-        // OverlayDisplayWindow and let it go through to the window or surface behind it.
-        val displaySettings =
-            displays.joinToString(separator = ";") { size ->
-                "${size.x}x${size.y}/$DEFAULT_DENSITY,disable_window_interaction"
-            }
-
-        // Add the overlay displays
-        Settings.Global.putString(
-            context.contentResolver,
-            Settings.Global.OVERLAY_DISPLAY_DEVICES,
-            displaySettings,
-        )
         withTimeoutOrNull(TIMEOUT) {
             displayAddedFlow.take(displays.size).collect { displayId ->
                 addedDisplays.add(displayId)
@@ -144,19 +145,18 @@ class SimulatedConnectedDisplayTestRule : TestRule {
             val handler = Handler(Looper.getMainLooper())
             displayManager.registerDisplayListener(listener, handler)
 
+            // Remove overlay displays. We'll execute this regardless of addedDisplays just to
+            // ensure all overlay displays are removed before and after the test.
+            // Note: If we want to restore the original overlay display added before this test (and
+            // its topology), it will be complicated as re-adding overlay display would lead to
+            // different displayId and topology could not be restored easily.
+            Settings.Global.putString(
+                context.contentResolver,
+                Settings.Global.OVERLAY_DISPLAY_DEVICES,
+                null,
+            )
             awaitClose { displayManager.unregisterDisplayListener(listener) }
         }
-
-        // Remove overlay displays. We'll execute this regardless of addedDisplays just to
-        // ensure all overlay displays are removed before and after the test.
-        // Note: If we want to restore the original overlay display added before this test (and its
-        // topology), it will be complicated as re-adding overlay display would lead to different
-        // displayId and topology could not be restored easily.
-        Settings.Global.putString(
-            context.contentResolver,
-            Settings.Global.OVERLAY_DISPLAY_DEVICES,
-            null,
-        )
 
         if (!addedDisplays.isEmpty()) {
             withTimeoutOrNull(TIMEOUT) {
