@@ -257,6 +257,10 @@ class Root private constructor(val displayId: Int = DEFAULT_DISPLAY) {
     val aod: Aod
         get() = Aod()
 
+    /** Gets Aod RON Skeleton. Fails if Aod is not visible. */
+    val aodRON: AodRON
+        get() = AodRON()
+
     /** Gets ChooseScreenLock. Fails if ChooseScreenLock is not visible. */
     val chooseScreenLock: ChooseScreenLock
         get() = ChooseScreenLock()

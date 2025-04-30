@@ -167,5 +167,8 @@ class LockScreen internal constructor() {
             } else {
                 sysuiResSelector("notification_panel")
             }
+
+        // https://hsv.googleplex.com/5656353459666944
+        val RON_AOD_SKELETON = sysuiResSelector("aod_promoted_notification_frame")
     }
 }
