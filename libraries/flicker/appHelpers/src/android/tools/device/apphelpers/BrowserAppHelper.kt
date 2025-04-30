@@ -25,6 +25,7 @@ import android.tools.traces.component.ComponentNameMatcher
 import android.tools.traces.component.IComponentNameMatcher
 import android.tools.traces.parsers.WindowManagerStateHelper
 import android.tools.traces.wm.WindowingMode
+import android.util.Log
 import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.uiautomator.By
 import androidx.test.uiautomator.UiDevice
@@ -66,6 +67,11 @@ constructor(
                 WAIT_TIME_IN_MILLISECONDS,
             )
             .click()
+    }
+
+    /** Clears the Chrome application's storage and data. */
+    fun clearStorage() {
+        device.executeShellCommand("pm clear $packageName")
     }
 
     /**
@@ -121,10 +127,75 @@ constructor(
     fun isFreeform(wmHelper: WindowManagerStateHelper): Boolean =
         wmHelper.getWindow(this)?.windowingMode == WindowingMode.WINDOWING_MODE_FREEFORM.value
 
+    /**
+     * Closes any known pop-up dialogs that might appear during the test.
+     *
+     * This function checks for and dismisses two types of pop-ups:
+     * 1. **Notification Permission Pop-up:** If a pop-up asking for notification permissions is
+     *    present, it clicks the "No thanks" negative button to dismiss it.
+     * 2. **Ad Privacy Pop-up:** If a pop-up related to ad privacy is present, it dismisses it and
+     *    then handles a follow-up "other" ad privacy popup by clicking "More" button (if present),
+     *    and then pressing "Got it" button.
+     *
+     * The function uses `UiDevice` to interact with the device's UI and searches for specific text
+     * elements to identify the pop-ups. It also includes logging to provide information about which
+     * pop-ups were detected and dismissed.
+     *
+     * @param device The UiDevice instance used to interact with the device's UI.
+     * @return `true` if any pop-up was found and dismissed, `false` otherwise.
+     */
+    fun closePopupsIfNeeded(device: UiDevice): Boolean {
+        if (device.hasObject(By.text(NOTIFICATION_PERMISSION_TEXT))) {
+            val negativeButton = device.findObject(By.text(NEGATIVE_BUTTON_TEXT))
+            negativeButton.click()
+            Log.d(TAG, "Dismiss grant notification pop-up")
+            return true
+        }
+
+        if (device.hasObject(By.text(AD_PRIVACY_TITLE_TEXT))) {
+            val negativeButton = device.findObject(By.text(NEGATIVE_BUTTON_TEXT))
+            negativeButton.click()
+            Log.d(TAG, "Dismiss ad privacy pop-up")
+
+            // Next popup about ad privacy is showed immediately - we need to close it as well
+            device.wait(
+                Until.findObject(By.text(OTHER_AD_PRIVACY_TITLE_TEXT)),
+                WAIT_TIME_IN_MILLISECONDS,
+            )
+            if (device.hasObject(By.res(packageName, MORE_BUTTON_ID))) {
+                val moreButton = device.findObject(By.res(packageName, MORE_BUTTON_ID))
+                moreButton.click()
+                device.waitForIdle()
+                Log.d(TAG, "Click the more button")
+            }
+
+            val ackButton =
+                device.wait(
+                    Until.findObject(By.text(ACKNOWLEDGED_BUTTON_TEXT)),
+                    WAIT_TIME_IN_MILLISECONDS,
+                )
+            ackButton.click()
+            Log.d(TAG, "Dismiss other ad privacy pop-up")
+            device.waitForIdle()
+            return true
+        }
+
+        return false
+    }
+
     companion object {
         enum class TabDraggingDirection {
             TOP_LEFT
         }
+
+        private const val TAG = "BrowserAppHelper"
+
+        private const val NOTIFICATION_PERMISSION_TEXT = "Chrome notifications make things easier"
+        private const val AD_PRIVACY_TITLE_TEXT = "Turn on an ad privacy feature"
+        private const val OTHER_AD_PRIVACY_TITLE_TEXT = "Other ad privacy features now available"
+        private const val NEGATIVE_BUTTON_TEXT = "No thanks"
+        private const val MORE_BUTTON_ID = "more_button"
+        private const val ACKNOWLEDGED_BUTTON_TEXT = "Got it"
 
         private val WAIT_TIME_IN_MILLISECONDS = Duration.ofSeconds(3).toMillis()
         private const val MIN_WINDOW_WIDTH_FOR_TAB_TEARING_DP = 600
