@@ -17,27 +17,15 @@
 package android.platform.systemui_tapl.ui
 
 import android.platform.systemui_tapl.utils.DeviceUtils.launcherResSelector
-import android.platform.uiautomatorhelpers.DeviceHelpers.assertInvisible
-import android.platform.uiautomatorhelpers.DeviceHelpers.assertVisible
-import android.platform.uiautomatorhelpers.DeviceHelpers.click
 
 /**
- * Provides an API for interacting with the bubble bar flyout within launcher in UI automation
- * tests.
+ * Provides an API to interact with the stashed bubble bar handle
+ *
+ * @see [BubbleBar] for collapsed bubble bar
+ * @see [ExpandedBubbleBar] for expanded bubble bar
  */
-class BubbleBarFlyout {
-
-    init {
-        BUBBLE_BAR_FLYOUT_VIEW.assertVisible()
-    }
-
-    /** Taps on the bubble bar flyout to expand it into the expanded bubble. */
-    fun expand() {
-        BUBBLE_BAR_FLYOUT_VIEW.click()
-        BUBBLE_BAR_FLYOUT_VIEW.assertInvisible()
-    }
-
+class StashedBubbleBar {
     companion object {
-        val BUBBLE_BAR_FLYOUT_VIEW = launcherResSelector("bubble_bar_flyout_view")
+        val HANDLE_VIEW = launcherResSelector("stashed_bubble_handle")
     }
 }

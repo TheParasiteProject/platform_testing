@@ -71,7 +71,10 @@ public class BubbleSettingsController {
     /** Disallows all bubbles. */
     public void disableBubbles() {
         setBubblesAllowed(NotificationManager.BUBBLE_PREFERENCE_NONE);
-        // Ensure any existing bubble is removed
+        // Ensure nothing is visible from bubbles
         Root.get().verifyNoBubbleIsVisible();
+        Root.get().verifyBubbleBarIsHidden();
+        Root.get().verifyStashedBubbleBarHandleIsHidden();
+        Root.get().verifyBubbleFlyoutIsHidden();
     }
 }

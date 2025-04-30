@@ -27,18 +27,18 @@ import java.time.Duration
  */
 class BubbleFlyout internal constructor() {
     init {
-        BUBBLE_FLYOUT_TEXT_CONTAIER_VIEW.assertVisible(timeout = TIMEOUT)
+        BUBBLE_FLYOUT_TEXT_CONTAINER_VIEW.assertVisible(timeout = TIMEOUT)
     }
 
     /** Fails if the flyout doesn't auto-close */
     fun verifyAutoClosing() {
-        BUBBLE_FLYOUT_TEXT_CONTAIER_VIEW.assertInvisible(timeout = TIMEOUT) {
+        BUBBLE_FLYOUT_TEXT_CONTAINER_VIEW.assertInvisible(timeout = TIMEOUT) {
             "Flyout didn't auto close"
         }
     }
 
-    private companion object {
-        val BUBBLE_FLYOUT_TEXT_CONTAIER_VIEW = sysuiResSelector("bubble_flyout_text_container")
+    companion object {
+        val BUBBLE_FLYOUT_TEXT_CONTAINER_VIEW = sysuiResSelector("bubble_flyout_text_container")
         val TIMEOUT = Duration.ofSeconds(20)
     }
 }

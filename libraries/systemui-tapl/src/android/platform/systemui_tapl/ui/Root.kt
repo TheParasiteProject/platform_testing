@@ -297,6 +297,11 @@ class Root private constructor(val displayId: Int = DEFAULT_DISPLAY) {
         BubbleBar.BUBBLE_BAR_VIEW.assertInvisible(LONG_WAIT)
     }
 
+    /** Verifies that the stashed bubble bar handle is hidden */
+    fun verifyStashedBubbleBarHandleIsHidden() {
+        StashedBubbleBar.HANDLE_VIEW.assertInvisible(timeout = Bubble.FIND_OBJECT_TIMEOUT)
+    }
+
     /** Verifies that no bubbles or an expanded bubble stack are visible. */
     fun verifyNoBubbleIsVisible() {
         Bubble.BUBBLE_VIEW.assertInvisible(timeout = Bubble.FIND_OBJECT_TIMEOUT)
@@ -306,6 +311,14 @@ class Root private constructor(val displayId: Int = DEFAULT_DISPLAY) {
     /** Verifies that expanded bubble stack (or bar) is not visible. */
     fun verifyNoExpandedBubbleIsVisible() {
         BUBBLE_EXPANDED_VIEW.assertInvisible(timeout = Bubble.FIND_OBJECT_TIMEOUT)
+    }
+
+    /** Verifies that bubble flyout is not visible. Checks for both stack and bar flyout. */
+    fun verifyBubbleFlyoutIsHidden() {
+        BubbleBarFlyout.BUBBLE_BAR_FLYOUT_VIEW.assertInvisible(timeout = Bubble.FIND_OBJECT_TIMEOUT)
+        BubbleFlyout.BUBBLE_FLYOUT_TEXT_CONTAINER_VIEW.assertInvisible(
+            timeout = Bubble.FIND_OBJECT_TIMEOUT
+        )
     }
 
     /** Verifies that status bar is hidden by checking StatusBar's clock icon whether it exists. */
