@@ -41,10 +41,10 @@ class ExpandedBubbleBar(val selectedBubble: BubbleBarItem) {
     val expandedBubble: ExpandedBubbleBarBubble
         get() = ExpandedBubbleBarBubble()
 
-    /** Collapses the bubble bar by tapping on the selected bubble and returns [BubbleBar]. */
-    fun collapse(): BubbleBar {
+    /** Collapses the bubble bar by tapping on the selected bubble. */
+    fun collapse() {
         selectedBubble.item.click()
-        return BubbleBar()
+        Root.get().verifyNoExpandedBubbleIsVisible()
     }
 
     /**
