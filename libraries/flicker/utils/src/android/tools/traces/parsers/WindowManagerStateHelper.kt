@@ -454,6 +454,38 @@ constructor(
         }
 
         /**
+         * Adds a condition to check if the top visible application windows match the given matchers
+         * in order.
+         *
+         * This function verifies that the top visible app windows (`wmState.visibleAppWindows`)
+         * match the provided `IComponentMatcher` instances in the order they are specified. It
+         * ensures there are enough visible windows and that each window matches its corresponding
+         * matcher.
+         */
+        fun withTopVisibleApps(vararg matchers: IComponentMatcher): StateSyncBuilder {
+            return add("withTopVisibleApps") {
+                val visibleApps = it.wmState.visibleAppWindows
+
+                if (visibleApps.size < matchers.size || visibleApps !is List) {
+                    // Not enough windows in the visible list or visibleApps collection is not List
+                    return@add false
+                }
+
+                for (i in matchers.indices) {
+                    val matcher = matchers[i]
+                    val window = visibleApps[i]
+
+                    // Check if the window at this position matches the expected matcher
+                    if (!matcher.windowMatchesAnyOf(window)) {
+                        return@add false
+                    }
+                }
+
+                return@add true
+            }
+        }
+
+        /**
          * Wait for the activities to appear in proper stacks and for valid state in AM and WM.
          *
          * @param waitForActivityState array of activity states to wait for.
