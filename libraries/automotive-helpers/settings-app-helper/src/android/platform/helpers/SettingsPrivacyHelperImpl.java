@@ -431,6 +431,7 @@ public class SettingsPrivacyHelperImpl extends AbstractStandardAppHelper
         getSpectatioUiUtil()
                 .validateUiObject(locationObject, AutomotiveConfigConstants.PRIVACY_LOCATION);
         getSpectatioUiUtil().clickAndWait(locationObject);
+        getSpectatioUiUtil().wait5Seconds();
         getSpectatioUiUtil().waitForIdle();
     }
 
