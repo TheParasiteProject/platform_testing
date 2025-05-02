@@ -17,6 +17,8 @@
 package android.platform.systemui_tapl.ui
 
 import android.platform.systemui_tapl.utils.DeviceUtils.launcherResSelector
+import android.platform.uiautomatorhelpers.DeviceHelpers.assertVisible
+import android.platform.uiautomatorhelpers.DeviceHelpers.click
 
 /**
  * Provides an API to interact with the stashed bubble bar handle
@@ -25,6 +27,21 @@ import android.platform.systemui_tapl.utils.DeviceUtils.launcherResSelector
  * @see [ExpandedBubbleBar] for expanded bubble bar
  */
 class StashedBubbleBar {
+
+    init {
+        HANDLE_VIEW.assertVisible { "Failed while waiting for bubble bar handle to become visible" }
+    }
+
+    /**
+     * Clicks on the stashed bubble bar handle to expand the bubble bar
+     *
+     * @return [ExpandedBubbleBar]
+     */
+    fun click(): ExpandedBubbleBar {
+        HANDLE_VIEW.click()
+        return ExpandedBubbleBar(BubbleBar().selectedBubble)
+    }
+
     companion object {
         val HANDLE_VIEW = launcherResSelector("stashed_bubble_handle")
     }
