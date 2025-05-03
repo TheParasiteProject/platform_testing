@@ -13,13 +13,14 @@ cc_defaults {
     compile_multilib: "64",
     local_include_dirs: ["include"],
     require_root: true,
-    test_suites: [
-        "device-tests",
-    ],
     shared_libs: [
         "libbase",
     ],
-}
+    test_suites: [
+        "device-tests",
+        "general-tests",
+        "dts",
+    ],}
 
 cc_test {
     name: "IgtCoreAuthTestCases",

@@ -224,14 +224,18 @@ class NotificationShade internal constructor(val displayId: Int = DEFAULT_DISPLA
             waitForObj(
                 sysuiResSelector(UI_QS_CONTAINER_ID, displayId),
                 Duration.ofMillis(UI_RESPONSE_TIMEOUT_MSECS),
-            ) { "Can't find qs container." }
+            ) {
+                "Can't find qs container."
+            }
 
     private val notificationShadeScrollContainer: UiObject2
         get() =
             waitForObj(
                 sysuiResSelector(UI_SCROLLABLE_ELEMENT_ID, displayId),
                 Duration.ofMillis(UI_RESPONSE_TIMEOUT_MSECS),
-            ) { "Can't find notification shade scroll container." }
+            ) {
+                "Can't find notification shade scroll container."
+            }
 
     // UiDevice#getDisplayHeight() excludes insets.
     private val screenBottom: Int
@@ -320,6 +324,7 @@ class NotificationShade internal constructor(val displayId: Int = DEFAULT_DISPLA
         const val NOTIFICATION_MAX_HIERARCHY_DEPTH = 4
         const val EXPANDABLE_NOTIFICATION_ROW = "expandableNotificationRow"
         const val SHELF_ID = "notificationShelf"
+        const val SHELF_BG_ID = "backgroundNormal"
         const val UI_SCROLLABLE_ELEMENT_ID = "notification_stack_scroller"
         const val HEADER_EXPAND_BUTTON = "expand_button"
         val notificationsStack: UiObject2?

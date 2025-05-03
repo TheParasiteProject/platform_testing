@@ -177,6 +177,35 @@ public abstract class BackupUtils {
                 ? LOCAL_TRANSPORT_NAME : LOCAL_TRANSPORT_NAME_PRE_Q;
     }
 
+    /** Toggles scheduling enabled or disabled. */
+    public String setSchedulingEnabled(boolean enabled) throws IOException {
+        return setSchedulingEnabled(enabled, getCurrentUserId());
+    }
+
+    /**
+     * Toggles scheduling enabled or disabled for given user.
+     *
+     * <p>Executes "bmgr --user USER_ID scheduling BOOL".
+     */
+    public String setSchedulingEnabled(boolean enabled, int userId) throws IOException {
+        return getShellCommandOutput(
+                "bmgr --user %d scheduling %b", userId, enabled);
+    }
+
+    /** Cancels backup for current user and returns its output. */
+    public String cancelBackups() throws IOException {
+        return cancelBackupsForUser(getCurrentUserId());
+    }
+
+    /**
+     * Cancels backup for given user and returns its output.
+     *
+     * <p>Executes "bmgr --user USER_ID cancel backups".
+     */
+    public String cancelBackupsForUser(int userId) throws IOException {
+        return getShellCommandOutput("bmgr --user %d cancel backups", userId);
+    }
+
     private InputStream backupNow(String packageName) throws IOException {
         return backupNowForUser(packageName, getCurrentUserId());
     }
