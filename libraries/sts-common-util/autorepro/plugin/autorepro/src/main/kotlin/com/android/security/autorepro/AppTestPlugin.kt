@@ -36,11 +36,13 @@ open class AppTestExtension {
     var minSdk: Int = 31 // oldest security-supported
     var targetSdk: Int = 34 // newest security-supported
     var compileSdk: Int = 34 // compile = target
+    var applicationId: String? = null
 }
 
 class AppTestPlugin : Plugin<Project> {
     override fun apply(project: Project) {
         val namespace = "com.android.security"
+        val placeholder = "_AutoReproPlaceholder"
         val appTest = project.extensions.create("appTest", AppTestExtension::class.java)
 
         val writeManifestTask =
@@ -71,14 +73,15 @@ class AppTestPlugin : Plugin<Project> {
             // Because every module must be unique, append a placeholder to find/replace on import.
             // https://source.android.com/docs/setup/reference/androidbp
             // "every module must have a name property, and the value must be unique"
-            val rename = project.name + "_AutoReproPlaceholder"
+            val rename = "${project.name}$placeholder"
 
             // Copy our restricted-scope AppTestExtension into the normal Android extension
             // BaseAppModuleExtension is internal to the AGP, but is widely used by similar
             // extensions and unlikely to break
             project.extensions.configure<BaseAppModuleExtension>("android") {
                 // Base on the Gradle project name so each APK is guaranteed to have unique id
-                it.defaultConfig.applicationId = "$namespace.$rename"
+                it.defaultConfig.applicationId =
+                    appTest.applicationId?.let { "$it$placeholder" } ?: "$namespace.$rename"
                 // Set the namespace to reduce refactoring requirements for STS integration
                 // https://developer.android.com/build/configure-app-module#set-namespace
                 it.namespace = namespace
