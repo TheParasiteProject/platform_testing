@@ -297,9 +297,10 @@ internal constructor(
     }
 
     /** Clicks the notification to open the bouncer. */
-    fun clickToBouncer(): Bouncer {
+    @JvmOverloads
+    fun clickToBouncer(fromExpandedShadeOnLockscreen: Boolean = false): Bouncer {
         assertWithMessage("The notification should be a lockscreen one")
-            .that(fromLockscreen)
+            .that(fromLockscreen || fromExpandedShadeOnLockscreen)
             .isTrue()
         Gestures.click(notification, "Notification")
         return Bouncer(/* notification= */ this)
