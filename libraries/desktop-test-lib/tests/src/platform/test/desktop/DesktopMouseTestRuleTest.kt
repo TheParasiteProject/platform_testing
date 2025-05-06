@@ -92,6 +92,7 @@ class DesktopMouseTestRuleTest {
             DisplayTopologyGraph.DisplayNode(
                 1,
                 DEFAULT_DENSITY,
+                RectF(), // unused
                 arrayOf(
                     DisplayTopologyGraph.AdjacentDisplay(
                         2,
@@ -104,6 +105,7 @@ class DesktopMouseTestRuleTest {
             DisplayTopologyGraph.DisplayNode(
                 2,
                 DEFAULT_DENSITY,
+                RectF(), // unused
                 arrayOf(
                     DisplayTopologyGraph.AdjacentDisplay(
                         1,
@@ -126,6 +128,7 @@ class DesktopMouseTestRuleTest {
             DisplayTopologyGraph.DisplayNode(
                 3,
                 DEFAULT_DENSITY,
+                RectF(), // unused
                 arrayOf(
                     DisplayTopologyGraph.AdjacentDisplay(
                         2,
@@ -138,6 +141,7 @@ class DesktopMouseTestRuleTest {
             DisplayTopologyGraph.DisplayNode(
                 4,
                 DEFAULT_DENSITY,
+                RectF(), // unused
                 arrayOf(
                     DisplayTopologyGraph.AdjacentDisplay(
                         2,
