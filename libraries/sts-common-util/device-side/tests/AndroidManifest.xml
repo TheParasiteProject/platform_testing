@@ -17,10 +17,10 @@
     package="com.android.sts.common.util.tests" >
     <application>
         <uses-library android:name="android.test.runner"/>
+        <activity android:name=".helperapp.PocActivity" />
     </application>
     <instrumentation
         android:name="androidx.test.runner.AndroidJUnitRunner"
         android:targetPackage="com.android.sts.common.util.tests"
         android:label="Tests for STS common device-side utils" />
 </manifest>
-
