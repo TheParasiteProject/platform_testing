@@ -23,6 +23,7 @@ import android.platform.helpers.IAutoAppGridHelper;
 import android.platform.helpers.IAutoPrivacySettingsHelper;
 import android.platform.helpers.IAutoSettingHelper;
 import android.platform.helpers.SettingsConstants;
+import android.util.Log;
 
 import androidx.test.runner.AndroidJUnit4;
 
@@ -35,6 +36,7 @@ public class MicroPhoneRecentAppsTest {
     private HelperAccessor<IAutoSettingHelper> mSettingHelper;
     private HelperAccessor<IAutoAppGridHelper> mAppGridHelper;
     private HelperAccessor<IAutoPrivacySettingsHelper> mPrivacySettingsHelper;
+    private static final String LOG_TAG = MicroPhoneRecentAppsTest.class.getSimpleName();
 
     private static final String APP = "Google Assistant";
     private static final String APP_TXT = "Google Assistant is using the mic";
@@ -58,8 +60,11 @@ public class MicroPhoneRecentAppsTest {
 
     @Test
     public void testRecentlyAccessedApps() {
+        Log.i(LOG_TAG, "Act: Open the privacy settings");
         mSettingHelper.get().openSetting(SettingsConstants.PRIVACY_SETTINGS);
+        Log.i(LOG_TAG, "Assert: Open MicroPhone");
         mSettingHelper.get().openMenuWith("MicroPhone");
+        Log.i(LOG_TAG, "Assert: Recent App time stamp is displayed in microphone settings page");
         assertTrue(
                 "Recent App time stamp is not displayed in microphone settings page",
                 mPrivacySettingsHelper.get().isRecentAppDisplayedWithStamp(APP));
@@ -67,9 +72,13 @@ public class MicroPhoneRecentAppsTest {
 
     @Test
     public void testViewAllLink() {
+        Log.i(LOG_TAG, "Act: Open the privacy settings");
         mSettingHelper.get().openSetting(SettingsConstants.PRIVACY_SETTINGS);
+        Log.i(LOG_TAG, "Act: Open MicroPhone");
         mSettingHelper.get().openMenuWith("MicroPhone");
+        Log.i(LOG_TAG, "Act: Click the View All Link");
         mPrivacySettingsHelper.get().clickViewAllLink();
+        Log.i(LOG_TAG, "Assert: Recent App time stamp is displayed in view all page");
         assertTrue(
                 "Recent App time stamp is not displayed in view all page",
                 mPrivacySettingsHelper.get().isRecentAppDisplayedWithStamp(APP));
@@ -77,7 +86,9 @@ public class MicroPhoneRecentAppsTest {
 
     @Test
     public void testMicroPhonePanelUpdatedWithCurrentAppUsage() {
+        Log.i(LOG_TAG, "Act: Click MicroPhone Status bar");
         mPrivacySettingsHelper.get().clickUnMutedMicroPhoneStatusBar();
+        Log.i(LOG_TAG, "Assert: Current App usage is displayed in the panel");
         assertTrue(
                 "Current App usage is not displayed in the panel",
                 mPrivacySettingsHelper.get().isMicroPhoneStatusMessageUpdated(APP_TXT));

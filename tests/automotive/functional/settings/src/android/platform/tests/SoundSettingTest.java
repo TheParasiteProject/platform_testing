@@ -26,6 +26,7 @@ import android.platform.helpers.IAutoSoundsSettingHelper.SoundType;
 import android.platform.helpers.IAutoSoundsSettingHelper.VolumeType;
 import android.platform.helpers.IAutoUISettingsHelper;
 import android.platform.helpers.SettingsConstants;
+import android.util.Log;
 
 import androidx.test.runner.AndroidJUnit4;
 
@@ -43,6 +44,7 @@ public class SoundSettingTest {
     private HelperAccessor<IAutoUISettingsHelper> mSettingsUIHelper;
     private HelperAccessor<IAutoSoundsSettingHelper> mSoundsSettingHelper;
     private HelperAccessor<IAutoSettingHelper> mSettingHelper;
+    private static final String LOG_TAG = SoundSettingTest.class.getSimpleName();
 
     public SoundSettingTest() throws Exception {
         mSoundsSettingHelper = new HelperAccessor<>(IAutoSoundsSettingHelper.class);
@@ -53,7 +55,9 @@ public class SoundSettingTest {
 
     @Before
     public void openSoundsSettingFacet() {
+        Log.i(LOG_TAG, "Act: Open the sound settings");
         mSettingHelper.get().openSetting(SettingsConstants.SOUND_SETTINGS);
+        Log.i(LOG_TAG, "Assert: Sound settings is open");
         assertTrue(
                 "Sound setting did not open",
                 mSettingsUIHelper
@@ -70,6 +74,7 @@ public class SoundSettingTest {
     public void testChangeMediaVolume() {
         mSoundsSettingHelper.get().setVolume(VolumeType.MEDIA, INDEX);
         int volume = mSoundsSettingHelper.get().getVolume(VolumeType.MEDIA);
+        Log.i(LOG_TAG, "Assert: Media Volume is set");
         assertTrue("Volume was not set", volume == INDEX);
     }
 
@@ -77,6 +82,7 @@ public class SoundSettingTest {
     public void testChangeAlarmVolume() {
         mSoundsSettingHelper.get().setVolume(VolumeType.ALARM, INDEX);
         int volume = mSoundsSettingHelper.get().getVolume(VolumeType.ALARM);
+        Log.i(LOG_TAG, "Assert: Alarm Volume is set");
         assertTrue("Volume was not set", volume == INDEX);
     }
 
@@ -84,6 +90,7 @@ public class SoundSettingTest {
     public void testChangeNavigationVolume() {
         mSoundsSettingHelper.get().setVolume(VolumeType.NAVIGATION, INDEX);
         int volume = mSoundsSettingHelper.get().getVolume(VolumeType.NAVIGATION);
+        Log.i(LOG_TAG, "Assert: Navigation Volume is set");
         assertTrue("Volume was not set", volume == INDEX);
     }
 
@@ -98,6 +105,7 @@ public class SoundSettingTest {
     public void testChangeRingtone() {
         mSoundsSettingHelper.get().setSound(SoundType.RINGTONE, RINGTONE);
         String sound = mSoundsSettingHelper.get().getSound(SoundType.RINGTONE);
+        Log.i(LOG_TAG, "Assert: Ringtone Volume is set");
         assertTrue("Sound was not changed", sound.equals(RINGTONE));
     }
 
@@ -105,6 +113,7 @@ public class SoundSettingTest {
     public void testChangeNotificationSound() {
         mSoundsSettingHelper.get().setSound(SoundType.NOTIFICATION, NOTIFICATION_SOUND);
         String sound = mSoundsSettingHelper.get().getSound(SoundType.NOTIFICATION);
+        Log.i(LOG_TAG, "Assert: Notification Volume is set");
         assertTrue("Sound was not changed", sound.equals(NOTIFICATION_SOUND));
     }
 
@@ -112,6 +121,7 @@ public class SoundSettingTest {
     public void testChangeAlarmSound() {
         mSoundsSettingHelper.get().setSound(SoundType.ALARM, ALARM_SOUND);
         String sound = mSoundsSettingHelper.get().getSound(SoundType.ALARM);
+        Log.i(LOG_TAG, "Assert: Alarm Volume is set");
         assertTrue("Sound was not changed", sound.equals(ALARM_SOUND));
     }
 }

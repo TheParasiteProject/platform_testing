@@ -24,6 +24,7 @@ import android.platform.helpers.HelperAccessor;
 import android.platform.helpers.IAutoSettingHelper;
 import android.platform.helpers.IAutoUISettingsHelper;
 import android.platform.helpers.SettingsConstants;
+import android.util.Log;
 
 import androidx.test.runner.AndroidJUnit4;
 
@@ -36,6 +37,7 @@ import org.junit.runner.RunWith;
 public class WifiSettingTest {
     private HelperAccessor<IAutoSettingHelper> mSettingHelper;
     private HelperAccessor<IAutoUISettingsHelper> mSettingsUIHelper;
+    private static final String LOG_TAG = WifiSettingTest.class.getSimpleName();
 
     public WifiSettingTest() throws Exception {
         mSettingsUIHelper = new HelperAccessor<>(IAutoUISettingsHelper.class);
@@ -58,28 +60,41 @@ public class WifiSettingTest {
 
     @Test
     public void testWifiSettings() {
+        Log.i(LOG_TAG, "Act: Turn Off Wifi");
         mSettingHelper.get().turnOnOffWifi(false);
+        Log.i(LOG_TAG, "Assert: Wifi is turned off");
         assertFalse(mSettingHelper.get().isWifiOn());
+        Log.i(LOG_TAG, "Act: Turn On Wifi");
         mSettingHelper.get().turnOnOffWifi(true);
+        Log.i(LOG_TAG, "Assert: Wifi is turned on");
         assertTrue(mSettingHelper.get().isWifiOn());
     }
 
     @Test
     public void testTurnOnOffHotspot() {
+        Log.i(LOG_TAG, "Act: Turn On Hotspot");
         mSettingHelper.get().turnOnOffHotspot(true);
+        Log.i(LOG_TAG, "Assert: Hotspot is On");
         assertTrue(mSettingHelper.get().isHotspotOn());
+        Log.i(LOG_TAG, "Act: Turn Off Hotspot");
         mSettingHelper.get().turnOnOffHotspot(false);
+        Log.i(LOG_TAG, "Assert: Hotspot is Off");
+        assertFalse(mSettingHelper.get().isHotspotOn());
     }
 
     @Test
     public void testWifiPreferences() {
+        Log.i(LOG_TAG, "Assert: Wi-Fi Preferences option is displayed");
         assertTrue(
                 "Wi-Fi Preferences option is not displayed",
                 mSettingsUIHelper.get().hasUIElement(AutomotiveConfigConstants.WIFI_PREFERENCES));
+        Log.i(LOG_TAG, "Act: Open Wifi preferences");
         mSettingHelper.get().openMenuWith("Wi‑Fi preferences");
+        Log.i(LOG_TAG, "Assert: Turn on Wi‑Fi automatically is displayed");
         assertTrue(
                 "Turn on Wi‑Fi automatically is not displayed",
                 mSettingHelper.get().checkMenuExists("Turn on Wi‑Fi automatically"));
+        Log.i(LOG_TAG, "Assert: Turn on Wi-Fi automatically toggle is displayed");
         assertTrue(
                 "Turn on Wi-Fi automatically toggle is not displayed",
                 mSettingsUIHelper
@@ -89,6 +104,7 @@ public class WifiSettingTest {
 
     @Test
     public void testJoinOtherNetwork() {
+        Log.i(LOG_TAG, "Assert: Join other network option is displayed");
         assertTrue(
                 "Join other network option is not displayed",
                 mSettingsUIHelper.get().hasUIElement(AutomotiveConfigConstants.JOIN_OTHER_NETWORK));

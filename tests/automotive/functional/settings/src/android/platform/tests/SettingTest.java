@@ -25,6 +25,7 @@ import android.platform.helpers.IAutoAppInfoSettingsHelper;
 import android.platform.helpers.IAutoSettingHelper;
 import android.platform.helpers.IAutoUISettingsHelper;
 import android.platform.helpers.SettingsConstants;
+import android.util.Log;
 
 import androidx.test.runner.AndroidJUnit4;
 
@@ -38,6 +39,7 @@ public class SettingTest {
     private HelperAccessor<IAutoAppInfoSettingsHelper> mAppInfoSettingsHelper;
     private HelperAccessor<IAutoSettingHelper> mSettingHelper;
     private HelperAccessor<IAutoUISettingsHelper> mSettingsUIHelper;
+    private static final String LOG_TAG = SettingTest.class.getSimpleName();
 
     public SettingTest() throws Exception {
         mSettingsUIHelper = new HelperAccessor<>(IAutoUISettingsHelper.class);
@@ -53,7 +55,9 @@ public class SettingTest {
 
     @Test
     public void testDisplaySettings() {
+        Log.i(LOG_TAG, "Act: Open the Display Setting");
         mSettingHelper.get().openSetting(SettingsConstants.DISPLAY_SETTINGS);
+        Log.i(LOG_TAG, "Assert: Display Setting is open");
         assertTrue(
                 "Display Setting did not open",
                 mSettingHelper.get().checkMenuExists("Brightness level"));
@@ -61,7 +65,9 @@ public class SettingTest {
 
     @Test
     public void testSoundSettings() {
+        Log.i(LOG_TAG, "Act: Open the Sound Setting");
         mSettingHelper.get().openSetting(SettingsConstants.SOUND_SETTINGS);
+        Log.i(LOG_TAG, "Assert: Sound Setting is open");
         assertTrue(
                 "Sound setting did not open",
                 mSettingsUIHelper
@@ -71,7 +77,9 @@ public class SettingTest {
 
     @Test
     public void testAppinfoSettings() {
+        Log.i(LOG_TAG, "Act: Open the App Setting");
         mSettingHelper.get().openSetting(SettingsConstants.APPS_SETTINGS);
+        Log.i(LOG_TAG, "Assert: App Setting is open");
         assertTrue(
                 "Apps setting did not open",
                 mSettingHelper.get().checkMenuExists("Recently opened")
@@ -81,7 +89,9 @@ public class SettingTest {
 
     @Test
     public void testAccountsSettings() {
+        Log.i(LOG_TAG, "Act: Open the Account Setting");
         mSettingHelper.get().openSetting(SettingsConstants.PROFILE_ACCOUNT_SETTINGS);
+        Log.i(LOG_TAG, "Assert: Profiles and accounts settings is open");
         assertTrue(
                 "Profiles and accounts settings did not open",
                 mSettingHelper.get().checkMenuExists("Add a profile"));
@@ -89,7 +99,9 @@ public class SettingTest {
 
     @Test
     public void testSystemSettings() {
+        Log.i(LOG_TAG, "Act: Open the System Setting");
         mSettingHelper.get().openSetting(SettingsConstants.SYSTEM_SETTINGS);
+        Log.i(LOG_TAG, "Assert: System Setting is opened");
         assertTrue(
                 "System settings did not open",
                 mSettingHelper.get().checkMenuExists("Languages & input"));
@@ -97,12 +109,17 @@ public class SettingTest {
 
     @Test
     public void testBluetoothSettings() {
+        Log.i(LOG_TAG, "Act: Open the Bluetooth Setting");
         mSettingHelper.get().openSetting(SettingsConstants.BLUETOOTH_SETTINGS);
+        Log.i(LOG_TAG, "Assert: Bluetooth Setting is opened");
         assertTrue(
                 "Bluetooth Setting did not open",
                 mSettingHelper.get().checkMenuExists("Pair new device"));
+        Log.i(LOG_TAG, "Act: Turn Off the Bluetooth");
         mSettingHelper.get().turnOnOffBluetooth(false);
+        Log.i(LOG_TAG, "Assert: Blue Setting is Off");
         assertFalse(mSettingHelper.get().isBluetoothOn());
+        Log.i(LOG_TAG, "Act: Turn On the Bluetooth");
         mSettingHelper.get().turnOnOffBluetooth(true);
     }
 }

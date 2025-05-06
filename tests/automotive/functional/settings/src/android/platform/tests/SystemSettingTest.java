@@ -22,6 +22,7 @@ import android.platform.helpers.HelperAccessor;
 import android.platform.helpers.IAutoSettingHelper;
 import android.platform.helpers.IAutoSystemSettingsHelper;
 import android.platform.helpers.SettingsConstants;
+import android.util.Log;
 
 import androidx.test.runner.AndroidJUnit4;
 
@@ -36,6 +37,7 @@ import java.util.Date;
 public class SystemSettingTest {
     private HelperAccessor<IAutoSettingHelper> mSettingHelper;
     private HelperAccessor<IAutoSystemSettingsHelper> mSystemSettingsHelper;
+    private static final String LOG_TAG = SystemSettingTest.class.getSimpleName();
 
     public SystemSettingTest() throws Exception {
         mSettingHelper = new HelperAccessor<>(IAutoSettingHelper.class);
@@ -45,7 +47,9 @@ public class SystemSettingTest {
 
     @Before
     public void openSystemFacet() {
+        Log.i(LOG_TAG, "Act: Open the System Settings");
         mSettingHelper.get().openSetting(SettingsConstants.SYSTEM_SETTINGS);
+        Log.i(LOG_TAG, "Assert: System settings is open");
         assertTrue(
                 "System settings did not open",
                 mSettingHelper.get().checkMenuExists("Languages & input"));
@@ -59,6 +63,7 @@ public class SystemSettingTest {
     @Test
     public void testDeviceModel() {
         String model = android.os.Build.MODEL;
+        Log.i(LOG_TAG, "Assert: Model from API and Model from UI are the same");
         assertTrue(
                 "Model from API and Model from UI are not the same",
                 mSystemSettingsHelper.get().getDeviceModel().endsWith(model));
@@ -68,6 +73,7 @@ public class SystemSettingTest {
     public void testAndroidVersion() {
         String androidVersion = android.os.Build.VERSION.RELEASE;
         String androidVersionCodename = android.os.Build.VERSION.RELEASE_OR_CODENAME;
+        Log.i(LOG_TAG, "Assert: Android Version from API and Android Version from UI are the same");
         assertTrue(
                 "Android Version from API and Android Version from UI are not the same",
                 mSystemSettingsHelper.get().getAndroidVersion().endsWith(androidVersion)
@@ -86,6 +92,7 @@ public class SystemSettingTest {
                         Integer.valueOf(arr[0]),
                         Integer.valueOf(arr[1]) - 1,
                         Integer.valueOf(arr[2]));
+        Log.i(LOG_TAG, "Assert: security patch from API and security patch from UI are the same");
         assertTrue(
                 "security patch from API and security patch from UI are not the same",
                 date.equals(mSystemSettingsHelper.get().getAndroidSecurityPatchLevel()));
@@ -94,6 +101,7 @@ public class SystemSettingTest {
     @Test
     public void testKernelVersion() {
         String kernelVersion = System.getProperty("os.version");
+        Log.i(LOG_TAG, "Assert: kernel version from API and kernel from UI are the same");
         assertTrue(
                 "kernel version from API and kernel from UI are not the same",
                 mSystemSettingsHelper.get().getKernelVersion().startsWith(kernelVersion));
@@ -102,6 +110,7 @@ public class SystemSettingTest {
     @Test
     public void testBuildNumber() {
         String buildNumber = android.os.Build.DISPLAY;
+        Log.i(LOG_TAG, "Assert: Build number from API and Build number from UI are the same");
         assertTrue(
                 "Build number from API and Build number from UI are not the same",
                 buildNumber.equals(mSystemSettingsHelper.get().getBuildNumber()));
