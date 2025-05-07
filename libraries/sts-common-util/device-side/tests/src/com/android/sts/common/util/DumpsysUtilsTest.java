@@ -19,15 +19,20 @@ package com.android.sts.common.util.tests;
 import static androidx.test.platform.app.InstrumentationRegistry.getInstrumentation;
 
 import static com.android.compatibility.common.util.SystemUtil.runShellCommand;
+import static com.android.sts.common.SystemUtil.DEFAULT_MAX_POLL_TIME_MS;
+import static com.android.sts.common.SystemUtil.DEFAULT_POLL_TIME_MS;
 import static com.android.sts.common.SystemUtil.poll;
 
 import static com.google.common.truth.Truth.assertWithMessage;
+import static com.google.common.truth.TruthJUnit.assume;
 
 import android.app.Instrumentation;
+import android.app.KeyguardManager;
+import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
-import android.provider.Settings;
+import android.content.IntentFilter;
 
 import androidx.test.uiautomator.By;
 import androidx.test.uiautomator.BySelector;
@@ -40,13 +45,20 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.util.concurrent.Semaphore;
+import java.util.concurrent.TimeUnit;
+import java.util.function.BooleanSupplier;
+
 /** Unit tests for {@link DumpsysUtils}. */
 public class DumpsysUtilsTest {
-    private String mActivityName;
-    private UiDevice mUiDevice;
-    private BySelector mSelector;
-    private Intent mIntent;
-    private Context mContext;
+    private String mActivityName = null;
+    private UiDevice mUiDevice = null;
+    private BySelector mSelector = null;
+    private Intent mIntent = null;
+    private Context mContext = null;
+    private BroadcastReceiver mBroadcastReceiver = null;
+    private Semaphore mBroadcastReceived = null;
+    private long timeout = 5_000L;
 
     @Before
     public void setUp() throws Exception {
@@ -57,53 +69,98 @@ public class DumpsysUtilsTest {
         Instrumentation instrumentation = getInstrumentation();
         mContext = instrumentation.getContext();
         mUiDevice = UiDevice.getInstance(instrumentation);
+        ComponentName componentName =
+                ComponentName.createRelative(mContext, ".helperapp.PocActivity");
         mIntent =
-                new Intent(Settings.ACTION_SETTINGS)
+                new Intent()
+                        .setComponent(componentName)
                         .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-        ComponentName componentName = mIntent.resolveActivity(mContext.getPackageManager());
         mActivityName = componentName.flattenToString();
         mSelector = By.pkg(componentName.getPackageName());
+
+        // Check if device is in locked/secured state.
+        KeyguardManager keyguardManager = mContext.getSystemService(KeyguardManager.class);
+        assume().withMessage("Device is in secured state")
+                .that(keyguardManager.isDeviceSecure() || keyguardManager.isDeviceLocked())
+                .isFalse();
+
+        // Register a broadcast receiver to detect whether the 'PocActivity' was launched.
+        mBroadcastReceiver =
+                new BroadcastReceiver() {
+                    @Override
+                    public void onReceive(Context context, Intent intent) {
+                        mBroadcastReceived.release();
+                    }
+                };
+        mContext.registerReceiver(
+                mBroadcastReceiver,
+                new IntentFilter(mContext.getPackageName()),
+                Context.RECEIVER_EXPORTED);
     }
 
     @After
     public void tearDown() throws Exception {
-        mUiDevice.pressHome();
-        mUiDevice.wait(Until.gone(mSelector), 5_000L /* timeout */);
+        if (mUiDevice != null) {
+            mUiDevice.pressHome();
+
+            if (mSelector != null) {
+                mUiDevice.wait(Until.gone(mSelector), timeout);
+            }
+        }
+
+        if (mBroadcastReceived != null) {
+            mContext.unregisterReceiver(mBroadcastReceiver);
+        }
     }
 
     @Test
     public void testActivityResumed() throws Exception {
         assertWithMessage("Activity was not resumed")
-                .that(
-                        poll(
-                                () -> {
-                                    mContext.startActivity(mIntent);
-                                    return DumpsysUtils.isActivityResumed(mActivityName);
-                                }))
+                .that(startPocActivity(() -> DumpsysUtils.isActivityResumed(mActivityName)))
                 .isTrue();
     }
 
     @Test
     public void testActivityVisible() throws Exception {
         assertWithMessage("Activity was not visible")
-                .that(
-                        poll(
-                                () -> {
-                                    mContext.startActivity(mIntent);
-                                    return DumpsysUtils.isActivityVisible(mActivityName);
-                                }))
+                .that(startPocActivity(() -> DumpsysUtils.isActivityVisible(mActivityName)))
                 .isTrue();
     }
 
     @Test
     public void testActivityLaunched() throws Exception {
         assertWithMessage("Activity was not launched")
-                .that(
-                        poll(
-                                () -> {
-                                    mContext.startActivity(mIntent);
-                                    return DumpsysUtils.isActivityLaunched(mActivityName);
-                                }))
+                .that(startPocActivity(() -> DumpsysUtils.isActivityLaunched(mActivityName)))
                 .isTrue();
+    }
+
+    private boolean startPocActivity(final BooleanSupplier dumpsysCommand) throws Exception {
+        // Start PocActivity and wait for broadcast from 'onResume()'.
+        mBroadcastReceived = new Semaphore(0);
+        Semaphore isPocActivityInOnResume = new Semaphore(0);
+        boolean isStatusExpected =
+                poll(
+                        () -> {
+                            try {
+                                mContext.startActivity(mIntent);
+                                isPocActivityInOnResume.tryAcquire();
+                                if (mBroadcastReceived.tryAcquire(timeout, TimeUnit.MILLISECONDS)) {
+                                    boolean result =
+                                            poll(
+                                                    () -> dumpsysCommand.getAsBoolean(),
+                                                    DEFAULT_POLL_TIME_MS,
+                                                    DEFAULT_MAX_POLL_TIME_MS / 3);
+                                    isPocActivityInOnResume.release();
+                                    return result;
+                                }
+                            } catch (Exception e) {
+                                // Ignore unexpected exceptions.
+                            }
+                            return false;
+                        });
+        assume().withMessage("PocActivity did not start")
+                .that(isPocActivityInOnResume.tryAcquire())
+                .isTrue();
+        return isStatusExpected;
     }
 }
