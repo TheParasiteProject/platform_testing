@@ -101,11 +101,17 @@ public class DumpsysUtils {
     public static boolean isActivityResumed(String activityName) {
         // Calls 'getParsedDumpsys' method to retrieve the matcher object for the activity
         // Returns true if 'mResumed=true' is found in the dumpsys output, otherwise false
-        return getParsedDumpsys(
+        Matcher matcher =
+                getParsedDumpsys(
                         "activity" /* service */,
                         Map.of("-a", activityName) /* args */,
-                        Pattern.compile("mResumed=true" /* regex */, Pattern.CASE_INSENSITIVE))
-                .find();
+                        Pattern.compile(
+                                "mResumed=(true|false)" /* regex */, Pattern.CASE_INSENSITIVE));
+        if (!matcher.find()) {
+            throw new IllegalStateException(
+                    "Dumpsys output does not contain status for 'mResumed'");
+        }
+        return Boolean.parseBoolean(matcher.group(1));
     }
 
     /**
@@ -117,12 +123,18 @@ public class DumpsysUtils {
     public static boolean isActivityVisible(String activityName) {
         // Calls 'getParsedDumpsys' method to retrieve the matcher object for the activity
         // Returns true if 'reportedVisible=true' is found in the dumpsys output, otherwise false
-        return getParsedDumpsys(
+        Matcher matcher =
+                getParsedDumpsys(
                         "activity" /* service */,
                         Map.of("-a", activityName) /* args */,
                         Pattern.compile(
-                                "reportedVisible=true" /* regex */, Pattern.CASE_INSENSITIVE))
-                .find();
+                                "reportedVisible=(true|false)" /* regex */,
+                                Pattern.CASE_INSENSITIVE));
+        if (!matcher.find()) {
+            throw new IllegalStateException(
+                    "Dumpsys output does not contain status for 'reportedVisible'");
+        }
+        return Boolean.parseBoolean(matcher.group(1));
     }
 
     /**
