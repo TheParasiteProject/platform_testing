@@ -96,6 +96,27 @@ public class SettingsUIHelperImpl extends AbstractStandardAppHelper
         return isElementPresent;
     }
 
+    @Override
+    public boolean hasSettingsMenu(String element) {
+        boolean isElementPresent;
+        BySelector elementSelector = getUiElementFromConfig(element);
+        BySelector settingsMenu =
+                getUiElementFromConfig(AutomotiveConfigConstants.SETTINGS_UI_SCROLL_ELEMENT);
+        isElementPresent = getSpectatioUiUtil().hasUiElement(elementSelector);
+        if (!isElementPresent) {
+            isElementPresent =
+                    mScrollUtility.scrollAndCheckIfUiElementExist(
+                            mScrollAction,
+                            mScrollDirection,
+                            mForwardButtonSelector,
+                            mBackwardButtonSelector,
+                            settingsMenu,
+                            elementSelector,
+                            "scroll and find UI Element");
+        }
+        return isElementPresent;
+    }
+
     /** {@inheritDoc} */
     @Override
     public void openUIOptions(String targetConstant) {

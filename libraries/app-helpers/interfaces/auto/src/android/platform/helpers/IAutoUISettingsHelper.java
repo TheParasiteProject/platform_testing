@@ -43,4 +43,13 @@ public interface IAutoUISettingsHelper extends IAppHelper {
      * @param element - element name
      */
     boolean hasUIElement(String element);
+
+    /**
+     * Setup expectation: Verify if UI element is present
+     *
+     * <p>To Verify if UI element is present
+     *
+     * @param element - element name
+     */
+    boolean hasSettingsMenu(String element);
 }
