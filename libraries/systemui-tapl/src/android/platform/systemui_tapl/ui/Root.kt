@@ -446,7 +446,7 @@ class Root private constructor(val displayId: Int = DEFAULT_DISPLAY) {
         traceSection("waitForShadeToOpen") {
             qsHeaderSelector.assertVisible(
                 timeout = NOTIFICATION_SHADE_OPEN_TIMEOUT,
-                errorProvider = { "Notification shade didn't open" },
+                errorProvider = { "Notification shade didn't open on display $displayId" },
             )
         }
     }

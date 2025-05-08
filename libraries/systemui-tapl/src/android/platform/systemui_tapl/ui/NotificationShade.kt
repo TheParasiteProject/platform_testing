@@ -225,7 +225,7 @@ class NotificationShade internal constructor(val displayId: Int = DEFAULT_DISPLA
                 sysuiResSelector(UI_QS_CONTAINER_ID, displayId),
                 Duration.ofMillis(UI_RESPONSE_TIMEOUT_MSECS),
             ) {
-                "Can't find qs container."
+                "Can't find qs container on display $displayId."
             }
 
     private val notificationShadeScrollContainer: UiObject2
@@ -234,7 +234,7 @@ class NotificationShade internal constructor(val displayId: Int = DEFAULT_DISPLA
                 sysuiResSelector(UI_SCROLLABLE_ELEMENT_ID, displayId),
                 Duration.ofMillis(UI_RESPONSE_TIMEOUT_MSECS),
             ) {
-                "Can't find notification shade scroll container."
+                "Can't find notification shade scroll container on display $displayId."
             }
 
     // UiDevice#getDisplayHeight() excludes insets.
@@ -349,11 +349,11 @@ class NotificationShade internal constructor(val displayId: Int = DEFAULT_DISPLA
             traceSection("waitForShadeToClose") {
                 // QS header view used in all configurations of Notification shade.
                 sysuiResSelector("split_shade_status_bar", displayId).assertInvisible {
-                    "Notification shade didn't close"
+                    "Notification shade on dislplay $displayId didn't close"
                 }
                 // Asserts on new QS resId.
                 sysuiResSelector("shade_header_root", displayId).assertInvisible {
-                    "Notification shade didn't close"
+                    "Notification shade on display $displayId didn't close"
                 }
             }
         }
