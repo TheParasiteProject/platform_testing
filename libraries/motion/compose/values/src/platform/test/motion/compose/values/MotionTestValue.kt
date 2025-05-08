@@ -16,12 +16,15 @@
 
 package platform.test.motion.compose.values
 
+import android.annotation.SuppressLint
 import androidx.compose.runtime.Stable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.node.CompositionLocalConsumerModifierNode
+import androidx.compose.ui.node.DelegatingNode
 import androidx.compose.ui.node.ModifierNodeElement
 import androidx.compose.ui.node.SemanticsModifierNode
 import androidx.compose.ui.node.currentValueOf
+import androidx.compose.ui.node.invalidateSemantics
 import androidx.compose.ui.platform.InspectorInfo
 import androidx.compose.ui.semantics.SemanticsPropertyKey
 import androidx.compose.ui.semantics.SemanticsPropertyReceiver
@@ -68,7 +71,7 @@ private data class MotionTestValuesElement(val values: MotionTestValueScope.() -
     }
 
     override fun update(node: MotionTestValuesNode) {
-        node.values = values
+        node.update(values)
     }
 
     override fun InspectorInfo.inspectableProperties() {
@@ -76,18 +79,40 @@ private data class MotionTestValuesElement(val values: MotionTestValueScope.() -
     }
 }
 
-private class MotionTestValuesNode(var values: MotionTestValueScope.() -> Unit) :
-    Modifier.Node(), SemanticsModifierNode, CompositionLocalConsumerModifierNode {
+private class MotionTestValuesNode(private var values: MotionTestValueScope.() -> Unit) :
+    DelegatingNode(), CompositionLocalConsumerModifierNode {
+
+    fun update(updated: MotionTestValueScope.() -> Unit) {
+        if (values !== updated) {
+            values = updated
+            delegateProvideNode?.values = updated
+            delegateProvideNode?.invalidateSemantics()
+        }
+    }
+
+    var delegateProvideNode: MotionTestValuesProviderNode? = null
+
+    override fun onAttach() {
+        // MotionTest set LocalEnableMotionTestValueCollection only during setup, never updated.
+        // For simplicity, reading the state only during onAttach, as the "correct" solution of
+        // observing changes would not provide any benefits.
+        @SuppressLint("SuspiciousCompositionLocalModifierRead")
+        if (currentValueOf(LocalEnableMotionTestValueCollection)) {
+            delegateProvideNode = delegate(MotionTestValuesProviderNode(values))
+        }
+    }
+}
+
+private class MotionTestValuesProviderNode(var values: MotionTestValueScope.() -> Unit) :
+    Modifier.Node(), SemanticsModifierNode {
 
     override fun SemanticsPropertyReceiver.applySemantics() {
-        if (currentValueOf(LocalEnableMotionTestValueCollection)) {
-            values.invoke(
-                object : MotionTestValueScope {
-                    override fun <T> T.exportAs(key: MotionTestValueKey<T>) {
-                        this@applySemantics[key.semanticsPropertyKey] = this
-                    }
+        values.invoke(
+            object : MotionTestValueScope {
+                override fun <T> T.exportAs(key: MotionTestValueKey<T>) {
+                    this@applySemantics[key.semanticsPropertyKey] = this
                 }
-            )
-        }
+            }
+        )
     }
 }

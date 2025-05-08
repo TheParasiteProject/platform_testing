@@ -16,10 +16,10 @@
 
 package platform.test.motion.compose.values
 
+import androidx.compose.foundation.layout.Box
 import androidx.compose.material3.Text
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.test.SemanticsMatcher
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithText
 import androidx.test.ext.junit.runners.AndroidJUnit4
@@ -53,6 +53,17 @@ class MotionTestValueTest {
         val semanticsNode = composeRule.onNodeWithText("foo").fetchSemanticsNode()
         assertThat(semanticsNode.config.contains(foo.semanticsPropertyKey)).isTrue()
         assertThat(semanticsNode.config[foo.semanticsPropertyKey]).isEqualTo(1f)
+    }
+
+    @Test
+    fun modifier_whenDisabled_doesNotEvenCreateSemanticNode() {
+        composeRule.setContent { Box(Modifier.motionTestValues { fail() }) }
+
+        val allNodes =
+            composeRule.onAllNodes(SemanticsMatcher("everything") { true }).fetchSemanticsNodes()
+
+        assertThat(allNodes).hasSize(1)
+        assertThat(allNodes.first().isRoot).isTrue()
     }
 
     companion object {
