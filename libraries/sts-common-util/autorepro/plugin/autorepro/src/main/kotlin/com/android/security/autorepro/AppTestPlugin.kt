@@ -33,9 +33,9 @@ import org.gradle.api.tasks.Copy
 // See "android_test_helper_app" at the "Soong reference files"
 // https://ci.android.com/builds/latest/branches/aosp-build-tools/targets/linux/view/soong_build.html
 open class AppTestExtension {
-    var minSdk: Int = 31 // oldest security-supported
-    var targetSdk: Int = 34 // newest security-supported
-    var compileSdk: Int = 34 // compile = target
+    var minSdk: Int? = null // oldest security-supported
+    var targetSdk: Int? = null // newest security-supported
+    var compileSdk: Int? = null // compile = target
     var applicationId: String? = null
 }
 
@@ -85,9 +85,9 @@ class AppTestPlugin : Plugin<Project> {
                 // Set the namespace to reduce refactoring requirements for STS integration
                 // https://developer.android.com/build/configure-app-module#set-namespace
                 it.namespace = namespace
-                it.compileSdk = appTest.compileSdk
-                it.defaultConfig.minSdk = appTest.minSdk
-                it.defaultConfig.targetSdk = appTest.targetSdk
+                it.compileSdk = appTest.compileSdk ?: 34
+                it.defaultConfig.minSdk = appTest.minSdk ?: 31
+                it.defaultConfig.targetSdk = appTest.targetSdk ?: 34
             }
 
             val implementationConfiguration = project.configurations.getByName("implementation")
