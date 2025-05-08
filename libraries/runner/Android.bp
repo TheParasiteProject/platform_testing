@@ -20,8 +20,8 @@ package {
 android_library {
     name: "platform-parametric-runner-lib",
     manifest: "AndroidManifest.xml",
-    sdk_version: "test_current",
-    min_sdk_version: "Tiramisu",
+    sdk_version: "34",
+    min_sdk_version: "33",
     lint: {
         test: true,
     },
@@ -48,7 +48,7 @@ android_test {
         "platform-parametric-runner-lib",
     ],
 
-    sdk_version: "current",
+    sdk_version: "34",
 
     test_suites: ["general-tests"],
 }
