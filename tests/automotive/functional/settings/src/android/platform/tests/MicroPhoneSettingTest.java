@@ -90,7 +90,7 @@ public class MicroPhoneSettingTest {
     }
 
     @Test
-    public void manageMicrophonePermissions() {
+    public void testManageMicrophonePermissions() {
         Log.i(LOG_TAG, "Act: Privacy settings is open");
         mSettingHelper.get().openSetting(SettingsConstants.PRIVACY_SETTINGS);
         assertTrue(
