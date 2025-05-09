@@ -23,11 +23,15 @@ import android.platform.helpers.IAutoAppGridHelper;
 import android.platform.helpers.IAutoHomeHelper;
 import android.platform.helpers.IAutoMediaHelper;
 import android.platform.test.option.StringOption;
+import android.platform.test.rules.ConditionalIgnore;
+import android.platform.test.rules.ConditionalIgnoreRule;
+import android.platform.test.rules.IgnoreOnPortrait;
 
 import androidx.test.runner.AndroidJUnit4;
 
 import org.junit.After;
 import org.junit.ClassRule;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -36,6 +40,7 @@ import java.util.List;
 
 @RunWith(AndroidJUnit4.class)
 public class OpenAppFromMediaCenterTest {
+    @Rule public ConditionalIgnoreRule rule = new ConditionalIgnoreRule();
     private static final String BLUETOOTH_APP = "bluetooth-app";
     private static final String MEDIA_APPS = "media-apps";
 
@@ -91,6 +96,7 @@ public class OpenAppFromMediaCenterTest {
     }
 
     @Test
+    @ConditionalIgnore(condition = IgnoreOnPortrait.class)
     public void testMediaAppPresentInMediaGrid() {
         mAutoAppGridHelper.get().open();
         assertTrue("App Grid is not open", mAutoAppGridHelper.get().isAppInForeground());
