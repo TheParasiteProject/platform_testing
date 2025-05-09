@@ -41,6 +41,15 @@ android_robolectric_test {
     instrumentation_for: "MyRoboApplication",
 
     strict_mode: false,
+
+    test_options: {
+        test_runner_options: [
+            {
+                name: "java-flags",
+                value: "-Drobolectric.a.random.property=true",
+            },
+        ],
+    },
 }
 
 android_robolectric_test {
