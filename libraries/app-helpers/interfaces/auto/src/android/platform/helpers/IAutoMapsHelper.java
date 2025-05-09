@@ -92,6 +92,27 @@ public interface IAutoMapsHelper extends IAppHelper {
     void launchKeyboard();
 
     /**
+     * Setup expectations: Maps app search bar is open
+     *
+     * <p>This method will click maps search back button.
+     */
+    void clickMapsSearchBackButton();
+
+    /**
+     * Setup expectations: Maps keyboard is trying to access microphone
+     *
+     * <p>This method will allow keyboard to access microphone.
+     */
+    void allowGoogleKeyboardToRecordAudio();
+
+    /**
+     * Setup expectations: microphone is used
+     *
+     * <p>checks whether microphone status panel is opened or not.
+     */
+     boolean isMicrophoneStatusPanelOpened();
+
+    /**
      * Setup expectations: Maps app is open
      *
      * <p>This method verifies the if keyboard is restricted when the drive mode is enabled.
