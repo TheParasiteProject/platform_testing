@@ -347,15 +347,15 @@ open class PerfettoTraceMonitor(val config: TraceConfig) : TraceMonitor() {
     companion object {
         private const val TRACE_BUFFER_SIZE_KB = 1024 * 1024
 
-        private const val IME_DATA_SOURCE = "android.inputmethod"
-        private const val SF_LAYERS_DATA_SOURCE = "android.surfaceflinger.layers"
-        private const val SF_TRANSACTIONS_DATA_SOURCE = "android.surfaceflinger.transactions"
-        private const val TRANSITIONS_DATA_SOURCE = "com.android.wm.shell.transition"
-        private const val PROTOLOG_DATA_SOURCE = "android.protolog"
-        private const val VIEWCAPTURE_DATA_SOURCE = "android.viewcapture"
-        private const val WINDOWMANAGER_DATA_SOURCE = "android.windowmanager"
-        private const val PROCESS_STATS_DATA_SOURCE = "linux.process_stats"
-        private const val FTRACE_DATA_SOURCE = "linux.ftrace"
+        const val IME_DATA_SOURCE = "android.inputmethod"
+        const val SF_LAYERS_DATA_SOURCE = "android.surfaceflinger.layers"
+        const val SF_TRANSACTIONS_DATA_SOURCE = "android.surfaceflinger.transactions"
+        const val TRANSITIONS_DATA_SOURCE = "com.android.wm.shell.transition"
+        const val PROTOLOG_DATA_SOURCE = "android.protolog"
+        const val VIEWCAPTURE_DATA_SOURCE = "android.viewcapture"
+        const val WINDOWMANAGER_DATA_SOURCE = "android.windowmanager"
+        const val PROCESS_STATS_DATA_SOURCE = "linux.process_stats"
+        const val FTRACE_DATA_SOURCE = "linux.ftrace"
 
         private val allPerfettoPids = mutableListOf<Int>()
         private val allPerfettoPidsLock = ReentrantLock()
