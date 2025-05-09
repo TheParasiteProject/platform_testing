@@ -148,8 +148,8 @@ public class SimpleperfHelper {
      */
     public boolean stopSimpleperf() throws IOException {
         if (!isSimpleperfRunning()) {
-            Log.e(LOG_TAG, "Simpleperf stop called, but simpleperf is not running.");
-            return false;
+            Log.i(LOG_TAG, "Simpleperf stop called, but simpleperf is not running.");
+            return true;
         }
 
         String stopOutput = mUiDevice.executeShellCommand(SIMPLEPERF_STOP_CMD);

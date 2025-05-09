@@ -47,7 +47,8 @@ public class SimpleperfListener extends BaseMetricListener {
     // Default subcommand passed to simpleperf
     private static final String DEFAULT_SUBCOMMAND = "record";
     // Default arguments passed to simpleperf command
-    private static final String DEFAULT_ARGUMENTS = "-g --post-unwind=yes -f 500 -a --exclude-perf";
+    private static final String DEFAULT_ARGUMENTS =
+            "-g --post-unwind=yes -f 500 --exclude-perf --log-to-android-buffer";
     // Destination directory to save the trace results.
     private static final String TEST_OUTPUT_ROOT = "test_output_root";
     // Simpleperf file path key.
@@ -164,6 +165,9 @@ public class SimpleperfListener extends BaseMetricListener {
                 mProcessToPid.put(process, mSimpleperfHelper.getPID(process));
             }
             mArguments += " -p " + String.join(",", mProcessToPid.values());
+        } else {
+            // Record system wide.
+            mArguments += " -a";
         }
 
         mTestIterations = Integer.parseInt(args.getString(TEST_ITERATIONS, "1"));

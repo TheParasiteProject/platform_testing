@@ -123,12 +123,13 @@ public class SimpleperfListenerTest {
                 .startCollecting(
                         eq("record"),
                         eq(
-                                "-g --post-unwind=yes -f 500 -a --exclude-perf -e"
-                                        + " instructions,cpu-cycles -p 1696,680"));
+                                "-g --post-unwind=yes -f 500 --exclude-perf --log-to-android-buffer"
+                                        + " -e instructions,cpu-cycles -p 1696,680"));
         verify(mUiDevice, times(1))
                 .executeShellCommand(
                         "simpleperf record -o /data/local/tmp/perf.data -g --post-unwind=yes -f"
-                                + " 500 -a --exclude-perf -e instructions,cpu-cycles -p 1696,680");
+                                + " 500 --exclude-perf --log-to-android-buffer"
+                                + " -e instructions,cpu-cycles -p 1696,680");
     }
 
     private void testSampleReport() {
@@ -340,6 +341,7 @@ public class SimpleperfListenerTest {
         doReturn(true)
                 .when(mSimpleperfHelperVisibleUidevice)
                 .startCollecting(anyString(), anyString());
+        doReturn(true).when(mSimpleperfHelperVisibleUidevice).stopCollecting(anyString());
 
         mListener.testRunStarted(mRunDesc);
         verify(mSimpleperfHelperVisibleUidevice, times(2)).getPID(anyString());
@@ -374,6 +376,7 @@ public class SimpleperfListenerTest {
         doReturn(true)
                 .when(mSimpleperfHelperVisibleUidevice)
                 .startCollecting(anyString(), anyString());
+        doReturn(true).when(mSimpleperfHelperVisibleUidevice).stopCollecting(anyString());
 
         mListener.testRunStarted(mRunDesc);
         mListener.testStarted(mTest1Desc);
