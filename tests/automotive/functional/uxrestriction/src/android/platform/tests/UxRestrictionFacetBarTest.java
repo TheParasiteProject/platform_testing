@@ -26,6 +26,7 @@ import android.platform.helpers.IAutoVehicleHardKeysHelper.DrivingState;
 import android.platform.test.rules.ConditionalIgnore;
 import android.platform.test.rules.ConditionalIgnoreRule;
 import android.platform.test.rules.IgnoreOnPortrait;
+import android.util.Log;
 
 import androidx.test.runner.AndroidJUnit4;
 
@@ -42,6 +43,7 @@ public class UxRestrictionFacetBarTest {
     private HelperAccessor<IAutoAppGridHelper> mAppGridHelper;
     private HelperAccessor<IAutoFacetBarHelper> mFacetBarHelper;
     private HelperAccessor<IAutoVehicleHardKeysHelper> mHardKeysHelper;
+    private static final String LOG_TAG = UxRestrictionFacetBarTest.class.getSimpleName();
 
     private static final int SPEED_TWENTY = 20;
     private static final int SPEED_ZERO = 0;
@@ -55,23 +57,32 @@ public class UxRestrictionFacetBarTest {
 
     @Before
     public void enableDrivingMode() {
+        Log.i(LOG_TAG, "Act: Go to Home Screen");
         mFacetBarHelper.get().goToHomeScreen();
+        Log.i(LOG_TAG, "Act: Set Driving State to Moving");
         mHardKeysHelper.get().setDrivingState(DrivingState.MOVING);
+        Log.i(LOG_TAG, "Act: Set Driving Speed to Twenty");
         mHardKeysHelper.get().setSpeed(SPEED_TWENTY);
     }
 
     @After
     public void disableDrivingMode() {
+        Log.i(LOG_TAG, "Act: Go to Homescreen");
         mFacetBarHelper.get().goToHomeScreen();
+        Log.i(LOG_TAG, "Act: Set Driving Speed to zero");
         mHardKeysHelper.get().setSpeed(SPEED_ZERO);
+        Log.i(LOG_TAG, "Act: Set Driving State to Parked");
         mHardKeysHelper.get().setDrivingState(DrivingState.PARKED);
     }
 
     @Test
     @ConditionalIgnore(condition = IgnoreOnPortrait.class)
     public void testRestrictedHomeFacetBar() {
+        Log.i(LOG_TAG, "Act: Open App Grid");
         mAppGridHelper.get().open();
+        Log.i(LOG_TAG, "Act: Click on Home Facet Icon");
         mFacetBarHelper.get().clickOnFacetIcon(IAutoFacetBarHelper.FACET_BAR.HOME);
+        Log.i(LOG_TAG, "Assert: Home screen is open");
         assertTrue(
                 "Home screen did not open",
                 mFacetBarHelper.get().isAppInForeground(IAutoFacetBarHelper.VERIFY_OPEN_APP.HOME));
@@ -80,7 +91,9 @@ public class UxRestrictionFacetBarTest {
     @Test
     @ConditionalIgnore(condition = IgnoreOnPortrait.class)
     public void testRestrictedPhoneFacetBar() {
+        Log.i(LOG_TAG, "Act: Open Facetbar Phone App");
         mFacetBarHelper.get().clickOnFacetIcon(IAutoFacetBarHelper.FACET_BAR.PHONE);
+        Log.i(LOG_TAG, "Assert: Phone App is open");
         assertTrue(
                 "Phone app did not open",
                 mFacetBarHelper.get().isAppInForeground(IAutoFacetBarHelper.VERIFY_OPEN_APP.PHONE));
@@ -88,7 +101,9 @@ public class UxRestrictionFacetBarTest {
 
     @Test
     public void testRestrictedHvacFacetBar() {
+        Log.i(LOG_TAG, "Act: Open Facetbar Hvac App");
         mFacetBarHelper.get().clickOnFacetIcon(IAutoFacetBarHelper.FACET_BAR.HVAC);
+        Log.i(LOG_TAG, "Assert: Havc app is open");
         assertTrue(
                 "Hvac did not open",
                 mFacetBarHelper.get().isAppInForeground(IAutoFacetBarHelper.VERIFY_OPEN_APP.HVAC));
@@ -96,7 +111,9 @@ public class UxRestrictionFacetBarTest {
 
     @Test
     public void testRestrictedAppGridFacetBar() {
+        Log.i(LOG_TAG, "Act: Open Facetbar App Grid");
         mFacetBarHelper.get().clickOnFacetIcon(IAutoFacetBarHelper.FACET_BAR.APP_GRID);
+        Log.i(LOG_TAG, "Assert: App Grid is open");
         assertTrue(
                 "App grid did not open",
                 mFacetBarHelper
@@ -106,7 +123,9 @@ public class UxRestrictionFacetBarTest {
 
     @Test
     public void testRestrictedNotificationFacetBar() {
+        Log.i(LOG_TAG, "Act: Open Facetbar Notification");
         mFacetBarHelper.get().clickOnFacetIcon(IAutoFacetBarHelper.FACET_BAR.NOTIFICATION);
+        Log.i(LOG_TAG, "Assert: Notification is open");
         assertTrue(
                 "Notification did not open.",
                 mFacetBarHelper
@@ -116,7 +135,9 @@ public class UxRestrictionFacetBarTest {
 
     @Test
     public void testRestrictedBluetoothPalette() {
+        Log.i(LOG_TAG, "Act: Open Facetbar Bluetooth App");
         mFacetBarHelper.get().clickOnFacetIcon(IAutoFacetBarHelper.FACET_BAR.BLUETOOTH);
+        Log.i(LOG_TAG, "Assert: Bluetooth menu is open");
         assertTrue(
                 "Bluetooth palette did not open.",
                 mFacetBarHelper
@@ -126,7 +147,9 @@ public class UxRestrictionFacetBarTest {
 
     @Test
     public void testRestrictedWifiPalette() {
+        Log.i(LOG_TAG, "Act: Open Facetbar Wifi");
         mFacetBarHelper.get().clickOnFacetIcon(IAutoFacetBarHelper.FACET_BAR.WIFI);
+        Log.i(LOG_TAG, "Assert: Wifi menu is open");
         assertTrue(
                 "Wifi palette did not open.",
                 mFacetBarHelper.get().isAppInForeground(IAutoFacetBarHelper.VERIFY_OPEN_APP.WIFI));
@@ -134,7 +157,9 @@ public class UxRestrictionFacetBarTest {
 
     @Test
     public void testRestrictedBrighnessPalette() {
+        Log.i(LOG_TAG, "Act: Open Facetbar Brightness");
         mFacetBarHelper.get().clickOnFacetIcon(IAutoFacetBarHelper.FACET_BAR.BRIGHTNESS);
+        Log.i(LOG_TAG, "Assert: Brightness menu is open");
         assertTrue(
                 "Brightness palette did not open.",
                 mFacetBarHelper
@@ -144,7 +169,9 @@ public class UxRestrictionFacetBarTest {
 
     @Test
     public void testRestrictedSoundPalette() {
+        Log.i(LOG_TAG, "Act: Open Facetbar Sound");
         mFacetBarHelper.get().clickOnFacetIcon(IAutoFacetBarHelper.FACET_BAR.SOUND);
+        Log.i(LOG_TAG, "Act: Facetbar Sound is open");
         assertTrue(
                 "Sound palette did not open.",
                 mFacetBarHelper.get().isAppInForeground(IAutoFacetBarHelper.VERIFY_OPEN_APP.SOUND));
