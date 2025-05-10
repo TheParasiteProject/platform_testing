@@ -2093,6 +2093,14 @@
       "VALUE": "summary",
       "PACKAGE": "android"
     },
+    "LOCAL_SYSTEM_UPDATE": {
+      "TYPE": "TEXT",
+      "VALUE": "Local System Update"
+    },
+    "LOCAL_SYSTEM_UPDATE_VOLUME": {
+      "TYPE": "TEXT_CONTAINS",
+      "VALUE": "Volume"
+    },
     "SMS_BLUETOOTH_ERROR": {
       "TYPE": "RESOURCE_ID",
       "VALUE": "error_message",

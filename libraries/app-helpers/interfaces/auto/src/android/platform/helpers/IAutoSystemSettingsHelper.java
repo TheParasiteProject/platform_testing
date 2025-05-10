@@ -137,4 +137,18 @@ public interface IAutoSystemSettingsHelper extends IAppHelper {
      * <p>Clicks on view all.
      */
     void openViewAll();
+
+    /**
+     * Setup expectation: System Setting is open.
+     *
+     * <p>Open Local System Update.
+     */
+    void openLocalSystemUpdate();
+
+    /**
+     * Setup expectation: Local System Update is Open.
+     *
+     * <p>Verify if Volumes is present in local system update
+     */
+    boolean isLocalSystemUpdateVolumesPresent();
 }
