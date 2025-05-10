@@ -344,7 +344,7 @@ class HumanEyeMatcherTest {
     @Test
     fun performDiff_forBlockOfPixels_diffsOnBigDiff() {
         val first = IntArray(16) { Color.BLACK }
-        val second = IntArray(16) { index -> if (index > 3) rgb(0, 2, 0) else Color.BLACK }
+        val second = IntArray(16) { index -> if (index > 3) rgb(0, 3, 0) else Color.BLACK }
 
         val result =
             matcher.compareBitmaps(
@@ -443,7 +443,7 @@ class HumanEyeMatcherTest {
     fun performDiff_forBlockOfPixels_whenIgnoringGrouping_diffsOnMediumDiff() {
         val matcherWithoutGrouping = HumanEyeMatcher(accountForGrouping = false)
         val first = IntArray(16) { Color.BLACK }
-        val second = IntArray(16) { index -> if (index > 3) rgb(0, 2, 0) else Color.BLACK }
+        val second = IntArray(16) { index -> if (index > 3) rgb(0, 3, 0) else Color.BLACK }
 
         val result =
             matcherWithoutGrouping.compareBitmaps(
@@ -500,7 +500,7 @@ class HumanEyeMatcherTest {
         val matcherIgnoringGrouping = HumanEyeMatcher(accountForGrouping = false)
         val first = IntArray(9) { Color.BLACK }
         val second = IntArray(9) { Color.BLACK }
-        second[4] = rgb(0, 2, 0)
+        second[4] = rgb(0, 3, 0)
 
         val result =
             matcherIgnoringGrouping.compareBitmaps(

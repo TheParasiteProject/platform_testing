@@ -52,7 +52,7 @@ import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.callbackFlow
-import kotlinx.coroutines.flow.take
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withTimeoutOrNull
 import org.junit.rules.ExternalResource
@@ -131,23 +131,23 @@ class DesktopMouseTestRule() : TestRule {
                     }
                 val handler = Handler(Looper.getMainLooper())
                 inputManager.registerInputDeviceListener(inputDeviceListener, handler)
+
+                // Note: AssociatedDisplayId is not actually used in connected displays, since
+                // cursor will be able to cross displays and no longer gets "associated" anymore,
+                // with an exception if display is excluded from the current DisplayTopology.
+                virtualMouse =
+                    createdVirtualDevice.createVirtualMouse(
+                        VirtualMouseConfig.Builder()
+                            .setVendorId(VIRTUAL_MOUSE_VENDOR_ID)
+                            .setProductId(VIRTUAL_MOUSE_PRODUCT_ID)
+                            .setInputDeviceName("VirtualMouse_ConnectedDisplaysTest")
+                            .setAssociatedDisplayId(DEFAULT_DISPLAY)
+                            .build()
+                    )
                 awaitClose { inputManager.unregisterInputDeviceListener(inputDeviceListener) }
             }
 
-            // Note: AssociatedDisplayId is not actually used in connected displays, since cursor
-            // will be able to cross displays and no longer gets "associated" anymore, with an
-            // exception if display is excluded from the current DisplayTopology.
-            virtualMouse =
-                createdVirtualDevice.createVirtualMouse(
-                    VirtualMouseConfig.Builder()
-                        .setVendorId(VIRTUAL_MOUSE_VENDOR_ID)
-                        .setProductId(VIRTUAL_MOUSE_PRODUCT_ID)
-                        .setInputDeviceName("VirtualMouse_ConnectedDisplaysTest")
-                        .setAssociatedDisplayId(DEFAULT_DISPLAY)
-                        .build()
-                )
-
-            withTimeoutOrNull(TIMEOUT) { inputDeviceFlow.take(1) }
+            withTimeoutOrNull(TIMEOUT) { inputDeviceFlow.first() }
                 ?: error("Timed out waiting for input device to be added.")
 
             disableMouseScaling()

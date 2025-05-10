@@ -16,33 +16,28 @@
 
 package android.platform.systemui_tapl.ui
 
-import android.platform.systemui_tapl.utils.DeviceUtils.launcherResSelector
+import android.platform.systemui_tapl.utils.DeviceUtils.sysuiResSelector
 import android.platform.uiautomatorhelpers.DeviceHelpers.assertVisible
 import android.platform.uiautomatorhelpers.DeviceHelpers.click
+import android.view.Display.DEFAULT_DISPLAY
 
-/**
- * Provides an API to interact with the stashed bubble bar handle
- *
- * @see [BubbleBar] for collapsed bubble bar
- * @see [ExpandedBubbleBar] for expanded bubble bar
- */
-class StashedBubbleBar {
+/** System UI test automation object representing the app handle menu. */
+class AppHandleMenu
+@JvmOverloads
+internal constructor(private val displayId: Int = DEFAULT_DISPLAY) {
 
     init {
-        HANDLE_VIEW.assertVisible { "Failed while waiting for bubble bar handle to become visible" }
+        sysuiResSelector(HANDLE_MENU_RES_ID, displayId).assertVisible {
+            "App handle menu is not visible"
+        }
     }
 
-    /**
-     * Clicks on the stashed bubble bar handle to expand the bubble bar
-     *
-     * @return [ExpandedBubbleBar]
-     */
-    fun click(): ExpandedBubbleBar {
-        HANDLE_VIEW.click()
-        return ExpandedBubbleBar(BubbleBar().selectedBubble)
+    fun clickFloating() {
+        sysuiResSelector(FLOATING_BUTTON_RES_ID, displayId).click()
     }
 
     companion object {
-        val HANDLE_VIEW = launcherResSelector("stashed_bubble_handle")
+        private const val HANDLE_MENU_RES_ID = "handle_menu"
+        private const val FLOATING_BUTTON_RES_ID = "floating_button"
     }
 }

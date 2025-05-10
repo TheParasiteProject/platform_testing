@@ -32,6 +32,7 @@ import static androidx.test.platform.app.InstrumentationRegistry.getInstrumentat
 
 import android.R;
 import android.annotation.FlaggedApi;
+import android.app.Flags;
 import android.app.Notification;
 import android.app.Notification.Builder;
 import android.app.Notification.MessagingStyle;
@@ -47,6 +48,7 @@ import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.drawable.Icon;
+import android.os.Bundle;
 import android.os.SystemClock;
 import android.service.notification.StatusBarNotification;
 import android.util.Log;
@@ -360,6 +362,37 @@ public class NotificationController {
         int textId = android.R.id.text1;
         customContent.setTextViewText(textId, "Example Text");
         return customContent;
+    }
+
+    /** Posts a no style promoted ongoing notification. */
+    @NonNull
+    public NotificationIdentity postNoStyleRON(@Nullable String pkg, @Nullable String title) {
+        final Bitmap bitmap = Bitmap.createBitmap(400, 400, Bitmap.Config.ARGB_8888);
+        new Canvas(bitmap).drawColor(Color.BLUE);
+        final Builder builder = makePromotedOngoing(getBuilder(pkg));
+        builder.setLargeIcon(bitmap);
+        builder.setContentTitle(title);
+        postNotificationSync(getNextNotificationId(), builder);
+        return new NotificationIdentity(
+                NotificationIdentity.Type.BY_TITLE,
+                title,
+                /* text= */ null,
+                /* summary= */ null,
+                /* textWhenExpanded= */ null,
+                /* contentIsVisibleInCollapsedState= */ true,
+                /* pkg= */ null);
+    }
+
+    @NonNull
+    private Builder makePromotedOngoing(@NonNull Builder builder) {
+        builder.setOngoing(true);
+        // TODO(b/415070395): Update this condition when the flag is merged.
+        if (Flags.optInRichOngoing()) {
+            builder.setRequestPromotedOngoing(true);
+        } else {
+            builder.setColorized(true).setColor(Color.GREEN);
+        }
+        return builder;
     }
 
     /**

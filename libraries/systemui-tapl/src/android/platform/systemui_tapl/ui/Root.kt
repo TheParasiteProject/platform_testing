@@ -33,6 +33,8 @@ import android.platform.uiautomatorhelpers.DeviceHelpers.assertInvisible
 import android.platform.uiautomatorhelpers.DeviceHelpers.assertVisible
 import android.platform.uiautomatorhelpers.DeviceHelpers.betterSwipe
 import android.platform.uiautomatorhelpers.DeviceHelpers.uiDevice
+import android.platform.uiautomatorhelpers.DeviceHelpers.waitForNullableObj
+import android.platform.uiautomatorhelpers.FailedEnsureException
 import android.view.Display.DEFAULT_DISPLAY
 import android.view.InputDevice
 import android.view.InputEvent
@@ -257,6 +259,10 @@ class Root private constructor(val displayId: Int = DEFAULT_DISPLAY) {
     val aod: Aod
         get() = Aod()
 
+    /** Gets Aod RON Skeleton. Fails if Aod is not visible. */
+    val aodRON: AodRON
+        get() = AodRON()
+
     /** Gets ChooseScreenLock. Fails if ChooseScreenLock is not visible. */
     val chooseScreenLock: ChooseScreenLock
         get() = ChooseScreenLock()
@@ -288,9 +294,40 @@ class Root private constructor(val displayId: Int = DEFAULT_DISPLAY) {
     val bubbleBar: BubbleBar
         get() = BubbleBar()
 
+    /** Get the stashed bubble bar handle in launcher */
+    val stashedBubbleBar: StashedBubbleBar
+        get() = StashedBubbleBar()
+
     /** Gets the bubble bar flyout in launcher. */
     val bubbleBarFlyout: BubbleBarFlyout
         get() = BubbleBarFlyout()
+
+    /**
+     * Try to expand the bubble bar by either clicking on the [BubbleBar] itself, or if it is not
+     * shown, try to click on [StashedBubbleBar] handle.
+     */
+    fun expandBubbleBar(): ExpandedBubbleBar {
+        // Perform a quick check for bubble bar and handle so we don't have to wait for them to show
+        try {
+            if (uiDevice.hasObject(BubbleBar.BUBBLE_BAR_VIEW)) {
+                return bubbleBar.expand()
+            }
+        } catch (e: FailedEnsureException) {
+            // Bubble bar may have been animating to handle. By the time we try to click, it may be
+            // gone, ignore the failure and try to click on the handle.
+        }
+        if (uiDevice.hasObject(StashedBubbleBar.HANDLE_VIEW)) {
+            return stashedBubbleBar.click()
+        }
+        // Wait for bubble bar or handle to show
+        waitForNullableObj(BubbleBar.BUBBLE_BAR_VIEW)?.let {
+            return bubbleBar.expand()
+        }
+        waitForNullableObj(StashedBubbleBar.HANDLE_VIEW)?.let {
+            return stashedBubbleBar.click()
+        }
+        throw AssertionError("Could not expand bubble bar as bar or handle is not visible")
+    }
 
     /** Verifies that the bubble bar is hidden. */
     fun verifyBubbleBarIsHidden() {
@@ -413,7 +450,7 @@ class Root private constructor(val displayId: Int = DEFAULT_DISPLAY) {
         traceSection("waitForShadeToOpen") {
             qsHeaderSelector.assertVisible(
                 timeout = NOTIFICATION_SHADE_OPEN_TIMEOUT,
-                errorProvider = { "Notification shade didn't open" },
+                errorProvider = { "Notification shade didn't open on display $displayId" },
             )
         }
     }

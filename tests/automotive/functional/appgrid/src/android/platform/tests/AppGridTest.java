@@ -25,6 +25,7 @@ import android.platform.helpers.IAutoAppGridHelper;
 import android.platform.test.rules.ConditionalIgnore;
 import android.platform.test.rules.ConditionalIgnoreRule;
 import android.platform.test.rules.IgnoreOnPortrait;
+import android.util.Log;
 
 import androidx.test.runner.AndroidJUnit4;
 
@@ -42,6 +43,7 @@ public class AppGridTest {
     private static final String NEWS_APP = "News";
 
     private HelperAccessor<IAutoAppGridHelper> mAppGridHelper;
+    private static final String LOG_TAG = AppGridTest.class.getSimpleName();
 
     public AppGridTest() {
         mAppGridHelper = new HelperAccessor<>(IAutoAppGridHelper.class);
@@ -51,45 +53,64 @@ public class AppGridTest {
     @Test
     public void testOpen() {
         // Make sure app grid is not open before testing.
+        Log.i(LOG_TAG, "Act: Exit Appgrid");
         mAppGridHelper.get().exit();
+        Log.i(LOG_TAG, "Assert: Appgrid is exit");
         assertFalse("App Grid is open even after exit.", mAppGridHelper.get().isAppInForeground());
         // Test open.
+        Log.i(LOG_TAG, "Act: Open Appgrid");
         mAppGridHelper.get().open();
+        Log.i(LOG_TAG, "Assert: Appgrid is open");
         assertTrue("App Grid is not open.", mAppGridHelper.get().isAppInForeground());
     }
 
     @Test
     public void testExit() {
         // Make sure app grid has been opened before testing.
+        Log.i(LOG_TAG, "Act: Open Appgrid");
         mAppGridHelper.get().open();
+        Log.i(LOG_TAG, "Assert: Appgrid is open");
         assertTrue("App Grid is not open.", mAppGridHelper.get().isAppInForeground());
         // Test exit.
+        Log.i(LOG_TAG, "Act: Exit Appgrid");
         mAppGridHelper.get().exit();
+        Log.i(LOG_TAG, "Assert: Appgrid is exit");
         assertFalse("App Grid is open even after exit.", mAppGridHelper.get().isAppInForeground());
     }
 
     @Test
     public void testScroll() {
         // Re-enter app grid.
+        Log.i(LOG_TAG, "Act: Exit Appgrid");
         mAppGridHelper.get().exit();
+        Log.i(LOG_TAG, "Act: Open Appgrid");
         mAppGridHelper.get().open();
 
+        Log.i(LOG_TAG, "Act: Scroll to beginning");
         mAppGridHelper.get().scrollToBeginning();
         // Test scroll only when there are more than one page in app grid.
+        Log.i(LOG_TAG, "Act: Check Scroll to beginning");
         if (!mAppGridHelper.get().isAtEnd()) {
+            Log.i(LOG_TAG, "Act: Scroll forward");
             mAppGridHelper.get().scrollForward();
+            Log.i(LOG_TAG, "Assert: Scroll is at end");
             assertFalse("Scrolling did not work.", mAppGridHelper.get().isAtBeginning());
+            Log.i(LOG_TAG, "Act: Scroll forward");
             mAppGridHelper.get().scrollBackward();
         }
     }
 
     @Test
     public void testLaunchBluetoothAudio() {
-        // Make sure app grid is not open before testing.
+        // Make sure app grid is not open before testing
+        Log.i(LOG_TAG, "Act: Exit Appgrid");
         mAppGridHelper.get().exit();
+        Log.i(LOG_TAG, "Act: Open Appgrid");
         mAppGridHelper.get().open();
 
+        Log.i(LOG_TAG, "Act: Open Bluetooth App");
         mAppGridHelper.get().openApp(BLUETOOTH_APP);
+        Log.i(LOG_TAG, "Assert: Bluetooth App is open");
         assertTrue(
                 "Bluetooth Audio app is not opened",
                 mAppGridHelper
@@ -100,10 +121,14 @@ public class AppGridTest {
     @Test
     public void testLaunchPhone() {
         // Make sure app grid is not open before testing.
+        Log.i(LOG_TAG, "Act: Exit Appgrid");
         mAppGridHelper.get().exit();
+        Log.i(LOG_TAG, "Act: Open Appgrid");
         mAppGridHelper.get().open();
 
+        Log.i(LOG_TAG, "Act: Open Phone App");
         mAppGridHelper.get().openApp(PHONE_APP);
+        Log.i(LOG_TAG, "Assert: Phone App is open");
         assertTrue(
                 "Phone app is not opened",
                 mAppGridHelper
@@ -114,10 +139,14 @@ public class AppGridTest {
     @Test
     public void testLaunchSMS() {
         // Make sure app grid is not open before testing.
+        Log.i(LOG_TAG, "Act: Exit Appgrid");
         mAppGridHelper.get().exit();
+        Log.i(LOG_TAG, "Act: Open Appgrid");
         mAppGridHelper.get().open();
 
+        Log.i(LOG_TAG, "Act: Open SMS App");
         mAppGridHelper.get().openApp(SMS_APP);
+        Log.i(LOG_TAG, "Assert: SMS App is Open");
         assertTrue(
                 "SMS app is not opened",
                 mAppGridHelper
@@ -128,10 +157,14 @@ public class AppGridTest {
     @Test
     public void testLaunchNews() {
         // Make sure app grid is not open before testing.
+        Log.i(LOG_TAG, "Act: Exit Appgrid");
         mAppGridHelper.get().exit();
+        Log.i(LOG_TAG, "Act: Open Appgrid");
         mAppGridHelper.get().open();
 
+        Log.i(LOG_TAG, "Act: Open News App");
         mAppGridHelper.get().openApp(NEWS_APP);
+        Log.i(LOG_TAG, "Assert: News App is Open");
         assertTrue(
                 "News app is not opened",
                 mAppGridHelper
@@ -142,12 +175,18 @@ public class AppGridTest {
     @Test
     @ConditionalIgnore(condition = IgnoreOnPortrait.class)
     public void testRecentAppsDisplaying() {
+        Log.i(LOG_TAG, "Act: Exit Appgrid");
         mAppGridHelper.get().open();
+        Log.i(LOG_TAG, "Act: Open News App");
         mAppGridHelper.get().openApp(PHONE_APP);
+        Log.i(LOG_TAG, "Act: Long tap on All Apps");
         mAppGridHelper.get().longTapAllAppsButton();
+        Log.i(LOG_TAG, "Assert: Recent App screen is launched");
         assertTrue(
                 "Recents Screen is not launched", mAppGridHelper.get().isRecentsScreenLaunched());
+        Log.i(LOG_TAG, "Act: Long tap on All Apps");
         mAppGridHelper.get().singleTapAllAppsButton();
+        Log.i(LOG_TAG, "Assert: Recent App screen is closed");
         assertFalse("Recents Screen is not closed", mAppGridHelper.get().isRecentsScreenLaunched());
     }
 }

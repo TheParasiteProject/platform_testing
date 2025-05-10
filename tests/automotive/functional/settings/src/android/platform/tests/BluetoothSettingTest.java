@@ -21,6 +21,7 @@ import android.platform.helpers.HelperAccessor;
 import android.platform.helpers.IAutoBluetoothSettingsHelper;
 import android.platform.helpers.IAutoSettingHelper;
 import android.platform.helpers.SettingsConstants;
+import android.util.Log;
 
 import androidx.test.runner.AndroidJUnit4;
 
@@ -32,6 +33,7 @@ import org.junit.runner.RunWith;
 public class BluetoothSettingTest {
     private HelperAccessor<IAutoBluetoothSettingsHelper> mBluetoothSettingHelper;
     private HelperAccessor<IAutoSettingHelper> mSettingHelper;
+    private static final String LOG_TAG = BluetoothSettingTest.class.getSimpleName();
 
     public BluetoothSettingTest() throws Exception {
         mBluetoothSettingHelper = new HelperAccessor<>(IAutoBluetoothSettingsHelper.class);
@@ -45,10 +47,13 @@ public class BluetoothSettingTest {
 
     @Test
     public void testBluetoothDefaultState() {
+        Log.i(LOG_TAG, "Act: Open the Bluetooth Setting");
         mSettingHelper.get().openSetting(SettingsConstants.BLUETOOTH_SETTINGS);
+        Log.i(LOG_TAG, "Assert: Bluetooth is turned on by default");
         assertTrue(
                 "Bluetooth default state is not turned on in the System",
                 mSettingHelper.get().isBluetoothOn());
+        Log.i(LOG_TAG, "Assert: Use Bluetooth toggle is turned on in the Settings");
         assertTrue(
                 "Use Bluetooth toggle is not turned on in the Settings",
                 mBluetoothSettingHelper.get().isUseBluetoothToggleChecked());

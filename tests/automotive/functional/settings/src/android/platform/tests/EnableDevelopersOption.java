@@ -22,6 +22,7 @@ import android.platform.helpers.HelperAccessor;
 import android.platform.helpers.IAutoSettingHelper;
 import android.platform.helpers.IAutoSystemSettingsHelper;
 import android.platform.helpers.SettingsConstants;
+import android.util.Log;
 
 import androidx.test.runner.AndroidJUnit4;
 
@@ -33,6 +34,7 @@ import org.junit.runner.RunWith;
 public class EnableDevelopersOption {
     private HelperAccessor<IAutoSettingHelper> mSettingHelper;
     private HelperAccessor<IAutoSystemSettingsHelper> mSystemSettingsHelper;
+    private static final String LOG_TAG = EnableDevelopersOption.class.getSimpleName();
 
     public EnableDevelopersOption() throws Exception {
         mSettingHelper = new HelperAccessor<>(IAutoSettingHelper.class);
@@ -41,8 +43,11 @@ public class EnableDevelopersOption {
 
     @Test
     public void testToVerifyDeveloperOptions() throws Exception {
+        Log.i(LOG_TAG, "Act: Open the System Setting");
         mSettingHelper.get().openSetting(SettingsConstants.SYSTEM_SETTINGS);
+        Log.i(LOG_TAG, "Act: Enter Developer Mode");
         mSystemSettingsHelper.get().enterDeveloperMode();
+        Log.i(LOG_TAG, "Assert: Developer Options is displayed");
         assertTrue(
                 "Developer options are not displayed",
                 mSystemSettingsHelper.get().hasDeveloperOptions());

@@ -27,6 +27,7 @@ import android.platform.helpers.SettingsConstants;
 import android.platform.test.annotations.RequiresFlagsEnabled;
 import android.platform.test.flag.junit.CheckFlagsRule;
 import android.platform.test.flag.junit.DeviceFlagsValueProvider;
+import android.util.Log;
 
 import androidx.test.runner.AndroidJUnit4;
 
@@ -45,6 +46,7 @@ public class MicroPhoneSettingTest {
     private HelperAccessor<IAutoFacetBarHelper> mFacetBarHelper;
     private HelperAccessor<IAutoSettingHelper> mSettingHelper;
     private HelperAccessor<IAutoPrivacySettingsHelper> mPrivacySettingsHelper;
+    private static final String LOG_TAG = MicroPhoneSettingTest.class.getSimpleName();
 
     @Rule
     public final CheckFlagsRule mCheckFlagsRule = DeviceFlagsValueProvider.createCheckFlagsRule();
@@ -57,15 +59,19 @@ public class MicroPhoneSettingTest {
 
     @Before
     public void openPrivacySetting() {
+        Log.i(LOG_TAG, "Act: Open the privacy settings");
         mSettingHelper.get().openSetting(SettingsConstants.PRIVACY_SETTINGS);
+        Log.i(LOG_TAG, "Assert: Privacy Settings is open");
         assertTrue(
                 "Privacy settings did not open",
                 mSettingHelper.get().checkMenuExists("Microphone"));
         mSettingHelper.get().openMenuWith("MicroPhone");
+        Log.i(LOG_TAG, "Assert: Microphone Settings is open");
         assertTrue(
                 "MicroPhone settings did not open",
                 mSettingHelper.get().checkMenuExists("Microphone access"));
         mSettingHelper.get().openMenuWith("Microphone access");
+        Log.i(LOG_TAG, "Assert: Microphone Access is open");
         assertTrue(
                 "MicroPhone access did not open",
                 mSettingHelper.get().checkMenuExists("Infotainment apps"));
@@ -85,12 +91,14 @@ public class MicroPhoneSettingTest {
 
     @Test
     public void manageMicrophonePermissions() {
+        Log.i(LOG_TAG, "Act: Privacy settings is open");
         mSettingHelper.get().openSetting(SettingsConstants.PRIVACY_SETTINGS);
         assertTrue(
                 "Privacy settings did not open",
                 mSettingHelper.get().checkMenuExists("Microphone"));
         mSettingHelper.get().openMenuWith("MicroPhone");
         mPrivacySettingsHelper.get().clickManageMicroPhonePermissions();
+        Log.i(LOG_TAG, "Assert: Microphone Permissions page is displayed");
         assertTrue(
                 "Microphone Permissions page is not displayed",
                 mPrivacySettingsHelper.get().verifyMicrophoneManagePermissionsPage());
@@ -98,15 +106,21 @@ public class MicroPhoneSettingTest {
 
     @Test
     public void testMicroPhoneToggleOff() {
-        // turn off microphone
+        Log.i(LOG_TAG, "Act: Turn Off the microphone");
         mPrivacySettingsHelper.get().turnOnOffMicroPhone(false);
+        Log.i(LOG_TAG, "Assert: Microphone is Off");
         assertFalse("MicroPhone is still on", mPrivacySettingsHelper.get().isMicroPhoneOn());
+        Log.i(LOG_TAG, "Act: Go back to settings screen");
         mSettingHelper.get().goBackToSettingsScreen();
+        Log.i(LOG_TAG, "Act: Privacy settings is open");
         mSettingHelper.get().openSetting(SettingsConstants.PRIVACY_SETTINGS);
+        Log.i(LOG_TAG, "Act: Open Microphone");
         mSettingHelper.get().openMenuWith("MicroPhone");
+        Log.i(LOG_TAG, "Assert: Recent apps is displayed");
         assertFalse(
                 "Recent apps is displayed",
                 mSettingHelper.get().checkMenuExists("Recently accessed"));
+        Log.i(LOG_TAG, "Assert: Micro Phone button is diplayed in the Status Bar");
         assertTrue(
                 "Micro Phone button is not diplayed in the Status Bar",
                 mPrivacySettingsHelper.get().isMutedMicChipPresentOnStatusBar());
@@ -114,13 +128,17 @@ public class MicroPhoneSettingTest {
 
     @Test
     public void testMicroPhoneToggleOn() {
-        // turn off microphone
+        Log.i(LOG_TAG, "Act: Turn Off the microphone");
         mPrivacySettingsHelper.get().turnOnOffMicroPhone(false);
-        // turn on microphone
+        Log.i(LOG_TAG, "Act: Turn On the microphone");
         mPrivacySettingsHelper.get().turnOnOffMicroPhone(true);
+        Log.i(LOG_TAG, "Assert: Microphone is On");
         assertTrue("MicroPhone is still off", mPrivacySettingsHelper.get().isMicroPhoneOn());
+        Log.i(LOG_TAG, "Act: Go back to settings screen");
         mSettingHelper.get().goBackToSettingsScreen();
+        Log.i(LOG_TAG, "Act: Privacy settings is open");
         mSettingHelper.get().openSetting(SettingsConstants.PRIVACY_SETTINGS);
+        Log.i(LOG_TAG, "Act: Open Microphone");
         mSettingHelper.get().openMenuWith("MicroPhone");
         assertTrue(
                 "Recently accessed is not present",
@@ -135,16 +153,19 @@ public class MicroPhoneSettingTest {
 
     @Test
     public void testMicroPhonePanelStatusBar() {
-        // turn off microphone
+        Log.i(LOG_TAG, "Act: Turn Off the microphone");
         mPrivacySettingsHelper.get().turnOnOffMicroPhone(false);
-        // open microphone panel
+        Log.i(LOG_TAG, "Act: Open Microphone panel");
         mPrivacySettingsHelper.get().clickMicroPhoneStatusBar();
+        Log.i(LOG_TAG, "Assert: MicroPhone status is updated");
         assertTrue(
                 "MicroPhone status not updated",
                 mPrivacySettingsHelper.get().isMicroPhoneStatusMessageUpdated(MICROPHONE_OFF_TXT));
+        Log.i(LOG_TAG, "Assert: MicroPhone settings link is present");
         assertTrue(
                 "MicroPhone settings link is not present",
                 mPrivacySettingsHelper.get().isMicroPhoneSettingsLinkPresent());
+        Log.i(LOG_TAG, "Assert: MicroPhone toggle is present in status bar");
         assertTrue(
                 "MicroPhone toggle not present in status bar",
                 mPrivacySettingsHelper.get().isMicroPhoneTogglePresent());
@@ -152,14 +173,17 @@ public class MicroPhoneSettingTest {
 
     @Test
     public void testMicroPhonePanelStatusBarFromHome() {
-        // turn off microphone
+        Log.i(LOG_TAG, "Act: Turn Off the microphone");
         mPrivacySettingsHelper.get().turnOnOffMicroPhone(false);
+        Log.i(LOG_TAG, "Act: Go to Homescreen");
         mFacetBarHelper.get().goToHomeScreen();
-        // open microphone panel
+        Log.i(LOG_TAG, "Act: Open Microphone panel");
         mPrivacySettingsHelper.get().clickMicroPhoneStatusBar();
+        Log.i(LOG_TAG, "Assert: MicroPhone settings link is present");
         assertTrue(
                 "MicroPhone settings link is not present",
                 mPrivacySettingsHelper.get().isMicroPhoneSettingsLinkPresent());
+        Log.i(LOG_TAG, "Assert: MicroPhone toggle is present in status bar");
         assertTrue(
                 "MicroPhone toggle not present in status bar",
                 mPrivacySettingsHelper.get().isMicroPhoneTogglePresent());
@@ -167,9 +191,9 @@ public class MicroPhoneSettingTest {
 
     @Test
     public void testMicroPhonePanelSettingsLink() {
-        // turn off microphone
+        Log.i(LOG_TAG, "Act: Turn Off the microphone");
         mPrivacySettingsHelper.get().turnOnOffMicroPhone(false);
-        // open microphone panel
+        Log.i(LOG_TAG, "Act: Open Microphone panel");
         mPrivacySettingsHelper.get().clickMicroPhoneStatusBar();
         // go to privacy settings
         mPrivacySettingsHelper.get().clickMicroPhoneSettingsLink();
@@ -180,20 +204,25 @@ public class MicroPhoneSettingTest {
 
     @Test
     public void testMicroPhonePanelToggle() {
-        // turn off microphone
+        Log.i(LOG_TAG, "Act: Turn Off the microphone");
         mPrivacySettingsHelper.get().turnOnOffMicroPhone(false);
+        Log.i(LOG_TAG, "Act: Open Microphone panel");
         mPrivacySettingsHelper.get().clickMicroPhoneStatusBar();
-        // turn on microphone
+        Log.i(LOG_TAG, "Act: Turn On the microphone");
         mPrivacySettingsHelper.get().clickMicroPhoneToggleStatusBar();
+        Log.i(LOG_TAG, "Assert: Microphone is On");
         assertTrue("MicroPhone is still off", mPrivacySettingsHelper.get().isMicroPhoneOn());
+        Log.i(LOG_TAG, "Assert: MicroPhone button updated in the status bar");
         assertFalse(
                 "MicroPhone button not updated in status bar",
                 mPrivacySettingsHelper.get().isMutedMicChipPresentWithMicPanel());
+        Log.i(LOG_TAG, "Assert: MicroPhone status updated in the status bar");
         assertTrue(
                 "MicroPhone status not updated",
                 mPrivacySettingsHelper.get().isMicroPhoneStatusMessageUpdated(USE_MICROPHONE_TXT));
-        // turn off microphone
+        Log.i(LOG_TAG, "Act: Turn Off the microphone");
         mPrivacySettingsHelper.get().clickMicroPhoneToggleStatusBar();
+        Log.i(LOG_TAG, "Act: MicroPhone button is muted");
         assertTrue(
                 "MicroPhone button should be muted",
                 mPrivacySettingsHelper.get().isMutedMicChipPresentWithMicPanel());
@@ -201,14 +230,19 @@ public class MicroPhoneSettingTest {
 
     @Test
     public void testMicroPhoneButtonDismiss() {
+        Log.i(LOG_TAG, "Act: Turn Off the microphone");
         mPrivacySettingsHelper.get().turnOnOffMicroPhone(false);
+        Log.i(LOG_TAG, "Act: Open Microphone panel");
         mPrivacySettingsHelper.get().clickMicroPhoneStatusBar();
-        // turn microphone on
+        Log.i(LOG_TAG, "Act: Turn On the microphone");
         mPrivacySettingsHelper.get().clickMicroPhoneToggleStatusBar();
+        Log.i(LOG_TAG, "Act: Muted MicroPhone button is displayed in status bar");
         assertFalse(
                 "Muted MicroPhone button is displayed in status bar",
                 mPrivacySettingsHelper.get().isMutedMicChipPresentWithMicPanel());
+        Log.i(LOG_TAG, "Assert: Goto Homescreen");
         mFacetBarHelper.get().goToHomeScreen();
+        Log.i(LOG_TAG, "Assert: Muted MicroPhone button is still displayed on status bar");
         assertFalse(
                 "MicroPhone button is still displayed on status bar",
                 mPrivacySettingsHelper.get().isMicChipPresentOnStatusBar());

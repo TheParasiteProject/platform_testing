@@ -16,17 +16,22 @@
 
 package platform.test.screenshot
 
+import android.os.Build
 import platform.test.screenshot.matchers.MSSIMMatcher
 import platform.test.screenshot.matchers.PixelPerfectMatcher
 
 val PerfectMatcher by lazy { PixelPerfectMatcher() }
+
+private val isEmulator = Build.CPU_ABI == "x86_64"
+
+private val isRobolectric = System.getProperty("java.vm.name")?.equals("Dalvik") == false
 
 /**
  * The [BitmapMatcher][platform.test.screenshot.matchers.BitmapMatcher] that should be used for
  * screenshot *unit* tests.
  */
 val UnitTestBitmapMatcher =
-    if (System.getProperty("java.vm.name")?.equals("Dalvik") == false) { // isRobolectric
+    if (isEmulator || isRobolectric) {
         // Different CPU architectures can sometimes end up rendering differently, so we can't do
         // pixel-perfect matching on different architectures using the same golden. Given that our
         // presubmits are run on cf_x86_64_phone, our goldens should be perfectly matched on the

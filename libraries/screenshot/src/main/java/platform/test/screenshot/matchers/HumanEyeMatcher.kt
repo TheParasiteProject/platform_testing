@@ -217,7 +217,7 @@ class HumanEyeMatcher(
     }
 
     private companion object {
-        const val THRESHOLD_BLOCK_OF_PIXELS_SQ = 3 * 3
+        const val THRESHOLD_BLOCK_OF_PIXELS_SQ = 5 * 5
         const val THRESHOLD_2PX_LINE_OF_PIXELS_SQ = 10 * 10
         const val THRESHOLD_1PX_LINE_OF_PIXELS_SQ = 12 * 12
         const val THRESHOLD_ISOLATED_PIXEL_SQ = 40 * 40
