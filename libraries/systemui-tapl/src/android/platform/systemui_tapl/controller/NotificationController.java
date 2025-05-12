@@ -928,6 +928,11 @@ public class NotificationController {
                         .setStyle(
                                 new android.app.Notification.MessagingStyle(person)
                                         .setConversationTitle(NOTIFICATION_TITLE_TEXT)
+                                         .addMessage(
+                                                new android.app.Notification.MessagingStyle.Message(
+                                                        "Hello, nice to meet you and I am happy to be your friend. You're welcome to join our party tomorrow. Please remember to invite more people and bring some food to share with us! Thank you",
+                                                        SystemClock.currentThreadTimeMillis(),
+                                                        person))
                                         .addMessage(
                                                 new android.app.Notification.MessagingStyle.Message(
                                                         "Message 4",
