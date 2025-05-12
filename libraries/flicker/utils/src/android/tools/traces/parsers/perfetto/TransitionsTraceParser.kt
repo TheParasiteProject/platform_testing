@@ -26,7 +26,7 @@ import android.tools.traces.wm.TransitionType
 import android.tools.traces.wm.TransitionsTrace
 import android.tools.traces.wm.WmTransitionData
 
-class TransitionsTraceParser :
+open class TransitionsTraceParser :
     AbstractTraceParser<TraceProcessorSession, Transition, Transition, TransitionsTrace>() {
 
     override val traceName = "Transitions Trace"
@@ -70,6 +70,25 @@ class TransitionsTraceParser :
     override fun getTimestamp(entry: Transition): Timestamp = entry.timestamp
 
     override fun onBeforeParse(input: TraceProcessorSession) {}
+
+    override fun doParse(
+        input: TraceProcessorSession,
+        from: Timestamp,
+        to: Timestamp,
+        addInitialEntry: Boolean,
+    ): TransitionsTrace {
+        val sliceEntries =
+            getEntries(input).filter {
+                (it.wmData.sendTime ?: it.shellData.dispatchTime ?: Timestamps.min()) >= from &&
+                    (it.wmData.finishTime
+                        ?: it.wmData.abortTime
+                        ?: it.shellData.abortTime
+                        ?: it.shellData.mergeTime
+                        ?: Timestamps.max()) <= to
+            }
+
+        return createTrace(sliceEntries)
+    }
 
     override fun doParseEntry(entry: Transition) = entry
 
