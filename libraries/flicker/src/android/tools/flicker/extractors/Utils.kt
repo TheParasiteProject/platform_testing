@@ -133,7 +133,11 @@ object Utils {
 
             sfEntryAtTransitionFinished =
                 layersTrace.entries.firstOrNull { it.timestamp.unixNanos >= unixNanos }
-                    ?: error("No SF entry for finish timestamp")
+                    ?: error("Could not find finish transaction#${transition.finishTransactionId}" +
+                        " associated with this scenario or it was not applied/merged into another" +
+                        " transaction. Falling back to using the finish time reported on the WM " +
+                        "side: $unixNanos. But no layers entry was found after this timestamp. " +
+                        "Debug string: $debugString")
             systemUptimeNanos = sfEntryAtTransitionFinished.timestamp.systemUptimeNanos
         } else {
             elapsedNanos =
