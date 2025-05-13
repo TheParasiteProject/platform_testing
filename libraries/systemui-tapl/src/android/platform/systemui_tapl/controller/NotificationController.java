@@ -386,7 +386,8 @@ public class NotificationController {
     @NonNull
     private Builder makePromotedOngoing(@NonNull Builder builder) {
         builder.setOngoing(true);
-        if (Flags.uiRichOngoing()) {
+        // TODO(b/415070395): Update this condition when the flag is merged.
+        if (Flags.optInRichOngoing()) {
             builder.setRequestPromotedOngoing(true);
         } else {
             builder.setColorized(true).setColor(Color.GREEN);
