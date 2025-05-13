@@ -392,6 +392,9 @@ public class AutomotiveConfigConstants {
     public static final String PERMISSIONS_PAGE_TITLE = "PERMISSIONS_PAGE_TITLE";
     public static final String OPEN_DIALER_WORKFLOW = "OPEN_DIALER_WORKFLOW";
     public static final String SEARCH_CONTACTS_WORKFLOW = "SEARCH_CONTACTS_WORKFLOW";
+
+    public static final String SETTING_SEARCH_EMPTY_DEFAULT_WORKFLOW =
+            "SETTING_SEARCH_EMPTY_DEFAULT_WORKFLOW";
     public static final String DIAL_CONTACT_WORKFLOW = "DIAL_CONTACT_WORKFLOW";
     public static final String SOUND_SETTINGS = "OPEN_SOUND_SETTINGS_WORKFLOW";
     public static final String NETWORK_AND_INTERNET_SETTINGS =
