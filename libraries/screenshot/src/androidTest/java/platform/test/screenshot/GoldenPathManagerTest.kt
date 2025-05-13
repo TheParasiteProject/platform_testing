@@ -82,7 +82,7 @@ class GoldenPathManagerTest {
 
         val pc2 = getSimplePathConfig()
         val pcResolvedRelativePath2 = pc2.resolveRelativePath(context)
-        assertThat(pcResolvedRelativePath2).startsWith("cuttlefish")
+        assertThat(pcResolvedRelativePath2).matches("^(cuttlefish|cf_).*")
     }
 
     @Test
