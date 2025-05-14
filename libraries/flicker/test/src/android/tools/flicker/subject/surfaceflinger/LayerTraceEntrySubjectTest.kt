@@ -66,7 +66,7 @@ class LayerTraceEntrySubjectTest {
         val reader = getLayerTraceReaderFromAsset("layers_trace_launch_split_screen.perfetto-trace")
         val trace = reader.readLayersTrace() ?: error("Unable to read layers trace")
         LayerTraceEntrySubject(trace.entries.first(), reader)
-            .isVisible(ComponentNameMatcher.NAV_BAR)
+            .isVisible(ComponentNameMatcher.NAV_BAR_LEGACY)
             .notContains(TestComponents.DOCKER_STACK_DIVIDER)
             .isVisible(TestComponents.LAUNCHER)
     }
@@ -76,7 +76,7 @@ class LayerTraceEntrySubjectTest {
         val reader = getLayerTraceReaderFromAsset("layers_trace_launch_split_screen.perfetto-trace")
         val trace = reader.readLayersTrace() ?: error("Unable to read layers trace")
         LayerTraceEntrySubject(trace.entries.last(), reader)
-            .isVisible(ComponentNameMatcher.NAV_BAR)
+            .isVisible(ComponentNameMatcher.NAV_BAR_LEGACY)
             .isVisible(TestComponents.DOCKER_STACK_DIVIDER)
     }
 

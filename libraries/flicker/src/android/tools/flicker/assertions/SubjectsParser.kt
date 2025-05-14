@@ -53,6 +53,10 @@ open class SubjectsParser(private val resultReader: Reader) {
         }
     }
 
+    /** Gets the subject with given type [T] and [tag]. */
+    inline fun <reified T : FlickerSubject> getSubjectOfType(tag: String): T =
+        getSubjectOfType(tag, T::class) as T
+
     /** Truth subject that corresponds to a [WindowManagerTrace] */
     private val wmTraceSubject: WindowManagerTraceSubject?
         get() = doGetWmTraceSubject()

@@ -51,7 +51,7 @@ import org.junit.runners.MethodSorters
 
 /**
  * Contains [WindowManagerStateHelper] tests. To run this test: `atest
- * FlickerLibTest:WindowManagerTraceHelperTest`
+ * FlickerLibTest:WindowManagerStateHelperTest`
  */
 @SuppressLint("VisibleForTests")
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)

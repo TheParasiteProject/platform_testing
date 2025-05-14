@@ -161,7 +161,7 @@ class WindowManagerTraceSubjectTest {
         WindowManagerTraceSubject(imeTrace, imeTraceReader)
             .doNotOverlap(
                 ComponentNameMatcher.IME,
-                ComponentNameMatcher.NAV_BAR,
+                ComponentNameMatcher.NAV_BAR_LEGACY,
                 TestComponents.IME_ACTIVITY,
             )
             .forAllEntries()
