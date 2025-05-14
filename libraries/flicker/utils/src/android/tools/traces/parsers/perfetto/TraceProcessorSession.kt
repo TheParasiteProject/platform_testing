@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 The Android Open Source Project
+ * Copyright (C) 2025 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,22 +23,16 @@ package android.tools.traces.parsers.perfetto
 
 import android.tools.io.TraceType
 import android.tools.withTracing
+import androidx.benchmark.macro.runServer
 import androidx.benchmark.traceprocessor.PerfettoTrace
 import androidx.benchmark.traceprocessor.TraceProcessor
-import androidx.benchmark.macro.runServer
 import java.io.File
 import java.io.FileOutputStream
 
 typealias Row = Map<String, Any?>
 
-class TraceProcessorSession(val session: TraceProcessor.Session) {
-
-    fun <T> query(sql: String, predicate: (List<Row>) -> T): T {
-        return withTracing("TraceProcessorSession#query") {
-            val rows = session.query(sql)
-            predicate(rows.toList())
-        }
-    }
+interface TraceProcessorSession {
+    fun <T> query(sql: String, predicate: (List<Row>) -> T): T
 
     companion object {
         @JvmStatic
@@ -49,7 +43,7 @@ class TraceProcessorSession(val session: TraceProcessor.Session) {
                 val result =
                     TraceProcessor.runServer {
                         loadTrace(PerfettoTrace(traceFile.absolutePath)) {
-                            predicate(TraceProcessorSession(this))
+                            predicate(TraceProcessorSessionImpl(this))
                         }
                     }
                 result
