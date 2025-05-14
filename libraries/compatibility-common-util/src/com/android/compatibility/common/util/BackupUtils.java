@@ -479,6 +479,13 @@ public abstract class BackupUtils {
     }
 
     /**
+     * Sets the backup transport for the current user and returns the previously selected transport.
+     */
+    public String setBackupTransport(String transport) throws IOException {
+        return setBackupTransportForUser(transport, getCurrentUserId());
+    }
+
+    /**
      * Executes shell command "bmgr --user <id> transport <transport>" and returns the old
      * transport.
      */
