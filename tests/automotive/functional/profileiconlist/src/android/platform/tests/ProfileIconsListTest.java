@@ -23,6 +23,7 @@ import android.platform.helpers.IAutoHomeHelper;
 import android.platform.helpers.IAutoSettingHelper;
 import android.platform.helpers.MultiUserHelper;
 import android.platform.scenario.multiuser.MultiUserConstants;
+import android.util.Log;
 
 import androidx.test.runner.AndroidJUnit4;
 
@@ -42,6 +43,8 @@ public class ProfileIconsListTest {
     private HelperAccessor<IAutoHomeHelper> mHomeHelper;
     private HelperAccessor<IAutoSettingHelper> mSettingHelper;
 
+    private static final String LOG_TAG = ProfileIconsListTest.class.getSimpleName();
+
     public ProfileIconsListTest() {
         mHomeHelper = new HelperAccessor<>(IAutoHomeHelper.class);
         mSettingHelper = new HelperAccessor<>(IAutoSettingHelper.class);
@@ -54,12 +57,18 @@ public class ProfileIconsListTest {
      */
     @Test
     public void testListOfProfiles() throws Exception {
+        Log.i(LOG_TAG, "Act: Create non-admin user");
         mMultiUserHelper.createUser(USER_NAME, false);
+        Log.i(LOG_TAG, "Act: Open status bar profiles");
         mHomeHelper.get().openStatusBarProfiles();
+        Log.i(LOG_TAG, "Act: Get list of user profile names");
         List<String> list = mHomeHelper.get().getUserProfileNames();
+        Log.i(LOG_TAG, "Assert: New user is at first position");
         assertFalse("newUser at index first position", USER_NAME.equals(list.get(0)));
         int position = list.size() - 1;
+        Log.i(LOG_TAG, "Assert: Guest profile is at last position");
         assertTrue("Guest profile not at last position", GUEST_NAME.equals(list.get(position)));
+        Log.i(LOG_TAG, "Assert: Add a Profile option is not displayed");
         assertTrue(
                 "Add a Profile option is not displayed",
                 mSettingHelper.get().checkMenuExists("Add a profile"));
