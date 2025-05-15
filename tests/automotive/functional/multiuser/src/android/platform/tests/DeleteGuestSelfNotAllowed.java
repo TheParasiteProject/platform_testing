@@ -49,6 +49,8 @@ public class DeleteGuestSelfNotAllowed {
     private HelperAccessor<IAutoUserHelper> mUsersHelper;
     private HelperAccessor<IAutoSettingHelper> mSettingHelper;
 
+    private static final String LOG_TAG = DeleteGuestSelfNotAllowed.class.getSimpleName();
+
     public DeleteGuestSelfNotAllowed() {
         mUsersHelper = new HelperAccessor<>(IAutoUserHelper.class);
         mSettingHelper = new HelperAccessor<>(IAutoSettingHelper.class);
@@ -61,15 +63,21 @@ public class DeleteGuestSelfNotAllowed {
 
     @Test
     public void testDeleteGuestNotAllowed() throws Exception {
+        Log.i(LOG_TAG, "Act: Get previous userinfo");
         UserInfo previousUser = mMultiUserHelper.getCurrentForegroundUserInfo();
         // switch to Guest and verify the user switch
+        Log.i(LOG_TAG, "Act: Switch to guest user");
         mUsersHelper.get().switchUsingUserIcon(GUEST);
+        Log.i(LOG_TAG, "Act: Get current userinfo");
         UserInfo currentUser = mMultiUserHelper.getCurrentForegroundUserInfo();
+        Log.i(LOG_TAG, "Assert: Current userinfo matches Guest userinfo ");
         assertTrue(currentUser.name.equals(guestUser));
         boolean IsDeleteAllowed = true;
         // try to delete self - runtime exception encountered
         try {
+            Log.i(LOG_TAG, "Act: Open Profile & Accounts setting");
             mSettingHelper.get().openSetting(SettingsConstants.PROFILE_ACCOUNT_SETTINGS);
+            Log.i(LOG_TAG, "Act: Delete current user");
             mUsersHelper.get().deleteCurrentUser();
         } catch (RuntimeException err) {
             Log.v(
@@ -77,9 +85,12 @@ public class DeleteGuestSelfNotAllowed {
                 String.format("Error caught while trying to delete Guest(Self) : %s ", err));
             IsDeleteAllowed = false;
         }
+        Log.i(LOG_TAG, "Assert: Delete user is not allowed");
         assertFalse(IsDeleteAllowed);
         // switch to initial user before terminating the test
+        Log.i(LOG_TAG, "Act: Switch back to initial user");
         mUsersHelper.get().switchUsingUserIcon(DRIVER);
+        Log.i(LOG_TAG, "Assert: Current userinfo matches initial userinfo");
         assertTrue(mMultiUserHelper.getCurrentForegroundUserInfo().name.equals(previousUser.name));
     }
 }
