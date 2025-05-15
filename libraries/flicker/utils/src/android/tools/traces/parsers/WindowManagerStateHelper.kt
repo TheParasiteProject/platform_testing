@@ -231,6 +231,36 @@ constructor(
                 .add(ConditionsFactory.isLauncherLayerVisible())
 
         /**
+         * Waits until the home activity, navigation bar and taskbar are visible, and nothing to be
+         * animating on a specific display
+         *
+         * @param displayId of the target display
+         */
+        @JvmOverloads
+        fun withDesktopModeOnDisplay(displayId: Int = Display.DEFAULT_DISPLAY) =
+            withAppTransitionIdle(displayId)
+                .add(ConditionsFactory.isHomeActivityVisible(displayId))
+                .add(ConditionsFactory.isNavBarWindowVisible(displayId))
+                .add(ConditionsFactory.isTaskBarWindowVisible(displayId))
+                .add(ConditionsFactory.isStatusBarWindowVisible(displayId))
+                // TODO: add checking for wallpaper
+
+        /**
+         * Waits until the home activity, navigation bar and status bar are no longer visible, and
+         * nothing to be animating on a specific display
+         *
+         * @param displayId of the target display
+         */
+        @JvmOverloads
+        fun withEmptyDisplay(displayId: Int = Display.DEFAULT_DISPLAY) =
+            withAppTransitionIdle(displayId)
+                .add(ConditionsFactory.isHomeActivityVisible(displayId).negate())
+                .add(ConditionsFactory.isNavBarWindowVisible(displayId).negate())
+                .add(ConditionsFactory.isTaskBarWindowVisible(displayId).negate())
+                .add(ConditionsFactory.isStatusBarWindowVisible(displayId).negate())
+                // TODO: add checking for wallpaper
+
+        /**
          * Waits until the split-screen divider is visible and nothing to be animating
          *
          * @param displayId of the target display
