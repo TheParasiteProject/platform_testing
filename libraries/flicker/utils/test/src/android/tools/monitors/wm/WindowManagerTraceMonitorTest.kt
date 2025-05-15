@@ -54,21 +54,6 @@ class WindowManagerTraceMonitorTest : TraceMonitorTest<WindowManagerTraceMonitor
         Assume.assumeFalse(android.tracing.Flags.perfettoWmTracing())
     }
 
-    @Test
-    fun includesProtologTrace() {
-        Assume.assumeFalse(android.tracing.Flags.perfettoProtologTracing())
-
-        val monitor = getMonitor()
-        monitor.start()
-        val writer = newTestResultWriter()
-        monitor.stop(writer)
-        val result = writer.write()
-        val reader = ResultReader(result, TRACE_CONFIG_REQUIRE_CHANGES)
-        Truth.assertWithMessage("Trace file exists ${TraceType.PROTOLOG.fileName}")
-            .that(reader.hasTraceFile(TraceType.PROTOLOG))
-            .isTrue()
-    }
-
     companion object {
         @ClassRule @JvmField val ENV_CLEANUP = CleanFlickerEnvironmentRule()
     }

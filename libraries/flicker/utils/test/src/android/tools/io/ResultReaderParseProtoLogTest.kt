@@ -35,11 +35,6 @@ class ResultReaderParseProtoLogTest : BaseResultReaderTestParseTrace() {
     override val invalidSizeMessage = "ProtoLog trace cannot be empty"
     override val expectedSlicedTraceSize = 1
 
-    @Before
-    fun before() {
-        assumeTrue(android.tracing.Flags.perfettoProtologTracing())
-    }
-
     override fun doParse(reader: ResultReader) = reader.readProtoLogTrace()
 
     override fun getTime(traceTime: Timestamp) = traceTime.elapsedNanos

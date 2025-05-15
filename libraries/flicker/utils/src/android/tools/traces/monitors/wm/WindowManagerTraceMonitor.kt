@@ -43,11 +43,6 @@ open class WindowManagerTraceMonitor : TraceMonitor() {
 
     override fun doStopTraces(): Map<TraceType, File> {
         val result = mutableMapOf(traceType to doStop())
-        if (!android.tracing.Flags.perfettoProtologTracing()) {
-            val protologFile = TRACE_DIR.resolve(TraceType.PROTOLOG.fileName)
-            Log.d(LOG_TAG, "Adding protolog trace from $protologFile")
-            result[TraceType.PROTOLOG] = protologFile
-        }
         return result
     }
 }
