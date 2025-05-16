@@ -72,7 +72,6 @@
     "OPEN_NOTIFICATIONS_COMMAND": "service call statusbar 1",
     "STOP_SETTING_APP_COMMAND": "am force-stop com.android.car.settings",
     "OPEN_SETTINGS_COMMAND": "am start --user $user_id -a android.settings.SETTINGS",
-    "MEDIA_LAUNCH_COMMAND": "am start --user $user_id -a android.car.intent.action.MEDIA_TEMPLATE -e android.car.intent.extra.MEDIA_COMPONENT com.android.bluetooth/com.android.bluetooth.avrcpcontroller.BluetoothMediaBrowserService",
     "MEDIA_LAUNCH_BLUETOOTH_AUDIO_COMMAND": "am start -a android.car.intent.action.MEDIA_TEMPLATE -e android.car.intent.extra.MEDIA_COMPONENT com.google.android.bluetooth/com.android.bluetooth.avrcpcontroller.BluetoothMediaBrowserService",
     "NIGHT_MODE_COMMAND": "dumpsys activity service com.android.car/.CarService day-night-mode  night",
     "DAY_MODE_COMMAND": "dumpsys activity service com.android.car/.CarService day-night-mode  day",
@@ -116,6 +115,11 @@
     "MOBILE_DIALPAD_INPUT": {
       "TYPE": "CLASS",
       "VALUE": "android.widget.EditText"
+    },
+    "MOBILE_DIALPAD_TITLE_INPUT": {
+      "TYPE": "RESOURCE_ID",
+      "VALUE": "title",
+      "PACKAGE": "com.android.car.dialer"
     },
     "END_CALL": {
       "TYPE": "RESOURCE_ID",

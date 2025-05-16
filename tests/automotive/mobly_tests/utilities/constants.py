@@ -153,7 +153,9 @@ TIMEZONE_DICT = {
     "PST": "Pacific Standard Time",
     "PDT": "Pacific Daylight Time",
     "EST": "Eastern Standard Time",
-    "EDT": "Eastern Daylight Time"
+    "EDT": "Eastern Daylight Time",
+    "GMT": "Greenwich Mean Time",
+    "UTC": "Coordinated Universal Time"
 }
 CLEAR_MESSAGING_APP = 'pm clear com.google.android.apps.messaging'
 DELETE_MESSAGING_DB = 'rm /data/data/com.android.providers.telephony/databases/mmssms.db'
@@ -165,6 +167,7 @@ DIALER_RECENTS_LABEL = "Recents"
 DIALER_CONTACTS_LABEL = "Contacts"
 DIALER_FAVORITES_LABEL = "Favorites"
 DIALER_DIALPAD_LABEL = "Dialpad"
+START_DIALER_SHELL = 'am start -a android.intent.action.DIAL'
 
 # Bluetooth Logs
 BLUETOOTH_TAG="setprop persist.log.tag.bluetooth verbose"
