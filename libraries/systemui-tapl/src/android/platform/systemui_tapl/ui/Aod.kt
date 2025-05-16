@@ -17,10 +17,11 @@
 package android.platform.systemui_tapl.ui
 
 import android.platform.uiautomatorhelpers.DeviceHelpers.assertVisible
+import android.view.Display.DEFAULT_DISPLAY
 
 /** System UI test automation object representing the always-on-display. */
-class Aod internal constructor() {
+class Aod internal constructor(displayId: Int = DEFAULT_DISPLAY) {
     init {
-        LockScreen.LOCKSCREEN_SELECTOR.assertVisible { "Lockscreen is not visible" }
+        LockScreen.lockScreenSelector(displayId).assertVisible { "Lockscreen is not visible" }
     }
 }
