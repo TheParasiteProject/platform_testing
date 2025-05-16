@@ -19,7 +19,6 @@ package android.tools.traces.parsers
 import android.app.ActivityTaskManager
 import android.app.Instrumentation
 import android.app.WindowConfiguration
-import android.graphics.Rect
 import android.graphics.Region
 import android.os.SystemClock
 import android.os.Trace
@@ -30,6 +29,7 @@ import android.tools.traces.DeviceStateDump
 import android.tools.traces.LOG_TAG
 import android.tools.traces.WaitCondition
 import android.tools.traces.component.ComponentNameMatcher
+import android.tools.traces.component.ComponentNameMatcher.Companion.BUBBLE
 import android.tools.traces.component.ComponentNameMatcher.Companion.IME
 import android.tools.traces.component.ComponentNameMatcher.Companion.LAUNCHER
 import android.tools.traces.component.ComponentNameMatcher.Companion.SNAPSHOT
@@ -370,16 +370,20 @@ constructor(
             compareFn: (Region, Region) -> Boolean = { surfaceRegion, expected ->
                 surfaceRegion == expected
             },
-        ) = add(Condition("surfaceRegion") {
-            val layer = it.layerState.visibleLayers.firstOrNull { layer ->
-                componentMatcher.layerMatchesAnyOf(layer)
-            }
-            layer?.let {
-                // TODO(pablogamito): Remove non-null assertion once visibleRegion in
-                // LayerProperties is no longer nullable.
-                compareFn(layer.visibleRegion!!, expectedRegion)
-            } ?: false
-        })
+        ) =
+            add(
+                Condition("surfaceRegion") {
+                    val layer =
+                        it.layerState.visibleLayers.firstOrNull { layer ->
+                            componentMatcher.layerMatchesAnyOf(layer)
+                        }
+                    layer?.let {
+                        // TODO(pablogamito): Remove non-null assertion once visibleRegion in
+                        // LayerProperties is no longer nullable.
+                        compareFn(layer.visibleRegion ?: Region(), expectedRegion)
+                    } ?: false
+                }
+            )
 
         /**
          * Waits until the IME window and layer are visible
@@ -415,6 +419,10 @@ constructor(
         @JvmOverloads
         fun withPipShown(displayId: Int = Display.DEFAULT_DISPLAY) =
             withAppTransitionIdle(displayId).add(ConditionsFactory.hasPipWindow())
+
+        @JvmOverloads
+        fun withBubbleShown(displayId: Int = Display.DEFAULT_DISPLAY) =
+            withAppTransitionIdle(displayId).add(ConditionsFactory.isLayerVisible(BUBBLE))
 
         /**
          * Waits until a window is no longer in PIP mode. That is:
