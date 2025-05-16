@@ -421,6 +421,11 @@ class Root private constructor(val displayId: Int = DEFAULT_DISPLAY) {
         LockScreen.LOCKSCREEN_SELECTOR.assertInvisible()
     }
 
+    /** Asserts that brightness slider is not visible (i.e. when shade is on a external display.) */
+    fun assertBrightnessSliderNotVisible() {
+        BrightnessSlider.sliderSelector(displayId).assertInvisible()
+    }
+
     // TODO (b/277105514): Determine whether this is an idiomatic method of determining visibility.
     /** Asserts that launcher is visible. */
     fun assertLauncherVisible() {

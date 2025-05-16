@@ -91,7 +91,7 @@ class QuickSettings internal constructor(val displayId: Int = DEFAULT_DISPLAY) {
 
     /** Returns the brightness slider. */
     val brightnessSlider: BrightnessSlider
-        get() = BrightnessSlider()
+        get() = BrightnessSlider(displayId)
 
     /** Returns the QS header. */
     val header: QSHeader
