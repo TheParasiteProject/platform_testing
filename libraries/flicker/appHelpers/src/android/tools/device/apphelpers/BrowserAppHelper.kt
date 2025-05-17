@@ -60,6 +60,23 @@ constructor(
             .click()
     }
 
+    fun clickNewTabInTaskbarContextMenu() {
+        device
+            .wait(
+                Until.findObject(
+                    By.text("New tab")
+                        .hasAncestor(
+                            By.res(
+                                "com.google.android.apps.nexuslauncher",
+                                "deep_shortcut_material",
+                            )
+                        )
+                ),
+                WAIT_TIME_IN_MILLISECONDS,
+            )
+            .click()
+    }
+
     fun clickNewTabInMenu() {
         device
             .wait(

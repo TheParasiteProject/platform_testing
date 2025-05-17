@@ -42,6 +42,8 @@ class EnsureDeviceSettingsRule : TestWatcher() {
                     description = "Test harness' mode is required but disabled.",
                     adbCommandToFixIt =
                         "adb shell setprop $TEST_HARNESS_PROP 1; " +
+                            // Prevents device from rebooting when it has no adb in test harness
+                            "adb shell setprop persist.adb.watchdog.timeout_secs 0; " +
                             "adb shell am force-stop $LAUNCHER_PACKAGE",
                 )
             )

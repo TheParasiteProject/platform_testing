@@ -39,6 +39,9 @@ android_test {
 
     srcs: ["src/**/*.java"],
     host_required: ["CarPropertyManagerStressTestLogPostProcessor"],
+    host_common_data: [
+        ":CarPropertyManagerStressTestLogPostProcessor",
+    ],
     min_sdk_version: "28",
     test_suites: [
         "general-tests",

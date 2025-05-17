@@ -28,30 +28,21 @@ import org.junit.runner.Description;
 public class ChromeOpenTabsRule extends TestWatcher {
 
     @VisibleForTesting static final String CHROME_TABS_COUNT = "tabs-count";
-    int tabsCount = 2;
-
-    @VisibleForTesting static final String CHROME_LINKS = "chrome-links";
-    String link = "https://www.google.com";
 
     private static HelperAccessor<IChromeHelper> sChomeHelper =
             new HelperAccessor<>(IChromeHelper.class);
 
     @Override
     protected void starting(Description description) {
-        link = getArguments().getString(CHROME_LINKS, "https://www.google.com");
-        tabsCount = Integer.valueOf(getArguments().getString(CHROME_TABS_COUNT, "2"));
-        int initialTabCount = tabsCount;
-        String[] links = link.split(",", tabsCount);
+        int tabsCounts = Integer.valueOf(getArguments().getString(CHROME_TABS_COUNT, "2"));
+        String link = "https://www.google.com";
 
         sChomeHelper.get().open();
-        for (int i = 0; i < tabsCount; i++) {
-            for (int j = 0; j < links.length; j++) {
-                sChomeHelper.get().addNewTab(links[j]);
-                SystemClock.sleep(3000);
-                tabsCount--;
-            }
+        for (int i = 0; i < tabsCounts; i++) {
+            sChomeHelper.get().addNewTab(link);
+            SystemClock.sleep(3000);
         }
-        sChomeHelper.get().tabsCount(initialTabCount);
+        sChomeHelper.get().tabsCount(tabsCounts + 1);
         sChomeHelper.get().exit();
     }
 

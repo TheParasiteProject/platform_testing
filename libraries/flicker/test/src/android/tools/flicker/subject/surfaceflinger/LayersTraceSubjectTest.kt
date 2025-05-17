@@ -79,7 +79,7 @@ class LayersTraceSubjectTest {
         val trace = reader.readLayersTrace() ?: error("Unable to read layers trace")
         LayersTraceSubject(trace, reader)
             .first()
-            .isVisible(ComponentNameMatcher.NAV_BAR)
+            .isVisible(ComponentNameMatcher.NAV_BAR_LEGACY)
             .notContains(TestComponents.DOCKER_STACK_DIVIDER)
             .isVisible(TestComponents.LAUNCHER)
     }
@@ -90,7 +90,7 @@ class LayersTraceSubjectTest {
         val trace = reader.readLayersTrace() ?: error("Unable to read layers trace")
         LayersTraceSubject(trace, reader)
             .last()
-            .isVisible(ComponentNameMatcher.NAV_BAR)
+            .isVisible(ComponentNameMatcher.NAV_BAR_LEGACY)
             .isVisible(TestComponents.DOCKER_STACK_DIVIDER)
     }
 
@@ -100,12 +100,12 @@ class LayersTraceSubjectTest {
         val trace = reader.readLayersTrace() ?: error("Unable to read layers trace")
 
         LayersTraceSubject(trace, reader)
-            .isVisible(ComponentNameMatcher.NAV_BAR)
+            .isVisible(ComponentNameMatcher.NAV_BAR_LEGACY)
             .isInvisible(TestComponents.DOCKER_STACK_DIVIDER)
             .forSystemUpTimeRange(90480846872160L, 90480994138424L)
 
         LayersTraceSubject(trace, reader)
-            .isVisible(ComponentNameMatcher.NAV_BAR)
+            .isVisible(ComponentNameMatcher.NAV_BAR_LEGACY)
             .isVisible(TestComponents.DOCKER_STACK_DIVIDER)
             .forSystemUpTimeRange(90491795074136L, 90493757372977L)
     }
@@ -115,13 +115,13 @@ class LayersTraceSubjectTest {
         val reader = getLayerTraceReaderFromAsset("layers_trace_launch_split_screen.perfetto-trace")
         val trace = reader.readLayersTrace() ?: error("Unable to read layers trace")
         LayersTraceSubject(trace, reader)
-            .isVisible(ComponentNameMatcher.NAV_BAR)
+            .isVisible(ComponentNameMatcher.NAV_BAR_LEGACY)
             .notContains(TestComponents.DOCKER_STACK_DIVIDER)
             .then()
-            .isVisible(ComponentNameMatcher.NAV_BAR)
+            .isVisible(ComponentNameMatcher.NAV_BAR_LEGACY)
             .isInvisible(TestComponents.DOCKER_STACK_DIVIDER)
             .then()
-            .isVisible(ComponentNameMatcher.NAV_BAR)
+            .isVisible(ComponentNameMatcher.NAV_BAR_LEGACY)
             .isVisible(TestComponents.DOCKER_STACK_DIVIDER)
             .forAllEntries()
     }

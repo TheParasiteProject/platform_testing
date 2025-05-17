@@ -17,10 +17,16 @@
 package android.tools.parsers.wm
 
 import android.tools.Cache
+import android.tools.Timestamp
+import android.tools.Timestamps
 import android.tools.testutils.CleanFlickerEnvironmentRule
 import android.tools.testutils.readAsset
+import android.tools.traces.parsers.perfetto.Row
 import android.tools.traces.parsers.perfetto.TraceProcessorSession
 import android.tools.traces.parsers.perfetto.TransitionsTraceParser
+import android.tools.traces.wm.ShellTransitionData
+import android.tools.traces.wm.Transition
+import android.tools.traces.wm.WmTransitionData
 import com.google.common.truth.Truth
 import org.junit.Assume
 import org.junit.Before
@@ -62,6 +68,148 @@ class TransitionsTraceParserTest {
                 .that(trace.entries.first().timestamp.systemUptimeNanos)
                 .isEqualTo(479583450997L)
         }
+    }
+
+    @Test
+    fun filtersTransitionWithDispatchTimeBeforeFrom() {
+        val from = Timestamps.from(elapsedNanos = 100)
+        val to = Timestamps.from(elapsedNanos = 200)
+        val transition =
+            createMockTransition(
+                id = 1,
+                dispatchTime = Timestamps.from(elapsedNanos = 99), // Before 'from'
+                finishTime = Timestamps.from(elapsedNanos = 150),
+            )
+        val parser = MockableTransitionsTraceParser(listOf(transition))
+        val trace = parser.parse(MockTraceProcessorSession(), from, to)
+        Truth.assertThat(trace.entries).isEmpty()
+    }
+
+    @Test
+    fun filtersTransitionWithSendTimeBeforeFrom() {
+        val from = Timestamps.from(elapsedNanos = 100)
+        val to = Timestamps.from(elapsedNanos = 200)
+        val transition =
+            createMockTransition(
+                id = 1,
+                sendTime = Timestamps.from(elapsedNanos = 99), // Before 'from'
+                finishTime = Timestamps.from(elapsedNanos = 150),
+            )
+        val parser = MockableTransitionsTraceParser(listOf(transition))
+        val trace = parser.parse(MockTraceProcessorSession(), from, to)
+        Truth.assertThat(trace.entries).isEmpty()
+    }
+
+    @Test
+    fun filtersTransitionWithFinishTimeAfterTo() {
+        val from = Timestamps.from(elapsedNanos = 100)
+        val to = Timestamps.from(elapsedNanos = 200)
+        val transition =
+            createMockTransition(
+                id = 1,
+                dispatchTime = Timestamps.from(elapsedNanos = 110),
+                finishTime = Timestamps.from(elapsedNanos = 201), // After 'to'
+            )
+        val parser = MockableTransitionsTraceParser(listOf(transition))
+        val trace = parser.parse(MockTraceProcessorSession(), from, to)
+        Truth.assertThat(trace.entries).isEmpty()
+    }
+
+    @Test
+    fun filtersTransitionWithWmAbortTimeAfterTo() {
+        val from = Timestamps.from(elapsedNanos = 100)
+        val to = Timestamps.from(elapsedNanos = 200)
+        val transition =
+            createMockTransition(
+                id = 1,
+                dispatchTime = Timestamps.from(elapsedNanos = 110),
+                wmAbortTime = Timestamps.from(elapsedNanos = 201), // After 'to'
+            )
+        val parser = MockableTransitionsTraceParser(listOf(transition))
+        val trace = parser.parse(MockTraceProcessorSession(), from, to)
+        Truth.assertThat(trace.entries).isEmpty()
+    }
+
+    @Test
+    fun filtersTransitionWithShellAbortTimeAfterTo() {
+        val from = Timestamps.from(elapsedNanos = 100)
+        val to = Timestamps.from(elapsedNanos = 200)
+        val transition =
+            createMockTransition(
+                id = 1,
+                dispatchTime = Timestamps.from(elapsedNanos = 110),
+                shellAbortTime = Timestamps.from(elapsedNanos = 201), // After 'to'
+            )
+        val parser = MockableTransitionsTraceParser(listOf(transition))
+        val trace = parser.parse(MockTraceProcessorSession(), from, to)
+        Truth.assertThat(trace.entries).isEmpty()
+    }
+
+    @Test
+    fun filtersTransitionWithMergeTimeAfterTo() {
+        val from = Timestamps.from(elapsedNanos = 100)
+        val to = Timestamps.from(elapsedNanos = 200)
+        val transition =
+            createMockTransition(
+                id = 1,
+                dispatchTime = Timestamps.from(elapsedNanos = 110),
+                mergeTime = Timestamps.from(elapsedNanos = 201), // After 'to'
+            )
+        val parser = MockableTransitionsTraceParser(listOf(transition))
+        val trace = parser.parse(MockTraceProcessorSession(), from, to)
+        Truth.assertThat(trace.entries).isEmpty()
+    }
+
+    @Test
+    fun includesValidTransition() {
+        val from = Timestamps.from(elapsedNanos = 100)
+        val to = Timestamps.from(elapsedNanos = 200)
+        val transition = createMockTransition(id = 1, dispatchTime = from, finishTime = to)
+        val parser = MockableTransitionsTraceParser(listOf(transition))
+        val trace = parser.parse(MockTraceProcessorSession(), from, to)
+        Truth.assertThat(trace.entries).containsExactly(transition)
+    }
+
+    private class MockTraceProcessorSession : TraceProcessorSession {
+        override fun <T> query(sql: String, predicate: (List<Row>) -> T): T {
+            // Not used in tests
+            error("Not implemented")
+        }
+    }
+
+    // Simple mock implementation for testing purposes
+    private class MockableTransitionsTraceParser(private val mockEntries: List<Transition>) :
+        TransitionsTraceParser() {
+        // Override getEntries to return the mocked list directly
+        override fun getEntries(input: TraceProcessorSession): List<Transition> {
+            return mockEntries
+        }
+    }
+
+    private fun createMockTransition(
+        id: Int,
+        sendTime: Timestamp? = null,
+        dispatchTime: Timestamp? = null,
+        finishTime: Timestamp? = null,
+        wmAbortTime: Timestamp? = null,
+        shellAbortTime: Timestamp? = null,
+        mergeTime: Timestamp? = null,
+    ): Transition {
+        return Transition(
+            id = id,
+            wmData =
+                WmTransitionData(
+                    sendTime = sendTime,
+                    finishTime = finishTime,
+                    abortTime = wmAbortTime,
+                ),
+            shellData =
+                ShellTransitionData(
+                    dispatchTime = dispatchTime,
+                    abortTime = shellAbortTime,
+                    mergeTime = mergeTime,
+                ),
+        )
     }
 
     companion object {

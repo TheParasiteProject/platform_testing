@@ -386,8 +386,7 @@ public class NotificationController {
     @NonNull
     private Builder makePromotedOngoing(@NonNull Builder builder) {
         builder.setOngoing(true);
-        // TODO(b/415070395): Update this condition when the flag is merged.
-        if (Flags.optInRichOngoing()) {
+        if (Flags.uiRichOngoing()) {
             builder.setRequestPromotedOngoing(true);
         } else {
             builder.setColorized(true).setColor(Color.GREEN);
@@ -928,6 +927,11 @@ public class NotificationController {
                         .setStyle(
                                 new android.app.Notification.MessagingStyle(person)
                                         .setConversationTitle(NOTIFICATION_TITLE_TEXT)
+                                         .addMessage(
+                                                new android.app.Notification.MessagingStyle.Message(
+                                                        "Hello, nice to meet you and I am happy to be your friend. You're welcome to join our party tomorrow. Please remember to invite more people and bring some food to share with us! Thank you",
+                                                        SystemClock.currentThreadTimeMillis(),
+                                                        person))
                                         .addMessage(
                                                 new android.app.Notification.MessagingStyle.Message(
                                                         "Message 4",

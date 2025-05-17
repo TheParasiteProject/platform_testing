@@ -21,6 +21,7 @@ import static junit.framework.Assert.assertTrue;
 import android.platform.helpers.HelperAccessor;
 import android.platform.helpers.IAutoFacetBarHelper;
 import android.platform.helpers.IAutoHomeHelper;
+import android.util.Log;
 
 import androidx.test.runner.AndroidJUnit4;
 
@@ -33,6 +34,7 @@ public class SystemUiTest {
 
     private HelperAccessor<IAutoHomeHelper> mHomeHelper;
     private HelperAccessor<IAutoFacetBarHelper> mFacetBarHelper;
+    private static final String LOG_TAG = SystemUiTest.class.getSimpleName();
 
     public SystemUiTest() {
         mHomeHelper = new HelperAccessor<>(IAutoHomeHelper.class);
@@ -41,15 +43,21 @@ public class SystemUiTest {
 
     @Before
     public void setup() {
+        Log.i(LOG_TAG, "Act: Open Home screen");
         mHomeHelper.get().open();
     }
 
     @Test
     public void testSystemUi() {
+        Log.i(LOG_TAG, "Act: Open System UI");
         mHomeHelper.get().openSystemUi();
+        Log.i(LOG_TAG, "Assert: Maps widget is displayed");
         assertTrue("Maps widget is not displayed", mHomeHelper.get().hasMapsWidget());
+        Log.i(LOG_TAG, "Act: Open Car Ui");
         mHomeHelper.get().openCarUi();
+        Log.i(LOG_TAG, "Act: Open Facet bar App Grid");
         mFacetBarHelper.get().clickOnFacetIcon(IAutoFacetBarHelper.FACET_BAR.APP_GRID);
+        Log.i(LOG_TAG, "Assert: App Grid is Open");
         assertTrue(
                 "App grid did not open",
                 mFacetBarHelper

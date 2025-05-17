@@ -47,7 +47,10 @@ object Utils {
             )
             .apply {
                 val perfettoMonitorBuilder = PerfettoTraceMonitor.newBuilder()
-                perfettoMonitorBuilder.enableLayersTrace().enableTransactionsTrace()
+                perfettoMonitorBuilder
+                    .enableLayersTrace()
+                    .enableTransactionsTrace()
+                    .enableProtoLog()
 
                 if (android.tracing.Flags.perfettoViewCaptureTracing()) {
                     perfettoMonitorBuilder.enableViewCaptureTrace()
@@ -66,10 +69,6 @@ object Utils {
                     perfettoMonitorBuilder.enableWindowManagerTrace()
                 } else {
                     this.add(WindowManagerTraceMonitor())
-                }
-
-                if (android.tracing.Flags.perfettoProtologTracing()) {
-                    perfettoMonitorBuilder.enableProtoLog()
                 }
 
                 if (android.tracing.Flags.perfettoIme()) {

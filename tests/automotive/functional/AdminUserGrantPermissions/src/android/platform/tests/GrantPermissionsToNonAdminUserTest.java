@@ -27,6 +27,7 @@ import android.platform.helpers.IAutoUserHelper;
 import android.platform.helpers.MultiUserHelper;
 import android.platform.helpers.SettingsConstants;
 import android.platform.scenario.multiuser.MultiUserConstants;
+import android.util.Log;
 
 import androidx.test.runner.AndroidJUnit4;
 
@@ -44,6 +45,7 @@ public class GrantPermissionsToNonAdminUserTest {
     private final MultiUserHelper mMultiUserHelper = MultiUserHelper.getInstance();
     private HelperAccessor<IAutoUserHelper> mUsersHelper;
     private HelperAccessor<IAutoSettingHelper> mSettingHelper;
+    private static final String LOG_TAG = GrantPermissionsToNonAdminUserTest.class.getSimpleName();
 
     public GrantPermissionsToNonAdminUserTest() {
         mUsersHelper = new HelperAccessor<>(IAutoUserHelper.class);
@@ -52,38 +54,47 @@ public class GrantPermissionsToNonAdminUserTest {
 
     @After
     public void goBackToHomeScreen() {
+
+        Log.i(LOG_TAG, "Act: Go back to Settings screen");
         mSettingHelper.get().goBackToSettingsScreen();
     }
 
     @Test
     public void testCreateNewUser() throws Exception {
+        Log.i(LOG_TAG, "Act: Create a new user");
         // create new user
         mMultiUserHelper.createUser(USER_NAME, false);
     }
 
     @Test
     public void testOpenPermissionsPageOfNonAdmin() throws Exception {
+        Log.i(LOG_TAG, "Act: Open Profile & Accounts Setting");
         mSettingHelper.get().openSetting(SettingsConstants.PROFILE_ACCOUNT_SETTINGS);
+        Log.i(LOG_TAG, "Act: Open Permissions screen");
         mUsersHelper.get().openPermissionsPage(USER_NAME);
     }
 
     @Test
     public void testToggleOffAllPermissionsAndCheck() throws Exception {
+        Log.i(LOG_TAG, "Assert: Create New Profile toggle is OFF");
         assertTrue(
                 (mUsersHelper.get().isToggleOn(AutomotiveConfigConstants.CREATE_NEW_PROFILE_SWITCH))
                         && (mUsersHelper
                                 .get()
                                 .toggle(AutomotiveConfigConstants.CREATE_NEW_PROFILE_SWITCH)));
+        Log.i(LOG_TAG, "Assert: Make Phone call toggle is OFF");
         assertTrue(
                 (mUsersHelper.get().isToggleOn(AutomotiveConfigConstants.MAKE_PHONE_CALLS_SWITCH))
                         && (mUsersHelper
                                 .get()
                                 .toggle(AutomotiveConfigConstants.MAKE_PHONE_CALLS_SWITCH)));
+        Log.i(LOG_TAG, "Assert: Install New Apps toggle is OFF");
         assertTrue(
                 (mUsersHelper.get().isToggleOn(AutomotiveConfigConstants.INSTALL_NEW_APPS_SWITCH))
                         && (mUsersHelper
                                 .get()
                                 .toggle(AutomotiveConfigConstants.INSTALL_NEW_APPS_SWITCH)));
+        Log.i(LOG_TAG, "Assert: Uninstall toggle is OFF");
         assertTrue(
                 (mUsersHelper.get().isToggleOn(AutomotiveConfigConstants.UNINSTALL_APPS_SWITCH))
                         && (mUsersHelper
@@ -93,6 +104,7 @@ public class GrantPermissionsToNonAdminUserTest {
 
     @Test
     public void testToggleOnAllPermissionsAndCheck() throws Exception {
+        Log.i(LOG_TAG, "Assert: Create New Profile toggle is ON");
         assertTrue(
                 !(mUsersHelper
                                 .get()
@@ -100,16 +112,19 @@ public class GrantPermissionsToNonAdminUserTest {
                         && (mUsersHelper
                                 .get()
                                 .toggle(AutomotiveConfigConstants.CREATE_NEW_PROFILE_SWITCH)));
+        Log.i(LOG_TAG, "Assert: Make Phone call toggle is ON");
         assertTrue(
                 !(mUsersHelper.get().isToggleOn(AutomotiveConfigConstants.MAKE_PHONE_CALLS_SWITCH))
                         && (mUsersHelper
                                 .get()
                                 .toggle(AutomotiveConfigConstants.MAKE_PHONE_CALLS_SWITCH)));
+        Log.i(LOG_TAG, "Assert: Install New Apps toggle is ON");
         assertTrue(
                 !(mUsersHelper.get().isToggleOn(AutomotiveConfigConstants.INSTALL_NEW_APPS_SWITCH))
                         && (mUsersHelper
                                 .get()
                                 .toggle(AutomotiveConfigConstants.INSTALL_NEW_APPS_SWITCH)));
+        Log.i(LOG_TAG, "Assert: Uninstall toggle is ON");
         assertTrue(
                 !(mUsersHelper.get().isToggleOn(AutomotiveConfigConstants.UNINSTALL_APPS_SWITCH))
                         && (mUsersHelper
@@ -120,6 +135,7 @@ public class GrantPermissionsToNonAdminUserTest {
     @Test
     // @ConditionalIgnore(condition = IgnoreOnPortrait.class)
     public void testUnCheckCreateNewProfilesPermissionAndSwitchToNonAdminUser() throws Exception {
+        Log.i(LOG_TAG, "Assert: Create New Profile toggle is ON");
         assertTrue(
                 (mUsersHelper.get().isToggleOn(AutomotiveConfigConstants.CREATE_NEW_PROFILE_SWITCH))
                         && (mUsersHelper
@@ -127,15 +143,22 @@ public class GrantPermissionsToNonAdminUserTest {
                                 .toggle(AutomotiveConfigConstants.CREATE_NEW_PROFILE_SWITCH)));
 
         // Switches the user mode to secondary and opens it profile account settings
+        Log.i(LOG_TAG, "Act: Switch user mode to secondary");
         UserInfo targetUser = mMultiUserHelper.getUserByName(USER_NAME);
         mMultiUserHelper.switchToUserId(targetUser.id);
+        Log.i(LOG_TAG, "Act: Open Profile & Accounts setting");
         mSettingHelper.get().openSetting(SettingsConstants.PROFILE_ACCOUNT_SETTINGS);
 
         // verifies the current user and the visibility of Add profile
+        Log.i(LOG_TAG, "Act: Get user info");
         UserInfo currentUser = mMultiUserHelper.getCurrentForegroundUserInfo();
+        Log.i(LOG_TAG, "Assert: Login user is Seconday user");
         assertTrue(currentUser.name.equals(USER_NAME));
+        Log.i(LOG_TAG, "Assert: Add Profile is not visible");
         assertFalse(mUsersHelper.get().isVisibleAddProfile());
+        Log.i(LOG_TAG, "Assert: Switch user mode to admin user");
         mMultiUserHelper.switchToUserId(mMultiUserHelper.getInitialUser());
+        Log.i(LOG_TAG, "Act: Remove user");
         mMultiUserHelper.removeUser(targetUser);
     }
 }

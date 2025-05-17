@@ -20,6 +20,7 @@ import static junit.framework.Assert.assertTrue;
 
 import android.platform.helpers.HelperAccessor;
 import android.platform.helpers.IAutoHomeHelper;
+import android.util.Log;
 
 import androidx.test.runner.AndroidJUnit4;
 
@@ -31,33 +32,41 @@ import org.junit.runner.RunWith;
 public class HomeTest {
     private HelperAccessor<IAutoHomeHelper> mHomeHelper;
 
+    private static final String LOG_TAG = HomeTest.class.getSimpleName();
+
     public HomeTest() {
         mHomeHelper = new HelperAccessor<>(IAutoHomeHelper.class);
     }
 
     @Before
     public void setup() {
+        Log.i(LOG_TAG, "Act: Open Home screen");
         mHomeHelper.get().open();
     }
 
     @Test
     public void testAssistantWidget() {
+        Log.i(LOG_TAG, "Assert: Assistant widget is visible");
         assertTrue(mHomeHelper.get().hasAssistantWidget());
     }
 
     @Test
     public void testMediaWidget() {
+        Log.i(LOG_TAG, "Assert: Media widget is visible");
         assertTrue(mHomeHelper.get().hasMediaWidget());
     }
 
     @Test
     public void testTempetraureWidget() {
+        Log.i(LOG_TAG, "Assert: Driver Temperature widget is visible");
         assertTrue("Driver temperature is not displayed", mHomeHelper.get().hasTemperatureWidget());
     }
 
     @Test
     public void testHvacPanel() {
+        Log.i(LOG_TAG, "Act: Open HVAC panel");
         mHomeHelper.get().openHVAC();
+        Log.i(LOG_TAG, "Assert: HVAC panel is open");
         assertTrue("HVAC panel is not opened", mHomeHelper.get().isHVACOpen());
     }
 }

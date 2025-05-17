@@ -26,6 +26,7 @@ import android.platform.helpers.IAutoFacetBarHelper;
 import android.platform.helpers.IAutoNotificationHelper;
 import android.platform.helpers.IAutoVehicleHardKeysHelper;
 import android.platform.helpers.IAutoVehicleHardKeysHelper.DrivingState;
+import android.util.Log;
 
 import androidx.test.runner.AndroidJUnit4;
 
@@ -45,6 +46,7 @@ public class DrivingOptimizedAppsTest {
     private static final String NOTIFICATION_TITLE = "Check recent permissions";
     private static final String APP_PERMISSIONS = "App permissions";
     private static final int SPEED_TWENTY = 20;
+    private static final String LOG_TAG = DrivingOptimizedAppsTest.class.getSimpleName();
 
     public DrivingOptimizedAppsTest() throws Exception {
         mAppGridHelper = new HelperAccessor<>(IAutoAppGridHelper.class);
@@ -56,20 +58,27 @@ public class DrivingOptimizedAppsTest {
 
     @Before
     public void enableDrivingMode() {
+        Log.i(LOG_TAG, "Act: Set Driving State to Moving");
         mHardKeysHelper.get().setDrivingState(DrivingState.MOVING);
+        Log.i(LOG_TAG, "Act: Set Driving Sped to Twenty");
         mHardKeysHelper.get().setSpeed(SPEED_TWENTY);
     }
 
     @After
     public void disableDrivingMode() {
+        Log.i(LOG_TAG, "Act: Go to Homescreen");
         mAppGridHelper.get().goToHomePage();
+        Log.i(LOG_TAG, "Act: Set Driving State to Parking");
         mHardKeysHelper.get().setDrivingState(DrivingState.PARKED);
     }
 
     @Test
     public void testOpenSettings() {
+        Log.i(LOG_TAG, "Act: Open App Grid");
         mAppGridHelper.get().open();
+        Log.i(LOG_TAG, "Act: Open Settings");
         mAppGridHelper.get().openApp("Settings");
+        Log.i(LOG_TAG, "Assert: Settings is open");
         assertTrue(
                 "Settings app is not open",
                 mAppGridHelper
@@ -79,8 +88,11 @@ public class DrivingOptimizedAppsTest {
 
     @Test
     public void testOpenRadio() {
+        Log.i(LOG_TAG, "Act: Open App Grid");
         mAppGridHelper.get().open();
+        Log.i(LOG_TAG, "Act: Open Radio App");
         mAppGridHelper.get().openApp("Radio");
+        Log.i(LOG_TAG, "Assert: Radio App is open");
         assertTrue(
                 "Radio app is not open",
                 mAppGridHelper
@@ -90,8 +102,11 @@ public class DrivingOptimizedAppsTest {
 
     @Test
     public void testOpenPhone() {
+        Log.i(LOG_TAG, "Act: Open App Grid");
         mAppGridHelper.get().open();
+        Log.i(LOG_TAG, "Act: Open Radio App");
         mAppGridHelper.get().openApp("Phone");
+        Log.i(LOG_TAG, "Assert: Phone App is open");
         assertTrue(
                 "Phone is not open",
                 mAppGridHelper
@@ -106,20 +121,29 @@ public class DrivingOptimizedAppsTest {
      */
     @Test
     public void testOpenContactsAndVerifyPostDriveNotification() {
+        Log.i(LOG_TAG, "Act: Open App Grid");
         mAppGridHelper.get().open();
+        Log.i(LOG_TAG, "Act: Open Contacts App");
         mAppGridHelper.get().openApp("Contacts");
+        Log.i(LOG_TAG, "Act: Dismiss pop-up dialog");
         mContactHelper.get().dismissInitialDialogs();
+        Log.i(LOG_TAG, "Assert: Contacts is open");
         assertTrue(
                 "Contacts is not open",
                 mAppGridHelper
                         .get()
                         .checkPackageInForeground(AutomotiveConfigConstants.CONTACTS_PACKAGE));
+        Log.i(LOG_TAG, "Act: Disable Driving Mode");
         disableDrivingMode();
+        Log.i(LOG_TAG, "Act: Open Notifications");
         mFacetBarHelper.get().clickOnFacetIcon(IAutoFacetBarHelper.FACET_BAR.NOTIFICATION);
+        Log.i(LOG_TAG, "Assert: Recent Permission is notified");
         assertTrue(
                 "Recent Permission is not Notified",
                 mNotificationHelper.get().checkNotificationExists(NOTIFICATION_TITLE));
+        Log.i(LOG_TAG, "Act: Open Recent Permission");
         mNotificationHelper.get().clickOnCheckRecentPermissions(NOTIFICATION_TITLE);
+        Log.i(LOG_TAG, "Act: Open App Permission is launched");
         assertTrue(
                 "App Permissions page is not launched",
                 mNotificationHelper.get().checkAppPermissionsExists(APP_PERMISSIONS));

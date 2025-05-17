@@ -44,6 +44,8 @@ class Transition(
         }
     }
 
+    // TODO: Rethink the timestamp assigned to transitions, conceptually these are not discrete
+    //  entries but continuous time ranges over which a transition lives.
     override val timestamp =
         wmData.createTime
             ?: wmData.sendTime

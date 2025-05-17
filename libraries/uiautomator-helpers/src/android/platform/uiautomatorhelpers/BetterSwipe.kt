@@ -188,6 +188,7 @@ object BetterSwipe {
                 point = start,
                 displayId = displayId,
             )
+            lastTime = downTime
             return this
         }
 

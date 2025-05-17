@@ -28,10 +28,8 @@ import android.tools.traces.component.IComponentMatcher
 import android.tools.traces.surfaceflinger.Layer
 import android.tools.traces.surfaceflinger.Transform
 import android.tools.traces.surfaceflinger.Transform.Companion.isFlagSet
-import android.tools.traces.wm.WindowManagerState
 import android.tools.traces.wm.WindowState
 import androidx.test.platform.app.InstrumentationRegistry
-import com.android.wm.shell.Flags
 
 object ConditionsFactory {
 
@@ -59,12 +57,9 @@ object ConditionsFactory {
         return isPhone
     }
 
-    fun getNavBarComponent(wmState: WindowManagerState): IComponentMatcher {
-        var component: IComponentMatcher = ComponentNameMatcher.NAV_BAR
-        if (wmState.isTablet || !isPhoneNavBar() || Flags.enableTaskbarOnPhones()) {
-            component = component.or(ComponentNameMatcher.TASK_BAR)
-        }
-        return component
+    fun getNavBarComponentOrLegacy(): IComponentMatcher {
+        // FlickerLib tests may still use legacy navigation bar.
+        return ComponentNameMatcher.NAV_BAR_LEGACY.or(ComponentNameMatcher.NAV_BAR)
     }
 
     /**
@@ -86,7 +81,7 @@ object ConditionsFactory {
      */
     fun isNavOrTaskBarWindowVisible(): Condition<DeviceStateDump> =
         Condition("isNavBarOrTaskBarWindowVisible") {
-            val component = getNavBarComponent(it.wmState)
+            val component = getNavBarComponentOrLegacy()
             it.wmState.isWindowSurfaceShown(component)
         }
 
@@ -96,14 +91,14 @@ object ConditionsFactory {
      */
     fun isNavOrTaskBarLayerVisible(): Condition<DeviceStateDump> =
         Condition("isNavBarOrTaskBarLayerVisible") {
-            val component = getNavBarComponent(it.wmState)
+            val component = getNavBarComponentOrLegacy()
             it.layerState.isVisible(component)
         }
 
     /** Condition to check if the [ComponentNameMatcher.NAV_BAR] layer is opaque */
     fun isNavOrTaskBarLayerOpaque(): Condition<DeviceStateDump> =
         Condition("isNavOrTaskBarLayerOpaque") {
-            val component = getNavBarComponent(it.wmState)
+            val component = getNavBarComponentOrLegacy()
             it.layerState.getLayerWithBuffer(component)?.color?.alpha() == 1.0f
         }
 
