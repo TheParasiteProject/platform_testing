@@ -77,6 +77,15 @@ public interface StsLogic {
                         "mainline",
                     });
 
+    // skip all tests to ensure tests are running correctly and are compatible with STS
+    // Exceptions:
+    // * skip all tests
+    List<String> STS_EXTRA_BUSINESS_LOGIC_SKIPALL =
+            Arrays.asList(
+                    new String[] {
+                        "skipAllTests",
+                    });
+
     Description getTestDescription();
 
     LocalDate getPlatformSpl();
@@ -97,6 +106,8 @@ public interface StsLogic {
                 return STS_EXTRA_BUSINESS_LOGIC_FULL;
             case "develop":
                 return STS_EXTRA_BUSINESS_LOGIC_DEVELOP;
+            case "skipAll":
+                return STS_EXTRA_BUSINESS_LOGIC_SKIPALL;
             default:
                 throw new RuntimeException(
                         "Could not find Dynamic STS plan in InstrumentationRegistry arguments");
