@@ -25,8 +25,6 @@ import android.tools.io.TraceType
 import android.tools.testutils.CleanFlickerEnvironmentRule
 import android.tools.testutils.TEST_SCENARIO
 import android.tools.testutils.assertArchiveContainsFiles
-import android.tools.testutils.getLauncherPackageName
-import android.tools.testutils.getSystemUiUidName
 import android.tools.traces.parsers.WindowManagerStateHelper
 import androidx.test.platform.app.InstrumentationRegistry
 import com.android.systemui.Flags.enableViewCaptureTracing
@@ -122,10 +120,6 @@ class FlickerServiceTracesCollectorTest {
                         it.add(TraceType.LEGACY_SHELL_TRANSITION.fileName)
                     }
 
-                    if (!android.tracing.Flags.perfettoViewCaptureTracing()) {
-                        it.add("${getLauncherPackageName()}_0.vc__view_capture_trace.winscope")
-                    }
-
                     if (!android.tracing.Flags.perfettoWmTracing()) {
                         it.add(TraceType.WM.fileName)
                     }
@@ -138,11 +132,6 @@ class FlickerServiceTracesCollectorTest {
                     if (!android.tracing.Flags.perfettoTransitionTracing()) {
                         it.add(TraceType.LEGACY_WM_TRANSITION.fileName)
                         it.add(TraceType.LEGACY_SHELL_TRANSITION.fileName)
-                    }
-
-                    if (!android.tracing.Flags.perfettoViewCaptureTracing()) {
-                        it.add("${getLauncherPackageName()}_0.vc__view_capture_trace.winscope")
-                        it.add("${getSystemUiUidName()}_1.vc__view_capture_trace.winscope")
                     }
 
                     if (!android.tracing.Flags.perfettoWmTracing()) {
@@ -160,11 +149,6 @@ class FlickerServiceTracesCollectorTest {
                 if (!android.tracing.Flags.perfettoTransitionTracing()) {
                     it.add(TraceType.LEGACY_WM_TRANSITION.fileName)
                     it.add(TraceType.LEGACY_SHELL_TRANSITION.fileName)
-                }
-
-                if (!android.tracing.Flags.perfettoViewCaptureTracing()) {
-                    it.add("${getSystemUiUidName()}_0.vc__view_capture_trace.winscope")
-                    it.add("${getLauncherPackageName()}_1.vc__view_capture_trace.winscope")
                 }
 
                 if (!android.tracing.Flags.perfettoWmTracing()) {

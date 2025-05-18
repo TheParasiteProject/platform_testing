@@ -177,11 +177,6 @@ class PerfettoTraceMonitorTest : TraceMonitorTest<PerfettoTraceMonitor>() {
 
     @Test
     fun viewCaptureTracingTest() {
-        assumeTrue(
-            "PerfettoViewCaptureTracing flag should be enabled",
-            android.tracing.Flags.perfettoViewCaptureTracing(),
-        )
-
         val traceMonitor = PerfettoTraceMonitor.newBuilder().enableViewCaptureTrace().build()
         val reader =
             traceMonitor.withTracing(resultReaderProvider = { buildResultReader(it) }) {
