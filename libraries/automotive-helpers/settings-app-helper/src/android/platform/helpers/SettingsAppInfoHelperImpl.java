@@ -231,6 +231,13 @@ public class SettingsAppInfoHelperImpl extends AbstractStandardAppHelper
 
     /** {@inheritDoc} */
     @Override
+    public void selectAppAndEnableDisableApp(String application, State state) {
+        selectApp(application);
+        enableDisableApplication(state);
+    }
+
+    /** {@inheritDoc} */
+    @Override
     public boolean isCurrentApplicationRunning() {
         UiObject2 forceStopButton = getForceStopButton();
         if (forceStopButton == null) {
