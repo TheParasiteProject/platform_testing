@@ -420,9 +420,23 @@ constructor(
         fun withPipShown(displayId: Int = Display.DEFAULT_DISPLAY) =
             withAppTransitionIdle(displayId).add(ConditionsFactory.hasPipWindow())
 
+        /**
+         * Checks whether [BUBBLE] is shown.
+         *
+         * @param displayId of the target display
+         */
         @JvmOverloads
         fun withBubbleShown(displayId: Int = Display.DEFAULT_DISPLAY) =
             withAppTransitionIdle(displayId).add(ConditionsFactory.isLayerVisible(BUBBLE))
+
+        /**
+         * Checks whether [BUBBLE] is gone.
+         *
+         * @param displayId of the target display
+         */
+        @JvmOverloads
+        fun withBubbleGone(displayId: Int = Display.DEFAULT_DISPLAY) =
+            withAppTransitionIdle(displayId).add(ConditionsFactory.hasBubbleWindow().negate())
 
         /**
          * Waits until a window is no longer in PIP mode. That is:
