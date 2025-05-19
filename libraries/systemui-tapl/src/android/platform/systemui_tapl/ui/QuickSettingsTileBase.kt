@@ -95,11 +95,15 @@ sealed class QuickSettingsTileBase(val displayId: Int = DEFAULT_DISPLAY) {
         internetDialog.clickOnDoneAndClose()
     }
 
-    /** Clicks the Bluetooth tile and presses Done button. */
-    fun clickBluetoothTile() {
+    /** Clicks the Bluetooth tile and opens dialog. */
+    fun openBluetoothDialog(): BluetoothDialog {
         clickWithoutAssertions()
-        val bluetoothDialog = BluetoothDialog(displayId)
+        return BluetoothDialog(displayId)
+    }
 
+    /** Clicks the Bluetooth tile, opens dialog and presses Done button. */
+    fun clickBluetoothTile() {
+        val bluetoothDialog = openBluetoothDialog()
         bluetoothDialog.clickOnDoneAndClose()
     }
 
