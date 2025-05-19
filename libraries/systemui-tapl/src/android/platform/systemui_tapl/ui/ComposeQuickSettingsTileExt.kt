@@ -22,11 +22,28 @@ fun ComposeQuickSettingsTile.clickInternetTileToOpenDialog(): InternetDialog {
 }
 
 fun ComposeQuickSettingsTile.clickBluetoothTileToOpenDialog(): BluetoothDialog {
-    click()
+    clickToOpenDialogOnDualTarget()
     return BluetoothDialog(displayId)
 }
 
 fun ComposeQuickSettingsTile.clickModesTileToOpenDialog(): ModesDialog {
-    click()
+    clickToOpenDialogOnDualTarget()
     return ModesDialog(displayId)
+}
+
+private fun ComposeQuickSettingsTile.clickToOpenDialogOnDualTarget() {
+    if (isSmallTile) {
+        longPress()
+    } else {
+        click()
+    }
+}
+
+/** Returns a Toggleable behavior for a dual target tile, regardless of the tile size. */
+fun ComposeQuickSettingsTile.getToggleableBehaviorForDualTarget(): Toggleable {
+    return if (isSmallTile) {
+        getBehavior<Toggleable>()!!
+    } else {
+        getBehavior<ToggleableDualTarget>()!!
+    }
 }
