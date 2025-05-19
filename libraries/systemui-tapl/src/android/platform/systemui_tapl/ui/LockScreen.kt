@@ -27,16 +27,30 @@ import android.platform.uiautomatorhelpers.DeviceHelpers.betterSwipe
 import android.platform.uiautomatorhelpers.DeviceHelpers.uiDevice
 import android.platform.uiautomatorhelpers.DeviceHelpers.waitForObj
 import android.platform.uiautomatorhelpers.FLING_GESTURE_INTERPOLATOR
+import android.view.Display.DEFAULT_DISPLAY
 import androidx.test.uiautomator.By
+import androidx.test.uiautomator.BySelector
 import com.android.launcher3.tapl.LauncherInstrumentation
 import com.android.launcher3.tapl.Workspace
 import com.android.systemui.Flags.sceneContainer
 import com.google.common.truth.Truth.assertWithMessage
 
 /** System UI test automation object representing the lock screen. */
-class LockScreen internal constructor() {
+class LockScreen internal constructor(val displayId: Int = DEFAULT_DISPLAY) {
+    private val lockScreenIconSelector: BySelector =
+        sysuiResSelector("device_entry_icon_view", displayId)
+
+    private val lockScreenSelector: BySelector = lockScreenSelector(displayId)
+
+    private val swipeableArea: BySelector =
+        if (sceneContainer()) {
+            sysuiResSelector("shared_notification_container", displayId)
+        } else {
+            sysuiResSelector("notification_panel", displayId)
+        }
+
     init {
-        LOCKSCREEN_SELECTOR.assertVisible { "Lockscreen is not visible" }
+        lockScreenSelector.assertVisible { "Lockscreen is not visible on display $displayId" }
     }
 
     /**
@@ -68,7 +82,7 @@ class LockScreen internal constructor() {
     /** Swipes up to the unlocked state. */
     fun swipeUpToUnlock(): Workspace {
         swipeUp()
-        LOCKSCREEN_SELECTOR.assertInvisible { "Lockscreen still visible after swiping up." }
+        lockScreenSelector.assertInvisible { "Lockscreen still visible after swiping up." }
         assertWithMessage("Device is still locked after swiping up")
             .that(LockscreenController.get().isDeviceLocked)
             .isFalse()
@@ -78,7 +92,7 @@ class LockScreen internal constructor() {
     /** Uses home key to get to the unlocked state, skipping potentially flaky gesture. */
     fun unlockDirectly() {
         uiDevice.pressMenu()
-        LOCKSCREEN_SELECTOR.assertInvisible { "Lockscreen still visible after swiping up." }
+        lockScreenSelector.assertInvisible { "Lockscreen still visible after swiping up." }
         assertWithMessage("Device is still locked after swiping up")
             .that(LockscreenController.get().isDeviceLocked)
             .isFalse()
@@ -103,7 +117,7 @@ class LockScreen internal constructor() {
      */
     val lockIcon: LockscreenLockIcon
         get() {
-            val lockIcon = waitForObj(LOCK_ICON_SELECTOR) { "Lockscreen lock icon not found" }
+            val lockIcon = waitForObj(lockScreenIconSelector) { "Lockscreen lock icon not found" }
             return LockscreenLockIcon(/* rect= */ lockIcon.visibleBounds)
         }
 
@@ -130,42 +144,38 @@ class LockScreen internal constructor() {
     }
 
     private fun swipeUp() {
-        LOCKSCREEN_SELECTOR.assertVisible { "Lockscreen is not visible" }
-        val swipeableArea = waitForObj(SWIPEABLE_AREA) { "Swipeable area not found" }
+        lockScreenSelector.assertVisible { "Lockscreen is not visible" }
+        val swipeableArea = waitForObj(swipeableArea) { "Swipeable area not found" }
         // shift swipe gesture over to left so we don't begin the gesture on the lock icon
         //   this can be removed if b/229696938 gets resolved to allow for swiping on the icon
         val bounds = swipeableArea.visibleBounds
         val swipeX = bounds.left + bounds.width() / 4f
-        BetterSwipe.swipe(PointF(swipeX, bounds.bottom - 1f), PointF(swipeX, bounds.top.toFloat()))
+        BetterSwipe.swipe(
+            PointF(swipeX, bounds.bottom - 1f),
+            PointF(swipeX, bounds.top.toFloat()),
+            displayId = displayId,
+        )
     }
 
     private fun swipeLeft() {
-        LOCKSCREEN_SELECTOR.assertVisible { "Lockscreen is not visible" }
-        val swipeableArea = waitForObj(SWIPEABLE_AREA) { "Swipeable area not found" }
+        lockScreenSelector.assertVisible { "Lockscreen is not visible" }
+        val swipeableArea = waitForObj(swipeableArea) { "Swipeable area not found" }
         val bounds = swipeableArea.visibleBounds
         val swipeY = bounds.top + bounds.height() / 2f
         BetterSwipe.swipe(
             PointF(bounds.right - 1f, swipeY),
             PointF(bounds.left + bounds.width() / 2f, swipeY),
+            displayId = displayId,
         )
     }
 
     companion object {
-        private val LOCK_ICON_SELECTOR = sysuiResSelector("device_entry_icon_view")
-
         // https://hsv.googleplex.com/5130837462876160?node=117
-        val LOCKSCREEN_SELECTOR =
+        fun lockScreenSelector(displayId: Int = DEFAULT_DISPLAY): BySelector =
             if (sceneContainer()) {
-                By.res("element:lockscreen")
+                By.displayId(displayId).res("element:lockscreen")
             } else {
-
-                sysuiResSelector("keyguard_indication_area")
-            }
-        private val SWIPEABLE_AREA =
-            if (com.android.systemui.Flags.sceneContainer()) {
-                sysuiResSelector("shared_notification_container")
-            } else {
-                sysuiResSelector("notification_panel")
+                sysuiResSelector("keyguard_indication_area", displayId)
             }
 
         // https://hsv.googleplex.com/5656353459666944
