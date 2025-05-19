@@ -19,8 +19,6 @@ package android.tools.io
 import android.tools.Timestamp
 import android.tools.testutils.TestTraces
 import android.tools.traces.io.ResultReader
-import org.junit.Assume.assumeTrue
-import org.junit.Before
 
 /** Tests for [ResultReader] parsing [TraceType.TRANSITION] */
 class ResultReaderParseTransitionsTest : BaseResultReaderTestParseTrace() {
@@ -32,11 +30,6 @@ class ResultReaderParseTransitionsTest : BaseResultReaderTestParseTrace() {
     override val invalidSliceTime = TestTraces.TransitionTrace.INVALID_SLICE_TIME
     override val invalidSizeMessage = "Transitions trace cannot be empty"
     override val expectedSlicedTraceSize = 1
-
-    @Before
-    fun before() {
-        assumeTrue(android.tracing.Flags.perfettoTransitionTracing())
-    }
 
     override fun doParse(reader: ResultReader) = reader.readTransitionsTrace()
 

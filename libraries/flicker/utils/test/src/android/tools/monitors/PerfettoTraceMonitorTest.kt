@@ -102,11 +102,6 @@ class PerfettoTraceMonitorTest : TraceMonitorTest<PerfettoTraceMonitor>() {
 
     @Test
     fun withTransitionTracingTest() {
-        assumeTrue(
-            "PerfettoTransitionTracing flag should be enabled",
-            android.tracing.Flags.perfettoTransitionTracing(),
-        )
-
         val traceMonitor = PerfettoTraceMonitor.newBuilder().enableTransitionsTrace().build()
         val reader =
             traceMonitor.withTracing(resultReaderProvider = { buildResultReader(it) }) {
