@@ -28,7 +28,6 @@ import android.tools.traces.wm.ShellTransitionData
 import android.tools.traces.wm.Transition
 import android.tools.traces.wm.WmTransitionData
 import com.google.common.truth.Truth
-import org.junit.Assume
 import org.junit.Before
 import org.junit.ClassRule
 import org.junit.Test
@@ -37,7 +36,6 @@ import org.junit.Test
 class TransitionsTraceParserTest {
     @Before
     fun before() {
-        Assume.assumeTrue(android.tracing.Flags.perfettoTransitionTracing())
         Cache.clear()
     }
 
