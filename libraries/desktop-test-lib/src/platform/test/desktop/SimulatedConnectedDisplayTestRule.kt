@@ -36,8 +36,14 @@ import org.junit.rules.TestRule
 import org.junit.runner.Description
 import org.junit.runners.model.Statement
 
-/** A [TestRule] to manage multiple simulated connected overlay displays. */
-class SimulatedConnectedDisplayTestRule : TestRule {
+/**
+ * A [TestRule] to manage multiple simulated connected overlay displays.
+ *
+ * @param initDisplayCount the number of displays to be set up immediately. Alternatively, it's
+ *   possible to setup new displays at a later stage (on-demand) by calling [setupTestDisplay] or
+ *   [setupTestDisplays].
+ */
+class SimulatedConnectedDisplayTestRule(val initDisplayCount: Int = 0) : TestRule {
 
     private val context = InstrumentationRegistry.getInstrumentation().targetContext
     private val displayManager = context.getSystemService(DisplayManager::class.java)
@@ -48,6 +54,9 @@ class SimulatedConnectedDisplayTestRule : TestRule {
         object : Statement() {
             override fun evaluate() {
                 try {
+                    if (initDisplayCount > 0) {
+                        setupTestDisplays(initDisplayCount)
+                    }
                     base.evaluate()
                 } finally {
                     teardown()
