@@ -48,7 +48,6 @@ import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.drawable.Icon;
-import android.os.Bundle;
 import android.os.SystemClock;
 import android.service.notification.StatusBarNotification;
 import android.util.Log;
@@ -364,23 +363,33 @@ public class NotificationController {
         return customContent;
     }
 
-    /** Posts a no style promoted ongoing notification. */
+    /**
+     * Posts a no style promoted ongoing notification.
+     *
+     * <p>Returns the new notification's [StatusBarNotification.getKey()].
+     */
     @NonNull
-    public NotificationIdentity postNoStyleRON(@Nullable String pkg, @Nullable String title) {
+    public NotificationIdentity postNoStyleRON(
+            @Nullable String pkg, @Nullable String title, @Nullable String shortCriticalText) {
         final Bitmap bitmap = Bitmap.createBitmap(400, 400, Bitmap.Config.ARGB_8888);
         new Canvas(bitmap).drawColor(Color.BLUE);
         final Builder builder = makePromotedOngoing(getBuilder(pkg));
         builder.setLargeIcon(bitmap);
         builder.setContentTitle(title);
-        postNotificationSync(getNextNotificationId(), builder);
+        builder.setShortCriticalText(shortCriticalText);
+        int id = getNextNotificationId();
+        postNotificationSync(id, builder);
+        String key = getStatusBarNotificationKey(id);
         return new NotificationIdentity(
                 NotificationIdentity.Type.BY_TITLE,
-                title,
+                /* title= */ title,
                 /* text= */ null,
                 /* summary= */ null,
                 /* textWhenExpanded= */ null,
                 /* contentIsVisibleInCollapsedState= */ true,
-                /* pkg= */ null);
+                /* pkg= */ null,
+                /* hasAction= */ false,
+                /* key= */ key);
     }
 
     @NonNull
@@ -928,9 +937,14 @@ public class NotificationController {
                         .setStyle(
                                 new android.app.Notification.MessagingStyle(person)
                                         .setConversationTitle(NOTIFICATION_TITLE_TEXT)
-                                         .addMessage(
+                                        .addMessage(
                                                 new android.app.Notification.MessagingStyle.Message(
-                                                        "Hello, nice to meet you and I am happy to be your friend. You're welcome to join our party tomorrow. Please remember to invite more people and bring some food to share with us! Thank you",
+                                                        "Hello, nice to meet you and I am happy to"
+                                                            + " be your friend. You're welcome to"
+                                                            + " join our party tomorrow. Please"
+                                                            + " remember to invite more people and"
+                                                            + " bring some food to share with us!"
+                                                            + " Thank you",
                                                         SystemClock.currentThreadTimeMillis(),
                                                         person))
                                         .addMessage(
@@ -1279,6 +1293,17 @@ public class NotificationController {
             }
         }
         return filteredNotificationCount;
+    }
+
+    @Nullable
+    private static String getStatusBarNotificationKey(int id) {
+        StatusBarNotification[] notifications = NOTIFICATION_MANAGER.getActiveNotifications();
+        for (StatusBarNotification notification : notifications) {
+            if (notification.getId() == id) {
+                return notification.getKey();
+            }
+        }
+        return null;
     }
 
     private static boolean hasNotification(int id) {

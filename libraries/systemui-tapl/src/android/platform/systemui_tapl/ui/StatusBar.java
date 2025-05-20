@@ -31,6 +31,7 @@ import static com.google.common.truth.Truth.assertWithMessage;
 
 import static org.junit.Assume.assumeFalse;
 
+import android.annotation.Nullable;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.platform.helpers.foldable.UnfoldAnimationTestingUtils;
@@ -69,6 +70,8 @@ public class StatusBar {
     static final String DND_ICON_DESC = "Do Not Disturb is on";
     private static final String WIFI_ICON_ID = "wifi_combo";
     private static final String ONGOING_ACTIVITY_CHIP_ICON_ID = "ongoing_activity_chip_primary";
+    // Corresponds with OngoingActivityChip.STATUS_BAR_CHIP_CONTENT_ID
+    private static final String STATUS_BAR_CHIP_CONTENT_ID = "ongoing_activity_chip_content";
     // Corresponds to ScreenRecordChipViewModel.KEY
     private static final String SCREEN_RECORDING_CHIP_ID = "ScreenRecord";
     static final String SCREEN_RECORD_DESC_STRING = "Recording screen";
@@ -346,6 +349,48 @@ public class StatusBar {
                         .hasDescendant(By.descContains(SCREEN_RECORD_DESC_STRING)),
                 LONG_WAIT,
                 () -> "Recording chip should be visible in status bar.");
+    }
+
+    /**
+     * Verifies that the status bar is showing a chip for the given notification.
+     *
+     * @param text If present & non-empty, verifies the given text is shown inside the chip. If
+     *     present & empty, verifies the chip is not showing any text. if null, doesn't verify
+     *     anything about text inside the chip.
+     */
+    public void verifyNotificationChipIsVisible(String notificationKey, @Nullable String text) {
+        DeviceHelpers.INSTANCE.assertVisible(
+                statusBarSelector(notificationKey),
+                LONG_WAIT,
+                () -> "Notification chip " + notificationKey + " should be visible in status bar.");
+
+        if (text == null) {
+            return;
+        }
+
+        BySelector chipTextSelector = statusBarSelector(STATUS_BAR_CHIP_CONTENT_ID);
+        if (!text.isEmpty()) {
+            UiObject2 chipText =
+                    DeviceHelpers.INSTANCE.waitForObj(
+                            /* UiDevice= */ getUiDevice(),
+                            /* selector= */ chipTextSelector,
+                            /* timeout= */ LONG_WAIT,
+                            /* errorProvider= */ () -> "Chip text not found.");
+            assertWithMessage("Status bar chip text should be " + text)
+                    .that(chipText.getText())
+                    .isEqualTo(text);
+        } else {
+            DeviceHelpers.INSTANCE.assertInvisible(
+                    chipTextSelector,
+                    LONG_WAIT,
+                    () -> "StatusBar chip is showing text when it shouldn't be");
+        }
+    }
+
+    /** Clicks the chip in the status bar associated with the given notification. */
+    public void clickNotificationChip(String notificationKey) {
+        verifyNotificationChipIsVisible(notificationKey, /* text= */ null);
+        DeviceHelpers.waitForObj(sysuiResSelector(notificationKey)).click();
     }
 
     /** Assert there is at least one status icon visible. */

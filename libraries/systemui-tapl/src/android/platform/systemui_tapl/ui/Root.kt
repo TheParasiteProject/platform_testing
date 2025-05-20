@@ -180,15 +180,18 @@ class Root private constructor(val displayId: Int = DEFAULT_DISPLAY) {
      *   verified. An action button is necessary for the verification. Consider posting the HUN with
      *   NotificationController#postBigTextHeadsUpNotification if you need to assert the HUN state.
      *   Expanded HUN state cannot be asserted.
+     * @param assertIsPromotedOngoingState see [NotificationStack.findHeadsUpNotification].
      */
     @JvmOverloads
     fun findHeadsUpNotification(
         identity: NotificationIdentity,
         assertIsHunState: Boolean = true,
+        assertIsPromotedOngoingState: Boolean = false,
     ): Notification {
         return NotificationStack.findHeadsUpNotification(
             identity = identity,
             assertIsHunState = assertIsHunState,
+            assertIsPromotedOngoingState = assertIsPromotedOngoingState,
         )
     }
 
@@ -196,17 +199,23 @@ class Root private constructor(val displayId: Int = DEFAULT_DISPLAY) {
      * Ensures there is not a HUN with this identity. Fails if the HUN is found, or the identity
      * doesn't have an action button.
      *
+     * @param assertIsHunState see [findHeadsUpNotification].
      * @param identity The NotificationIdentity used to find the HUN, an action button is necessary
      */
     // TODO(b/295209746): More robust (and more performant) assertion for "HUN does not appear"
-    fun ensureNoHeadsUpNotification(identity: NotificationIdentity) {
-        assertWithMessage(
-                "HUN state Assertion usage error: Notification: ${identity.title} " +
-                    "| You can only assert the HUN State of a notification that has an action " +
-                    "button."
-            )
-            .that(identity.hasAction)
-            .isTrue()
+    fun ensureNoHeadsUpNotification(
+        identity: NotificationIdentity,
+        assertIsHunState: Boolean = true,
+    ) {
+        if (assertIsHunState) {
+            assertWithMessage(
+                    "HUN state Assertion usage error: Notification: ${identity.title} " +
+                        "| You can only assert the HUN State of a notification that has an action " +
+                        "button."
+                )
+                .that(identity.hasAction)
+                .isTrue()
+        }
         assertThrows(IllegalStateException::class.java) {
             findHeadsUpNotification(identity, assertIsHunState = false)
         }
