@@ -474,6 +474,10 @@ class Root private constructor(val displayId: Int = DEFAULT_DISPLAY) {
         if (displayId == DEFAULT_DISPLAY) {
             uiDevice.pressHome()
         } else {
+            // Check the display is available before attempting to send key events
+            By.displayId(displayId).assertVisible {
+                "Can't press home on display $displayId: display not found"
+            }
             // replicate UiDevice#pressHome() for a display other than DEFAULT_DISPLAY
             sendKey(KeyEvent.KEYCODE_HOME, 0, SystemClock.uptimeMillis())
             uiDevice.waitForWindowUpdate(LAUNCHER_PACKAGE, LONG_TIMEOUT)

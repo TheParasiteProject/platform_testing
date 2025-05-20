@@ -134,7 +134,11 @@ class SimulatedConnectedDisplayTestRule : TestRule {
     fun setupTestDisplay(width: Int = DEFAULT_WIDTH, height: Int = DEFAULT_HEIGHT): Int =
         setupTestDisplays(listOf(Point(width, height)))[0]
 
-    private fun cleanupTestDisplays() = runBlocking {
+    /**
+     * Removes all overlay displays. This function is safe to call manually, as it will be a no-op
+     * if all overlay displays have already been removed.
+     */
+    fun cleanupTestDisplays() = runBlocking {
         val existingDisplays =
             displayManager.displays.filter { it.type == TYPE_OVERLAY }.map { it.displayId }
         if (existingDisplays.isEmpty()) {
