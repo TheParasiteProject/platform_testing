@@ -23,6 +23,7 @@ import android.os.Handler
 import android.os.Looper
 import android.provider.Settings
 import android.util.Log
+import android.view.Display.TYPE_OVERLAY
 import androidx.test.platform.app.InstrumentationRegistry
 import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.channels.awaitClose
@@ -40,7 +41,8 @@ class SimulatedConnectedDisplayTestRule : TestRule {
 
     private val context = InstrumentationRegistry.getInstrumentation().targetContext
     private val displayManager = context.getSystemService(DisplayManager::class.java)
-    private val addedDisplays = mutableListOf<Int>()
+    var addedDisplays = listOf<Int>()
+        private set
 
     override fun apply(base: Statement, description: Description): Statement =
         object : Statement() {
@@ -106,12 +108,14 @@ class SimulatedConnectedDisplayTestRule : TestRule {
             awaitClose { displayManager.unregisterDisplayListener(listener) }
         }
 
-        withTimeoutOrNull(TIMEOUT) {
-            displayAddedFlow.take(displays.size).collect { displayId ->
-                addedDisplays.add(displayId)
-            }
-        } ?: error("Timed out waiting for displays to be added.")
-        addedDisplays.toList()
+        addedDisplays = buildList {
+            withTimeoutOrNull(TIMEOUT) {
+                displayAddedFlow.take(displays.size).collect { displayId ->
+                    this@buildList += displayId
+                }
+            } ?: error("Timed out waiting for displays to be added.")
+        }
+        addedDisplays
     }
 
     /**
@@ -131,6 +135,12 @@ class SimulatedConnectedDisplayTestRule : TestRule {
         setupTestDisplays(listOf(Point(width, height)))[0]
 
     private fun cleanupTestDisplays() = runBlocking {
+        val existingDisplays =
+            displayManager.displays.filter { it.type == TYPE_OVERLAY }.map { it.displayId }
+        if (existingDisplays.isEmpty()) {
+            return@runBlocking
+        }
+
         val displayRemovedFlow: Flow<Int> = callbackFlow {
             val listener =
                 object : DisplayListener {
@@ -158,13 +168,14 @@ class SimulatedConnectedDisplayTestRule : TestRule {
             awaitClose { displayManager.unregisterDisplayListener(listener) }
         }
 
-        if (!addedDisplays.isEmpty()) {
+        val removedDisplays = buildList {
             withTimeoutOrNull(TIMEOUT) {
-                displayRemovedFlow.take(addedDisplays.size).collect { displayId ->
-                    addedDisplays.remove(displayId)
+                displayRemovedFlow.take(existingDisplays.size).collect { displayId ->
+                    this@buildList += displayId
                 }
-            } ?: error("Timed out waiting for displays to be removed: $addedDisplays")
+            } ?: error("Timed out waiting for displays to be removed: $existingDisplays")
         }
+        addedDisplays = existingDisplays - removedDisplays
     }
 
     private companion object {
