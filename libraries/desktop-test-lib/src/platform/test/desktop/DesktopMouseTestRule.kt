@@ -235,6 +235,18 @@ class DesktopMouseTestRule() : TestRule {
         }
     }
 
+    /**
+     * Requests to move the mouse cursor by the specified delta. Different from the [move] method,
+     * this does not consider where the current mouse cursor is, and does not ensure that the cursor
+     * will move to any target position.
+     *
+     * @param xPx The delta X (PX) coordinate.
+     * @param yPx The delta Y (PX) coordinate.
+     */
+    fun moveDelta(xPx: Int, yPx: Int) {
+        moveInternal(Delta(xPx, yPx))
+    }
+
     private fun moveToDisplay(startingDisplayId: Int, targetDisplayId: Int) {
         var currentCursorDisplayId = startingDisplayId
         val topology =
