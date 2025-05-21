@@ -57,6 +57,18 @@ public class HomeHelperImpl extends AbstractStandardAppHelper implements IAutoHo
 
     /** {@inheritDoc} */
     @Override
+    public void openBluetoothButton() {
+        BySelector bluetoothButtonSelector =
+                getUiElementFromConfig(AutomotiveConfigConstants.STATUS_BAR_BLUETOOTH_BUTTON);
+        UiObject2 bluetoothButton = getSpectatioUiUtil().findUiObject(bluetoothButtonSelector);
+        getSpectatioUiUtil()
+                .validateUiObject(
+                        bluetoothButton, AutomotiveConfigConstants.STATUS_BAR_BLUETOOTH_BUTTON);
+        getSpectatioUiUtil().clickAndWait(bluetoothButton);
+    }
+
+    /** {@inheritDoc} */
+    @Override
     public boolean hasNetworkButton() {
         BySelector networkWidgetSelector =
                 getUiElementFromConfig(AutomotiveConfigConstants.NETWORK_PALETTE);
@@ -65,10 +77,40 @@ public class HomeHelperImpl extends AbstractStandardAppHelper implements IAutoHo
 
     /** {@inheritDoc} */
     @Override
+    public void openNetworkPalette() {
+        BySelector networkButtonSelector =
+                getUiElementFromConfig(AutomotiveConfigConstants.NETWORK_PALETTE);
+        UiObject2 networkButton = getSpectatioUiUtil().findUiObject(networkButtonSelector);
+        getSpectatioUiUtil()
+                .validateUiObject(networkButton, AutomotiveConfigConstants.NETWORK_PALETTE);
+        getSpectatioUiUtil().clickAndWait(networkButton);
+    }
+
+    /** {@inheritDoc} */
+    @Override
     public boolean hasDisplayBrightness() {
         BySelector displayBrightnessWidgetSelector =
                 getUiElementFromConfig(AutomotiveConfigConstants.STATUS_BAR_BRIGHTNESS_BUTTON);
         return getSpectatioUiUtil().hasUiElement(displayBrightnessWidgetSelector);
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    public boolean hasSoundSettings() {
+        BySelector soundSettingsWidgetSelector =
+                getUiElementFromConfig(AutomotiveConfigConstants.SOUND_FACET_BUTTON);
+        return getSpectatioUiUtil().hasUiElement(soundSettingsWidgetSelector);
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    public void openSoundSettingsPalette() {
+        BySelector soundSettingsSelector =
+                getUiElementFromConfig(AutomotiveConfigConstants.SOUND_FACET_BUTTON);
+        UiObject2 soundSettings = getSpectatioUiUtil().findUiObject(soundSettingsSelector);
+        getSpectatioUiUtil()
+                .validateUiObject(soundSettings, AutomotiveConfigConstants.SOUND_FACET_BUTTON);
+        getSpectatioUiUtil().clickAndWait(soundSettings);
     }
 
     public boolean hasAssistantWidget() {
