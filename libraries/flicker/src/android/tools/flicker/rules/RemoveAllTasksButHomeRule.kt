@@ -16,13 +16,12 @@
 
 package android.tools.flicker.rules
 
-import android.app.Instrumentation
+import android.app.ActivityTaskManager
+import android.app.WindowConfiguration
 import android.tools.FLICKER_TAG
-import android.tools.helpers.RecentTasksUtils
 import android.tools.traces.parsers.WindowManagerStateHelper
 import android.tools.withTracing
 import android.util.Log
-import androidx.test.platform.app.InstrumentationRegistry
 import org.junit.rules.TestWatcher
 import org.junit.runner.Description
 
@@ -42,11 +41,17 @@ class RemoveAllTasksButHomeRule() : TestWatcher() {
 
     companion object {
         @JvmStatic
-        @JvmOverloads
-        fun removeAllTasksButHome(
-            instr: Instrumentation = InstrumentationRegistry.getInstrumentation()
-        ) {
-            RecentTasksUtils.clearAllVisibleRecentTasks(instr)
+        fun removeAllTasksButHome() {
+            val atm = ActivityTaskManager.getService()
+            atm.removeRootTasksWithActivityTypes(ALL_ACTIVITY_TYPE_BUT_HOME)
         }
+
+        private val ALL_ACTIVITY_TYPE_BUT_HOME =
+            intArrayOf(
+                WindowConfiguration.ACTIVITY_TYPE_STANDARD,
+                WindowConfiguration.ACTIVITY_TYPE_ASSISTANT,
+                WindowConfiguration.ACTIVITY_TYPE_RECENTS,
+                WindowConfiguration.ACTIVITY_TYPE_UNDEFINED,
+            )
     }
 }
