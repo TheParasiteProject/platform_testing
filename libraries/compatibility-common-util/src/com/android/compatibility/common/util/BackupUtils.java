@@ -137,6 +137,14 @@ public abstract class BackupUtils {
         return StreamUtil.readInputStream(restore(token, packageName));
     }
 
+    /** Executes shell command "bmgr wipe <transport> <package>" and assert success. */
+    public void wipeAndAssertSuccess(String transport, String packageName) throws IOException {
+        String output = wipe(transport, packageName);
+        if (!output.startsWith("Wiped backup data for ")) {
+            fail("Wipe not successful");
+        }
+    }
+
     public boolean isLocalTransportSelected() throws IOException {
         return isLocalTransportSelectedForUser(getCurrentUserId());
     }
@@ -302,6 +310,17 @@ public abstract class BackupUtils {
         } finally {
             StreamUtil.drainAndClose(reader);
         }
+    }
+
+    private String wipe(String transport, String packageName) throws IOException {
+        return wipeForUser(transport, packageName, getCurrentUserId());
+    }
+
+    /** Executes "bmgr --user <id> wipe <transport> <package>" and returns its output. */
+    private String wipeForUser(String transport, String packageName, int userId)
+            throws IOException {
+        return getLineString(
+                executeShellCommand("bmgr --user %d wipe %s %s", userId, transport, packageName));
     }
 
     /**
