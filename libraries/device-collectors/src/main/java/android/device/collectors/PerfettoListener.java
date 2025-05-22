@@ -17,6 +17,7 @@ package android.device.collectors;
 
 import android.device.collectors.annotations.OptionClass;
 import android.os.Bundle;
+import android.os.Trace;
 
 import androidx.annotation.VisibleForTesting;
 
@@ -62,6 +63,11 @@ public class PerfettoListener extends BaseMetricListener {
     @Override
     public void onTestStart(DataRecord testData, Description description) {
         final int iteration = getIteration(description);
+        String sectionName = "test:" + description;
+        if (iteration > 0) {
+            sectionName += " iteration:" + iteration;
+        }
+        Trace.beginSection(sectionName);
         mTracingStrategies.forEach(strategy -> strategy.testStart(testData, description,
                 iteration));
     }
@@ -75,6 +81,7 @@ public class PerfettoListener extends BaseMetricListener {
     public void onTestEnd(DataRecord testData, Description description) {
         final int iteration = getIteration(description);
         mTracingStrategies.forEach(strategy -> strategy.testEnd(testData, description, iteration));
+        Trace.endSection();
     }
 
     @Override
