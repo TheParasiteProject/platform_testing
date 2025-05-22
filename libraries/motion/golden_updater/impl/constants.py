@@ -14,6 +14,16 @@
 #
 
 import os
+from urllib.parse import quote
 
 GOLDEN_ACCESS_TOKEN_HEADER = "Golden-Access-Token"
 GOLDEN_ACCESS_TOKEN_LOCATION = os.path.expanduser("~/.config/motion-golden/.token")
+ANDROID_BUILD_SCOPE = "https://www.googleapis.com/auth/androidbuild.internal"
+
+def create_presubmit_artifacts_list_url(invocation_id, max_results):
+    return (f'https://androidbuildinternal.googleapis.com/android/internal/build/v3/testArtifacts?'
+           f'invocationId={invocation_id}&maxResults={max_results}&fields=nextPageToken%2Ctest_artifacts.name')
+
+def create_get_download_url_for_presubmit_artifact(resource_id, invocation_id):
+    return (f'https://androidbuildinternal.googleapis.com/android/internal/build/v3/testArtifacts/'
+            f'{quote(resource_id, safe='')}/url?invocationId={invocation_id}')

@@ -25,6 +25,7 @@ class CachedGolden:
         self.local_file = local_file
         self.updated = False
         self.test_time = datetime.datetime.now().isoformat()
+        self.golden_name = None
         # Checksum is the time the test data was loaded, forcing unique URLs
         # every time the golden is reloaded
         self.checksum = hashlib.md5(self.test_time.encode("utf-8")).hexdigest()

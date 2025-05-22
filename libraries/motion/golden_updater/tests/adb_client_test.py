@@ -19,22 +19,7 @@ import os
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 from impl.adb_client import AdbClient
-
-class FakeSubprocessRun:
-    def __init__(self, return_stdout=None, raise_exception=None):
-        self.return_stdout = return_stdout
-        self.raise_exception = raise_exception
-        self.calls = []
-
-    def __call__(self, command, check=True, capture_output=True):
-        self.calls.append(command)
-        if self.raise_exception:
-            raise self.raise_exception
-        else:
-            class FakeProcess:
-                stdout = self.return_stdout
-
-            return FakeProcess()
+from test_assets.fake_subprocess import FakeSubprocessRun
 
 fake_subprocess_run = FakeSubprocessRun(return_stdout=b"test output")
 adb_client = AdbClient("adb_serial", fake_subprocess_run)
