@@ -69,6 +69,7 @@ class DesktopMouseTestRule() : TestRule {
     private val adoptShellPermissionsTestRule = AdoptShellPermissionsRule(*PERMISSIONS)
     private val fakeAssociationRule = FakeAssociationRule()
     private val context = InstrumentationRegistry.getInstrumentation().targetContext
+    private val uiAutomation = InstrumentationRegistry.getInstrumentation().getUiAutomation()
     private val displayManager = context.getSystemService(DisplayManager::class.java)
     private val inputManager = context.getSystemService(InputManager::class.java)
     private val resourceTracker = ResourceTracker()
@@ -92,6 +93,17 @@ class DesktopMouseTestRule() : TestRule {
         private var virtualDevice: VirtualDeviceManager.VirtualDevice? = null
         private var virtualMouse: VirtualMouse? = null
         private val displayIdsWithMouseScalingDisabled = mutableListOf<Int>()
+        private val handler = Handler(Looper.getMainLooper())
+        private val displayListener =
+            object : DisplayManager.DisplayListener {
+                override fun onDisplayAdded(displayId: Int) {
+                    disableMouseScaling(displayId)
+                }
+
+                override fun onDisplayRemoved(displayId: Int) {}
+
+                override fun onDisplayChanged(displayId: Int) {}
+            }
 
         val requireVirtualMouse: VirtualMouse
             get() = checkNotNull(virtualMouse) { "Failed to initialize VirtualMouse" }
@@ -129,7 +141,6 @@ class DesktopMouseTestRule() : TestRule {
 
                         override fun onInputDeviceChanged(deviceId: Int) {}
                     }
-                val handler = Handler(Looper.getMainLooper())
                 inputManager.registerInputDeviceListener(inputDeviceListener, handler)
 
                 // Note: AssociatedDisplayId is not actually used in connected displays, since
@@ -150,15 +161,16 @@ class DesktopMouseTestRule() : TestRule {
             withTimeoutOrNull(TIMEOUT) { inputDeviceFlow.first() }
                 ?: error("Timed out waiting for input device to be added.")
 
-            disableMouseScaling()
+            for (display in displayManager.displays) {
+                disableMouseScaling(display.displayId)
+            }
+            displayManager.registerDisplayListener(displayListener, handler)
             ensureCursorStartsOnDefaultDisplay()
         }
 
-        private fun disableMouseScaling() {
-            for (display in displayManager.displays) {
-                displayIdsWithMouseScalingDisabled += display.displayId
-                inputManager.setMouseScalingEnabled(false, display.displayId)
-            }
+        private fun disableMouseScaling(displayId: Int) {
+            displayIdsWithMouseScalingDisabled += displayId
+            inputManager.setMouseScalingEnabled(false, displayId)
         }
 
         private fun ensureCursorStartsOnDefaultDisplay() {
@@ -167,6 +179,7 @@ class DesktopMouseTestRule() : TestRule {
         }
 
         override fun after() {
+            displayManager.unregisterDisplayListener(displayListener)
             for (displayId in displayIdsWithMouseScalingDisabled) {
                 try {
                     inputManager.setMouseScalingEnabled(true, displayId)
@@ -287,6 +300,11 @@ class DesktopMouseTestRule() : TestRule {
             // Validate cursor crossed display
             WaitUtils.ensureThat { getCursorDisplayId() == nextDisplayId }
             currentCursorDisplayId = nextDisplayId
+
+            // InputDevice reconfiguration will happen when cursor changed display, and might jam
+            // the input queue. Waiting for input transactions to finish ensure any subsequent
+            // `getCursorPosition()` calls return accurate position
+            uiAutomation.syncInputTransactions()
         }
     }
 
