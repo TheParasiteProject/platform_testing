@@ -132,10 +132,6 @@ class FlickerServiceTracesCollectorTest {
 
         val EXPECTED_TRACES_SYSUI_FIRST =
             mutableListOf(TraceType.EVENT_LOG.fileName, TraceType.PERFETTO.fileName).also {
-                if (!android.tracing.Flags.perfettoProtologTracing()) {
-                    it.add(TraceType.PROTOLOG.fileName)
-                }
-
                 if (!android.tracing.Flags.perfettoWmTracing()) {
                     it.add(TraceType.WM.fileName)
                 }
