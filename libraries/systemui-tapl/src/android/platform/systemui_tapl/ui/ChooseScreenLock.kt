@@ -82,19 +82,17 @@ class ChooseScreenLock internal constructor() {
     private companion object {
         @JvmField val LONG_WAIT_TIME: Duration = Duration.ofSeconds(15)
 
-        const val BUTTON_CLASS = "android.widget.Button"
-
         // https://hsv.googleplex.com/6685423272198144?node=7
         val CHOOSE_A_SCREEN_LOCK_SELECTOR: BySelector =
             settingsResSelector("collapsing_toolbar").desc("Choose a screen lock")
 
         val PASSWORD_ENTRY: BySelector = settingsResSelector("password_entry")
 
-        val NEXT_BUTTON_SELECTOR: BySelector = By.clazz(BUTTON_CLASS).text("Next")
+        val NEXT_BUTTON_SELECTOR: BySelector = By.text("Next")
 
-        val CONFIRM_BUTTON_SELECTOR: BySelector = By.clazz(BUTTON_CLASS).text("Confirm")
+        val CONFIRM_BUTTON_SELECTOR: BySelector = By.text("Confirm")
 
         // https://hsv.googleplex.com/5618542457126912?node=26
-        val DONE_BUTTON_SELECTOR: BySelector = By.clazz(BUTTON_CLASS).text("Done")
+        val DONE_BUTTON_SELECTOR: BySelector = By.text("Done")
     }
 }
