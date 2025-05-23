@@ -35,7 +35,7 @@ namespace {
 class KmsBwTests : public ::testing::TestWithParam<IgtSubtestParams>,
                    public IgtTestHelper {
 public:
-  KmsBwTests() : IgtTestHelper("kms_flip") {}
+  KmsBwTests() : IgtTestHelper("kms_bw") {}
 };
 
 constexpr std::string_view kDescription =
@@ -48,10 +48,10 @@ constexpr std::string_view kRationale =
 
 IgtSubtestParams subtests[] = {
     // Fundamental Validation tests.
-    {.name = "linear-tiling-%d-displays-%s",
+    {.name = "linear-tiling-*-displays-*",
      .desc = kDescription,
      .rationale = kRationale},
-    {.name = "connected-linear-tiling-%d-displays-%s",
+    {.name = "connected-linear-tiling-*-displays-*",
      .desc = kDescription,
      .rationale = kRationale},
 

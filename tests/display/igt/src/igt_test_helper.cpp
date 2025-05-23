@@ -117,16 +117,11 @@ std::string IgtTestHelper::generateGTestName(
     const ::testing::TestParamInfo<IgtSubtestParams> &info) {
   std::string dashedName(info.param.name);
 
-  // Many subtest names include %s and %d which are not valid GTest names.
-  size_t pos = dashedName.find("%s");
+  // Many subtest names include * which is not a valid GTest name.
+  size_t pos = dashedName.find("*");
   while (pos != std::string::npos) {
-    dashedName.erase(pos, 2);
-    pos = dashedName.find("%s", pos);
-  }
-  pos = dashedName.find("%d");
-  while (pos != std::string::npos) {
-    dashedName.erase(pos, 2);
-    pos = dashedName.find("%d", pos);
+    dashedName.erase(pos, 1);
+    pos = dashedName.find("*", pos);
   }
 
   // convert test-name to PascalCase

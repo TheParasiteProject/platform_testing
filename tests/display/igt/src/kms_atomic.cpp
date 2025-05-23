@@ -67,10 +67,11 @@ IgtSubtestParams subtests[] = {
      .rationale = "important for ensuring that the planes are displayed in the "
                   "correct order"}};
 
-TEST_P(KmsAtomicTests, Run) { runSubTest(GetParam()); }
+TEST_P(KmsAtomicTests, RunSubTests) { runSubTest(GetParam()); }
 
-INSTANTIATE_TEST_SUITE_P(KmsAtomic, KmsAtomicTests,
-                         ::testing::ValuesIn(subtests));
+INSTANTIATE_TEST_SUITE_P(KmsAtomicTests, KmsAtomicTests,
+                          ::testing::ValuesIn(subtests),
+                          IgtTestHelper::generateGTestName);
 
 } // namespace
 } // namespace igt
