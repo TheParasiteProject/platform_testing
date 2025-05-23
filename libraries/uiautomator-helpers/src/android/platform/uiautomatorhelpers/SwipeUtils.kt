@@ -26,6 +26,12 @@ import androidx.test.uiautomator.Direction.UP
 /** Common utils to perform swipes. */
 internal object SwipeUtils {
 
+    /** [MotionEvent.CLASSIFICATION_MULTI_FINGER_SWIPE] is hidden.  */
+    const val CLASSIFICATION_MULTI_FINGER_SWIPE: Int = 4
+
+    /** [MotionEvent.AXIS_GESTURE_SWIPE_FINGER_COUNT] is hidden.  */
+    const val AXIS_GESTURE_SWIPE_FINGER_COUNT: Int = 53
+
     /**
      * Calculates start and end point taking into consideration first [marginPx], then [percent].
      */
