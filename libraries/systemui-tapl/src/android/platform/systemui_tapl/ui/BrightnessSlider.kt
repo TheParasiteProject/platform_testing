@@ -20,23 +20,25 @@ import android.graphics.Rect
 import android.platform.systemui_tapl.utils.DeviceUtils.LONG_WAIT
 import android.platform.systemui_tapl.utils.DeviceUtils.sysuiResSelector
 import android.platform.uiautomatorhelpers.BetterSwipe
-import android.platform.uiautomatorhelpers.DeviceHelpers.assertVisibility
+import android.platform.uiautomatorhelpers.DeviceHelpers.assertInvisible
+import android.platform.uiautomatorhelpers.DeviceHelpers.assertVisible
 import android.platform.uiautomatorhelpers.DeviceHelpers.waitForObj
 import android.platform.uiautomatorhelpers.PRECISE_GESTURE_INTERPOLATOR
+import android.view.Display.DEFAULT_DISPLAY
 import androidx.test.uiautomator.UiObject2
 import com.android.systemui.Flags
 import com.google.common.truth.Truth.assertThat
 import java.time.Duration
 
 /** System UI test automation object representing the quick settings' brightness slider. */
-class BrightnessSlider internal constructor() {
+class BrightnessSlider internal constructor(private val displayId: Int = DEFAULT_DISPLAY) {
     private val slider: UiObject2
 
     init {
-        val selector = sysuiResSelector(UI_BRIGHTNESS_SLIDER_ID)
+        val selector = sliderSelector(displayId)
         slider =
             waitForObj(selector, LONG_WAIT) { "$selector not found" }
-                .waitForObj(sysuiResSelector(UI_TOGGLE_SEEKBAR_ID))
+                .waitForObj(sysuiResSelector(UI_TOGGLE_SEEKBAR_ID, displayId))
     }
 
     /** Slides from left to right */
@@ -59,19 +61,20 @@ class BrightnessSlider internal constructor() {
             )
         // NOTE: This control logic is less than clean.
         if (Flags.qsUiRefactorComposeFragment()) {
-            BetterSwipe.swipe(pointFrom, pointTo, swipeDuration, PRECISE_GESTURE_INTERPOLATOR)
+            BetterSwipe.swipe(
+                pointFrom, pointTo, swipeDuration, PRECISE_GESTURE_INTERPOLATOR, displayId)
             if (Flags.qsUiRefactorComposeFragment()) {
                 // In this case, the slider is moved to an overlay, then we verify:
                 // The notification shade is not visible, but
-                assertVisibility(sysuiResSelector(UI_NOTIFICATION_SHADE_ID), visible = false)
+                sysuiResSelector(UI_NOTIFICATION_SHADE_ID, displayId).assertInvisible()
                 // The actual slider is visible, and
-                assertVisibility(sysuiResSelector(UI_BRIGHTNESS_SLIDER_ID), visible = true)
+                sysuiResSelector(UI_BRIGHTNESS_SLIDER_ID, displayId).assertVisible()
                 // The bounds haven't changed.
                 assertThat(slider.visibleBounds).isEqualTo(sliderBounds)
             }
         } else {
             var mirrorBounds: Rect? = null
-            BetterSwipe.swipe(pointFrom) {
+            BetterSwipe.swipe(pointFrom, displayId) {
                 to(pointTo, swipeDuration, PRECISE_GESTURE_INTERPOLATOR)
                 mirrorBounds = brightnessSliderMirror.visibleBounds
                 assertThat(sliderBounds).isEqualTo(mirrorBounds)
@@ -85,14 +88,17 @@ class BrightnessSlider internal constructor() {
         get() {
             // The Mirror slider has the same id as the original one, so we get it from the
             // container
-            return waitForObj(sysuiResSelector(UI_BRIGHTNESS_MIRROR_CONTAINER_ID))
-                .waitForObj(sysuiResSelector(UI_TOGGLE_SEEKBAR_ID))
+            return waitForObj(sysuiResSelector(UI_BRIGHTNESS_MIRROR_CONTAINER_ID, displayId))
+                .waitForObj(sysuiResSelector(UI_TOGGLE_SEEKBAR_ID, displayId))
         }
 
-    private companion object {
-        const val UI_TOGGLE_SEEKBAR_ID = "slider"
-        const val UI_BRIGHTNESS_SLIDER_ID = "brightness_slider"
-        const val UI_BRIGHTNESS_MIRROR_CONTAINER_ID = "brightness_mirror_container"
-        const val UI_NOTIFICATION_SHADE_ID = "notification_shade"
+    companion object {
+        private const val UI_TOGGLE_SEEKBAR_ID = "slider"
+        private const val UI_BRIGHTNESS_SLIDER_ID = "brightness_slider"
+        private const val UI_BRIGHTNESS_MIRROR_CONTAINER_ID = "brightness_mirror_container"
+        private const val UI_NOTIFICATION_SHADE_ID = "notification_shade"
+
+        fun sliderSelector(displayId: Int = DEFAULT_DISPLAY) =
+            sysuiResSelector(UI_BRIGHTNESS_SLIDER_ID, displayId)
     }
 }

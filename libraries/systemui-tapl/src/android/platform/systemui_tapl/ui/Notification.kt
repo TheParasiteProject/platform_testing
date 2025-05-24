@@ -121,9 +121,13 @@ internal constructor(
     }
 
     /**
-     * Verifies that the notification is in HUN state. HUN State: A notification that has the expand
-     * button (chevron) at the “expand” status, and has at least an action that is currently
-     * showing. We only allow assertion of HUN state for notifications that have action buttons.
+     * Verifies that the notification is in HUN state.
+     *
+     * HUNs are the only notification state where:
+     * 1) It's collapsed by default so it has an expand button (chevron) at the "expand status"; AND
+     * 2) It shows action buttons even in the collapsed state. Because of this, we only allow
+     *    assertion of HUN state for notifications that have action buttons.
+     *
      * Fails if the notification is not at the HUN state defined above.
      */
     fun verifyIsHunState() {
@@ -141,6 +145,25 @@ internal constructor(
             errorProvider = {
                 "HUN state assertion error: The notification is found, but not " +
                     "in the HUN status, because didn't find an action button."
+            },
+        )
+    }
+
+    /**
+     * Verifies that the notification is a promoted ongoing notification.
+     *
+     * Promoted notifications are the only notification state where the notification is always
+     * expanded, so there shouldn't be an expand OR collapse caret.
+     *
+     * Fails if the notification is not in the promoted state defined above.
+     */
+    fun verifyIsPromotedOngoingState() {
+        notification.assertVisibility(
+            selector = androidResSelector(EXPAND_BUTTON_ID),
+            visible = false,
+            errorProvider = {
+                "Promoted ongoing state assertion error: The notification is found, " +
+                    "but is not promoted because it has an expand button."
             },
         )
     }

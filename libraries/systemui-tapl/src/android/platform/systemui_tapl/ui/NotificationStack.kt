@@ -203,6 +203,8 @@ open class NotificationStack internal constructor(val fromLockscreen: Boolean) {
          *   cannot be verified. An action button is necessary for the verification. Consider
          *   posting the HUN with NotificationController#postBigTextHeadsUpNotification if you need
          *   to assert the HUN state. Expanded HUN state cannot be asserted.
+         * @param assertIsPromotedOngoingState when true, asserts that the notification is a
+         *   promoted ongoing notification, which has different visual characteristics.
          * @param waitTimeout duration to wait for the notification to appear.
          * @return Notification (throws assertion if not found)
          */
@@ -211,16 +213,23 @@ open class NotificationStack internal constructor(val fromLockscreen: Boolean) {
         internal fun findHeadsUpNotification(
             identity: NotificationIdentity,
             assertIsHunState: Boolean = true,
+            assertIsPromotedOngoingState: Boolean = false,
             waitTimeout: Duration = LONG_WAIT,
         ): Notification {
-            if (!assertIsHunState) {
-                return findNotificationInternal(
-                    identity = identity,
+            val notification =
+                findNotificationInternal(
+                    identity,
                     fromLockscreen = false,
                     isHeadsUpNotification = true,
                     scroll = false,
                     waitTimeout = waitTimeout,
                 )
+            if (assertIsPromotedOngoingState) {
+                notification.verifyIsPromotedOngoingState()
+            }
+
+            if (!assertIsHunState) {
+                return notification
             }
 
             assertTrue(
@@ -230,15 +239,6 @@ open class NotificationStack internal constructor(val fromLockscreen: Boolean) {
                     "to false.",
                 identity.hasAction,
             )
-
-            val notification =
-                findNotificationInternal(
-                    identity,
-                    fromLockscreen = false,
-                    isHeadsUpNotification = true,
-                    scroll = false,
-                    waitTimeout = waitTimeout,
-                )
             notification.verifyIsHunState()
             return notification
         }

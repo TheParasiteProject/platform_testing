@@ -34,7 +34,6 @@ import android.tools.traces.parsers.perfetto.TraceProcessorSession
 import android.tools.traces.parsers.perfetto.TransactionsTraceParser
 import android.tools.traces.parsers.perfetto.TransitionsTraceParser
 import android.tools.traces.parsers.perfetto.WindowManagerTraceParser
-import android.tools.traces.parsers.wm.LegacyTransitionTraceParser
 import android.tools.traces.parsers.wm.LegacyWindowManagerTraceParser
 import android.tools.traces.parsers.wm.WindowManagerDumpParser
 import android.tools.traces.protolog.ProtoLogTrace
@@ -211,12 +210,7 @@ open class ResultReader(_result: IResultData, internal val traceConfig: TraceCon
     @Throws(IOException::class)
     override fun readTransitionsTrace(): TransitionsTrace? {
         return withTracing("readTransitionsTrace") {
-            val trace =
-                if (android.tracing.Flags.perfettoTransitionTracing()) {
-                    readPerfettoTransitionsTrace()
-                } else {
-                    readLegacyTransitionTrace()
-                }
+            val trace = readPerfettoTransitionsTrace()
 
             if (trace == null) {
                 return@withTracing null
@@ -287,25 +281,6 @@ open class ResultReader(_result: IResultData, internal val traceConfig: TraceCon
                 TransitionsTraceParser()
                     .parse(session, from = transitionTimeRange.start, to = transitionTimeRange.end)
             }
-        }
-    }
-
-    private fun readLegacyTransitionTrace(): TransitionsTrace? {
-        val wmSideTraceData =
-            artifact.readBytes(ResultArtifactDescriptor(TraceType.LEGACY_WM_TRANSITION))
-        val shellSideTraceData =
-            artifact.readBytes(ResultArtifactDescriptor(TraceType.LEGACY_SHELL_TRANSITION))
-
-        return if (wmSideTraceData == null || shellSideTraceData == null) {
-            null
-        } else {
-            LegacyTransitionTraceParser()
-                .parse(
-                    wmSideTraceData,
-                    shellSideTraceData,
-                    from = transitionTimeRange.start,
-                    to = transitionTimeRange.end,
-                )
         }
     }
 

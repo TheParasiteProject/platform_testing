@@ -36,7 +36,8 @@ import kotlin.reflect.KClass
  *
  * In order to interact with the tile, [getBehavior] needs to be called, with the type of behavior
  * needed. There are also convenience methods for calling [click], [toggleAndAssertToggled], and
- * [longPress]. These methods will fail the test if the tile doesn't support that interaction.
+ * [longPressAndAssertSettings]. These methods will fail the test if the tile doesn't support that
+ * interaction.
  */
 abstract class ComposeQuickSettingsTile private constructor(val displayId: Int = DEFAULT_DISPLAY) {
     /**
@@ -117,10 +118,20 @@ abstract class ComposeQuickSettingsTile private constructor(val displayId: Int =
      * [SETTINGS_PACKAGE] if `null`) is visible afterwards. This will fail if the tile does not
      * support [LongPressable].
      *
-     * See [LongPressable.longPress]
+     * See [LongPressable.longPressAndAssertSettings]
      */
-    fun longPress(expectedSettingsPackage: String? = null) {
-        getBehavior<LongPressable>()!!.longPress(expectedSettingsPackage)
+    fun longPressAndAssertSettings(expectedSettingsPackage: String? = null) {
+        getBehavior<LongPressable>()!!.longPressAndAssertSettings(expectedSettingsPackage)
+    }
+
+    /**
+     * Perform a long press on the tile, without performing any validation. This will fail if the
+     * tile does not support [LongPressable].
+     *
+     * See [LongPressable.longPres]
+     */
+    fun longPress() {
+        getBehavior<LongPressable>()!!.longPress()
     }
 
     companion object {
@@ -245,7 +256,10 @@ interface LongPressable : TileBehavior {
      * Long press on the tile. Validates that a settings activity with the correct package was
      * launched.
      */
-    fun longPress(expectedSettingsPackage: String? = null)
+    fun longPressAndAssertSettings(expectedSettingsPackage: String? = null)
+
+    /** Long press on the tile. Performs no validation. */
+    fun longPress()
 }
 
 private class LongPressableImpl(private val tile: UiObject2) : LongPressable {
@@ -253,13 +267,17 @@ private class LongPressableImpl(private val tile: UiObject2) : LongPressable {
         check(tile.isLongClickable)
     }
 
-    override fun longPress(expectedSettingsPackage: String?) {
+    override fun longPressAndAssertSettings(expectedSettingsPackage: String?) {
         Gestures.longClickDownUp(tile, "Quick settings tile", tile.displayId) {
             val packageName = expectedSettingsPackage ?: SETTINGS_PACKAGE
             By.displayId(tile.displayId).pkg(packageName).assertVisible {
                 "$packageName didn't appear"
             }
         }
+    }
+
+    override fun longPress() {
+        Gestures.longClickDownUp(tile, "Quick settings tile", tile.displayId) {}
     }
 }
 

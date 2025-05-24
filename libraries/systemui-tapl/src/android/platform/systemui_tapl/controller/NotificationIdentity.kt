@@ -19,6 +19,9 @@ package android.platform.systemui_tapl.controller
 /**
  * A way to uniquely identify a notification. It's produced by posting a notification and can be
  * passed to methods for finding a notification.
+ *
+ * @property key the [StatusBarNotification.key] (only filled in if needed for status bar
+ *   assertions)
  */
 data class NotificationIdentity
 @JvmOverloads
@@ -31,6 +34,7 @@ constructor(
     val contentIsVisibleInCollapsedState: Boolean = false,
     val pkg: String? = null,
     val hasAction: Boolean = false,
+    val key: String? = null,
 ) {
     enum class Type {
         GROUP,

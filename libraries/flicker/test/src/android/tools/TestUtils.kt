@@ -38,7 +38,7 @@ import android.tools.traces.parsers.WindowManagerStateHelper
 import android.tools.traces.parsers.perfetto.LayersTraceParser
 import android.tools.traces.parsers.perfetto.TraceProcessorSession
 import android.tools.traces.parsers.perfetto.TransactionsTraceParser
-import android.tools.traces.parsers.wm.LegacyTransitionTraceParser
+import android.tools.traces.parsers.perfetto.TransitionsTraceParser
 import android.tools.traces.parsers.wm.LegacyWindowManagerTraceParser
 import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.uiautomator.UiDevice
@@ -53,23 +53,19 @@ fun CleanFlickerEnvironmentRuleWithDataStore(): RuleChain =
 internal fun getTraceReaderFromScenario(scenario: String): Reader {
     val scenarioTraces = getScenarioTraces(scenario)
 
-    val (layersTrace, transactionsTrace) =
+    val (layersTrace, transactionsTrace, transitionsTrace) =
         TraceProcessorSession.loadPerfettoTrace(scenarioTraces.perfetto.readBytes()) { session ->
             val layersTrace = LayersTraceParser().parse(session)
             val transactionsTrace = TransactionsTraceParser().parse(session)
-            Pair(layersTrace, transactionsTrace)
+            val transitionsTrace = TransitionsTraceParser().parse(session)
+            Triple(layersTrace, transactionsTrace, transitionsTrace)
         }
 
     return ParsedTracesReader(
         artifact = TestArtifact(scenario),
         wmTrace = LegacyWindowManagerTraceParser().parse(scenarioTraces.wmTrace.readBytes()),
         layersTrace = layersTrace,
-        transitionsTrace =
-            LegacyTransitionTraceParser()
-                .parse(
-                    scenarioTraces.wmTransitions.readBytes(),
-                    scenarioTraces.shellTransitions.readBytes(),
-                ),
+        transitionsTrace = transitionsTrace,
         transactionsTrace = transactionsTrace,
         eventLog = EventLogParser().parse(scenarioTraces.eventLog.readBytes()),
     )
@@ -84,7 +80,7 @@ fun getScenarioTraces(scenario: String): FlickerBuilder.TraceFiles {
     val traces =
         mapOf<String, (File) -> Unit>(
             "wm_trace$WINSCOPE_EXT" to { wmTrace = it },
-            "layers_and_transactions_trace$PERFETTO_EXT" to { perfettoTrace = it },
+            "trace$PERFETTO_EXT" to { perfettoTrace = it },
             "wm_transition_trace$WINSCOPE_EXT" to { wmTransitionTrace = it },
             "shell_transition_trace$WINSCOPE_EXT" to { shellTransitionTrace = it },
             "eventlog$WINSCOPE_EXT" to { eventLog = it },

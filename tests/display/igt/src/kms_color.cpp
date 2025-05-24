@@ -52,7 +52,7 @@ IgtSubtestParams subtests[] = {
      .desc = "Verify that gamma LUT transformation works correctly",
      .rationale =
          "checks if the gamma LUT is applied correctly by the hardware"},
-    {.name = "ctm-%s",
+    {.name = "ctm-*",
      .desc = "Check the color transformation",
      .rationale = "checks the hardware's ability to apply various color "
                   "transformations using CTMs"},

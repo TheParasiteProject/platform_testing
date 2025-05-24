@@ -24,6 +24,7 @@ import android.hardware.devicestate.feature.flags.Flags as DeviceStateManagerFla
 import android.tools.PlatformConsts
 import android.tools.Rotation
 import android.tools.traces.component.ComponentNameMatcher
+import android.tools.traces.component.ComponentNameMatcher.Companion.BUBBLE
 import android.tools.traces.component.IComponentMatcher
 import android.tools.traces.surfaceflinger.Layer
 import android.tools.traces.surfaceflinger.Transform
@@ -341,6 +342,10 @@ object ConditionsFactory {
 
     fun hasPipWindow(): Condition<DeviceStateDump> =
         Condition("hasPipWindow") { it.wmState.hasPipWindow() }
+
+    /** Checks whether the [BUBBLE] window exists. */
+    fun hasBubbleWindow(): Condition<DeviceStateDump> =
+        Condition("hasBubbleWindow") { it.wmState.containsWindow(BUBBLE) }
 
     fun isImeShown(displayId: Int): Condition<DeviceStateDump> =
         ConditionList(

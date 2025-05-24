@@ -23,6 +23,7 @@ import android.os.Handler
 import android.os.Looper
 import android.provider.Settings
 import android.util.Log
+import android.view.Display.TYPE_OVERLAY
 import androidx.test.platform.app.InstrumentationRegistry
 import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.channels.awaitClose
@@ -35,17 +36,27 @@ import org.junit.rules.TestRule
 import org.junit.runner.Description
 import org.junit.runners.model.Statement
 
-/** A [TestRule] to manage multiple simulated connected overlay displays. */
-class SimulatedConnectedDisplayTestRule : TestRule {
+/**
+ * A [TestRule] to manage multiple simulated connected overlay displays.
+ *
+ * @param initDisplayCount the number of displays to be set up immediately. Alternatively, it's
+ *   possible to setup new displays at a later stage (on-demand) by calling [setupTestDisplay] or
+ *   [setupTestDisplays].
+ */
+class SimulatedConnectedDisplayTestRule(val initDisplayCount: Int = 0) : TestRule {
 
     private val context = InstrumentationRegistry.getInstrumentation().targetContext
     private val displayManager = context.getSystemService(DisplayManager::class.java)
-    private val addedDisplays = mutableListOf<Int>()
+    var addedDisplays = listOf<Int>()
+        private set
 
     override fun apply(base: Statement, description: Description): Statement =
         object : Statement() {
             override fun evaluate() {
                 try {
+                    if (initDisplayCount > 0) {
+                        setupTestDisplays(initDisplayCount)
+                    }
                     base.evaluate()
                 } finally {
                     teardown()
@@ -106,12 +117,14 @@ class SimulatedConnectedDisplayTestRule : TestRule {
             awaitClose { displayManager.unregisterDisplayListener(listener) }
         }
 
-        withTimeoutOrNull(TIMEOUT) {
-            displayAddedFlow.take(displays.size).collect { displayId ->
-                addedDisplays.add(displayId)
-            }
-        } ?: error("Timed out waiting for displays to be added.")
-        addedDisplays.toList()
+        addedDisplays = buildList {
+            withTimeoutOrNull(TIMEOUT) {
+                displayAddedFlow.take(displays.size).collect { displayId ->
+                    this@buildList += displayId
+                }
+            } ?: error("Timed out waiting for displays to be added.")
+        }
+        addedDisplays
     }
 
     /**
@@ -130,7 +143,17 @@ class SimulatedConnectedDisplayTestRule : TestRule {
     fun setupTestDisplay(width: Int = DEFAULT_WIDTH, height: Int = DEFAULT_HEIGHT): Int =
         setupTestDisplays(listOf(Point(width, height)))[0]
 
-    private fun cleanupTestDisplays() = runBlocking {
+    /**
+     * Removes all overlay displays. This function is safe to call manually, as it will be a no-op
+     * if all overlay displays have already been removed.
+     */
+    fun cleanupTestDisplays() = runBlocking {
+        val existingDisplays =
+            displayManager.displays.filter { it.type == TYPE_OVERLAY }.map { it.displayId }
+        if (existingDisplays.isEmpty()) {
+            return@runBlocking
+        }
+
         val displayRemovedFlow: Flow<Int> = callbackFlow {
             val listener =
                 object : DisplayListener {
@@ -158,13 +181,14 @@ class SimulatedConnectedDisplayTestRule : TestRule {
             awaitClose { displayManager.unregisterDisplayListener(listener) }
         }
 
-        if (!addedDisplays.isEmpty()) {
+        val removedDisplays = buildList {
             withTimeoutOrNull(TIMEOUT) {
-                displayRemovedFlow.take(addedDisplays.size).collect { displayId ->
-                    addedDisplays.remove(displayId)
+                displayRemovedFlow.take(existingDisplays.size).collect { displayId ->
+                    this@buildList += displayId
                 }
-            } ?: error("Timed out waiting for displays to be removed: $addedDisplays")
+            } ?: error("Timed out waiting for displays to be removed: $existingDisplays")
         }
+        addedDisplays = existingDisplays - removedDisplays
     }
 
     private companion object {

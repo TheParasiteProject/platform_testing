@@ -79,7 +79,7 @@ class Root private constructor(val displayId: Int = DEFAULT_DISPLAY) {
         traceSection("Opening notification shade via global action") {
             uiDevice.openNotification()
             waitForShadeToOpen()
-            return NotificationShade()
+            return NotificationShade(displayId)
         }
     }
 
@@ -180,15 +180,18 @@ class Root private constructor(val displayId: Int = DEFAULT_DISPLAY) {
      *   verified. An action button is necessary for the verification. Consider posting the HUN with
      *   NotificationController#postBigTextHeadsUpNotification if you need to assert the HUN state.
      *   Expanded HUN state cannot be asserted.
+     * @param assertIsPromotedOngoingState see [NotificationStack.findHeadsUpNotification].
      */
     @JvmOverloads
     fun findHeadsUpNotification(
         identity: NotificationIdentity,
         assertIsHunState: Boolean = true,
+        assertIsPromotedOngoingState: Boolean = false,
     ): Notification {
         return NotificationStack.findHeadsUpNotification(
             identity = identity,
             assertIsHunState = assertIsHunState,
+            assertIsPromotedOngoingState = assertIsPromotedOngoingState,
         )
     }
 
@@ -196,17 +199,23 @@ class Root private constructor(val displayId: Int = DEFAULT_DISPLAY) {
      * Ensures there is not a HUN with this identity. Fails if the HUN is found, or the identity
      * doesn't have an action button.
      *
+     * @param assertIsHunState see [findHeadsUpNotification].
      * @param identity The NotificationIdentity used to find the HUN, an action button is necessary
      */
     // TODO(b/295209746): More robust (and more performant) assertion for "HUN does not appear"
-    fun ensureNoHeadsUpNotification(identity: NotificationIdentity) {
-        assertWithMessage(
-                "HUN state Assertion usage error: Notification: ${identity.title} " +
-                    "| You can only assert the HUN State of a notification that has an action " +
-                    "button."
-            )
-            .that(identity.hasAction)
-            .isTrue()
+    fun ensureNoHeadsUpNotification(
+        identity: NotificationIdentity,
+        assertIsHunState: Boolean = true,
+    ) {
+        if (assertIsHunState) {
+            assertWithMessage(
+                    "HUN state Assertion usage error: Notification: ${identity.title} " +
+                        "| You can only assert the HUN State of a notification that has an action " +
+                        "button."
+                )
+                .that(identity.hasAction)
+                .isTrue()
+        }
         assertThrows(IllegalStateException::class.java) {
             findHeadsUpNotification(identity, assertIsHunState = false)
         }
@@ -249,7 +258,7 @@ class Root private constructor(val displayId: Int = DEFAULT_DISPLAY) {
 
     /** Gets lock screen. Fails if lock screen is not visible. */
     val lockScreen: LockScreen
-        get() = LockScreen()
+        get() = LockScreen(displayId)
 
     /** Gets primary bouncer. Fails if the primary bouncer is not visible. */
     val primaryBouncer: Bouncer
@@ -257,7 +266,7 @@ class Root private constructor(val displayId: Int = DEFAULT_DISPLAY) {
 
     /** Gets Aod. Fails if Aod is not visible. */
     val aod: Aod
-        get() = Aod()
+        get() = Aod(displayId)
 
     /** Gets Aod RON Skeleton. Fails if Aod is not visible. */
     val aodRON: AodRON
@@ -418,7 +427,12 @@ class Root private constructor(val displayId: Int = DEFAULT_DISPLAY) {
 
     /** Asserts that lock screen is invisible. */
     fun assertLockScreenNotVisible() {
-        LockScreen.LOCKSCREEN_SELECTOR.assertInvisible()
+        LockScreen.lockScreenSelector(displayId).assertInvisible()
+    }
+
+    /** Asserts that brightness slider is not visible (i.e. when shade is on a external display.) */
+    fun assertBrightnessSliderNotVisible() {
+        BrightnessSlider.sliderSelector(displayId).assertInvisible()
     }
 
     // TODO (b/277105514): Determine whether this is an idiomatic method of determining visibility.
@@ -469,6 +483,10 @@ class Root private constructor(val displayId: Int = DEFAULT_DISPLAY) {
         if (displayId == DEFAULT_DISPLAY) {
             uiDevice.pressHome()
         } else {
+            // Check the display is available before attempting to send key events
+            By.displayId(displayId).assertVisible {
+                "Can't press home on display $displayId: display not found"
+            }
             // replicate UiDevice#pressHome() for a display other than DEFAULT_DISPLAY
             sendKey(KeyEvent.KEYCODE_HOME, 0, SystemClock.uptimeMillis())
             uiDevice.waitForWindowUpdate(LAUNCHER_PACKAGE, LONG_TIMEOUT)
