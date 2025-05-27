@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.compatibility.common.util;
+package android.platform.test.annotations;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
