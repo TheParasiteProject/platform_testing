@@ -285,6 +285,24 @@ constructor(
     }
 
     /** {@inheritDoc} */
+    override fun isStrictlyLargerThan(other: Region): RegionSubject = apply {
+        val testArea = other.bounds.area
+        val area = region.bounds.area
+
+        if (area <= testArea) {
+            val errorMsgBuilder =
+                ExceptionMessageBuilder()
+                    .forSubject(this)
+                    .forIncorrectRegion("region. $region area should be larger than $testArea")
+                    .setExpected(testArea)
+                    .setActual(area)
+                    .addExtraDescription("Expected region larger than", other)
+                    .addExtraDescription("Actual region", regionEntry.region)
+            throw IncorrectRegionException(errorMsgBuilder)
+        }
+    }
+
+    /** {@inheritDoc} */
     override fun notSmallerThan(other: Region): RegionSubject = apply {
         val testArea = other.bounds.area
         val area = region.bounds.area
@@ -297,6 +315,24 @@ constructor(
                     .setExpected(testArea)
                     .setActual(area)
                     .addExtraDescription("Expected region", other)
+                    .addExtraDescription("Actual region", regionEntry.region)
+            throw IncorrectRegionException(errorMsgBuilder)
+        }
+    }
+
+    /** {@inheritDoc} */
+    override fun isStrictlySmallerThan(other: Region): RegionSubject = apply {
+        val testArea = other.bounds.area
+        val area = region.bounds.area
+
+        if (area >= testArea) {
+            val errorMsgBuilder =
+                ExceptionMessageBuilder()
+                    .forSubject(this)
+                    .forIncorrectRegion("region. $region area should be smaller than $testArea")
+                    .setExpected(testArea)
+                    .setActual(area)
+                    .addExtraDescription("Expected region smaller than", other)
                     .addExtraDescription("Actual region", regionEntry.region)
             throw IncorrectRegionException(errorMsgBuilder)
         }
@@ -479,6 +515,39 @@ constructor(
     override fun hasSameRightPosition(displayRect: Rect): RegionSubject = apply {
         assertEquals("right", Region(displayRect)) { it.right }
     }
+
+    /** {@inheritDoc) */
+    override fun hasSameSize(testWidth: Int, testHeight: Int, diffThreshold: Int): RegionSubject =
+        apply {
+            val width = region.bounds.width()
+            val height = region.bounds.height()
+
+            if (Math.abs(testWidth - width) > diffThreshold) {
+                val errorMsgBuilder =
+                    ExceptionMessageBuilder()
+                        .forSubject(this)
+                        .forIncorrectRegion(
+                            "region. $region width should be the same as $testWidth"
+                        )
+                        .setExpected(testWidth)
+                        .setActual(width)
+                        .addExtraDescription("Threshold", diffThreshold)
+                throw IncorrectRegionException(errorMsgBuilder)
+            }
+
+            if (Math.abs(testHeight - height) > diffThreshold) {
+                val errorMsgBuilder =
+                    ExceptionMessageBuilder()
+                        .forSubject(this)
+                        .forIncorrectRegion(
+                            "region. $region height should be the same as $testHeight"
+                        )
+                        .setExpected(testHeight)
+                        .setActual(height)
+                        .addExtraDescription("Threshold", diffThreshold)
+                throw IncorrectRegionException(errorMsgBuilder)
+            }
+        }
 
     fun isSameAspectRatio(other: RegionSubject, threshold: Double = 0.1): RegionSubject =
         isSameAspectRatio(other.region, threshold)

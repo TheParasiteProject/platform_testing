@@ -104,8 +104,22 @@ constructor(val trace: RegionTrace, override val reader: Reader? = null) :
     }
 
     /** {@inheritDoc} */
+    override fun isStrictlyLargerThan(other: Region): RegionTraceSubject = apply {
+        addAssertion("isStrictlyLargerThan($other, $componentsAsString)") {
+            it.isStrictlyLargerThan(other)
+        }
+    }
+
+    /** {@inheritDoc} */
     override fun notSmallerThan(other: Region): RegionTraceSubject = apply {
         addAssertion("notSmallerThan($other, $componentsAsString)") { it.notSmallerThan(other) }
+    }
+
+    /** {@inheritDoc} */
+    override fun isStrictlySmallerThan(other: Region): RegionTraceSubject = apply {
+        addAssertion("isStrictlySmallerThan($other, $componentsAsString)") {
+            it.isStrictlySmallerThan(other)
+        }
     }
 
     /** {@inheritDoc} */
@@ -182,6 +196,17 @@ constructor(val trace: RegionTrace, override val reader: Reader? = null) :
 
     override fun hasSameTopPosition(displayRect: Rect): RegionTraceSubject = apply {
         addAssertion("hasSameTopPosition($displayRect)") { it.hasSameTopPosition(displayRect) }
+    }
+
+    /** {@inheritDoc} */
+    override fun hasSameSize(
+        testWidth: Int,
+        testHeight: Int,
+        diffThreshold: Int,
+    ): RegionTraceSubject = apply {
+        addAssertion("hasSameSize($testWidth, $testHeight, $diffThreshold)") {
+            it.hasSameSize(testWidth, testHeight, diffThreshold)
+        }
     }
 
     @JvmOverloads

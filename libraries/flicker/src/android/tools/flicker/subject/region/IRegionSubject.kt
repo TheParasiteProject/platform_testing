@@ -140,12 +140,28 @@ interface IRegionSubject {
     fun notBiggerThan(other: Region): IRegionSubject
 
     /**
+     * Asserts that region is strictly larger than [other], even if the regions don't overlap.
+     *
+     * @param other Area to compare to
+     * @throws AssertionError
+     */
+    fun isStrictlyLargerThan(other: Region): IRegionSubject
+
+    /**
      * Asserts that region is not smaller than [other], even if the regions don't overlap.
      *
      * @param other Area to compare to
      * @throws AssertionError
      */
     fun notSmallerThan(other: Region): IRegionSubject
+
+    /**
+     * Asserts that region is strictly smaller than [other], even if the regions don't overlap.
+     *
+     * @param other Area to compare to
+     * @throws AssertionError
+     */
+    fun isStrictlySmallerThan(other: Region): IRegionSubject
 
     /**
      * Asserts that region is positioned to the right and bottom from [other], but the regions can
@@ -270,4 +286,14 @@ interface IRegionSubject {
      * @throws AssertionError
      */
     fun hasSameLeftPosition(displayRect: Rect): IRegionSubject
+
+    /**
+     * Asserts that region's width and height match [testWidth] and [testHeight]
+     *
+     * @param testWidth expected width
+     * @param testHeight expected height
+     * @param diffThreshold tolerance for difference in size and width
+     * @throws AssertionError
+     */
+    fun hasSameSize(testWidth: Int, testHeight: Int, diffThreshold: Int): IRegionSubject
 }
