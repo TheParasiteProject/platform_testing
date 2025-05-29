@@ -44,6 +44,7 @@ public class SettingSearchTest {
 
     private static final String SEARCH_DEFAULT_APP = "Contacts";
     private static final String SEARCH_DEFAULT_SETTING = "Date & time";
+    private static final String SEARCH_SOUND = "sound";
 
     private HelperAccessor<IAutoSettingHelper> mSettingHelper;
 
@@ -86,5 +87,23 @@ public class SettingSearchTest {
         assertTrue(
                 "Page title does not contains searched setting name",
                 searchSetting.equals(mSettingHelper.get().getSettingsPageTitleText()));
+    }
+
+    @Test
+    public void testSearchMatchingPages() {
+        mSettingHelper.get().searchSettings(SEARCH_SOUND);
+        mSettingHelper.get().hideSoftKeyboard();
+        assertTrue(
+                "All sound settings names are not rendered",
+                mSettingHelper.get().isAllSettingsDisplayed(SEARCH_SOUND));
+    }
+
+    @Test
+    public void testSearchResultsCount() {
+        mSettingHelper.get().searchSettings(SEARCH_SOUND);
+        mSettingHelper.get().hideSoftKeyboard();
+        assertTrue(
+                "Number of search results count is not matched",
+                mSettingHelper.get().isNumberOfResultsDisplayed(3));
     }
 }
