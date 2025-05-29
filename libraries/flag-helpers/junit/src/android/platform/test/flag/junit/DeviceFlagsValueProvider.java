@@ -16,6 +16,7 @@
 
 package android.platform.test.flag.junit;
 
+import android.annotation.SuppressLint;
 import android.app.UiAutomation;
 import android.platform.test.flag.util.Flag;
 import android.platform.test.flag.util.FlagReadException;
@@ -59,6 +60,11 @@ public class DeviceFlagsValueProvider implements IFlagsValueProvider {
 
     private DeviceFlagsValueProvider(UiAutomation uiAutomation) {
         mUiAutomation = uiAutomation;
+    }
+
+    @Override
+    public void setUp() {
+        mUiAutomation.adoptShellPermissionIdentity(READ_DEVICE_CONFIG_PERMISSION);
     }
 
     @Override
@@ -115,9 +121,8 @@ public class DeviceFlagsValueProvider implements IFlagsValueProvider {
     }
 
     private boolean getLegacyFlagBoolean(Flag flag) throws FlagReadException {
-        mUiAutomation.adoptShellPermissionIdentity(READ_DEVICE_CONFIG_PERMISSION);
+        @SuppressLint("MissingPermission")
         String property = DeviceConfig.getProperty(flag.namespace(), flag.fullFlagName());
-        mUiAutomation.dropShellPermissionIdentity();
         if (property == null) {
             throw new FlagReadException(flag.fullFlagName(), "Flag does not exist on the device.");
         }
@@ -126,5 +131,10 @@ public class DeviceFlagsValueProvider implements IFlagsValueProvider {
         }
         throw new FlagReadException(
                 flag.fullFlagName(), String.format("Value %s is not a valid boolean.", property));
+    }
+
+    @Override
+    public void tearDownBeforeTest() {
+        mUiAutomation.dropShellPermissionIdentity();
     }
 }
