@@ -86,7 +86,7 @@ class Root private constructor(val displayId: Int = DEFAULT_DISPLAY) {
     /** Opens the notification shade via two fingers wipe. */
     fun openNotificationShadeViaTwoFingersSwipe(): NotificationShade {
         assertWithMessage(
-                "two finger swipe is only supported on the default display, because it relies on " +
+            "two finger swipe is only supported on the default display, because it relies on " +
                     "UiObject#performTwoPointerGesture, and UiObject has no concept of displayId " +
                     "(unlike UiObject2)"
             )
@@ -166,6 +166,27 @@ class Root private constructor(val displayId: Int = DEFAULT_DISPLAY) {
         return NotificationShade()
     }
 
+    /** Opens notification shade via 3-finger swipe on trackpad */
+    fun openNotificationShadeViaTrackpadSwipe(): NotificationShade {
+        // Swiping on horizontal center, vertically from upper quarter to 3/4 down, as to
+        // give enough space for shade to open fully, and not losing focus by touching screen edge
+        val startX = uiDevice.getDisplayWidth(displayId) / 2f
+        val startY = uiDevice.getDisplayHeight(displayId) / 4f
+        val endY = uiDevice.getDisplayHeight(displayId) * 3f / 4
+        val deltaY = endY - startY
+
+        BetterSwipe.threeFingerTrackpadSwipe(
+            start1 = PointF(startX, startY),
+            start2 = PointF(startX - TOUCHPAD_POINTER_SPACING, startY),
+            start3 = PointF(startX + TOUCHPAD_POINTER_SPACING, startY),
+            delta = PointF(0f, deltaY),
+            displayId = displayId,
+        )
+
+        waitForShadeToOpen()
+        return NotificationShade(displayId)
+    }
+
     private val footerSelector = sysuiResSelector("qs_footer_actions", displayId)
 
     private val notificationSwipeX: Float
@@ -209,7 +230,7 @@ class Root private constructor(val displayId: Int = DEFAULT_DISPLAY) {
     ) {
         if (assertIsHunState) {
             assertWithMessage(
-                    "HUN state Assertion usage error: Notification: ${identity.title} " +
+                "HUN state Assertion usage error: Notification: ${identity.title} " +
                         "| You can only assert the HUN State of a notification that has an action " +
                         "button."
                 )
@@ -586,6 +607,7 @@ class Root private constructor(val displayId: Int = DEFAULT_DISPLAY) {
         private const val LONG_TIMEOUT: Long = 2000
         private const val SHORT_TIMEOUT: Long = 500
         private const val SCREENSHOT_POST_TIMEOUT_MSEC: Long = 20000
+        private const val TOUCHPAD_POINTER_SPACING = 50
         private val GLOBAL_SCREENSHOT_SELECTOR = sysuiResSelector("screenshot_actions")
 
         /**
