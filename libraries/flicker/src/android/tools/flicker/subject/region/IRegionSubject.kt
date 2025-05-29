@@ -77,6 +77,9 @@ interface IRegionSubject {
      */
     fun isLeftEdgeToTheRight(other: Region): IRegionSubject
 
+    /** Asserts that this region is strictly wider than [other]. */
+    fun isStrictlyWiderThan(other: Region): IRegionSubject
+
     /**
      * Asserts that the top and bottom coordinates of [other] are smaller than those of region.
      *
