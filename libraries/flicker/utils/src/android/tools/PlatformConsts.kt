@@ -103,6 +103,9 @@ object PlatformConsts {
     /** @see android.app.WindowConfiguration.WINDOWING_MODE_PINNED */
     internal const val WINDOWING_MODE_PINNED = 2
 
+    /** @see android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM */
+    internal const val WINDOWING_MODE_FREEFORM = 5
+
     /** @see android.view.WindowManager.LayoutParams */
     internal const val TYPE_NAVIGATION_BAR_PANEL = 2024
 
