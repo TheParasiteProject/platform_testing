@@ -292,4 +292,21 @@ public class AppGridHelperImpl extends AbstractStandardAppHelper implements IAut
                 getUiElementFromConfig(AutomotiveConfigConstants.RECENT_APPS_THUMBNAIL);
         return getSpectatioUiUtil().hasUiElement(recentAppsThumbnailSelector);
     }
+
+    @Override
+    public boolean isAppPresentInAppgrid(String appName) {
+        BySelector appNameSelector = By.text(appName);
+
+        UiObject2 app =
+                mScrollUtility.scrollAndFindUiObject(
+                        mScrollAction,
+                        mScrollDirection,
+                        mForwardButtonSelector,
+                        mBackwardButtonSelector,
+                        mScrollableElementSelector,
+                        appNameSelector,
+                        String.format("Scroll on app grid to find %s", appName));
+
+        return app != null;
+    }
 }

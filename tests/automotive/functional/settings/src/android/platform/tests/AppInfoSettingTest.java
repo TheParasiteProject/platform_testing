@@ -1,8 +1,10 @@
 package android.platform.tests;
 
+import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertTrue;
 
 import android.platform.helpers.HelperAccessor;
+import android.platform.helpers.IAutoAppGridHelper;
 import android.platform.helpers.IAutoAppInfoSettingsHelper;
 import android.platform.helpers.IAutoAppInfoSettingsHelper.State;
 import android.platform.helpers.IAutoSettingHelper;
@@ -22,6 +24,7 @@ import java.util.List;
 public class AppInfoSettingTest {
     private HelperAccessor<IAutoAppInfoSettingsHelper> mAppInfoSettingsHelper;
     private HelperAccessor<IAutoSettingHelper> mSettingHelper;
+    private HelperAccessor<IAutoAppGridHelper> mAppGridHelper;
     private static final String LOG_TAG = AppInfoSettingTest.class.getSimpleName();
 
     private static final String CONTACTS_APP = "Contacts";
@@ -31,6 +34,7 @@ public class AppInfoSettingTest {
     public AppInfoSettingTest() throws Exception {
         mAppInfoSettingsHelper = new HelperAccessor<>(IAutoAppInfoSettingsHelper.class);
         mSettingHelper = new HelperAccessor<>(IAutoSettingHelper.class);
+        mAppGridHelper = new HelperAccessor<>(IAutoAppGridHelper.class);
     }
     @Before
     public void openAppInfoFacet() {
@@ -49,20 +53,43 @@ public class AppInfoSettingTest {
 
     @Test
     public void testDisableEnableApplication() {
-        Log.i(LOG_TAG, "Act: Open the Contacts App");
-        mAppInfoSettingsHelper.get().selectApp(CONTACTS_APP);
-        Log.i(LOG_TAG, "Act: Disable the contacts app");
-        mAppInfoSettingsHelper.get().enableDisableApplication(State.DISABLE);
+        // Diabale contacts app in app info settings
+        Log.i(LOG_TAG, "Act: Select Contacts App and disable it");
+        mAppInfoSettingsHelper.get().selectAppAndEnableDisableApp(CONTACTS_APP, State.DISABLE);
+
         Log.i(LOG_TAG, "Assert: Application is disabled");
         assertTrue(
                 "Application is not disabled",
                 mAppInfoSettingsHelper.get().isApplicationDisabled(CONTACT_PACKAGE));
-        Log.i(LOG_TAG, "Act: Enable the contacts app");
-        mAppInfoSettingsHelper.get().enableDisableApplication(State.ENABLE);
+
+        // Validate whether app is not visible in app grid
+        Log.i(LOG_TAG, "Act: Open Appgrid");
+        mAppGridHelper.get().open();
+
+        Log.i(LOG_TAG, "Assert: Contacts app is not visible in app grid");
+        assertFalse(
+                "App is present in app grid",
+                mAppGridHelper.get().isAppPresentInAppgrid("Contacts"));
+
+        // Enable contacts app in app info settings
+        Log.i(LOG_TAG, "Act: Open app info settings");
+        openAppInfoFacet();
+        Log.i(LOG_TAG, "Act: Select Contacts App and disable it");
+        mAppInfoSettingsHelper.get().selectAppAndEnableDisableApp(CONTACTS_APP, State.ENABLE);
+
         Log.i(LOG_TAG, "Assert: Application is enabled");
         assertTrue(
                 "Application is not enabled",
                 !mAppInfoSettingsHelper.get().isApplicationDisabled(CONTACT_PACKAGE));
+
+        // Validate whether app is not visible in app grid
+        Log.i(LOG_TAG, "Act: Open Appgrid");
+        mAppGridHelper.get().open();
+
+        Log.i(LOG_TAG, "Assert: Contacts app is visible in app grid");
+        assertTrue(
+                "App is not present in app grid",
+                mAppGridHelper.get().isAppPresentInAppgrid("Contacts"));
     }
 
     @Test
