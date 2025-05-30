@@ -828,7 +828,7 @@
     },
     "APP_INFO_SETTINGS_FORCE_STOP_BUTTON": {
       "TYPE": "TEXT",
-      "VALUE": "Force stop"
+      "VALUE": "Stop app"
     },
     "APP_INFO_SETTINGS_TITTLE": {
       "TYPE": "RESOURCE_ID",

@@ -28,6 +28,7 @@ public class AppInfoSettingTest {
     private static final String LOG_TAG = AppInfoSettingTest.class.getSimpleName();
 
     private static final String CONTACTS_APP = "Contacts";
+    private static final String CALENDAR_APP = "Calendar";
     private static final String PHONE_PERMISSION = "Phone";
     private static final String CONTACT_PACKAGE = "com.android.contacts";
 
@@ -142,5 +143,18 @@ public class AppInfoSettingTest {
                                 + "\nSummary Value: %d \tListed: %d",
                         summaryTotal, listedTotal),
                 summaryTotal == listedTotal);
+    }
+
+    @Test
+    public void testAppForceStop() {
+        Log.i(LOG_TAG, "Act: Select Calendar App");
+        mAppInfoSettingsHelper.get().selectApp(CALENDAR_APP);
+
+        Log.i(LOG_TAG, "Act: click on stop app button ");
+        mAppInfoSettingsHelper.get().forceStop();
+
+        Log.i(LOG_TAG, "Assert: stop app popup is not displaying ");
+        assertFalse(
+                "App is not force stopped", mAppInfoSettingsHelper.get().isStopappPopupDisplayed());
     }
 }
