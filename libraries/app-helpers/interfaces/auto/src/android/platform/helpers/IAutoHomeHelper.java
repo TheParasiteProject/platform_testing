@@ -44,6 +44,13 @@ public interface IAutoHomeHelper extends IAppHelper {
     /**
      * Setup expectations: Should be on home screen.
      *
+     * <p>Opens bluetooth palette palette.
+     */
+    void openBluetoothButton();
+
+    /**
+     * Setup expectations: Should be on home screen.
+     *
      * <p>Checks if exists a network widget.
      */
     boolean hasNetworkButton();
@@ -51,9 +58,30 @@ public interface IAutoHomeHelper extends IAppHelper {
     /**
      * Setup expectations: Should be on home screen.
      *
+     * <p>Opens network palette.
+     */
+    void openNetworkPalette();
+
+    /**
+     * Setup expectations: Should be on home screen.
+     *
      * <p>Checks if exists a Brightness widget.
      */
     boolean hasDisplayBrightness();
+
+    /**
+     * Setup expectations: Should be on home screen.
+     *
+     * <p>Checks if exists a Sound settings widget.
+     */
+    boolean hasSoundSettings();
+
+    /**
+     * Setup expectations: Should be on home screen.
+     *
+     * <p>Opens sound settings palette.
+     */
+    void openSoundSettingsPalette();
 
     /**
      * Setup expectations: Verifying the Guest label displayed in profile icon in status bar
