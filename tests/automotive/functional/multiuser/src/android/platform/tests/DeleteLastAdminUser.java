@@ -60,8 +60,8 @@ public class DeleteLastAdminUser {
 
     @After
     public void goBackToHomeScreen() {
-        Log.i(LOG_TAG, "Act: Go back to Settings");
-        mSettingHelper.get().goBackToSettingsScreen();
+        Log.i(LOG_TAG, "Act: Go back to Home Screen");
+        mSettingHelper.get().exit();
     }
 
     @Test

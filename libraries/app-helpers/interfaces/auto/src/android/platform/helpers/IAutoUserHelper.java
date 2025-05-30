@@ -119,5 +119,12 @@ public interface IAutoUserHelper extends IAppHelper {
      * <p>This method is used to toggle the switch .
      */
     boolean toggle(String buttonText);
+
+    /**
+     * Setup expectation: New User is created
+     *
+     * <p>This method is used to skip the set up and initial diaglogs.
+     */
+    void skipSetupWizard();
 }
 

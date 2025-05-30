@@ -53,6 +53,7 @@ public class GuestUserSettings {
     @Before
     public void switchToGuestUser() {
         mUsersHelper.get().switchUsingUserIcon(GUEST);
+        mUsersHelper.get().skipSetupWizard();
     }
 
     @After

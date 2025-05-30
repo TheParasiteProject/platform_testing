@@ -67,6 +67,7 @@ public class SwitchUserQuickSettings {
         // switch to Guest
         Log.i(LOG_TAG, "Act: Get previous userinfo");
         mUsersHelper.get().switchUsingUserIcon(GUEST);
+        mUsersHelper.get().skipSetupWizard();
         Log.i(LOG_TAG, "Act: Get current userinfo");
         UserInfo currentUser = mMultiUserHelper.getCurrentForegroundUserInfo();
         // verify the user switch
