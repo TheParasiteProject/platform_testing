@@ -50,12 +50,28 @@ public class StatusBarTest {
 
     @Test
     public void testToverifyDefaultStatusbar() {
-        Log.i(LOG_TAG, "Assert:  Bluetooth Button is not displayed.");
-        assertTrue("Bluetooth Button is not displayed", mHomeHelper.get().hasBluetoothButton());
-        Log.i(LOG_TAG, "Assert:  Network Button is not displayed.");
-        assertTrue("Network Button is not displayed", mHomeHelper.get().hasNetworkButton());
-        Log.i(LOG_TAG, "Assert:  Brightness Button is not displayed.");
-        assertTrue("Brightness Button is not displayed", mHomeHelper.get().hasDisplayBrightness());
+        for (int i = 0; i < 2; i++) {
+            Log.i(LOG_TAG, "Assert:  Bluetooth Button is not displayed.");
+            assertTrue("Bluetooth Button is not displayed", mHomeHelper.get().hasBluetoothButton());
+            Log.i(LOG_TAG, "Act: Open Bluetooth palette");
+            mHomeHelper.get().openBluetoothButton();
+            Log.i(LOG_TAG, "Assert:  Network Button is not displayed.");
+            assertTrue("Network Button is not displayed", mHomeHelper.get().hasNetworkButton());
+            Log.i(LOG_TAG, "Act:  Open Network palette");
+            mHomeHelper.get().openNetworkPalette();
+            Log.i(LOG_TAG, "Assert:  Brightness Button is not displayed.");
+            assertTrue(
+                    "Brightness Button is not displayed", mHomeHelper.get().hasDisplayBrightness());
+            Log.i(LOG_TAG, "Act:  Open Brightness palette");
+            mHomeHelper.get().openBrightnessPalette();
+            Log.i(LOG_TAG, "Assert:  Sound settings button is not displayed.");
+            assertTrue(
+                    "Sound settings Button is not displayed", mHomeHelper.get().hasSoundSettings());
+            Log.i(LOG_TAG, "Act:  Open Sound setting palette");
+            mHomeHelper.get().openSoundSettingsPalette();
+            Log.i(LOG_TAG, "Act: Press home screen");
+            mHomeHelper.get().open();
+        }
     }
 
     @Test

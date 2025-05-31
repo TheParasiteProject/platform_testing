@@ -22,13 +22,23 @@ import android.hardware.display.DisplayManager
 import android.os.SystemClock
 import android.os.SystemClock.sleep
 import android.platform.uiautomatorhelpers.DeviceHelpers.context
+import android.platform.uiautomatorhelpers.SwipeUtils.AXIS_GESTURE_SWIPE_FINGER_COUNT
+import android.platform.uiautomatorhelpers.SwipeUtils.CLASSIFICATION_MULTI_FINGER_SWIPE
 import android.platform.uiautomatorhelpers.TracingUtils.trace
 import android.util.Log
 import android.view.Display.DEFAULT_DISPLAY
 import android.view.InputDevice
+import android.view.InputDevice.SOURCE_TOUCHSCREEN
 import android.view.MotionEvent
+import android.view.MotionEvent.ACTION_DOWN
+import android.view.MotionEvent.ACTION_MOVE
+import android.view.MotionEvent.ACTION_POINTER_DOWN
+import android.view.MotionEvent.ACTION_POINTER_INDEX_SHIFT
+import android.view.MotionEvent.ACTION_POINTER_UP
+import android.view.MotionEvent.ACTION_UP
 import android.view.MotionEvent.CLASSIFICATION_NONE
 import android.view.MotionEvent.TOOL_TYPE_FINGER
+import android.view.MotionEvent.obtain
 import android.view.animation.DecelerateInterpolator
 import android.view.animation.LinearInterpolator
 import androidx.test.platform.app.InstrumentationRegistry.getInstrumentation
@@ -107,7 +117,7 @@ object BetterSwipe {
     ) {
         var swipe: Swipe? = null
         try {
-            swipe = Swipe(start, displayId)
+            swipe = Swipe(start, displayId = displayId)
             swipe.from()
             swipe.swipeFn()
             swipe.to(end, duration, interpolator)
@@ -127,14 +137,7 @@ object BetterSwipe {
         displayId: Int = DEFAULT_DISPLAY,
         swipeFn: (Swipe.() -> Unit) = {},
     ) {
-        swipe(
-            PointF(start.x.toFloat(), start.y.toFloat()),
-            PointF(end.x.toFloat(), end.y.toFloat()),
-            duration,
-            interpolator,
-            displayId,
-            swipeFn,
-        )
+        swipe(PointF(start), PointF(end), duration, interpolator, displayId, swipeFn)
     }
 
     /**
@@ -151,7 +154,7 @@ object BetterSwipe {
     fun swipe(start: PointF, displayId: Int = DEFAULT_DISPLAY, swipeFn: (Swipe.() -> Unit)) {
         var swipe: Swipe? = null
         try {
-            swipe = Swipe(start, displayId)
+            swipe = Swipe(start, displayId = displayId)
             swipe.from()
             swipe.swipeFn()
         } finally {
@@ -163,10 +166,71 @@ object BetterSwipe {
     @JvmOverloads
     @JvmStatic
     fun swipe(start: Point, displayId: Int = DEFAULT_DISPLAY, swipeFn: (Swipe.() -> Unit) = {}) {
-        swipe(PointF(start.x.toFloat(), start.y.toFloat()), displayId, swipeFn)
+        swipe(PointF(start), displayId, swipeFn)
     }
 
-    class Swipe internal constructor(val start: PointF, val displayId: Int = DEFAULT_DISPLAY) {
+    /**
+     * Perform a three-finger trackpad swipe from [start1], [start2] and [start3] in direction of
+     * [delta] on display [displayId].
+     *
+     * @param [start1] first starting point of swipe.
+     * @param [start2] second starting point of swipe.
+     * @param [start3] third starting point of swipe.
+     * @param [delta] Movement to be followed by all pointers.
+     * @param [displayId] the display to send the events to.
+     */
+    @JvmOverloads
+    @JvmStatic
+    fun threeFingerTrackpadSwipe(
+        start1: PointF,
+        start2: PointF,
+        start3: PointF,
+        delta: PointF,
+        displayId: Int = DEFAULT_DISPLAY,
+    ) {
+        var swipes: Swipes? = null
+        try {
+            swipes =
+                Swipes(
+                    displayId = displayId,
+                    source = InputDevice.SOURCE_TOUCHPAD or InputDevice.SOURCE_CLASS_POINTER,
+                    classification = CLASSIFICATION_MULTI_FINGER_SWIPE,
+                    start1,
+                    start2,
+                    start3,
+                )
+            swipes.from()
+            swipes.moveBy(delta)
+        } finally {
+            swipes?.release()
+        }
+    }
+
+    /** Variant of above which takes an integer points for starts and delta. */
+    @JvmOverloads
+    @JvmStatic
+    fun threeFingerTrackpadSwipe(
+        start1: Point,
+        start2: Point,
+        start3: Point,
+        delta: Point,
+        displayId: Int = DEFAULT_DISPLAY,
+    ) {
+        threeFingerTrackpadSwipe(
+            PointF(start1),
+            PointF(start2),
+            PointF(start3),
+            PointF(delta),
+            displayId,
+        )
+    }
+
+    class Swipe internal constructor(
+        private val start: PointF,
+        private val source: Int = SOURCE_TOUCHSCREEN,
+        private val displayId: Int = DEFAULT_DISPLAY,
+        private val classification: Int = CLASSIFICATION_NONE,
+    ) {
 
         private var downTime = -1L
         private val pointerId = lastPointerId.incrementAndGet()
@@ -179,14 +243,13 @@ object BetterSwipe {
             log("Touch $pointerId started at $start")
         }
 
-        internal fun from(): Swipe {
+        internal fun from(action: Int = ACTION_DOWN): Swipe {
             throwIfReleased()
             downTime = SystemClock.uptimeMillis()
             sendPointer(
                 currentTime = downTime,
-                action = MotionEvent.ACTION_DOWN,
+                action = action,
                 point = start,
-                displayId = displayId,
             )
             lastTime = downTime
             return this
@@ -242,21 +305,11 @@ object BetterSwipe {
 
         /** Moves the pointer up, finishing the swipe. Further calls will result in an exception. */
         @JvmOverloads
-        /*
-        fun release(sync: Boolean = true) {
-            currentSwipes.remove(this)
-        */
-        internal fun release(sync: Boolean = true) {
+        internal fun release(sync: Boolean = true, action: Int = ACTION_UP) {
             currentSwipes.remove(this)
             throwIfReleased()
             log("Touch $pointerId released at $lastPoint")
-            sendPointer(
-                currentTime = lastTime,
-                action = MotionEvent.ACTION_UP,
-                point = lastPoint,
-                sync = sync,
-                displayId = displayId,
-            )
+            sendPointer(lastTime, action, lastPoint, sync)
             lastPointerId.decrementAndGet()
             released = true
         }
@@ -264,7 +317,7 @@ object BetterSwipe {
         /** Moves the pointer by [delta], sending the event at [currentTime]. */
         internal fun moveBy(delta: PointF, currentTime: Long, sync: Boolean) {
             val targetPoint = PointF(lastPoint.x + delta.x, lastPoint.y + delta.y)
-            sendPointer(currentTime, MotionEvent.ACTION_MOVE, targetPoint, sync, displayId)
+            sendPointer(currentTime, ACTION_MOVE, targetPoint, sync)
             lastTime = currentTime
             lastPoint = targetPoint
         }
@@ -284,9 +337,18 @@ object BetterSwipe {
             action: Int,
             point: PointF,
             sync: Boolean = true,
-            displayId: Int = this@Swipe.displayId,
         ) {
-            val event = getMotionEvent(downTime, currentTime, action, point, pointerId, displayId)
+            val event =
+                getMotionEvent(
+                    downTime,
+                    currentTime,
+                    action,
+                    point,
+                    pointerId,
+                    source,
+                    displayId,
+                    classification,
+                )
 
             try {
                 trySendMotionEvent(event, sync)
@@ -303,9 +365,7 @@ object BetterSwipe {
             // the event.
 
             try {
-                getInstrumentation()
-                    .uiAutomation
-                    .injectInputEvent(event, sync)
+                getInstrumentation().uiAutomation.injectInputEvent(event, sync)
             } catch (t: Throwable) {
                 throw RuntimeException(t)
             }
@@ -334,7 +394,7 @@ object BetterSwipe {
                 currentTime += stepTimeMs
                 val progress = interpolator.getInterpolation(i / (steps - 1f))
                 val point = from.lerp(progress, to)
-                sendPointer(currentTime, MotionEvent.ACTION_MOVE, point, displayId = displayId)
+                sendPointer(currentTime, ACTION_MOVE, point)
             }
             assertThat(currentTime).isEqualTo(startTime + stepTimeMs * steps)
             return currentTime
@@ -342,10 +402,28 @@ object BetterSwipe {
     }
 
     /** Collection of swipes. This can be used to simulate multitouch. */
-    class Swipes internal constructor(vararg starts: PointF) {
+    class Swipes
+    internal constructor(
+        val displayId: Int = DEFAULT_DISPLAY,
+        val source: Int = SOURCE_TOUCHSCREEN,
+        val classification: Int = CLASSIFICATION_NONE,
+        vararg starts: PointF,
+    ) {
 
         private var lastTime: Long = SystemClock.uptimeMillis()
-        private val swipes: List<Swipe> = starts.map { Swipe(it) }
+        private val swipes: List<Swipe> = starts.map { start ->
+            Swipe(start, source, displayId, classification)
+        }
+
+        /** Start all swipes by injecting initial position as MotionEvents */
+        fun from(): Swipes {
+            swipes.forEachIndexed { index, swipe ->
+                val action =
+                    if (index == 0) ACTION_DOWN else ACTION_POINTER_DOWN.asIndexedPointer(index)
+                swipe.from(action)
+            }
+            return this
+        }
 
         /** Moves all the swipes by [delta], in [duration] time with constant speed. */
         fun moveBy(delta: PointF, duration: Duration = DEFAULT_DURATION): Swipes {
@@ -375,52 +453,67 @@ object BetterSwipe {
 
         /** Moves pointers up, finishing the swipe. Further calls will result in an exception. */
         fun release() {
-            swipes.forEach { it.release(sync = false) }
+            for (index in swipes.indices.reversed()) {
+                val action =
+                    if (index == 0) ACTION_UP else ACTION_POINTER_UP.asIndexedPointer(index)
+                swipes[index].release(sync = false, action)
+            }
         }
     }
 
     private fun log(s: String) = Log.d("BetterSwipe", s)
+
+    private fun getMotionEvent(
+        downTime: Long,
+        eventTime: Long,
+        action: Int,
+        p: PointF,
+        pointerId: Int,
+        source: Int,
+        displayId: Int,
+        classification: Int,
+    ): MotionEvent {
+        val properties =
+            MotionEvent.PointerProperties().apply {
+                id = pointerId
+                toolType = TOOL_TYPE_FINGER
+            }
+        val coordinates =
+            MotionEvent.PointerCoords().apply {
+                pressure = 1f
+                size = 1f
+                x = p.x
+                y = p.y
+
+                // Need to set the swipe finger count to differentiate between 3 and 4 finger swipes
+                // 2 finger swipes are identified using other classifications.
+                val pointerCount = currentSwipes.size
+                if (pointerCount >= 3) {
+                    setAxisValue(AXIS_GESTURE_SWIPE_FINGER_COUNT, pointerCount.toFloat())
+                }
+            }
+        return obtain(
+            /* downTime= */ downTime,
+            /* eventTime= */ eventTime,
+            /* action= */ action,
+            /* pointerCount= */ pointerId,
+            /* pointerProperties= */ Array(pointerId) { properties },
+            /* pointerCoords= */ Array(pointerId) { coordinates },
+            /* metaState= */ 0,
+            /* buttonState= */ 0,
+            /* xPrecision= */ 1.0f,
+            /* yPrecision= */ 1.0f,
+            /* deviceId= */ 0,
+            /* edgeFlags= */ 0,
+            /* source= */ source,
+            /* displayId= */ displayId,
+            /* flags= */ 0,
+            /* classification= */ classification,
+        )!!
+    }
 }
 
-private fun getMotionEvent(
-    downTime: Long,
-    eventTime: Long,
-    action: Int,
-    p: PointF,
-    pointerId: Int,
-    displayId: Int,
-): MotionEvent {
-    val properties =
-        MotionEvent.PointerProperties().apply {
-            id = pointerId
-            toolType = TOOL_TYPE_FINGER
-        }
-    val coordinates =
-        MotionEvent.PointerCoords().apply {
-            pressure = 1f
-            size = 1f
-            x = p.x
-            y = p.y
-        }
-    return MotionEvent.obtain(
-        /* downTime= */ downTime,
-        /* eventTime= */ eventTime,
-        /* action= */ action,
-        /* pointerCount= */ 1,
-        /* pointerProperties= */ arrayOf(properties),
-        /* pointerCoords= */ arrayOf(coordinates),
-        /* metaState= */ 0,
-        /* buttonState= */ 0,
-        /* xPrecision= */ 1.0f,
-        /* yPrecision= */ 1.0f,
-        /* deviceId= */ 0,
-        /* edgeFlags= */ 0,
-        /* source= */ InputDevice.SOURCE_TOUCHSCREEN,
-        /* displayId= */ displayId,
-        /* flags= */ 0,
-        /* classification= */ CLASSIFICATION_NONE,
-    )!!
-}
+private fun Int.asIndexedPointer(index: Int): Int = this + (index shl ACTION_POINTER_INDEX_SHIFT)
 
 private fun PointF.lerp(amount: Float, b: PointF) =
     PointF(lerp(x, b.x, amount), lerp(y, b.y, amount))

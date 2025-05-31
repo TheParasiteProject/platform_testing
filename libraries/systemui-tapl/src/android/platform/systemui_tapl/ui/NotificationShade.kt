@@ -200,8 +200,9 @@ class NotificationShade internal constructor(val displayId: Int = DEFAULT_DISPLA
     /** Closes the shade. */
     fun close() {
         val device = uiDevice
-        // Swipe in first quarter to avoid desktop windowing app handle interactions.
-        val swipeXCoordinate = device.getDisplayWidth(displayId) / 4
+        // Swipe in third quarter to avoid desktop windowing app handle interactions, and due to
+        // the flexiglass notification shade not always being responsive on left side (b/406203539)
+        val swipeXCoordinate = device.getDisplayWidth(displayId) * 3 / 4
         betterSwipe(
             startX = swipeXCoordinate,
             startY = screenBottom,

@@ -58,7 +58,16 @@ public interface IAutoAppInfoSettingsHelper extends IAppHelper {
     /**
      * Setup expectation: An application in Apps & notifications setting is open
      *
-     * This method is to check whether an application is running in background from UI
+     * <p>This method is to enable/disable an application
+     *
+     * @param state - ENABLE: to enable, DISABLE: to disable
+     */
+    void selectAppAndEnableDisableApp(String application, State state);
+
+    /**
+     * Setup expectation: An application in Apps & notifications setting is open
+     *
+     * <p>This method is to check whether an application is running in background from UI
      */
     boolean isCurrentApplicationRunning();
 

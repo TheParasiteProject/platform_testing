@@ -236,6 +236,9 @@ class WindowManagerState(
     fun getStackByActivityType(activityType: Int): Task? =
         rootTasks.firstOrNull { it.activityType == activityType }
 
+    fun getStackByActivityType(activityType: Int, displayId: Int): Task? =
+        getDisplay(displayId)?.rootTasks?.firstOrNull { it.activityType == activityType }
+
     fun getStandardStackByWindowingMode(windowingMode: Int): Task? =
         rootTasks.firstOrNull {
             it.activityType == PlatformConsts.ACTIVITY_TYPE_STANDARD &&
@@ -316,12 +319,28 @@ class WindowManagerState(
 
     /**
      * @param componentMatcher Components to search
-     * @return the visible [WindowState]s matching [componentMatcher]
+     * @param displayId Display to search
+     * @return the visible [WindowState]s matching [componentMatcher] on the specific display
      */
+    @JvmOverloads
     fun getMatchingVisibleWindowState(
-        componentMatcher: IComponentMatcher
+        componentMatcher: IComponentMatcher,
+        displayId: Int = PlatformConsts.DEFAULT_DISPLAY,
     ): Collection<WindowState> {
-        return windowStates.filter { it.isSurfaceShown && componentMatcher.windowMatchesAnyOf(it) }
+        return windowStates.filter { it.displayId == displayId
+                && it.isSurfaceShown
+                && componentMatcher.windowMatchesAnyOf(it) }
+    }
+
+    /**
+     * @param displayId Display to search
+     * @return True if the home activity is not null and visible on the specified display, false
+     * otherwise.
+     */
+    fun isHomeActivityVisible(displayId: Int): Boolean {
+        val homeActivityOfDisplay = getStackByActivityType(PlatformConsts.ACTIVITY_TYPE_HOME,
+            displayId)?.topTask?.activities?.lastOrNull()
+        return homeActivityOfDisplay != null && homeActivityOfDisplay.isVisible
     }
 
     /** @return the [WindowState] for the nav bar in the display with id [displayId] */
@@ -348,12 +367,18 @@ class WindowManagerState(
         componentMatcher.windowMatchesAnyOf(windowStates)
 
     /**
-     * Check if at least one [WindowState] matching [componentMatcher] is visible
+     * Check if at least one [WindowState] matching [componentMatcher] is visible on the specific
+     * display
      *
      * @param componentMatcher Components to search
+     * @param displayId Display to search
      */
-    fun isWindowSurfaceShown(componentMatcher: IComponentMatcher): Boolean =
-        getMatchingVisibleWindowState(componentMatcher).isNotEmpty()
+    @JvmOverloads
+    fun isWindowSurfaceShown(
+        componentMatcher: IComponentMatcher,
+        displayId: Int = PlatformConsts.DEFAULT_DISPLAY,
+    ): Boolean =
+        getMatchingVisibleWindowState(componentMatcher, displayId).isNotEmpty()
 
     /** Checks if the state has any window in PIP mode */
     fun hasPipWindow(): Boolean = pinnedWindows.isNotEmpty()

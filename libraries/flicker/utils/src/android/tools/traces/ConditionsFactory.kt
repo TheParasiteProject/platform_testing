@@ -109,10 +109,14 @@ object ConditionsFactory {
             listOf(isNavBarWindowVisible(), isNavBarLayerVisible(), isNavBarLayerOpaque())
         )
 
-    /** Condition to check if the [ComponentNameMatcher.NAV_BAR] window is visible */
-    fun isNavBarWindowVisible(): Condition<DeviceStateDump> =
-        Condition("isNavBarWindowVisible") {
-            it.wmState.isWindowSurfaceShown(ComponentNameMatcher.NAV_BAR)
+    /** Condition to check if the [ComponentNameMatcher.NAV_BAR] window is visible on a specific
+     * display*/
+    @JvmOverloads
+    fun isNavBarWindowVisible(
+        displayId: Int = PlatformConsts.DEFAULT_DISPLAY
+    ): Condition<DeviceStateDump> =
+        Condition("isNavBarWindowVisible[$displayId]") {
+            it.wmState.isWindowSurfaceShown(ComponentNameMatcher.NAV_BAR, displayId)
         }
 
     /** Condition to check if the [ComponentNameMatcher.NAV_BAR] layer is visible */
@@ -131,10 +135,14 @@ object ConditionsFactory {
             listOf(isTaskBarWindowVisible(), isTaskBarLayerVisible(), isTaskBarLayerOpaque())
         )
 
-    /** Condition to check if the [ComponentNameMatcher.TASK_BAR] window is visible */
-    fun isTaskBarWindowVisible(): Condition<DeviceStateDump> =
-        Condition("isTaskBarWindowVisible") {
-            it.wmState.isWindowSurfaceShown(ComponentNameMatcher.TASK_BAR)
+    /** Condition to check if the [ComponentNameMatcher.TASK_BAR] window is visible on a specific
+     * display*/
+    @JvmOverloads
+    fun isTaskBarWindowVisible(
+        displayId: Int = PlatformConsts.DEFAULT_DISPLAY
+    ): Condition<DeviceStateDump> =
+        Condition("isTaskBarWindowVisible[$displayId]") {
+            it.wmState.isWindowSurfaceShown( ComponentNameMatcher.TASK_BAR, displayId)
         }
 
     /** Condition to check if the [ComponentNameMatcher.TASK_BAR] layer is visible */
@@ -153,10 +161,14 @@ object ConditionsFactory {
             listOf(isStatusBarWindowVisible(), isStatusBarLayerVisible(), isStatusBarLayerOpaque())
         )
 
-    /** Condition to check if the [ComponentNameMatcher.STATUS_BAR] window is visible */
-    fun isStatusBarWindowVisible(): Condition<DeviceStateDump> =
-        Condition("isStatusBarWindowVisible") {
-            it.wmState.isWindowSurfaceShown(ComponentNameMatcher.STATUS_BAR)
+    /** Condition to check if the [ComponentNameMatcher.STATUS_BAR] window is visible on a specific
+     * display*/
+    @JvmOverloads
+    fun isStatusBarWindowVisible(
+        displayId: Int = PlatformConsts.DEFAULT_DISPLAY
+    ): Condition<DeviceStateDump> =
+        Condition("isStatusBarWindowVisible[$displayId]") {
+            it.wmState.isWindowSurfaceShown(ComponentNameMatcher.STATUS_BAR, displayId)
         }
 
     /** Condition to check if the [ComponentNameMatcher.STATUS_BAR] layer is visible */
@@ -170,8 +182,13 @@ object ConditionsFactory {
                 1.0f
         }
 
-    fun isHomeActivityVisible(): Condition<DeviceStateDump> =
-        Condition("isHomeActivityVisible") { it.wmState.isHomeActivityVisible }
+    @JvmOverloads
+    fun isHomeActivityVisible(
+        displayId: Int = PlatformConsts.DEFAULT_DISPLAY
+    ): Condition<DeviceStateDump> =
+        Condition("isHomeActivityVisible[display=$displayId]") {
+            it.wmState.isHomeActivityVisible(displayId)
+        }
 
     fun isRecentsActivityVisible(): Condition<DeviceStateDump> =
         Condition("isRecentsActivityVisible") {

@@ -105,4 +105,11 @@ public interface IAutoAppGridHelper extends IAppHelper {
      * <p>Validates Recent App Screen is displaying.
      */
     boolean isRecentsScreenLaunched();
+
+    /**
+     * Setup expectations: Appgrid is not opened.
+     *
+     * <p>Validates whether app is present in app grid.
+     */
+    boolean isAppPresentInAppgrid(String appName);
 }
