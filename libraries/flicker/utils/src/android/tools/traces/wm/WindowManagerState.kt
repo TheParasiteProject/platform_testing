@@ -118,6 +118,9 @@ class WindowManagerState(
     val pinnedWindows: Collection<WindowState>
         get() = visibleWindows.filter { it.windowingMode == PlatformConsts.WINDOWING_MODE_PINNED }
 
+    val freeformWindows: Collection<WindowState>
+        get() = visibleWindows.filter { it.windowingMode == PlatformConsts.WINDOWING_MODE_FREEFORM }
+
     val pendingActivities: Collection<Activity>
         get() = _pendingActivities.mapNotNull { getActivityByName(it) }
 
@@ -327,19 +330,24 @@ class WindowManagerState(
         componentMatcher: IComponentMatcher,
         displayId: Int = PlatformConsts.DEFAULT_DISPLAY,
     ): Collection<WindowState> {
-        return windowStates.filter { it.displayId == displayId
-                && it.isSurfaceShown
-                && componentMatcher.windowMatchesAnyOf(it) }
+        return windowStates.filter {
+            it.displayId == displayId &&
+                it.isSurfaceShown &&
+                componentMatcher.windowMatchesAnyOf(it)
+        }
     }
 
     /**
      * @param displayId Display to search
      * @return True if the home activity is not null and visible on the specified display, false
-     * otherwise.
+     *   otherwise.
      */
     fun isHomeActivityVisible(displayId: Int): Boolean {
-        val homeActivityOfDisplay = getStackByActivityType(PlatformConsts.ACTIVITY_TYPE_HOME,
-            displayId)?.topTask?.activities?.lastOrNull()
+        val homeActivityOfDisplay =
+            getStackByActivityType(PlatformConsts.ACTIVITY_TYPE_HOME, displayId)
+                ?.topTask
+                ?.activities
+                ?.lastOrNull()
         return homeActivityOfDisplay != null && homeActivityOfDisplay.isVisible
     }
 
@@ -377,11 +385,13 @@ class WindowManagerState(
     fun isWindowSurfaceShown(
         componentMatcher: IComponentMatcher,
         displayId: Int = PlatformConsts.DEFAULT_DISPLAY,
-    ): Boolean =
-        getMatchingVisibleWindowState(componentMatcher, displayId).isNotEmpty()
+    ): Boolean = getMatchingVisibleWindowState(componentMatcher, displayId).isNotEmpty()
 
     /** Checks if the state has any window in PIP mode */
     fun hasPipWindow(): Boolean = pinnedWindows.isNotEmpty()
+
+    /** Checks if the state has any window in Freeform mode */
+    fun hasFreeformWindow(): Boolean = freeformWindows.isNotEmpty()
 
     /**
      * Checks that a [WindowState] matching [componentMatcher] is in PIP mode
