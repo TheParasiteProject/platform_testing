@@ -52,7 +52,11 @@ def main():
             golden_watcher = GoldenWatcherFactory.create_watcher(
                 GoldenWatcherTypes.ROBOLECTRIC, tmpdir
             )
-
+        elif args.none:
+            print("Running thin client")
+            golden_watcher = GoldenWatcherFactory.create_watcher(
+                GoldenWatcherTypes.NONE, tmpdir
+            )
         else:
             serial = args.serial
             if not serial:

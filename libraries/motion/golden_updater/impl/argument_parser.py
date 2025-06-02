@@ -45,6 +45,12 @@ class ArgumentParser:
         )
 
         parser.add_argument(
+            "--none",
+            action="store_true",
+            help="Empty argument. DO NOT USE"
+        )
+
+        parser.add_argument(
             "--serial",
             default=os.environ.get("ANDROID_SERIAL"),
             help="The ADB device serial to pull goldens from.",
