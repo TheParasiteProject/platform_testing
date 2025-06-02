@@ -380,6 +380,10 @@ class WindowManagerState(
     ): Boolean =
         getMatchingVisibleWindowState(componentMatcher, displayId).isNotEmpty()
 
+    @JvmOverloads
+    fun hasNoActivityOnDisplay(displayId: Int = PlatformConsts.DEFAULT_DISPLAY): Boolean =
+        getDisplay(displayId)?.rootTasks?.isEmpty() ?: true
+
     /** Checks if the state has any window in PIP mode */
     fun hasPipWindow(): Boolean = pinnedWindows.isNotEmpty()
 

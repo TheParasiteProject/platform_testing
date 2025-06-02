@@ -258,6 +258,7 @@ constructor(
                 .add(ConditionsFactory.isNavBarWindowVisible(displayId).negate())
                 .add(ConditionsFactory.isTaskBarWindowVisible(displayId).negate())
                 .add(ConditionsFactory.isStatusBarWindowVisible(displayId).negate())
+                .add(ConditionsFactory.hasNoActivityOnDisplay(displayId))
                 // TODO: add checking for wallpaper
 
         /**
