@@ -196,6 +196,18 @@ object ConditionsFactory {
             it.wmState.isHomeActivityVisible(displayId)
         }
 
+    /**
+     * Condition to check if the [ComponentNameMatcher.IMAGE_WALLPAPER] window is visible on a
+     * specific display
+     */
+    @JvmOverloads
+    fun isImageWallpaperWindowVisible(
+        displayId: Int = PlatformConsts.DEFAULT_DISPLAY
+    ): Condition<DeviceStateDump> =
+        Condition("isWallpaperWindowVisible[$displayId]") {
+            it.wmState.isWindowSurfaceShown(ComponentNameMatcher.IMAGE_WALLPAPER, displayId)
+        }
+
     fun isRecentsActivityVisible(): Condition<DeviceStateDump> =
         Condition("isRecentsActivityVisible") {
             it.wmState.isHomeActivityVisible || it.wmState.isRecentsActivityVisible
