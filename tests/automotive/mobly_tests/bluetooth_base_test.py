@@ -56,8 +56,8 @@ class BluetoothBaseTest(base_test.BaseTestClass):
         self.call_utils.press_home()
         logging.info("Running basic test setup.")
         logging.info("\tEnabling bluetooth on Target and Discoverer.")
-        self.target.mbs.btEnable()
-        self.discoverer.mbs.btEnable()
+        self.target.mbs.btEnableWithLongerWait()
+        self.discoverer.mbs.btEnableWithLongerWait()
 
     def teardown_test(self):
         # Turn Bluetooth off on both devices.
