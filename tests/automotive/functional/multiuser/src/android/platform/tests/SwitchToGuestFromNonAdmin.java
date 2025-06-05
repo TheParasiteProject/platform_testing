@@ -26,6 +26,7 @@ import android.platform.helpers.IAutoSettingHelper;
 import android.platform.helpers.IAutoUserHelper;
 import android.platform.helpers.MultiUserHelper;
 import android.platform.scenario.multiuser.MultiUserConstants;
+import android.util.Log;
 
 import androidx.test.runner.AndroidJUnit4;
 
@@ -49,6 +50,8 @@ public class SwitchToGuestFromNonAdmin {
     private HelperAccessor<IAutoSettingHelper> mSettingHelper;
     private int mTargetUserId;
 
+    private static final String LOG_TAG = SwitchToGuestFromNonAdmin.class.getSimpleName();
+
     public SwitchToGuestFromNonAdmin() {
         mUsersHelper = new HelperAccessor<>(IAutoUserHelper.class);
         mSettingHelper = new HelperAccessor<>(IAutoSettingHelper.class);
@@ -56,27 +59,37 @@ public class SwitchToGuestFromNonAdmin {
 
     @After
     public void goBackToHomeScreen() {
+        Log.i(LOG_TAG, "Act: Go back to settings");
         mSettingHelper.get().goBackToSettingsScreen();
     }
 
     @Test
     public void testSwitchToGuest() throws Exception {
+        Log.i(LOG_TAG, "Act: Get current userinfo");
         UserInfo initialUser = mMultiUserHelper.getCurrentForegroundUserInfo();
         // add new user
+        Log.i(LOG_TAG, "Act: Create a non admin user");
         mTargetUserId = mMultiUserHelper.createUser(userName, false);
         SystemClock.sleep(WAIT_TIME);
         // switch to new user
+        Log.i(LOG_TAG, "Act: Switch to new user");
         mMultiUserHelper.switchAndWaitForStable(
             mTargetUserId, MultiUserConstants.WAIT_FOR_IDLE_TIME_MS);
+        Log.i(LOG_TAG, "Act: Get new userinfo");
         UserInfo newUser = mMultiUserHelper.getCurrentForegroundUserInfo();
         // switch to guest from new user
+        Log.i(LOG_TAG, "Act: Switch to guest user");
         mUsersHelper.get().switchUsingUserIcon(GUEST);
         // verify the user switch
+        Log.i(LOG_TAG, "Act: Get guest userinfo");
         UserInfo currentUser = mMultiUserHelper.getCurrentForegroundUserInfo();
+        Log.i(LOG_TAG, "Assert: Current userinfo should match guest userinfo");
         assertTrue(currentUser.name.equals(guestUser));
         // switch to initial user and delete new user before terminating the test
+        Log.i(LOG_TAG, "Act: Switch back to initia user");
         mMultiUserHelper.switchAndWaitForStable(
             initialUser.id, MultiUserConstants.WAIT_FOR_IDLE_TIME_MS);
+        Log.i(LOG_TAG, "Act: Delete new user");
         mMultiUserHelper.removeUser(newUser);
     }
 }

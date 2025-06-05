@@ -26,6 +26,7 @@ import android.platform.test.option.StringOption;
 import android.platform.test.rules.ConditionalIgnore;
 import android.platform.test.rules.ConditionalIgnoreRule;
 import android.platform.test.rules.IgnoreOnPortrait;
+import android.util.Log;
 
 import androidx.test.runner.AndroidJUnit4;
 
@@ -46,6 +47,7 @@ public class OpenAppFromMediaCenterTest {
 
     private static final String DEFAULT_MEDIA_APP = "Bluetooth Audio";
     private static final String DEFAULT_LIST_OF_MEDIA_APPS = "Bluetooth Audio, Radio";
+    private static final String LOG_TAG = OpenAppFromMediaCenterTest.class.getSimpleName();
 
     @ClassRule
     public static StringOption mMediaDefaultApp =
@@ -65,21 +67,29 @@ public class OpenAppFromMediaCenterTest {
 
     @After
     public void goBackToHomeScreen() {
+        Log.i(LOG_TAG, "Act: Exit Media widget");
         mMediaCenterHelper.get().exit();
     }
 
     @Test
     public void testOpenMediaAppFromMediaWidget() {
+        Log.i(LOG_TAG, "Act: Open Media widget");
         mAutoHomeHelper.get().openMediaWidget();
+        Log.i(LOG_TAG, "Assert: Radio App is launched");
         assertTrue("Radio app not launched", mMediaCenterHelper.get().isRadioAppLaunched());
     }
 
     @Test
     public void testOpenMediaAppFromMediaAppAppgrid() {
+        Log.i(LOG_TAG, "Act: Open Media widget");
         mAutoHomeHelper.get().openMediaWidget();
+        Log.i(LOG_TAG, "Assert: Radio App is launched");
         assertTrue("Radio app not launched", mMediaCenterHelper.get().isRadioAppLaunched());
+        Log.i(LOG_TAG, "Act: Open Media App Menu Items");
         mMediaCenterHelper.get().openMediaAppMenuItems();
+        Log.i(LOG_TAG, "Act: Open Bluetooth Audio App");
         mMediaCenterHelper.get().openApp(DEFAULT_MEDIA_APP);
+        Log.i(LOG_TAG, "Assert: Bluetooth Audio App is open");
         assertTrue(
                 "Not a media app",
                 mMediaCenterHelper.get().getMediaAppTitle().equals(getDefaultMediaAppName()));
@@ -87,9 +97,13 @@ public class OpenAppFromMediaCenterTest {
 
     @Test
     public void testOpenMediaAppFromAppgrid() {
+        Log.i(LOG_TAG, "Act: Open App Grid");
         mAutoAppGridHelper.get().open();
+        Log.i(LOG_TAG, "Assert: App Grid is open");
         assertTrue("App Grid is not open", mAutoAppGridHelper.get().isAppInForeground());
+        Log.i(LOG_TAG, "Act: Open Bluetooth Audio App");
         mMediaCenterHelper.get().openApp(DEFAULT_MEDIA_APP);
+        Log.i(LOG_TAG, "Assert: Bluetooth Audio App is open");
         assertTrue(
                 "Not a media app",
                 mMediaCenterHelper.get().getMediaAppTitle().equals(getDefaultMediaAppName()));
@@ -98,10 +112,15 @@ public class OpenAppFromMediaCenterTest {
     @Test
     @ConditionalIgnore(condition = IgnoreOnPortrait.class)
     public void testMediaAppPresentInMediaGrid() {
+        Log.i(LOG_TAG, "Act: Open App Grid");
         mAutoAppGridHelper.get().open();
+        Log.i(LOG_TAG, "Assert: App Grid is open");
         assertTrue("App Grid is not open", mAutoAppGridHelper.get().isAppInForeground());
+        Log.i(LOG_TAG, "Act: Open Bluetooth Audio App");
         mMediaCenterHelper.get().openApp(DEFAULT_MEDIA_APP);
+        Log.i(LOG_TAG, "Act: Open Media App Menu Items");
         mMediaCenterHelper.get().openMediaAppMenuItems();
+        Log.i(LOG_TAG, "Assert: Correct Media App in App Grid");
         assertTrue("Incorrect Media apps in Grid",
                 mMediaCenterHelper.get().areMediaAppsPresent(getExpectedMediaAppNames()));
     }
@@ -110,6 +129,7 @@ public class OpenAppFromMediaCenterTest {
         String mediaAppName = DEFAULT_MEDIA_APP;
         if (mMediaDefaultApp != null
                 && mMediaDefaultApp.get() != null && !mMediaDefaultApp.get().isEmpty()) {
+            Log.i(LOG_TAG, "Act: Get Default Media App");
             mediaAppName = mMediaDefaultApp.get();
         }
         return mediaAppName;
@@ -121,6 +141,7 @@ public class OpenAppFromMediaCenterTest {
             // Get list of media apps from String options if passed.
             mediaAppNames = mMediaApps.get();
         }
+        Log.i(LOG_TAG, "Act: Get list of Default Media Apps");
         String[] mediaAppNamesList = mediaAppNames.trim().split("\\s*,\\s*");
         return Arrays.asList(mediaAppNamesList);
     }
