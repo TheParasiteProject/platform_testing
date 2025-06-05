@@ -56,7 +56,7 @@ class IsMediaSynchronizedForReconnectedDevice(bluetooth_base_test.BluetoothBaseT
         asserts.assert_true(self.call_utils.is_bluetooth_audio_disconnected_label_visible(),
                             '<Bluetooth Audio disconnected> label should be present')
         # Enable BT on HU
-        self.discoverer.mbs.btEnable()
+        self.discoverer.mbs.btEnableWithLongerWait()
         self.call_utils.wait_with_log(5)
         # Assert <Bluetooth Audio disconnected> label is NOT present
         asserts.assert_false(self.call_utils.is_bluetooth_audio_disconnected_label_visible(),

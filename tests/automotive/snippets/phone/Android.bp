@@ -51,6 +51,7 @@ android_test {
         "src/**/PhoneSnippet.java",
         "src/**/UISnippet.java",
         "src/**/DialerSnippet.java",
+        "src/**/BluetoothAdapterSnippet.java",
     ],
     manifest: "AndroidPhoneManifest.xml",
     compile_multilib: "both",
