@@ -357,6 +357,7 @@ public class AutomotiveConfigConstants {
     public static final String TEST_MEDIA_ROOT_NODE_TYPE_BROWSABLE =
             "TEST_MEDIA_ROOT_NODE_TYPE_BROWSABLE";
     public static final String TEST_MEDIA_APP_CLOSE_SETTING = "TEST_MEDIA_APP_CLOSE_SETTING";
+    public static final String TEST_MEDIA_APP_SETTING = "TEST_MEDIA_APP_SETTING";
     // Same NEXT_BUTTON is applicable for Media Center
     public static final String NEXT_BUTTON = "NEXT_BUTTON";
     public static final String DONE_BUTTON = "DONE_BUTTON";
