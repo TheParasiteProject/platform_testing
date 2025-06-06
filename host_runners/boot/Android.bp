@@ -21,6 +21,7 @@ java_test_host {
     team: "trendy_team_android_platform_performance_testing",
     srcs: ["src/**/*.java"],
     static_libs: ["loganalysis","host_runner_utils"],
+    libs: ["tradefed"],
     test_suites: [
         "device-tests",
         "performance-tests",
