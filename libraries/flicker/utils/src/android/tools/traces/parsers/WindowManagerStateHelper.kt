@@ -243,7 +243,7 @@ constructor(
                 .add(ConditionsFactory.isNavBarWindowVisible(displayId))
                 .add(ConditionsFactory.isTaskBarWindowVisible(displayId))
                 .add(ConditionsFactory.isStatusBarWindowVisible(displayId))
-                // TODO: add checking for wallpaper
+                .add(ConditionsFactory.isImageWallpaperWindowVisible(displayId))
 
         /**
          * Waits until the home activity, navigation bar and status bar are no longer visible, and
@@ -258,8 +258,8 @@ constructor(
                 .add(ConditionsFactory.isNavBarWindowVisible(displayId).negate())
                 .add(ConditionsFactory.isTaskBarWindowVisible(displayId).negate())
                 .add(ConditionsFactory.isStatusBarWindowVisible(displayId).negate())
+                .add(ConditionsFactory.isImageWallpaperWindowVisible(displayId).negate())
                 .add(ConditionsFactory.hasNoActivityOnDisplay(displayId))
-                // TODO: add checking for wallpaper
 
         /**
          * Waits until the split-screen divider is visible and nothing to be animating
