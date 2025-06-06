@@ -30,16 +30,18 @@ import android.util.Log;
 
 import androidx.test.runner.AndroidJUnit4;
 
-import org.junit.After;
-import org.junit.Before;
+import org.junit.AfterClass;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
 @RunWith(AndroidJUnit4.class)
 public class DrivingOptimizedAppsTest {
     private HelperAccessor<IAutoDialContactDetailsHelper> mContactHelper;
-    private HelperAccessor<IAutoAppGridHelper> mAppGridHelper;
-    private HelperAccessor<IAutoVehicleHardKeysHelper> mHardKeysHelper;
+    private static HelperAccessor<IAutoAppGridHelper> sAppGridHelper =
+            new HelperAccessor<>(IAutoAppGridHelper.class);
+    private static HelperAccessor<IAutoVehicleHardKeysHelper> sHardKeysHelper =
+            new HelperAccessor<>(IAutoVehicleHardKeysHelper.class);
     private HelperAccessor<IAutoFacetBarHelper> mFacetBarHelper;
     private HelperAccessor<IAutoNotificationHelper> mNotificationHelper;
 
@@ -49,39 +51,37 @@ public class DrivingOptimizedAppsTest {
     private static final String LOG_TAG = DrivingOptimizedAppsTest.class.getSimpleName();
 
     public DrivingOptimizedAppsTest() throws Exception {
-        mAppGridHelper = new HelperAccessor<>(IAutoAppGridHelper.class);
         mContactHelper = new HelperAccessor<>(IAutoDialContactDetailsHelper.class);
-        mHardKeysHelper = new HelperAccessor<>(IAutoVehicleHardKeysHelper.class);
         mFacetBarHelper = new HelperAccessor<>(IAutoFacetBarHelper.class);
         mNotificationHelper = new HelperAccessor<>(IAutoNotificationHelper.class);
     }
 
-    @Before
-    public void enableDrivingMode() {
+    @BeforeClass
+    public static void enableDrivingMode() {
         Log.i(LOG_TAG, "Act: Set Driving State to Moving");
-        mHardKeysHelper.get().setDrivingState(DrivingState.MOVING);
+        sHardKeysHelper.get().setDrivingState(DrivingState.MOVING);
         Log.i(LOG_TAG, "Act: Set Driving Sped to Twenty");
-        mHardKeysHelper.get().setSpeed(SPEED_TWENTY);
+        sHardKeysHelper.get().setSpeed(SPEED_TWENTY);
     }
 
-    @After
-    public void disableDrivingMode() {
+    @AfterClass
+    public static void disableDrivingMode() {
         Log.i(LOG_TAG, "Act: Go to Homescreen");
-        mAppGridHelper.get().goToHomePage();
+        sAppGridHelper.get().goToHomePage();
         Log.i(LOG_TAG, "Act: Set Driving State to Parking");
-        mHardKeysHelper.get().setDrivingState(DrivingState.PARKED);
+        sHardKeysHelper.get().setDrivingState(DrivingState.PARKED);
     }
 
     @Test
     public void testOpenSettings() {
         Log.i(LOG_TAG, "Act: Open App Grid");
-        mAppGridHelper.get().open();
+        sAppGridHelper.get().open();
         Log.i(LOG_TAG, "Act: Open Settings");
-        mAppGridHelper.get().openApp("Settings");
+        sAppGridHelper.get().openApp("Settings");
         Log.i(LOG_TAG, "Assert: Settings is open");
         assertTrue(
                 "Settings app is not open",
-                mAppGridHelper
+                sAppGridHelper
                         .get()
                         .checkPackageInForeground(AutomotiveConfigConstants.SETTINGS_PACKAGE));
     }
@@ -89,13 +89,13 @@ public class DrivingOptimizedAppsTest {
     @Test
     public void testOpenRadio() {
         Log.i(LOG_TAG, "Act: Open App Grid");
-        mAppGridHelper.get().open();
+        sAppGridHelper.get().open();
         Log.i(LOG_TAG, "Act: Open Radio App");
-        mAppGridHelper.get().openApp("Radio");
+        sAppGridHelper.get().openApp("Radio");
         Log.i(LOG_TAG, "Assert: Radio App is open");
         assertTrue(
                 "Radio app is not open",
-                mAppGridHelper
+                sAppGridHelper
                         .get()
                         .checkPackageInForeground(AutomotiveConfigConstants.RADIO_PACKAGE));
     }
@@ -103,13 +103,13 @@ public class DrivingOptimizedAppsTest {
     @Test
     public void testOpenPhone() {
         Log.i(LOG_TAG, "Act: Open App Grid");
-        mAppGridHelper.get().open();
+        sAppGridHelper.get().open();
         Log.i(LOG_TAG, "Act: Open Radio App");
-        mAppGridHelper.get().openApp("Phone");
+        sAppGridHelper.get().openApp("Phone");
         Log.i(LOG_TAG, "Assert: Phone App is open");
         assertTrue(
                 "Phone is not open",
-                mAppGridHelper
+                sAppGridHelper
                         .get()
                         .checkPackageInForeground(AutomotiveConfigConstants.DIAL_PACKAGE));
     }
@@ -122,15 +122,15 @@ public class DrivingOptimizedAppsTest {
     @Test
     public void testOpenContactsAndVerifyPostDriveNotification() {
         Log.i(LOG_TAG, "Act: Open App Grid");
-        mAppGridHelper.get().open();
+        sAppGridHelper.get().open();
         Log.i(LOG_TAG, "Act: Open Contacts App");
-        mAppGridHelper.get().openApp("Contacts");
+        sAppGridHelper.get().openApp("Contacts");
         Log.i(LOG_TAG, "Act: Dismiss pop-up dialog");
         mContactHelper.get().dismissInitialDialogs();
         Log.i(LOG_TAG, "Assert: Contacts is open");
         assertTrue(
                 "Contacts is not open",
-                mAppGridHelper
+                sAppGridHelper
                         .get()
                         .checkPackageInForeground(AutomotiveConfigConstants.CONTACTS_PACKAGE));
         Log.i(LOG_TAG, "Act: Disable Driving Mode");
