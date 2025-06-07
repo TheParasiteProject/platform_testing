@@ -38,14 +38,14 @@ class CallingDeclineBtTest(bluetooth_sms_base_test.BluetoothSMSBaseTest):
         super().enable_recording()
 
     def test_basic_call(self):
-         # call the callee phone with automotive device
-        target_phone_number = self.phone_notpaired.mbs.getPhoneNumber()
+        # call the callee phone with automotive device
+        phone_notpaired_number = self.phone_notpaired.mbs.getPhoneNumber()
         logging.info(
                 'Calling from %s calling to %s',
-                self.phone_notpaired.serial,
                 self.target.serial,
+                self.phone_notpaired.serial,
             )
-        self.call_utils.dial_a_number(target_phone_number);
+        self.call_utils.dial_a_number(phone_notpaired_number)
         self.call_utils.make_call()
         self.call_utils.wait_with_log(5)
         self.call_utils.end_call()

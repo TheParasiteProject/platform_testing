@@ -22,6 +22,7 @@ import android.platform.helpers.HelperAccessor;
 import android.platform.helpers.IAutoHomeHelper;
 import android.platform.helpers.IAutoMediaHelper;
 import android.platform.test.option.StringOption;
+import android.util.Log;
 
 import androidx.test.runner.AndroidJUnit4;
 
@@ -38,6 +39,8 @@ public class NoUserLoggedInTest {
     private HelperAccessor<IAutoHomeHelper> mAutoHomeHelper;
     private HelperAccessor<IAutoMediaHelper> mMediaCenterHelper;
 
+    private static final String LOG_TAG = NoUserLoggedInTest.class.getSimpleName();
+
     public NoUserLoggedInTest() throws Exception {
         mMediaCenterHelper = new HelperAccessor<>(IAutoMediaHelper.class);
         mAutoHomeHelper = new HelperAccessor<>(IAutoHomeHelper.class);
@@ -46,14 +49,18 @@ public class NoUserLoggedInTest {
 
     @Test
     public void testNoUserLogInMessage() {
+        Log.i(LOG_TAG, "Act: Open Media widget");
         mAutoHomeHelper.get().openMediaWidget();
+        Log.i(LOG_TAG, "Act: Open Media App Menu Item");
         mMediaCenterHelper.get().openMediaAppMenuItems();
+        Log.i(LOG_TAG, "Act: Open Youtube Music App");
         mMediaCenterHelper.get().openApp(mMediaApp.get());
-
+        Log.i(LOG_TAG, "Assert: Youtube Music App is a Media App");
         assertTrue("Not a media app.",
                 mMediaCenterHelper.get().getMediaAppTitle().equals(mMediaApp.get()));
-
+        Log.i(LOG_TAG, "Act: Get Media app error message");
         String noUserLoginMsg = mMediaCenterHelper.get().getMediaAppUserNotLoggedInErrorMessage();
+        Log.i(LOG_TAG, "Assert: Sign In error message is correct");
         assertTrue("Incorrect Sign in error message.",
                 noUserLoginMsg.equals("Please sign in to YouTube Music."));
     }

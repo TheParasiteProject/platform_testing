@@ -54,7 +54,7 @@ class BluetoothDisableFromPhone(bluetooth_base_test.BluetoothBaseTest):
             'Failed to disconnect from mobile device')
 
         #Connect seahawk device from mobile phone and verify it is reflected in seahawk device
-        self.target.mbs.btEnable()
+        self.target.mbs.btEnableWithLongerWait()
         self.discoverer.mbs.waitUntilConnectionStatus(constants.CONNECTED_SUMMARY_STATUS)
         asserts.assert_true(
             self.discoverer.mbs.hasUIElementWithText(constants.CONNECTED_SUMMARY_STATUS),

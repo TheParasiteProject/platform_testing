@@ -26,6 +26,7 @@ import android.platform.helpers.IAutoUserHelper;
 import android.platform.helpers.MultiUserHelper;
 import android.platform.helpers.SettingsConstants;
 import android.platform.scenario.multiuser.MultiUserConstants;
+import android.util.Log;
 
 import androidx.test.runner.AndroidJUnit4;
 
@@ -46,6 +47,7 @@ public class DeleteCurrentNonAdminUser {
     private HelperAccessor<IAutoUserHelper> mUsersHelper;
     private HelperAccessor<IAutoSettingHelper> mSettingHelper;
     private int mTargetUserId;
+    private static final String LOG_TAG = DeleteCurrentNonAdminUser.class.getSimpleName();
 
     public DeleteCurrentNonAdminUser() {
         mUsersHelper = new HelperAccessor<>(IAutoUserHelper.class);
@@ -59,21 +61,29 @@ public class DeleteCurrentNonAdminUser {
 
     @Test
     public void testRemoveUserSelf() throws Exception {
+        Log.i(LOG_TAG, "Act: Get current userinfo");
         UserInfo initialUser = mMultiUserHelper.getCurrentForegroundUserInfo();
         // add new user
+        Log.i(LOG_TAG, "Act: Create a non admin user");
         mTargetUserId = mMultiUserHelper.createUser(userName, false);
         SystemClock.sleep(WAIT_TIME);
         // switch to new user
+        Log.i(LOG_TAG, "Act: Switch to new user");
         mMultiUserHelper.switchAndWaitForStable(
             mTargetUserId, MultiUserConstants.WAIT_FOR_IDLE_TIME_MS);
+        Log.i(LOG_TAG, "Act: Get new userinfo");
         UserInfo newUser = mMultiUserHelper.getCurrentForegroundUserInfo();
         // user deleted self
+        Log.i(LOG_TAG, "Act: Open Profile & Accounts setting");
         mSettingHelper.get().openSetting(SettingsConstants.PROFILE_ACCOUNT_SETTINGS);
+        Log.i(LOG_TAG, "Act: Delete current user");
         mUsersHelper.get().deleteCurrentUser();
         // goes to guest user, switch back to initial user
+        Log.i(LOG_TAG, "Act: Switch back to initial user");
         mMultiUserHelper.switchAndWaitForStable(
             initialUser.id, MultiUserConstants.WAIT_FOR_IDLE_TIME_MS);
         // verify that user is deleted
+        Log.i(LOG_TAG, "Assert: New user is deleted");
         assertTrue(mMultiUserHelper.getUserByName(newUser.name) == null);
     }
 }

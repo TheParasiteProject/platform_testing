@@ -369,8 +369,15 @@ class CallUtils:
     def is_connect_to_bluetooth_label_visible_on_bluetooth_audio_page(self):
         """Return is <Connect to Bluetooth> label present """
         logging.info('Checking is <Connect to Bluetooth> label present')
-        actual_status = self.device.mbs.isBluetoothAudioDisconnectedLabelVisible()
+        actual_status = self.device.mbs.isConnectToBluetoothLabelVisible()
         logging.info('<Connect to Bluetooth> label is present: %s',actual_status)
+        return actual_status
+
+    def is_cancel_button_visible_on_bluetooth_audio_page(self):
+        """Return is <Cancel> button present """
+        logging.info('Checking is <Cancel> button present')
+        actual_status = self.device.mbs.isCancelButtonVisible()
+        logging.info('<Cancel> button is present: %s',actual_status)
         return actual_status
 
     def click_cancel_label_visible_on_bluetooth_audio_page(self):
@@ -383,7 +390,8 @@ class CallUtils:
         logging.info('Adding wait to check the Bluetooth Audio popup')
         time.sleep(constants.DEFAULT_WAIT_TIME_FIVE_SECS)
         is_bluetooth_media_popup_present = self.is_connect_to_bluetooth_label_visible_on_bluetooth_audio_page()
-        if is_bluetooth_media_popup_present:
+        is_cancel_button_visible = self.is_cancel_button_visible_on_bluetooth_audio_page()
+        if is_bluetooth_media_popup_present and is_cancel_button_visible:
           logging.info('BT Audio popup present, cancelling that.')
           self.click_cancel_label_visible_on_bluetooth_audio_page()
 

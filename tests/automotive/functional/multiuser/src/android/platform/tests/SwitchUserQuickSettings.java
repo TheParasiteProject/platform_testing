@@ -25,6 +25,7 @@ import android.platform.helpers.IAutoSettingHelper;
 import android.platform.helpers.IAutoUserHelper;
 import android.platform.helpers.MultiUserHelper;
 import android.platform.scenario.multiuser.MultiUserConstants;
+import android.util.Log;
 
 import androidx.test.runner.AndroidJUnit4;
 
@@ -46,6 +47,8 @@ public class SwitchUserQuickSettings {
     private HelperAccessor<IAutoUserHelper> mUsersHelper;
     private HelperAccessor<IAutoSettingHelper> mSettingHelper;
 
+    private static final String LOG_TAG = SwitchUserQuickSettings.class.getSimpleName();
+
     public SwitchUserQuickSettings() {
         mUsersHelper = new HelperAccessor<>(IAutoUserHelper.class);
         mSettingHelper = new HelperAccessor<>(IAutoSettingHelper.class);
@@ -53,19 +56,26 @@ public class SwitchUserQuickSettings {
 
     @After
     public void goBackToHomeScreen() {
+        Log.i(LOG_TAG, "Act: Go back to settings");
         mSettingHelper.get().goBackToSettingsScreen();
     }
 
     @Test
     public void testSwitchUser() throws Exception {
+        Log.i(LOG_TAG, "Act: Get previous userinfo");
         UserInfo previousUser = mMultiUserHelper.getCurrentForegroundUserInfo();
         // switch to Guest
+        Log.i(LOG_TAG, "Act: Get previous userinfo");
         mUsersHelper.get().switchUsingUserIcon(GUEST);
+        Log.i(LOG_TAG, "Act: Get current userinfo");
         UserInfo currentUser = mMultiUserHelper.getCurrentForegroundUserInfo();
         // verify the user switch
+        Log.i(LOG_TAG, "Assert: Current userinfo matches guest userinfo");
         assertTrue(currentUser.name.equals(guestUser));
         // switch to initial user before terminating the test
+        Log.i(LOG_TAG, "Act: Switch to initial user");
         mUsersHelper.get().switchUsingUserIcon(DRIVER);
+        Log.i(LOG_TAG, "Assert: Current userinfo matches initial userinfo");
         assertTrue(
             mMultiUserHelper.getCurrentForegroundUserInfo().name.equals(previousUser.name));
     }

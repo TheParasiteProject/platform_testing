@@ -45,7 +45,7 @@ class IsMediaStreamPairedWhenRadioLunchedTest(bluetooth_base_test.BluetoothBaseT
                             '<' + constants.RADIO_APP + '> has to be present on HU screen')
         self.media_utils.open_radio_app()
         self.media_utils.tune_fm_radio_on_hu(constants.DEFAULT_FM_FREQUENCY)
-#         self.bt_utils.pair_primary_to_secondary()
+        self.bt_utils.pair_primary_to_secondary()
         self.media_utils.open_media_app_on_hu()
         current_phone_song_title = self.media_utils.get_song_title_from_phone()
         current_hu_song_title = self.media_utils.get_song_title_from_hu()

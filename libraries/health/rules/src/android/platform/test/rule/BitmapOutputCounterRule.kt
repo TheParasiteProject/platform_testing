@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2024 The Android Open Source Project
+ * Copyright (C) 2025 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,18 +14,21 @@
  * limitations under the License.
  */
 
-package com.android.compatibility.common.util;
+package android.platform.test.rule
 
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
+import android.graphics.Bitmap
+import org.junit.rules.TestRule
+import org.junit.runner.Description
+import org.junit.runners.model.Statement
 
-/** Marks the type of test with purpose of asserting Desktop requirements and cujs. */
-@Retention(RetentionPolicy.RUNTIME)
-@Target({ElementType.METHOD, ElementType.TYPE})
-public @interface DesktopTest {
-    String[] requirements() default {""};
+/**
+ * This rule will allocate a dummy Bitmap before a test starts to emit the Bitmap counter metric in
+ * the perfetto traces.
+ */
+class BitmapOutputCounterRule : TestRule {
 
-    String[] cujs() default {""};
+    override fun apply(base: Statement, description: Description): Statement {
+        Bitmap.createBitmap(1, 1, Bitmap.Config.ALPHA_8)
+        return base
+    }
 }

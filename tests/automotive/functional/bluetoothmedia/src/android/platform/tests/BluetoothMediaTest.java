@@ -20,6 +20,7 @@ import static junit.framework.Assert.assertTrue;
 import android.platform.helpers.HelperAccessor;
 import android.platform.helpers.IAutoAppGridHelper;
 import android.platform.helpers.IAutoMediaHelper;
+import android.util.Log;
 
 import androidx.test.runner.AndroidJUnit4;
 
@@ -32,6 +33,7 @@ import org.junit.runner.RunWith;
 public class BluetoothMediaTest {
     private HelperAccessor<IAutoAppGridHelper> mAppGridHelper;
     private HelperAccessor<IAutoMediaHelper> mAutoMediaHelper;
+    private static final String LOG_TAG = BluetoothMediaTest.class.getSimpleName();
 
     public BluetoothMediaTest() throws Exception {
         mAppGridHelper = new HelperAccessor<>(IAutoAppGridHelper.class);
@@ -40,21 +42,26 @@ public class BluetoothMediaTest {
 
     @Before
     public void openAppGrid() {
+        Log.i(LOG_TAG, "Act: Open App Grid");
         // Open the APP Grid
         mAppGridHelper.get().open();
     }
 
     @After
     public void goBackToHomeScreen() {
+        Log.i(LOG_TAG, "Act: Go to Homescreen");
         mAppGridHelper.get().goToHomePage();
     }
 
     @Test
     public void testBluetoothMediaDefaultState() {
+        Log.i(LOG_TAG, "Act: Open Bluetooth Audio App");
         mAppGridHelper.get().openApp("Bluetooth Audio");
+        Log.i(LOG_TAG, "Assert: Bluetooth audio disconnected label is present");
         assertTrue(
                 "Bluetooth audio disconnected label is not present",
                 mAutoMediaHelper.get().isBluetoothAudioDisconnectedLabelVisible());
+        Log.i(LOG_TAG, "Assert: Connect to Bluetooth label is present");
         assertTrue(
                 "Connect to Bluetooth label is not present",
                 mAutoMediaHelper.get().isConnectToBluetoothLabelVisible());

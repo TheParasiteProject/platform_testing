@@ -27,6 +27,7 @@ import android.platform.test.flag.junit.SetFlagsRule;
 import android.platform.test.rules.ConditionalIgnore;
 import android.platform.test.rules.ConditionalIgnoreRule;
 import android.platform.test.rules.IgnoreOnPortrait;
+import android.util.Log;
 
 import androidx.test.runner.AndroidJUnit4;
 
@@ -41,6 +42,7 @@ public class SettingsLocationTest {
 
     private HelperAccessor<IAutoSettingsLocationHelper> mSettingLocationHelper;
     private HelperAccessor<IAutoSettingHelper> mSettingHelper;
+    private static final String LOG_TAG = SettingsLocationTest.class.getSimpleName();
 
     @Rule public final SetFlagsRule mSetFlagsRule = new SetFlagsRule();
 
@@ -51,7 +53,9 @@ public class SettingsLocationTest {
 
     @Before
     public void setup() {
+        Log.i(LOG_TAG, "Act: Open Location Setting");
         mSettingHelper.get().openSetting(SettingsConstants.LOCATION_SETTINGS);
+        Log.i(LOG_TAG, "Assert: Location setting is open");
         assertTrue(
                 "Location settings did not open", mSettingHelper.get().checkMenuExists("Location"));
     }
@@ -61,15 +65,21 @@ public class SettingsLocationTest {
     @RequiresFlagsEnabled(
             com.android.car.settings.Flags.FLAG_REQUIRED_INFOTAINMENT_APPS_SETTINGS_PAGE)
     public void testToVerifyToggleLocation() {
+        Log.i(LOG_TAG, "Act: Open Location access");
         mSettingLocationHelper.get().locationAccess();
+        Log.i(LOG_TAG, "Act: Get location ON status");
         boolean defaultState = mSettingLocationHelper.get().isLocationOn();
         String widgetShownMessage = "Location widget is displayed ";
         String widgetNotShownMessage = "Location widget is not displayed ";
+        Log.i(LOG_TAG, "Act: Toggle Off location status");
         mSettingLocationHelper.get().toggleLocation(!defaultState);
+        Log.i(LOG_TAG, "Assert: Location status is OFF");
         assertTrue(
                 defaultState ? widgetShownMessage : widgetNotShownMessage,
                 mSettingLocationHelper.get().hasMapsWidget() != defaultState);
+        Log.i(LOG_TAG, "Act: Toggle On location status");
         mSettingLocationHelper.get().toggleLocation(defaultState);
+        Log.i(LOG_TAG, "Assert: Location status is ON");
         assertTrue(
                 defaultState ? widgetShownMessage : widgetNotShownMessage,
                 mSettingLocationHelper.get().hasMapsWidget() == defaultState);
@@ -77,6 +87,7 @@ public class SettingsLocationTest {
 
     @Test
     public void testToCheckRecentlyAccessedOption() {
+        Log.i(LOG_TAG, "Assert: Recently accessed option is displayed");
         assertTrue(
                 "Recently accessed option is not displayed ",
                 mSettingLocationHelper.get().hasRecentlyAccessed());

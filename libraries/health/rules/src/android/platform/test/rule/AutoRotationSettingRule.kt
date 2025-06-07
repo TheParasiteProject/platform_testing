@@ -12,5 +12,7 @@ class AutoRotationSettingRule(enabled: Boolean? = null) :
         initialValue = enabled,
     ) {
 
+    fun setEnabled(enabled: Boolean) = setSettingValue(enabled)
+
     fun isEnabled() = getSettingValue<Boolean>()
 }

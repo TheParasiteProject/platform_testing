@@ -197,6 +197,23 @@ constructor(
         )
     }
 
+    /** {@inheritDoc} */
+    override fun isStrictlyWiderThan(other: Region): RegionSubject = apply {
+        val otherBounds = other.bounds
+        val currentBounds = region.bounds
+        if (otherBounds.width() >= currentBounds.width()) {
+            val errorMsgBuilder =
+                ExceptionMessageBuilder()
+                    .forSubject(this)
+                    .setActual(currentBounds.width())
+                    .setExpected("Smaller than ${otherBounds.width()}")
+                    .forIncorrectRegion(
+                        "Region $otherBounds width should not be larger than Region $currentBounds width"
+                    )
+            throw IncorrectRegionException(errorMsgBuilder)
+        }
+    }
+
     /** See [isHigher] */
     fun isHigher(subject: RegionSubject): RegionSubject = isHigher(subject.region)
 

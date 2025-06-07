@@ -85,6 +85,6 @@ public class SettingSearchTest {
         mSettingHelper.get().searchAndSelect(searchSetting);
         assertTrue(
                 "Page title does not contains searched setting name",
-                mSettingHelper.get().isValidPageTitle(searchSetting));
+                searchSetting.equals(mSettingHelper.get().getSettingsPageTitleText()));
     }
 }

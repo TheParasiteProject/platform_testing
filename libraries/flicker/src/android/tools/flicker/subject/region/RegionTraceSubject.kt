@@ -123,6 +123,13 @@ constructor(val trace: RegionTrace, override val reader: Reader? = null) :
     }
 
     /** {@inheritDoc} */
+    override fun isStrictlyWiderThan(other: Region): RegionTraceSubject = apply {
+        addAssertion("isStrictlyWiderThan($other, $componentsAsString)") {
+            it.isStrictlyWiderThan(other)
+        }
+    }
+
+    /** {@inheritDoc} */
     override fun isToTheRightBottom(other: Region, threshold: Int): RegionTraceSubject = apply {
         addAssertion("isToTheRightBottom($other, $componentsAsString)") {
             it.isToTheRightBottom(other, threshold)

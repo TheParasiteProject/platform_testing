@@ -22,5 +22,5 @@ java_test_host {
     srcs: ["src/**/*.java"],
 
     libs: ["tradefed"],
-    test_suites: ["general-tests"],
+    test_suites: ["performance-tests"],
 }

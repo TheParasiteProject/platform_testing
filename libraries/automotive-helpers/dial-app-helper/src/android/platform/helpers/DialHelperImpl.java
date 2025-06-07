@@ -175,7 +175,7 @@ public class DialHelperImpl extends AbstractStandardAppHelper implements IAutoDi
 
     /** {@inheritDoc} */
     public void dialANumber(String phoneNumber) {
-        enterNumber(phoneNumber);
+        enterNumberOnDialpad(phoneNumber);
         getSpectatioUiUtil().wait1Second();
     }
 
@@ -787,6 +787,10 @@ public class DialHelperImpl extends AbstractStandardAppHelper implements IAutoDi
         getSpectatioUiUtil().validateUiObject(dialPad, AutomotiveConfigConstants.DIAL_PAD_FRAGMENT);
         char[] array = phoneNumber.toCharArray();
         for (char ch : array) {
+            boolean shouldLongPressZero = ch == '+';
+            if (shouldLongPressZero) {
+                ch = '0';
+            }
             UiObject2 numberButton =
                     getSpectatioUiUtil()
                             .findUiObject(getUiElementFromConfig(Character.toString(ch)));
@@ -796,8 +800,42 @@ public class DialHelperImpl extends AbstractStandardAppHelper implements IAutoDi
             getSpectatioUiUtil()
                     .validateUiObject(
                             numberButton, String.format("Number %s", Character.toString(ch)));
-            getSpectatioUiUtil().clickAndWait(numberButton);
+            if (shouldLongPressZero) {
+                getSpectatioUiUtil().longPress(numberButton);
+            } else {
+                getSpectatioUiUtil().clickAndWait(numberButton);
+            }
         }
+    }
+
+    /**
+     * This method is used to enter phonenumber from the on-screen number input text field
+     *
+     * @param phoneNumber number to be dialed
+     */
+    private void enterNumberOnDialpad(String phoneNumber) {
+        if (phoneNumber == null || phoneNumber.trim().isEmpty()) {
+            throw new IllegalArgumentException("No phone number provided");
+        }
+        getSpectatioUiUtil().pressHome();
+        getSpectatioUiUtil().wait1Second();
+        getSpectatioUiUtil()
+                .executeShellCommand(
+                        getCommandFromConfig(AutomotiveConfigConstants.OPEN_DIAL_PAD_COMMAND));
+        BySelector dialPadMenuSelector =
+                getUiElementFromConfig(AutomotiveConfigConstants.DIAL_PAD_MENU);
+        UiObject2 dialMenuButton = getSpectatioUiUtil().findUiObject(dialPadMenuSelector);
+        getSpectatioUiUtil()
+                .validateUiObject(dialMenuButton, AutomotiveConfigConstants.DIAL_PAD_MENU);
+        getSpectatioUiUtil().clickAndWait(dialMenuButton);
+        getSpectatioUiUtil().wait1Second();
+        BySelector dialPadInputSelector =
+                getUiElementFromConfig(AutomotiveConfigConstants.MOBILE_DIALPAD_TITLE_INPUT);
+        UiObject2 dialPadInput = getSpectatioUiUtil().findUiObject(dialPadInputSelector);
+        getSpectatioUiUtil()
+                .validateUiObject(
+                        dialPadInput, AutomotiveConfigConstants.MOBILE_DIALPAD_TITLE_INPUT);
+        dialPadInput.setText(phoneNumber);
     }
 
     /** This method is used check if ongoing call is displayed on home. */

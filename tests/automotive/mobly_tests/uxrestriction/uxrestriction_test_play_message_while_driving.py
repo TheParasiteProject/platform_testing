@@ -55,7 +55,7 @@ class UxRestrictionPlayUnreadMessageWhileDrivingTest(bluetooth_sms_base_test.Blu
     self.call_utils.open_sms_app()
 
     # Verify that there is no new sms currently
-    self.call_utils.verify_sms_app_unread_message(False)
+    self.call_utils.verify_sms_app_unread_message()
 
     # Send a new sms
     target_phone_number = self.target.mbs.getPhoneNumber()
@@ -63,8 +63,8 @@ class UxRestrictionPlayUnreadMessageWhileDrivingTest(bluetooth_sms_base_test.Blu
     self.call_utils.wait_with_log(constants.BT_DEFAULT_TIMEOUT)
 
     # Perform the verifications
-    self.call_utils.verify_sms_app_unread_message(True)
-    self.call_utils.verify_sms_preview_timestamp(True)
+    self.call_utils.verify_sms_app_unread_message()
+    self.call_utils.verify_sms_preview_timestamp()
 
     # Tap on Received Text message to read it aloud
     self.call_utils.tap_to_read_aloud()

@@ -23,6 +23,7 @@ import static org.junit.Assert.assertNotEquals;
 
 import android.platform.helpers.HelperAccessor;
 import android.platform.helpers.IAutoMediaHelper;
+import android.util.Log;
 
 import androidx.test.runner.AndroidJUnit4;
 
@@ -35,32 +36,43 @@ import org.junit.runner.RunWith;
 public class BluetoothAudioTest {
     private HelperAccessor<IAutoMediaHelper> mBluetoothAudioHelper;
 
+    private static final String LOG_TAG = BluetoothAudioTest.class.getSimpleName();
+
     public BluetoothAudioTest() throws Exception {
         mBluetoothAudioHelper = new HelperAccessor<>(IAutoMediaHelper.class);
     }
 
     @Before
     public void openMediaFacet() {
+        Log.i(LOG_TAG, "Act: Open Bluetooth Audio App");
         mBluetoothAudioHelper.get().open();
     }
 
     @After
     public void goBackToMediaFacet() {
+        Log.i(LOG_TAG, "Act: Go back to Home screen");
         mBluetoothAudioHelper.get().goBackToMediaHomePage();
     }
 
     @Test
     public void testPlayPauseMedia() {
+        Log.i(LOG_TAG, "Act: Pause Media Song");
         mBluetoothAudioHelper.get().pauseMedia();
+        Log.i(LOG_TAG, "Assert: Media Song is paused");
         assertFalse("Song not paused.", mBluetoothAudioHelper.get().isPlaying());
+        Log.i(LOG_TAG, "Act: Play Media Song");
         mBluetoothAudioHelper.get().playMedia();
+        Log.i(LOG_TAG, "Assert: Media Song is Playing");
         assertTrue("Song not playing.", mBluetoothAudioHelper.get().isPlaying());
     }
 
     @Test
     public void testNextTrack() {
+        Log.i(LOG_TAG, "Act: Get Media Song track name");
         String currentSong = mBluetoothAudioHelper.get().getMediaTrackName();
+        Log.i(LOG_TAG, "Act: Click on Next track");
         mBluetoothAudioHelper.get().clickNextTrack();
+        Log.i(LOG_TAG, "Assert: Media Song is changed");
         assertNotEquals(
                 "Song playing has not been changed",
                 currentSong,

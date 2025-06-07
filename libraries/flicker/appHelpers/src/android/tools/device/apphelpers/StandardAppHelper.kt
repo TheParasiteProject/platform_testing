@@ -17,6 +17,7 @@
 package android.tools.device.apphelpers
 
 import android.app.ActivityManager
+import android.app.ActivityOptions
 import android.app.Instrumentation
 import android.content.ComponentName
 import android.content.Context
@@ -123,12 +124,13 @@ open class StandardAppHelper(
     private fun launchAppViaIntent(
         action: String? = null,
         stringExtras: Map<String, String> = mapOf(),
+        options: ActivityOptions? = null,
     ) {
         withTracing("${this::class.simpleName}#launchAppViaIntent") {
             val intent = openAppIntent
             intent.action = action ?: Intent.ACTION_MAIN
             stringExtras.forEach { intent.putExtra(it.key, it.value) }
-            context.startActivity(intent)
+            context.startActivity(intent, if (options != null) options.toBundle() else null)
         }
     }
 
@@ -137,8 +139,9 @@ open class StandardAppHelper(
         expectedPackageName: String,
         action: String?,
         stringExtras: Map<String, String>,
+        options: ActivityOptions?,
     ) {
-        launchAppViaIntent(action, stringExtras)
+        launchAppViaIntent(action, stringExtras, options)
         val appSelector = getAppSelector(expectedPackageName)
         uiDevice.wait(Until.hasObject(appSelector), APP_LAUNCH_WAIT_TIME_MS)
     }
@@ -150,8 +153,9 @@ open class StandardAppHelper(
         action: String?,
         stringExtras: Map<String, String>,
         waitConditionsBuilder: WindowManagerStateHelper.StateSyncBuilder,
+        options: ActivityOptions?,
     ) {
-        launchAppViaIntent(action, stringExtras)
+        launchAppViaIntent(action, stringExtras, options)
         doWaitShown(launchedAppComponentMatcherOverride, waitConditionsBuilder)
     }
 
@@ -161,9 +165,10 @@ open class StandardAppHelper(
         intent: Intent,
         launchedAppComponentMatcherOverride: IComponentMatcher?,
         waitConditionsBuilder: WindowManagerStateHelper.StateSyncBuilder,
+        options: ActivityOptions?,
     ) {
         withTracing("${this::class.simpleName}#launchViaIntent") {
-            context.startActivity(intent)
+            context.startActivity(intent, if (options != null) options.toBundle() else null)
             doWaitShown(launchedAppComponentMatcherOverride, waitConditionsBuilder)
         }
     }

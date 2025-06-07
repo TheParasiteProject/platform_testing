@@ -498,6 +498,13 @@ public abstract class BackupUtils {
     }
 
     /**
+     * Sets the local transport for the current user and returns the previously selected transport.
+     */
+    public String setLocalTransport() throws IOException {
+        return setBackupTransport(getLocalTransportName());
+    }
+
+    /**
      * Sets the backup transport for the current user and returns the previously selected transport.
      */
     public String setBackupTransport(String transport) throws IOException {

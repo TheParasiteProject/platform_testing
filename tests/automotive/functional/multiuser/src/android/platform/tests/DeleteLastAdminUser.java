@@ -24,6 +24,7 @@ import android.platform.helpers.IAutoSettingHelper;
 import android.platform.helpers.IAutoUserHelper;
 import android.platform.helpers.MultiUserHelper;
 import android.platform.helpers.SettingsConstants;
+import android.util.Log;
 
 import androidx.test.runner.AndroidJUnit4;
 
@@ -44,6 +45,7 @@ public class DeleteLastAdminUser {
     private final MultiUserHelper mMultiUserHelper = MultiUserHelper.getInstance();
     private HelperAccessor<IAutoUserHelper> mUsersHelper;
     private HelperAccessor<IAutoSettingHelper> mSettingHelper;
+    private static final String LOG_TAG = DeleteLastAdminUser.class.getSimpleName();
 
     public DeleteLastAdminUser() {
         mUsersHelper = new HelperAccessor<>(IAutoUserHelper.class);
@@ -52,22 +54,28 @@ public class DeleteLastAdminUser {
 
     @Before
     public void openAccountsFacet() {
+        Log.i(LOG_TAG, "Act: Open  Profile & Accounts setting");
         mSettingHelper.get().openSetting(SettingsConstants.PROFILE_ACCOUNT_SETTINGS);
     }
 
     @After
     public void goBackToHomeScreen() {
+        Log.i(LOG_TAG, "Act: Go back to Settings");
         mSettingHelper.get().goBackToSettingsScreen();
     }
 
     @Test
     public void testRemoveUserSelf() throws Exception {
         // add new user
+        Log.i(LOG_TAG, "Act: Get current userinfo");
         UserInfo initialUser = mMultiUserHelper.getCurrentForegroundUserInfo();
         // user deleted self
+        Log.i(LOG_TAG, "Act: Delete current user");
         mUsersHelper.get().deleteCurrentUser();
+        Log.i(LOG_TAG, "Act: Get current userinfo");
         UserInfo newUser = mMultiUserHelper.getCurrentForegroundUserInfo();
         // verify that user is deleted
+        Log.i(LOG_TAG, "Assert: user is deleted");
         assertTrue((initialUser.id != newUser.id) && (initialUser.name.equals(newUser.name)));
     }
 

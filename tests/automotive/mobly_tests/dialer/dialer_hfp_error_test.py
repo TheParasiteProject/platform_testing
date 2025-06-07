@@ -28,7 +28,7 @@ class DialerHFPError(bluetooth_base_test.BluetoothBaseTest):
 
   def teardown_test(self):
     # enabling the Bluetooth
-    self.target.mbs.btEnable()
+    self.target.mbs.btEnableWithLongerWait()
     super().teardown_test()
 
 if __name__ == '__main__':

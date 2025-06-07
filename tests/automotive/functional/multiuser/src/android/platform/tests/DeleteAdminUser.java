@@ -28,6 +28,7 @@ import android.platform.scenario.multiuser.MultiUserConstants;
 import android.platform.test.rules.ConditionalIgnore;
 import android.platform.test.rules.ConditionalIgnoreRule;
 import android.platform.test.rules.IgnoreOnPortrait;
+import android.util.Log;
 
 import androidx.test.runner.AndroidJUnit4;
 
@@ -49,6 +50,7 @@ public class DeleteAdminUser {
     private HelperAccessor<IAutoUserHelper> mUsersHelper;
     private HelperAccessor<IAutoSettingHelper> mSettingHelper;
     private int mTargetUserId;
+    private static final String LOG_TAG = DeleteAdminUser.class.getSimpleName();
 
     public DeleteAdminUser() {
         mUsersHelper = new HelperAccessor<>(IAutoUserHelper.class);
@@ -57,6 +59,7 @@ public class DeleteAdminUser {
 
     @After
     public void goBackToHomeScreen() {
+        Log.i(LOG_TAG, "Act: Go back to settings");
         mSettingHelper.get().goBackToSettingsScreen();
     }
 
@@ -64,14 +67,20 @@ public class DeleteAdminUser {
     @ConditionalIgnore(condition = IgnoreOnPortrait.class)
     public void testRemoveUser() throws Exception {
         // create new user
+        Log.i(LOG_TAG, "Act: Create a non admin user");
         mTargetUserId = mMultiUserHelper.createUser(userName, false);
         SystemClock.sleep(WAIT_TIME);
         // make the new user admin and delete new user
+        Log.i(LOG_TAG, "Act: Open Profile & Accounts setting");
         mSettingHelper.get().openSetting(SettingsConstants.PROFILE_ACCOUNT_SETTINGS);
+        Log.i(LOG_TAG, "Act: Mark newly created user as admin");
         mUsersHelper.get().makeUserAdmin(userName);
+        Log.i(LOG_TAG, "Act: Open Profile & Accounts setting");
         mSettingHelper.get().openSetting(SettingsConstants.PROFILE_ACCOUNT_SETTINGS);
+        Log.i(LOG_TAG, "Act: Delete new user");
         mUsersHelper.get().deleteUser(userName);
         // verify new user was deleted
+        Log.i(LOG_TAG, "Assert: New user is deleted");
         assertFalse(mUsersHelper.get().isUserPresent(userName));
     }
 }

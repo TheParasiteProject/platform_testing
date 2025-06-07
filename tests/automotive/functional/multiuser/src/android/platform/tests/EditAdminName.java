@@ -24,6 +24,7 @@ import android.platform.helpers.IAutoSettingHelper;
 import android.platform.helpers.IAutoUserHelper;
 import android.platform.helpers.MultiUserHelper;
 import android.platform.helpers.SettingsConstants;
+import android.util.Log;
 
 import androidx.test.runner.AndroidJUnit4;
 
@@ -41,6 +42,8 @@ public class EditAdminName {
     private HelperAccessor<IAutoUserHelper> mUsersHelper;
     private HelperAccessor<IAutoSettingHelper> mSettingHelper;
 
+    private static final String LOG_TAG = EditAdminName.class.getSimpleName();
+
     public EditAdminName() {
         mUsersHelper = new HelperAccessor<>(IAutoUserHelper.class);
         mSettingHelper = new HelperAccessor<>(IAutoSettingHelper.class);
@@ -48,21 +51,28 @@ public class EditAdminName {
 
     @Before
     public void getUserNameFromSettings() {
+        Log.i(LOG_TAG, "Act: Get current userinfo");
         UserInfo initialUser = mMultiUserHelper.getCurrentForegroundUserInfo();
         INITIAL_USERNAME = initialUser.name;
     }
 
     @After
     public void goBackToHomeScreen() {
+        Log.i(LOG_TAG, "Act: Edit initial user's name");
         mUsersHelper.get().editUserName(INITIAL_USERNAME);
+        Log.i(LOG_TAG, "Act: Go back to settings");
         mSettingHelper.get().goBackToSettingsScreen();
     }
 
     @Test
     public void testEditAdminName() {
+        Log.i(LOG_TAG, "Act: Open Profile & Accounts setting");
         mSettingHelper.get().openSetting(SettingsConstants.PROFILE_ACCOUNT_SETTINGS);
+        Log.i(LOG_TAG, "Act: Edit initial user's name");
         mUsersHelper.get().editUserName(EDIT_USERNAME);
+        Log.i(LOG_TAG, "Act: Get current userinfo");
         UserInfo newUser = mMultiUserHelper.getCurrentForegroundUserInfo();
+        Log.i(LOG_TAG, "Assert: Current username is changed ");
         assertTrue("Username is not changed", EDIT_USERNAME.equals(newUser.name));
     }
 }

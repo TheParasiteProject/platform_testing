@@ -164,6 +164,10 @@ class ComponentNameMatcher(var component: ComponentName) : IComponentNameMatcher
 
         @JvmField val BUBBLE = ComponentNameMatcher("", "Bubbles!")
 
+        @JvmField
+        val IMAGE_WALLPAPER =
+            ComponentNameMatcher("","com.android.systemui.wallpapers.ImageWallpaper")
+
         /**
          * Creates a component matcher from a window or layer name.
          *

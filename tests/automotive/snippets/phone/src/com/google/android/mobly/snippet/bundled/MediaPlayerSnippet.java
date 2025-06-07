@@ -93,6 +93,11 @@ public class MediaPlayerSnippet implements Snippet {
         return mAutoMediaHelper.get().isConnectToBluetoothLabelVisible();
     }
 
+    @Rpc(description = "Is Cancel button present")
+    public boolean isCancelButtonVisible() {
+        return mAutoMediaHelper.get().isCancelButtonVisible();
+    }
+
     @Rpc(description = "Open Bluetooth Audio app")
     public void openBluetoothMediaApp() {
         mAutoMediaHelper.get().openBluetoothMediaApp();

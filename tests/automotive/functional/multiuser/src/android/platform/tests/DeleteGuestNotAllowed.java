@@ -23,6 +23,7 @@ import android.platform.helpers.IAutoSettingHelper;
 import android.platform.helpers.IAutoUserHelper;
 import android.platform.helpers.SettingsConstants;
 import android.platform.scenario.multiuser.MultiUserConstants;
+import android.util.Log;
 
 import androidx.test.runner.AndroidJUnit4;
 
@@ -41,6 +42,8 @@ public class DeleteGuestNotAllowed {
     private HelperAccessor<IAutoUserHelper> mUsersHelper;
     private HelperAccessor<IAutoSettingHelper> mSettingHelper;
 
+    private static final String LOG_TAG = DeleteGuestNotAllowed.class.getSimpleName();
+
     public DeleteGuestNotAllowed() {
         mUsersHelper = new HelperAccessor<>(IAutoUserHelper.class);
         mSettingHelper = new HelperAccessor<>(IAutoSettingHelper.class);
@@ -48,17 +51,20 @@ public class DeleteGuestNotAllowed {
 
     @Before
     public void openAccountsFacet() {
+        Log.i(LOG_TAG, "Act: Open Profile & Accounts setting");
         mSettingHelper.get().openSetting(SettingsConstants.PROFILE_ACCOUNT_SETTINGS);
     }
 
     @After
     public void goBackToHomeScreen() {
+        Log.i(LOG_TAG, "Act: Go back to settings");
         mSettingHelper.get().goBackToSettingsScreen();
     }
 
     @Test
     public void testDeleteGuestNotAllowed() throws Exception {
         // verify that guest user cannot be seen and deleted from list of profiles
+        Log.i(LOG_TAG, "Assert: Guest user cannot be seen and deleted from list of profiles");
         assertFalse(mUsersHelper.get().isUserPresent(guestUser));
     }
 }

@@ -11,11 +11,6 @@ DISCOVERABLE_TIME = 120
 
 class MultiDeviceTest(bluetooth_base_test.BluetoothBaseTest):
 
-    def setup_test(self):
-        super().setup_test()
-        # Set Bluetooth name on target device.
-        self.target.mbs.btSetName('LookForMe!')
-
     def test_bluetooth_discovery(self):
         self.bt_utils.discover_secondary_from_primary()
 

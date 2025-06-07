@@ -16,6 +16,7 @@
 
 package android.tools.device.apphelpers
 
+import android.app.ActivityOptions
 import android.content.Intent
 import android.tools.traces.ConditionsFactory
 import android.tools.traces.component.IComponentMatcher
@@ -39,6 +40,7 @@ interface IStandardAppHelper : IComponentNameMatcher {
         expectedPackageName: String = "",
         action: String? = null,
         stringExtras: Map<String, String> = mapOf(),
+        options: ActivityOptions? = null,
     )
 
     /**
@@ -55,6 +57,7 @@ interface IStandardAppHelper : IComponentNameMatcher {
                 .StateSyncBuilder()
                 .add(ConditionsFactory.isWMStateComplete())
                 .withAppTransitionIdle(),
+        options: ActivityOptions? = null,
     )
 
     /**
@@ -70,6 +73,7 @@ interface IStandardAppHelper : IComponentNameMatcher {
                 .StateSyncBuilder()
                 .add(ConditionsFactory.isWMStateComplete())
                 .withAppTransitionIdle(),
+        options: ActivityOptions? = null,
     )
 
     fun isAvailable(): Boolean

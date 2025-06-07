@@ -19,5 +19,5 @@ package {
 java_library_host {
     name: "host_runner_utils",
     srcs: ["src/**/*.java"],
-    static_libs: ["tradefed"],
+    libs: ["tradefed"],
 }

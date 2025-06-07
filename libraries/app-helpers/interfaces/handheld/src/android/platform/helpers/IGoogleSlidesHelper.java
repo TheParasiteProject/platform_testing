@@ -20,32 +20,44 @@ import androidx.test.uiautomator.UiObject2;
 /** An App Helper interface for Google Slides. */
 public interface IGoogleSlidesHelper extends IAppHelper {
     /**
-     * Setup expectation: Google Slides is open.
+     * Setup expectation: Google Slides is opened.
      *
      * <p>This method will open slides file from shared with me drawer.
+     *
+     * @throws UnknownUiException If the slides file cannot be opened.
      */
     void openSlidesFromSharedMenu();
 
     /**
-     * Setup expectation: Google Slides is open and open slide file.
+     * Setup expectation: Google Slides is opened.
      *
-     * <p>Check if device is now in Slides page.
+     * <p>Check if device is now in the Slides page.
      *
-     * @return Returns true if device is in Slides page, false if not.
+     * @return Returns true if device is in the Slides page, false if not.
      */
     boolean isOnSlidesPage();
 
     /**
-     * Setup expectation: Google Slides is open and open slide file..
+     * Setup expectation: Google Slides is opened and is in the Slides page.
      *
      * <p>This method will get a UiObject2 object for Slides page container
      */
     UiObject2 getScrollView();
 
     /**
-     * Setup expectation: Google Slides is open and open slide file.
+     * Setup expectation: Google Slides is opened and is in the Slides page.
      *
      * <p>This method will close slides file.
      */
     void closeSlides();
+
+    /**
+     * Setup expectation: Google Slides is open.
+     *
+     * <p>This method will open slides file by its title.
+     *
+     * @param title The title text of the slides file to open.
+     * @throws UnknownUiException If the slides file cannot be opened.
+     */
+    void openSlidesByTitle(String title);
 }

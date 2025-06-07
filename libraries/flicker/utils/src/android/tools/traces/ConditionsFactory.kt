@@ -109,8 +109,10 @@ object ConditionsFactory {
             listOf(isNavBarWindowVisible(), isNavBarLayerVisible(), isNavBarLayerOpaque())
         )
 
-    /** Condition to check if the [ComponentNameMatcher.NAV_BAR] window is visible on a specific
-     * display*/
+    /**
+     * Condition to check if the [ComponentNameMatcher.NAV_BAR] window is visible on a specific
+     * display
+     */
     @JvmOverloads
     fun isNavBarWindowVisible(
         displayId: Int = PlatformConsts.DEFAULT_DISPLAY
@@ -135,8 +137,10 @@ object ConditionsFactory {
             listOf(isTaskBarWindowVisible(), isTaskBarLayerVisible(), isTaskBarLayerOpaque())
         )
 
-    /** Condition to check if the [ComponentNameMatcher.TASK_BAR] window is visible on a specific
-     * display*/
+    /**
+     * Condition to check if the [ComponentNameMatcher.TASK_BAR] window is visible on a specific
+     * display
+     */
     @JvmOverloads
     fun isTaskBarWindowVisible(
         displayId: Int = PlatformConsts.DEFAULT_DISPLAY
@@ -161,8 +165,10 @@ object ConditionsFactory {
             listOf(isStatusBarWindowVisible(), isStatusBarLayerVisible(), isStatusBarLayerOpaque())
         )
 
-    /** Condition to check if the [ComponentNameMatcher.STATUS_BAR] window is visible on a specific
-     * display*/
+    /**
+     * Condition to check if the [ComponentNameMatcher.STATUS_BAR] window is visible on a specific
+     * display
+     */
     @JvmOverloads
     fun isStatusBarWindowVisible(
         displayId: Int = PlatformConsts.DEFAULT_DISPLAY
@@ -188,6 +194,18 @@ object ConditionsFactory {
     ): Condition<DeviceStateDump> =
         Condition("isHomeActivityVisible[display=$displayId]") {
             it.wmState.isHomeActivityVisible(displayId)
+        }
+
+    /**
+     * Condition to check if the [ComponentNameMatcher.IMAGE_WALLPAPER] window is visible on a
+     * specific display
+     */
+    @JvmOverloads
+    fun isImageWallpaperWindowVisible(
+        displayId: Int = PlatformConsts.DEFAULT_DISPLAY
+    ): Condition<DeviceStateDump> =
+        Condition("isWallpaperWindowVisible[$displayId]") {
+            it.wmState.isWindowSurfaceShown(ComponentNameMatcher.IMAGE_WALLPAPER, displayId)
         }
 
     fun isRecentsActivityVisible(): Condition<DeviceStateDump> =
@@ -218,6 +236,15 @@ object ConditionsFactory {
     fun containsActivity(componentMatcher: IComponentMatcher): Condition<DeviceStateDump> =
         Condition("containsActivity[${componentMatcher.toActivityIdentifier()}]") {
             it.wmState.containsActivity(componentMatcher)
+        }
+
+    /** Condition to check if a specific display contains no activity */
+    @JvmOverloads
+    fun hasNoActivityOnDisplay(
+        displayId: Int = PlatformConsts.DEFAULT_DISPLAY
+    ): Condition<DeviceStateDump> =
+        Condition("hasNoActivityOnDisplay[$displayId]") {
+            it.wmState.hasNoActivityOnDisplay(displayId)
         }
 
     fun containsWindow(componentMatcher: IComponentMatcher): Condition<DeviceStateDump> =

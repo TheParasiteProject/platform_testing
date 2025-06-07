@@ -231,6 +231,13 @@ public interface IAutoMediaHelper extends IAppHelper, Scrollable {
     boolean isConnectToBluetoothLabelVisible();
 
     /**
+     * Setup expectations: Bluetooth Audio page opened.
+     *
+     * <p>This method returns whether cancel button visible or not.
+     */
+    boolean isCancelButtonVisible();
+
+    /**
      * Setup expectations: on home screen.
      *
      * <p>This method is used to open Bluetooth Audio screen.

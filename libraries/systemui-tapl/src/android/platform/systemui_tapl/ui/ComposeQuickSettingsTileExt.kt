@@ -26,6 +26,11 @@ fun ComposeQuickSettingsTile.clickBluetoothTileToOpenDialog(): BluetoothDialog {
     return BluetoothDialog(displayId)
 }
 
+fun ComposeQuickSettingsTile.clickFlashlightTileToOpenDialog(): FlashlightDialog {
+    clickToOpenDialogOnDualTarget()
+    return FlashlightDialog(displayId)
+}
+
 fun ComposeQuickSettingsTile.clickModesTileToOpenDialog(): ModesDialog {
     clickToOpenDialogOnDualTarget()
     return ModesDialog(displayId)

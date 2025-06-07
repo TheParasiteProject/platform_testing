@@ -24,4 +24,7 @@ java_library_host {
         "mockito",
         "objenesis",
     ],
+    libs: [
+        "tradefed",
+    ],
 }

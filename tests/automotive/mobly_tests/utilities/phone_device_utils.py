@@ -29,9 +29,8 @@ class PhoneDeviceUtils:
         self.phone_device = phone_device
 
     def call_number_from_home_screen(self, number):
-        """Assumes the phone is on its home screen.
-        Opens the phone app, then dial pad, enters the given number, and starts a call"""
-        self.phone_device.mbs.pressPhoneIcon()
+        """Opens the phone app, then dial pad, enters the given number, and starts a call"""
+        self.phone_device.adb.shell(constants.START_DIALER_SHELL)
         logging.info("Close the video call popup on Phone")
         self.phone_device.mbs.clickUIElementWithText(constants.NOT_NOW_TEXT)
         isDialPadOpen = self.phone_device.mbs.isDialPadOpen()
