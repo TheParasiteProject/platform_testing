@@ -63,7 +63,7 @@ class BTUtils:
         target_name = self.target.mbs.btGetName()
         self.target.log.info('Become discoverable with name "%s" for %ds.',
                              target_name, DISCOVERABLE_TIME)
-        self.target.mbs.btBecomeDiscoverable(DISCOVERABLE_TIME)
+        self.target.mbs.btBecomeDiscoverableWithLongerWait(DISCOVERABLE_TIME)
         self.discoverer.log.info('Looking for Bluetooth devices.')
         discovered_devices = self.discoverer.mbs.btDiscoverAndGetResults()
         self.discoverer.log.debug('Found Bluetooth devices: %s',
@@ -87,7 +87,7 @@ class BTUtils:
         self.target.mbs.btEnableWithLongerWait()
         self.disable_android_auto_popup_on_hu()
         logging.info('Setting devices to be discoverable')
-        self.target.mbs.btBecomeDiscoverable(DISCOVERABLE_TIME)
+        self.target.mbs.btBecomeDiscoverableWithLongerWait(DISCOVERABLE_TIME)
         self.target.mbs.btStartAutoAcceptIncomingPairRequest()
         target_address = self.target.mbs.btGetAddress()
         logging.info('Scanning for discoverable devices')
