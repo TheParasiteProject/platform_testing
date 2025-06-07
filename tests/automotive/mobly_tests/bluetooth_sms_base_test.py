@@ -49,17 +49,28 @@ class BluetoothSMSBaseTest(bluetooth_base_test.BluetoothBaseTest):
         self.target,
         self.__class__.__name__,
     )
-
-    logging.info('Enabling video recording for Discoverer device')
-    self.video_utils_service.enable_screen_recording()
-
-    logging.info('Enabling video recording for Target device')
-    self.video_utils_service_target.enable_screen_recording()
-
+    self.video_utils_service_phone_notpaired = VideoRecording(
+        self.phone_notpaired,
+        self.__class__.__name__,
+    )
     self.call_utils.press_phone_home_icon_using_adb_command(
         self.phone_notpaired
     )
 
+  def hu_recording_handler(self):
+    super().hu_recording_handler()
+    logging.info("Stopping the screen recording on phone_notpaired")
+    self.video_utils_service_phone_notpaired.stop_screen_recording()
+    logging.info("Pull the screen recording from phone_notpaired")
+    self.video_utils_service_phone_notpaired.pull_recording_file(self.log_path)
+    logging.info("delete the screen recording from phone_notpaired")
+    self.video_utils_service_phone_notpaired.delete_screen_recording_from_device()
+
+  def enable_recording(self):
+    super().enable_recording()
+    logging.info("Enabling video recording for phone_notpaired")
+    self.video_utils_service_phone_notpaired.enable_screen_recording()
+    logging.info("Video recording started on phone_notpaired")
 
 if __name__ == '__main__':
   common_main()

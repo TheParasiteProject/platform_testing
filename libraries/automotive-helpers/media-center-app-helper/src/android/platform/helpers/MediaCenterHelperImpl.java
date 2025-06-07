@@ -137,7 +137,8 @@ public class MediaCenterHelperImpl extends AbstractStandardAppHelper implements 
         getSpectatioUiUtil().waitForIdle();
         getSpectatioUiUtil()
                 .executeShellCommand(
-                        getCommandFromConfig(AutomotiveConfigConstants.MEDIA_LAUNCH_COMMAND));
+                        getCommandFromConfig(
+                                AutomotiveConfigConstants.MEDIA_LAUNCH_BLUETOOTH_AUDIO_COMMAND));
     }
 
     /**
@@ -582,6 +583,14 @@ public class MediaCenterHelperImpl extends AbstractStandardAppHelper implements 
         BySelector connectToBluetoothLabel =
                 getUiElementFromConfig(AutomotiveConfigConstants.CONNECT_TO_BLUETOOTH);
         return getSpectatioUiUtil().hasUiElement(connectToBluetoothLabel);
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    public boolean isCancelButtonVisible() {
+        BySelector cancelBluetoothAudioConncetionButton =
+                getUiElementFromConfig(AutomotiveConfigConstants.CANCEL_BT_AUDIO_CONNECTION_BUTTON);
+        return getSpectatioUiUtil().hasUiElement(cancelBluetoothAudioConncetionButton);
     }
 
     private UiObject2 scrollAndFindApp(BySelector selector) {

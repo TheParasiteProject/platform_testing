@@ -60,6 +60,7 @@ class BluetoothBaseTest(base_test.BaseTestClass):
         self.discoverer.mbs.btEnableWithLongerWait()
 
     def teardown_test(self):
+        android_device.take_bug_reports(self.ads, destination=self.log_path)
         # Turn Bluetooth off on both devices.
         logging.info("Running basic test teardown.")
         self.call_utils.press_home()

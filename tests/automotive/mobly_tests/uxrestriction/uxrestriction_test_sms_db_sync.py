@@ -65,8 +65,8 @@ class UxRestrictionSMSDBTest(bluetooth_sms_base_test.BluetoothSMSBaseTest):
         self.call_utils.open_sms_app()
 
         # Perform the verifications
-        self.call_utils.verify_sms_app_unread_message(True)
-        self.call_utils.verify_sms_preview_timestamp(True)
+        self.call_utils.verify_sms_app_unread_message()
+        self.call_utils.verify_sms_preview_timestamp()
         self.call_utils.verify_sms_preview_text(True, constants.SMS_TEXT_DRIVE_MODE)
 
         # Disable driving mode

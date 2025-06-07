@@ -310,7 +310,6 @@ public class AutomotiveConfigConstants {
 
     // Media Center
     public static final String MEDIA_CENTER_PACKAGE = "MEDIA_CENTER_PACKAGE";
-    public static final String MEDIA_LAUNCH_COMMAND = "MEDIA_LAUNCH_COMMAND";
     // Media Center Screen
     public static final String PLAY_PAUSE_BUTTON = "PLAY_PAUSE_BUTTON";
     public static final String MEDIA_SONGS_LIST = "MEDIA_SONGS_LIST";
@@ -724,6 +723,7 @@ public class AutomotiveConfigConstants {
     public static final String MOBILE_PHONE_ICON = "MOBILE_PHONE_ICON";
     public static final String PHONE_DEVICE_PACKAGE = "PHONE_DEVICE_PACAKAGE";
     public static final String MOBILE_DIALPAD_INPUT = "MOBILE_DIALPAD_INPUT";
+    public static final String MOBILE_DIALPAD_TITLE_INPUT = "MOBILE_DIALPAD_TITLE_INPUT";
 
     // Phone Card Identifiers
     public static final String PHONE_CARD_DIALER_BUTTON = "PHONE_CARD_DIALER_BUTTON";
