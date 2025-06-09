@@ -261,6 +261,17 @@ public class SettingsAppInfoHelperImpl extends AbstractStandardAppHelper
 
     /** {@inheritDoc} */
     @Override
+    public boolean isStopappPopupDisplayed() {
+        UiObject2 forceStopButton = getForceStopButton();
+        getSpectatioUiUtil().clickAndWait(forceStopButton);
+        BySelector okBtnSelector =
+                getUiElementFromConfig(AutomotiveConfigConstants.APP_INFO_SETTINGS_OK_BUTTON);
+        UiObject2 okBtn = getSpectatioUiUtil().findUiObject(okBtnSelector);
+        return okBtn != null;
+    }
+
+    /** {@inheritDoc} */
+    @Override
     public void setAppPermission(String permission, State state) {
         BySelector permissions_selector =
                 getUiElementFromConfig(
