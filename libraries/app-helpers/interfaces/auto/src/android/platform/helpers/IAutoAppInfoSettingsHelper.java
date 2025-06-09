@@ -79,6 +79,13 @@ public interface IAutoAppInfoSettingsHelper extends IAppHelper {
     void forceStop();
 
     /**
+     * Setup expectation: An application in Apps & notifications setting is open
+     *
+     * <p>clicks stopapp button and checks stop app popup is displaying
+     */
+    boolean isStopappPopupDisplayed();
+
+    /**
      * Setup expectation: Apps & notifications setting is open
      *
      * <p>This method is to add a permission to an application
