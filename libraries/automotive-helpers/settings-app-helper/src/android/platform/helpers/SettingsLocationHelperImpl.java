@@ -24,6 +24,7 @@ import androidx.test.uiautomator.UiObject2;
 /** Helper class for functional tests of Location settings */
 public class SettingsLocationHelperImpl extends AbstractStandardAppHelper
         implements IAutoSettingsLocationHelper {
+    private static final int WAIT_MS = 15000;
 
     public SettingsLocationHelperImpl(Instrumentation instr) {
         super(instr);
@@ -106,9 +107,13 @@ public class SettingsLocationHelperImpl extends AbstractStandardAppHelper
     public void openAppLevelPermissions() {
         BySelector appPermissionsSelector =
                 getUiElementFromConfig(AutomotiveConfigConstants.APP_LEVEL_PERMISSION);
-        UiObject2 appLevelPermissions = getSpectatioUiUtil().findUiObject(appPermissionsSelector);
+        UiObject2 appLevelPermissions =
+                getSpectatioUiUtil().waitForUiObject(appPermissionsSelector, WAIT_MS);
         getSpectatioUiUtil().clickAndWait(appLevelPermissions);
-        getSpectatioUiUtil().wait5Seconds();
+        BySelector mapsSelector =
+                getUiElementFromConfig(
+                        AutomotiveConfigConstants.LOCATION_SETTINGS_RECENTLY_ACCESSED_MAPS);
+        getSpectatioUiUtil().waitForUiObject(mapsSelector, WAIT_MS);
     }
 
     /** {@inheritDoc} */
@@ -117,9 +122,9 @@ public class SettingsLocationHelperImpl extends AbstractStandardAppHelper
         BySelector mapsSelector =
                 getUiElementFromConfig(
                         AutomotiveConfigConstants.LOCATION_SETTINGS_RECENTLY_ACCESSED_MAPS);
-        UiObject2 maps = getSpectatioUiUtil().findUiObject(mapsSelector);
+        UiObject2 maps = getSpectatioUiUtil().waitForUiObject(mapsSelector, WAIT_MS);
         getSpectatioUiUtil().clickAndWait(maps);
-        getSpectatioUiUtil().wait5Seconds();
+
     }
 
     /** {@inheritDoc} */
@@ -127,8 +132,15 @@ public class SettingsLocationHelperImpl extends AbstractStandardAppHelper
     public void clickViewAll() {
         BySelector viewAllSelector =
                 getUiElementFromConfig(AutomotiveConfigConstants.LOCATION_SETTINGS_VIEW_ALL);
-        UiObject2 viewAll = getSpectatioUiUtil().findUiObject(viewAllSelector);
+        UiObject2 viewAll = getSpectatioUiUtil().waitForUiObject(viewAllSelector, WAIT_MS);
         getSpectatioUiUtil().clickAndWait(viewAll);
-        getSpectatioUiUtil().wait5Seconds();
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    public void enableLocationUsingAdb() {
+        getSpectatioUiUtil()
+                .executeShellCommand(
+                        getCommandFromConfig(AutomotiveConfigConstants.LOCATION_ENABLE_COMMAND));
     }
 }

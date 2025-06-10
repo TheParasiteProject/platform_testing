@@ -428,7 +428,7 @@ public class AutomotiveConfigConstants {
     public static final String SKIP_ASSISTANT_IMPROVEMENT_PAGE_BUTTON =
             "SKIP_ASSISTANT_IMPROVEMENT_PAGE_BUTTON";
     public static final String ASSISTANT_IMPROVEMENT_POPUP = "ASSISTANT_IMPROVEMENT_POPUP";
-
+    public static final String LOCATION_ENABLE_COMMAND = "LOCATION_ENABLE_COMMAND";
     // App Info Settings Constants
     public static final String APP_INFO_SETTINGS_APP_NAME_ELEMENT =
             "APP_INFO_SETTINGS_APP_NAME_ELEMENT";

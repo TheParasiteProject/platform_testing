@@ -79,7 +79,8 @@
     "OPEN_CAR_UI": "am crash com.android.car",
     "DATE_COMMAND": "date",
     "ADAPTIVE_BRIGHTNESS_COMMAND": "settings get system screen_brightness_mode",
-    "LOCK_SCREEN_COMMAND": "input text %s"
+    "LOCK_SCREEN_COMMAND": "input text %s",
+    "LOCATION_ENABLE_COMMAND": "cmd location set-location-enabled true"
   },
   "UI_ELEMENTS": {
     "MAKE_CALL": {
@@ -1798,8 +1799,7 @@
     },
     "SETTINGS_UI_SUB_SETTING_SCROLL_ELEMENT": {
       "TYPE": "RESOURCE_ID",
-      "VALUE": "fragment_container",
-      "PACKAGE": "com.android.car.settings"
+      "VALUE": "car_ui_internal_recycler_view"
     },
     "SETTINGS_UI_SCROLL_ELEMENT": {
       "TYPE": "RESOURCE_ID",
@@ -2526,13 +2526,6 @@
       }
     ],
     "OPEN_LOCATION_SETTINGS_WORKFLOW": [
-      {
-        "NAME": "Go to Home",
-        "TYPE": "PRESS",
-        "CONFIG": {
-          "TEXT": "HOME"
-        }
-      },
       {
         "NAME": "Open Settings",
         "TYPE": "COMMAND",
