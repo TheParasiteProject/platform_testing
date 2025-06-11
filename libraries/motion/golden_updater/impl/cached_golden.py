@@ -20,7 +20,7 @@ import json
 class CachedGolden:
 
     def __init__(self, remote_file, local_file):
-        self.id = hashlib.md5(remote_file.encode("utf-8")).hexdigest()
+        self.id = hashlib.sha256(remote_file.encode("utf-8")).hexdigest()
         self.remote_file = remote_file
         self.local_file = local_file
         self.updated = False
@@ -28,7 +28,7 @@ class CachedGolden:
         self.golden_name = None
         # Checksum is the time the test data was loaded, forcing unique URLs
         # every time the golden is reloaded
-        self.checksum = hashlib.md5(self.test_time.encode("utf-8")).hexdigest()
+        self.checksum = hashlib.sha256(self.test_time.encode("utf-8")).hexdigest()
 
         motion_golden_data = None
         with open(local_file, "r") as json_file:
