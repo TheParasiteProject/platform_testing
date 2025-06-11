@@ -108,5 +108,45 @@ local_file_content = {
   ]
 }
 
+class FetchPresubmitTestArtifactTestAssets:
+  invocation_id = "1234567890"
+  artifacts_download_dir = "artifacts_download_dir_test"
+  email = "email_id"
+  scope = "auth_token_scope"
+  test_name1 = "test_name1"
+  test_name2 = "test_name2"
+  test_asset_1_json = "test_name1.actual_1234.json"
+  test_asset_2_json = "test_name2.actual_7890.json"
+  test_asset_2_mp4 = "test_name2.actual_5678.mp4"
+  page_two_token = "page_two_token"
+  download_url = "download_url"
+  auth_token = "auth_token"
+  list_artifact_api_response = [
+    {
+      "nextPageToken": page_two_token,
+      "test_artifacts": [
+        {
+          "name": "a.log"
+        },
+        {
+          "name": test_asset_1_json
+        }
+      ]
+    },
+    {
+      "test_artifacts": [
+        {
+          "name": "c.txt"
+        },
+        {
+          "name": test_asset_2_json
+        },
+        {
+          "name": test_asset_2_mp4
+        }
+      ]
+    }
+  ]
+
 def returnNoneIfOverFlow(list: list, index):
     return list[index] if len(list) > index else None

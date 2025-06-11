@@ -17,6 +17,7 @@ import os
 from impl.golden_watchers.golden_watcher_types import GoldenWatcherTypes
 from impl.golden_watchers.atest_golden_watcher import AtestGoldenWatcher
 from impl.golden_watchers.robolectric_golden_watcher import RobolectricGoldenWatcher
+from impl.golden_watchers.presubmit_golden_watcher import PresubmitGoldenWatcher
 from impl.golden_watchers.golden_file_watcher import GoldenFileWatcher
 
 class GoldenWatcherFactory:
@@ -29,6 +30,11 @@ class GoldenWatcherFactory:
                 user = os.environ.get("USER")
                 return AtestGoldenWatcher(
                     tmpdir, f"/tmp/atest_result_{user}/LATEST/"
+                )
+
+            case GoldenWatcherTypes.PRESUBMIT:
+                return PresubmitGoldenWatcher(
+                    tmpdir, "artifacts_download_dir"
                 )
 
             case GoldenWatcherTypes.ROBOLECTRIC:

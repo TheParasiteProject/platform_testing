@@ -21,14 +21,19 @@ import shutil
 from os import path
 import pathlib
 import os
+import requests
 from impl.constants import GOLDEN_ACCESS_TOKEN_HEADER
 from impl.zip_to_video_converter import ZipToVideoConverter
+from impl.fetch_presubmit_test_artifact import FetchPresubmitTestArtifacts
+from impl.golden_watchers.golden_watcher_factory import GoldenWatcherFactory
+from impl.golden_watchers.golden_watcher_types import GoldenWatcherTypes
 
 class WatchWebAppRequestHandler(http.server.BaseHTTPRequestHandler):
     secret_token = None
     golden_watcher = None
     android_build_top = None
     this_server_address = None
+    presubmit_fetch_client = None
 
     def __init__(self, *args, **kwargs):
         self.root_directory = path.abspath(path.dirname(__file__))
@@ -59,7 +64,10 @@ class WatchWebAppRequestHandler(http.server.BaseHTTPRequestHandler):
         elif parsed.path.startswith("/golden/"):
             requested_file_start_index = parsed.path.find("/", len("/golden/") + 1)
             requested_file = parsed.path[requested_file_start_index + 1 :]
-            self.serve_file(WatchWebAppRequestHandler.golden_watcher.temp_dir, requested_file)
+            self.serve_file(
+                WatchWebAppRequestHandler.golden_watcher.temp_dir,
+                requested_file
+            )
             return
         elif parsed.path.startswith("/expected/"):
             golden_id = parsed.path[len("/expected/") :]
@@ -70,7 +78,8 @@ class WatchWebAppRequestHandler(http.server.BaseHTTPRequestHandler):
                     continue
 
                 self.serve_file(
-                    WatchWebAppRequestHandler.android_build_top, golden.golden_repo_path, "application/json"
+                    WatchWebAppRequestHandler.android_build_top,
+                    golden.golden_repo_path, "application/json"
                 )
                 return
 
@@ -93,6 +102,10 @@ class WatchWebAppRequestHandler(http.server.BaseHTTPRequestHandler):
         parsed = urllib.parse.urlparse(self.path)
         if parsed.path == "/service/refresh":
             self.service_refresh_goldens(message["clear"])
+        elif parsed.path == '/service/presubmit_artifact/list':
+            self.service_presubmit_artifact_list(message["invocation_id"])
+        elif parsed.path == '/service/fetch_artifact':
+            self.service_fetch_artifacts(message["resource_id"])
         else:
             self.send_error(404)
 
@@ -124,7 +137,7 @@ class WatchWebAppRequestHandler(http.server.BaseHTTPRequestHandler):
 
                 if ZipToVideoConverter.process_single_zip(pathlib.Path(resolved_path)):
                     video_path = resolved_path.replace("zip","mp4")
-                    if pathlib.Path(video_path).is_file() :
+                    if pathlib.Path(video_path).is_file():
                         self.send_header(
                             "Content-type", "video/mp4"
                         )
@@ -147,33 +160,89 @@ class WatchWebAppRequestHandler(http.server.BaseHTTPRequestHandler):
         goldens_list = []
 
         for golden in WatchWebAppRequestHandler.golden_watcher.cached_goldens.values():
-
-            golden_data = {}
-            golden_data["id"] = golden.id
-            golden_data["result"] = golden.result
-            golden_data["label"] = golden.golden_identifier
-            golden_data["goldenRepoPath"] = golden.golden_repo_path
-            golden_data["updated"] = golden.updated
-            golden_data["testClassName"] = golden.test_class_name
-            golden_data["testMethodName"] = golden.test_method_name
-            golden_data["testTime"] = golden.test_time
-
-            golden_data["actualUrl"] = (
-                f"{WatchWebAppRequestHandler.this_server_address}/golden/{golden.checksum}/{golden.local_file[len(WatchWebAppRequestHandler.golden_watcher.temp_dir) + 1 :]}"
-            )
-            expected_file = path.join(WatchWebAppRequestHandler.android_build_top, golden.golden_repo_path)
-            if os.path.exists(expected_file):
-                golden_data["expectedUrl"] = (
-                    f"{WatchWebAppRequestHandler.this_server_address}/expected/{golden.id}"
-                )
-
-            golden_data["videoUrl"] = (
-                f"{WatchWebAppRequestHandler.this_server_address}/golden/{golden.checksum}/{golden.video_location}"
-            )
-
-            goldens_list.append(golden_data)
+            goldens_list.append(self.create_golden_data(golden))
 
         self.send_json(goldens_list)
+
+    def create_golden_data(self, golden):
+        golden_data = {}
+        golden_data["id"] = golden.id
+        golden_data["result"] = golden.result
+        golden_data["label"] = golden.golden_identifier
+        golden_data["goldenRepoPath"] = golden.golden_repo_path
+        golden_data["updated"] = golden.updated
+        golden_data["testClassName"] = golden.test_class_name
+        golden_data["testMethodName"] = golden.test_method_name
+        golden_data["testTime"] = golden.test_time
+        golden_data["goldenName"] = golden.golden_name
+
+        golden_data["actualUrl"] = (
+            f"{WatchWebAppRequestHandler.this_server_address}/golden/"
+            f"{golden.checksum}/"
+            f"{golden.local_file[len(WatchWebAppRequestHandler.
+                                     golden_watcher.temp_dir) + 1 :]}"
+        )
+        expected_file = path.join(
+                            WatchWebAppRequestHandler.android_build_top,
+                            golden.golden_repo_path
+                        )
+
+        if os.path.exists(expected_file):
+            golden_data["expectedUrl"] = (
+                f"{WatchWebAppRequestHandler.this_server_address}/expected/{golden.id}"
+            )
+
+        golden_data["videoUrl"] = (
+            f"{WatchWebAppRequestHandler.this_server_address}/golden/"
+            f"{golden.checksum}/{golden.video_location}"
+        )
+
+        return golden_data
+
+    def service_presubmit_artifact_list(self, invocation_id):
+        try:
+            WatchWebAppRequestHandler.golden_watcher = (
+                GoldenWatcherFactory.create_watcher(
+                    GoldenWatcherTypes.PRESUBMIT,
+                    WatchWebAppRequestHandler.golden_watcher.temp_dir
+                )
+            )
+            WatchWebAppRequestHandler.presubmit_fetch_client = (
+                FetchPresubmitTestArtifacts(invocation_id,
+                                            WatchWebAppRequestHandler
+                                            .golden_watcher
+                                            .artifacts_download_dir)
+            )
+            artifacts_list = (WatchWebAppRequestHandler.presubmit_fetch_client.
+                              list_presubmit_test_artifacts())
+            self.send_json(artifacts_list)
+        except requests.exceptions.RequestException as exception:
+            if exception.response.status_code == 500:
+                self.send_error(503, str(exception))
+            else:
+                self.send_error(exception.response.status_code, str(exception))
+        except Exception as exception:
+            self.send_error(500, str(exception))
+
+    def service_fetch_artifacts(self, test_name):
+        try:
+            artifacts = (WatchWebAppRequestHandler.presubmit_fetch_client
+                            .download_presubmit_test_artifact_for_test_name(test_name))
+            if artifacts:
+                (WatchWebAppRequestHandler.golden_watcher
+                .refresh_golden_files(artifacts, test_name))
+            for golden in (WatchWebAppRequestHandler.golden_watcher
+                           .cached_goldens.values()):
+                if golden.golden_name == test_name:
+                    self.send_json(self.create_golden_data(golden))
+                    break
+        except requests.exceptions.RequestException as exception:
+            if exception.response.status_code == 500:
+                self.send_error(503, str(exception))
+            else:
+                self.send_error(exception.response.status_code, str(exception))
+        except Exception as exception:
+            self.send_error(500, str(exception))
 
     def service_refresh_goldens(self, clear):
         if clear:
@@ -188,7 +257,8 @@ class WatchWebAppRequestHandler(http.server.BaseHTTPRequestHandler):
                 print("skip", golden.id)
                 continue
 
-            dst = path.join(WatchWebAppRequestHandler.android_build_top, golden.golden_repo_path)
+            dst = path.join(WatchWebAppRequestHandler.android_build_top,
+                            golden.golden_repo_path)
             if not path.exists(path.dirname(dst)):
                 os.makedirs(path.dirname(dst))
 

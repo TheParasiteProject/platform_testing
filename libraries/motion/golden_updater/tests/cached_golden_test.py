@@ -51,10 +51,11 @@ class CachedGoldenTest(unittest.TestCase):
     self.assertEqual(
       [cached_golden.id, cached_golden.remote_file, cached_golden.local_file,
        cached_golden.updated, cached_golden.result, cached_golden.golden_repo_path,
-       cached_golden.golden_identifier, cached_golden.test_class_name, cached_golden.test_method_name,
-       cached_golden.device_local_path, cached_golden.video_location],
+       cached_golden.golden_identifier, cached_golden.test_class_name,
+       cached_golden.test_method_name, cached_golden.device_local_path,
+       cached_golden.video_location],
 
-      [hashlib.md5(remote_file.encode("utf-8")).hexdigest(), remote_file, local_file,
+      [hashlib.sha256(remote_file.encode("utf-8")).hexdigest(), remote_file, local_file,
        False, metadata["result"], metadata["goldenRepoPath"], metadata["goldenIdentifier"],
        metadata["testClassName"], metadata["testMethodName"], metadata["deviceLocalPath"],
        metadata["videoLocation"]]

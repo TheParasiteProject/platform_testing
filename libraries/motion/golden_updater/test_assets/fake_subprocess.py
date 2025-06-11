@@ -13,10 +13,18 @@
 # limitations under the License.
 #
 
-import enum
+class FakeSubprocessRun:
+    def __init__(self, return_stdout=None, raise_exception=None):
+        self.return_stdout = return_stdout
+        self.raise_exception = raise_exception
+        self.calls = []
 
-class GoldenWatcherTypes(enum.Enum):
-    ATEST = "atest"
-    FILE = "file"
-    ROBOLECTRIC = "robolectric"
-    PRESUBMIT = 'presubmit'
+    def __call__(self, command, check=True, capture_output=True, text=None):
+        self.calls.append(command)
+        if self.raise_exception:
+            raise self.raise_exception
+        else:
+            class FakeProcess:
+                stdout = self.return_stdout
+
+            return FakeProcess()

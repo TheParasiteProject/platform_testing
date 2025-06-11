@@ -52,6 +52,7 @@ def main():
             golden_watcher = GoldenWatcherFactory.create_watcher(
                 GoldenWatcherTypes.ROBOLECTRIC, tmpdir
             )
+
         else:
             serial = args.serial
             if not serial:
