@@ -36,6 +36,16 @@ object DeviceUtils {
     fun sysuiResSelector(resourceId: String, displayId: Int = DEFAULT_DISPLAY): BySelector =
         By.displayId(displayId).pkg(SYSUI_PACKAGE).res(SYSUI_PACKAGE, resourceId)
 
+    /**
+     * Returns a [BySelector] of a resource that contains the given content description in sysui
+     * package on a given display id.
+     */
+    @JvmStatic
+    fun sysuiDescContainsSelector(
+        contentDescription: String,
+        displayId: Int = DEFAULT_DISPLAY,
+    ): BySelector = By.displayId(displayId).pkg(SYSUI_PACKAGE).descContains(contentDescription)
+
     /** Returns a [BySelector] of a resource in settings package. */
     @JvmStatic
     fun settingsResSelector(resourceId: String): BySelector =

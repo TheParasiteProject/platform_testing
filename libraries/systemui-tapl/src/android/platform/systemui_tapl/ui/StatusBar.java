@@ -18,6 +18,7 @@ package android.platform.systemui_tapl.ui;
 
 import static android.platform.systemui_tapl.utils.DeviceUtils.LONG_WAIT;
 import static android.platform.systemui_tapl.utils.DeviceUtils.SHORT_WAIT;
+import static android.platform.systemui_tapl.utils.DeviceUtils.sysuiDescContainsSelector;
 import static android.platform.systemui_tapl.utils.DeviceUtils.sysuiResSelector;
 import static android.platform.test.util.HealthTestingUtils.waitForValueCatchingStaleObjectExceptions;
 import static android.platform.uiautomatorhelpers.DeviceHelpers.getUiDevice;
@@ -57,8 +58,7 @@ public class StatusBar {
     static final String BATTERY_LEVEL_TEXT_ID = "battery_percentage_view";
     static final String CLOCK_ID = "clock";
     private static final String NOTIFICATION_ICON_CONTAINER_ID = "notificationIcons";
-    private static final BySelector NOTIFICATION_LIGHTS_OUT_DOT_SELECTOR =
-            sysuiResSelector("notification_lights_out");
+    private static final String NOTIFICATION_LIGHTS_OUT_DOT_ICON = "notification_lights_out";
     private static final String UI_SYSTEM_ICONS_ID = "system_icons";
     private static final String DATE_ID = "date";
     static final String STATUS_ICON_CONTAINER_ID = "statusIcons";
@@ -90,7 +90,11 @@ public class StatusBar {
         return sysuiResSelector(resourceId, mDisplayId);
     }
 
-    private static List<UiObject2> getNotificationIconsObjects() {
+    private BySelector statusBarDescContainsSelector(String contentDescription) {
+        return sysuiDescContainsSelector(contentDescription, mDisplayId);
+    }
+
+    private static List<UiObject2> getNotificationIconsObjects(int displayId) {
         // As the container for notifications can change between the moment we get it and we get its
         // children, we retry several times in case of failure. This aims at reducing flakiness.
         return waitForValueCatchingStaleObjectExceptions(
@@ -101,7 +105,8 @@ public class StatusBar {
                                     .wait(
                                             Until.findObject(
                                                     sysuiResSelector(
-                                                            NOTIFICATION_ICON_CONTAINER_ID)),
+                                                            NOTIFICATION_ICON_CONTAINER_ID,
+                                                            displayId)),
                                             10000);
                     return container != null ? container.getChildren() : Collections.emptyList();
                 });
@@ -109,7 +114,7 @@ public class StatusBar {
 
     /** Returns the number of notification icons visible on the status bar. */
     public int getNotificationIconCount() {
-        List<UiObject2> icons = getNotificationIconsObjects();
+        List<UiObject2> icons = getNotificationIconsObjects(mDisplayId);
 
         // 2 icons are never ellipsized, let's return them.
         if (icons.size() <= 2) {
@@ -161,7 +166,7 @@ public class StatusBar {
         // Matches 12h or 24h time format
         Pattern timePattern = Pattern.compile("^(?:[01]?\\d|2[0-3]):[0-5]\\d");
         DeviceHelpers.waitForObj(
-                By.pkg("com.android.systemui").text(timePattern),
+                By.displayId(mDisplayId).pkg("com.android.systemui").text(timePattern),
                 SHORT_WAIT,
                 () -> "Clock should be visible.");
     }
@@ -171,20 +176,23 @@ public class StatusBar {
         assertWithMessage("StatusBar clock is visible")
                 .that(
                         getUiDevice()
-                                .wait(Until.gone(sysuiResSelector(CLOCK_ID)), LONG_WAIT.toMillis()))
+                                .wait(
+                                        Until.gone(statusBarSelector(CLOCK_ID)),
+                                        LONG_WAIT.toMillis()))
                 .isTrue();
     }
 
     /** Assert that the lights out notification dot is visible. */
     public void verifyLightsOutDotIsVisible() {
         SearchCondition<Boolean> searchCondition =
-                Until.hasObject(NOTIFICATION_LIGHTS_OUT_DOT_SELECTOR);
+                Until.hasObject(statusBarSelector(NOTIFICATION_LIGHTS_OUT_DOT_ICON));
         assertThat(getUiDevice().wait(searchCondition, LONG_WAIT.toMillis())).isTrue();
     }
 
     /** Assert that the lights out notification dot is NOT visible. */
     public void verifyLightsOutDotIsNotVisible() {
-        SearchCondition<Boolean> searchCondition = Until.gone(NOTIFICATION_LIGHTS_OUT_DOT_SELECTOR);
+        SearchCondition<Boolean> searchCondition =
+                Until.gone(statusBarSelector(NOTIFICATION_LIGHTS_OUT_DOT_ICON));
         assertThat(getUiDevice().wait(searchCondition, LONG_WAIT.toMillis())).isTrue();
     }
 
@@ -198,7 +206,7 @@ public class StatusBar {
         return DeviceHelpers.INSTANCE
                 .waitForObj(
                         /* UiDevice= */ getUiDevice(),
-                        /* selector= */ sysuiResSelector(STATUS_ICON_CONTAINER_ID),
+                        /* selector= */ statusBarSelector(STATUS_ICON_CONTAINER_ID),
                         /* timeout= */ SHORT_WAIT,
                         /* errorProvider= */ () ->
                                 "StatusBar icons are not found on the right hand side.")
@@ -221,7 +229,7 @@ public class StatusBar {
                         getUiDevice()
                                 .wait(
                                         Until.hasObject(
-                                                sysuiResSelector(STATUS_ICON_CONTAINER_ID)
+                                                statusBarSelector(STATUS_ICON_CONTAINER_ID)
                                                         .hasChild(
                                                                 By.desc(AIRPLANE_MODE_ICON_DESC))),
                                         SHORT_WAIT.toMillis()))
@@ -234,7 +242,7 @@ public class StatusBar {
                         getUiDevice()
                                 .wait(
                                         Until.hasObject(
-                                                sysuiResSelector(STATUS_ICON_CONTAINER_ID)
+                                                statusBarSelector(STATUS_ICON_CONTAINER_ID)
                                                         .hasChild(By.desc(DATA_SAVER_ICON_DESC))),
                                         SHORT_WAIT.toMillis()))
                 .isTrue();
@@ -247,9 +255,9 @@ public class StatusBar {
                         getUiDevice()
                                 .wait(
                                         Until.hasObject(
-                                                sysuiResSelector(UI_SYSTEM_ICONS_ID)
+                                                statusBarSelector(UI_SYSTEM_ICONS_ID)
                                                         .hasDescendant(
-                                                                By.descContains(
+                                                                statusBarDescContainsSelector(
                                                                         DOCK_DEFEND_ICON_SUFFIX_STRING))),
                                         SHORT_WAIT.toMillis()))
                 .isTrue();
@@ -258,7 +266,7 @@ public class StatusBar {
     /** Asserts that user switcher chip is invisible. */
     public void assertUserSwitcherChipIsInvisible() {
         DeviceHelpers.INSTANCE.assertInvisible(
-                sysuiResSelector(UserSwitcherChip.USER_SWITCHER_CONTAINER_ID),
+                statusBarSelector(UserSwitcherChip.USER_SWITCHER_CONTAINER_ID),
                 SHORT_WAIT,
                 () -> "User switcher chip should be invisible in status bar.");
     }
@@ -283,7 +291,7 @@ public class StatusBar {
                 viewId -> {
                     UiObject2 viewUiObject =
                             DeviceHelpers.INSTANCE.waitForNullableObj(
-                                    sysuiResSelector(viewId), SHORT_WAIT);
+                                    statusBarSelector(viewId), SHORT_WAIT);
                     if (viewUiObject != null) {
                         Rect iconPosition = viewUiObject.getVisibleBounds();
                         statusBarViewPositions.add(
@@ -302,8 +310,10 @@ public class StatusBar {
                         getUiDevice()
                                 .wait(
                                         Until.hasObject(
-                                                sysuiResSelector(STATUS_ICON_CONTAINER_ID)
-                                                        .hasChild(By.descContains(DND_ICON_DESC))),
+                                                statusBarSelector(STATUS_ICON_CONTAINER_ID)
+                                                        .hasChild(
+                                                                statusBarDescContainsSelector(
+                                                                        DND_ICON_DESC))),
                                         SHORT_WAIT.toMillis()))
                 .isTrue();
     }
@@ -313,7 +323,7 @@ public class StatusBar {
         UiObject2 batteryPercentage =
                 DeviceHelpers.INSTANCE.waitForObj(
                         /* UiDevice= */ getUiDevice(),
-                        /* selector= */ sysuiResSelector(BATTERY_LEVEL_TEXT_ID),
+                        /* selector= */ statusBarSelector(BATTERY_LEVEL_TEXT_ID),
                         /* timeout= */ LONG_WAIT,
                         /* errorProvider= */ () -> "Battery percentage not found.");
         return batteryPercentage.getText();
@@ -322,7 +332,8 @@ public class StatusBar {
     /** Assert that WiFi icon is visible. Experimental. */
     public void verifyWifiIconIsVisible() {
         DeviceHelpers.INSTANCE.assertVisible(
-                sysuiResSelector(UI_SYSTEM_ICONS_ID).hasDescendant(sysuiResSelector(WIFI_ICON_ID)),
+                statusBarSelector(UI_SYSTEM_ICONS_ID)
+                        .hasDescendant(statusBarSelector(WIFI_ICON_ID)),
                 LONG_WAIT,
                 () -> "WiFi icon should be visible in status bar.");
     }
@@ -330,8 +341,8 @@ public class StatusBar {
     /** Assert that silent icon is visible. */
     public void verifySilentIconIsVisible() {
         DeviceHelpers.INSTANCE.assertVisible(
-                sysuiResSelector(STATUS_ICON_CONTAINER_ID)
-                        .hasChild(By.descContains(SILENT_ICON_DESC_PREFIX_STRING)),
+                statusBarSelector(STATUS_ICON_CONTAINER_ID)
+                        .hasChild(statusBarDescContainsSelector(SILENT_ICON_DESC_PREFIX_STRING)),
                 LONG_WAIT,
                 () -> "Silent icon should be visible in status bar.");
     }
@@ -345,8 +356,8 @@ public class StatusBar {
             resSelector = ONGOING_ACTIVITY_CHIP_ICON_ID;
         }
         DeviceHelpers.INSTANCE.assertVisible(
-                sysuiResSelector(resSelector)
-                        .hasDescendant(By.descContains(SCREEN_RECORD_DESC_STRING)),
+                statusBarSelector(resSelector)
+                        .hasDescendant(statusBarDescContainsSelector(SCREEN_RECORD_DESC_STRING)),
                 LONG_WAIT,
                 () -> "Recording chip should be visible in status bar.");
     }
@@ -390,12 +401,12 @@ public class StatusBar {
     /** Clicks the chip in the status bar associated with the given notification. */
     public void clickNotificationChip(String notificationKey) {
         verifyNotificationChipIsVisible(notificationKey, /* text= */ null);
-        DeviceHelpers.waitForObj(sysuiResSelector(notificationKey)).click();
+        DeviceHelpers.waitForObj(statusBarSelector(notificationKey)).click();
     }
 
     /** Assert there is at least one status icon visible. */
     public void verifyAtLeastOneStatusIconIsVisible() {
-        UiObject2 statusBar = DeviceHelpers.waitForObj(sysuiResSelector(STATUS_ICON_CONTAINER_ID));
+        UiObject2 statusBar = DeviceHelpers.waitForObj(statusBarSelector(STATUS_ICON_CONTAINER_ID));
         assertWithMessage("Status bar should have at least one icon visible")
                 .that(statusBar.getChildCount())
                 .isGreaterThan(0);
@@ -405,8 +416,8 @@ public class StatusBar {
     public void assertVibrateIconVisibility(boolean visible) {
         DeviceHelpers.INSTANCE.assertVisibility(
                 /* UiDevice= */ getUiDevice(),
-                /* selector= */ sysuiResSelector(STATUS_ICON_CONTAINER_ID)
-                        .hasChild(By.descContains(VIBRATE_ICON_DESC_PREFIX_STRING)),
+                /* selector= */ statusBarSelector(STATUS_ICON_CONTAINER_ID)
+                        .hasChild(statusBarDescContainsSelector(VIBRATE_ICON_DESC_PREFIX_STRING)),
                 /* visible= */ visible,
                 /* timeout= */ LONG_WAIT);
     }
