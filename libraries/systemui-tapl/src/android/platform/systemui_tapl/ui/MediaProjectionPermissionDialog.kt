@@ -114,7 +114,7 @@ class MediaProjectionPermissionDialog internal constructor() {
         private val ENTIRE_SCREEN_RECORD_SECONDARY_SELECTOR = By.text("Record Overlay #1")
         private val SINGLE_APP_START_SELECTOR = By.text("Next")
         private val CANCEL_SELECTOR = By.text("Cancel")
-        private val SINGLE_APP_DISABLED_SELECTOR = By.textEndsWith("has disabled this option")
+        private val SINGLE_APP_DISABLED_SELECTOR = By.textEndsWith("Not supported by the app")
         private const val APP_SELECTOR_ACTIVITY = "MediaProjectionAppSelectorActivity"
         private val SHORT_TIMEOUT = Duration.ofMillis(500)
 
