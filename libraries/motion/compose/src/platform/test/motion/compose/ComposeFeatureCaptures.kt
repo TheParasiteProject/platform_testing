@@ -19,6 +19,7 @@ package platform.test.motion.compose
 import androidx.compose.ui.semantics.SemanticsNode
 import androidx.compose.ui.test.SemanticsMatcher
 import androidx.compose.ui.test.SemanticsNodeInteractionsProvider
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.IntSize
@@ -37,6 +38,16 @@ object ComposeFeatureCaptures {
         FeatureCapture<SemanticsNode, DpSize>("size") {
             with(it.layoutInfo.density) { it.size.toSize().toDpSize().asDataPoint() }
         }
+    /** Width of a node in DPs. */
+    val width =
+        FeatureCapture<SemanticsNode, Dp>("width") {
+            with(it.layoutInfo.density) { it.layoutInfo.width.toDp().asDataPoint() }
+        }
+    /** Height of a node in DPs. */
+    val height =
+        FeatureCapture<SemanticsNode, Dp>("height") {
+            with(it.layoutInfo.density) { it.layoutInfo.height.toDp().asDataPoint() }
+        }
     /**
      * The position of this node relative to the root of this Compose hierarchy, with no clipping
      * applied.
@@ -46,6 +57,16 @@ object ComposeFeatureCaptures {
             with(it.layoutInfo.density) {
                 DpOffset(it.positionInRoot.x.toDp(), it.positionInRoot.y.toDp()).asDataPoint()
             }
+        }
+    /** The x position of this node relative to the root of this Compose hierarchy in DPs. */
+    val x =
+        FeatureCapture<SemanticsNode, Dp>("x") {
+            with(it.layoutInfo.density) { it.positionInRoot.x.toDp().asDataPoint() }
+        }
+    /** The y position of this node relative to the root of this Compose hierarchy in DPs. */
+    val y =
+        FeatureCapture<SemanticsNode, Dp>("y") {
+            with(it.layoutInfo.density) { it.positionInRoot.y.toDp().asDataPoint() }
         }
 
     /**
@@ -61,6 +82,28 @@ object ComposeFeatureCaptures {
 }
 
 /**
+ * Nested time series on a single node found via [matcher].
+ *
+ * If zero or more than one matching node is found, `DataPoint.notFound()` is recorded.
+ */
+fun TimeSeriesCaptureScope<SemanticsNodeInteractionsProvider>.on(
+    matcher: SemanticsMatcher,
+    useUnmergedTree: Boolean = false,
+    nestedTimeSeriesCapture: TimeSeriesCaptureScope<SemanticsNode>.() -> Unit,
+) {
+    on(
+        resolveRelated = {
+            try {
+                it.onNode(matcher, useUnmergedTree = useUnmergedTree).fetchSemanticsNode()
+            } catch (e: AssertionError) {
+                null
+            }
+        },
+        nestedTimeSeriesCapture = nestedTimeSeriesCapture,
+    )
+}
+
+/**
  * Captures the feature using [capture] from a node found via [matcher].
  *
  * If zero or more than one matching node is found, `DataPoint.notFound()` is recorded.
@@ -69,15 +112,7 @@ fun TimeSeriesCaptureScope<SemanticsNodeInteractionsProvider>.feature(
     matcher: SemanticsMatcher,
     capture: FeatureCapture<SemanticsNode, *>,
     name: String = capture.name,
-    useUnmergedTree: Boolean = false
+    useUnmergedTree: Boolean = false,
 ) {
-    on({
-        try {
-            it.onNode(matcher, useUnmergedTree = useUnmergedTree).fetchSemanticsNode()
-        } catch (e: AssertionError) {
-            null
-        }
-    }) {
-        feature(capture, name)
-    }
+    on(matcher, useUnmergedTree = useUnmergedTree) { feature(capture, name) }
 }
