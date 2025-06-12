@@ -17,6 +17,7 @@
 package android.platform.systemui_tapl.ui
 
 import android.graphics.PointF
+import android.platform.helpers.CommonUtils.executeShellCommand
 import android.platform.systemui_tapl.controller.LockscreenController
 import android.platform.systemui_tapl.ui.CommunalHub.Companion.COMMUNAL_SELECTOR
 import android.platform.systemui_tapl.utils.DeviceUtils.sysuiResSelector
@@ -81,12 +82,17 @@ class LockScreen internal constructor(val displayId: Int = DEFAULT_DISPLAY) {
 
     /** Swipes up to the unlocked state. */
     fun swipeUpToUnlock(): Workspace {
-        swipeUp()
-        lockScreenSelector.assertInvisible { "Lockscreen still visible after swiping up." }
-        assertWithMessage("Device is still locked after swiping up")
-            .that(LockscreenController.get().isDeviceLocked)
-            .isFalse()
-        return Root.get().goHomeViaKeycode()
+        return unlock(useSwipeUp = true)
+    }
+
+    /**
+     * Dismisses the keyguard to unlock the device via a shell command.
+     *
+     * This method provides a non-interactive way to unlock the screen, which is essential
+     * for automated environments like test setup or teardown.
+     */
+    fun unlockWithShellCommand(): Workspace {
+        return unlock(useSwipeUp = false)
     }
 
     /** Uses home key to get to the unlocked state, skipping potentially flaky gesture. */
@@ -167,6 +173,20 @@ class LockScreen internal constructor(val displayId: Int = DEFAULT_DISPLAY) {
             PointF(bounds.left + bounds.width() / 2f, swipeY),
             displayId = displayId,
         )
+    }
+
+    private fun unlock(useSwipeUp: Boolean): Workspace {
+        if (useSwipeUp) {
+            swipeUp();
+        } else {
+            executeShellCommand("wm dismiss-keyguard");
+        }
+
+        lockScreenSelector.assertInvisible { "Lockscreen still visible after swiping up." }
+        assertWithMessage("Device is still locked after swiping up")
+            .that(LockscreenController.get().isDeviceLocked)
+            .isFalse()
+        return Root.get().goHomeViaKeycode()
     }
 
     companion object {
