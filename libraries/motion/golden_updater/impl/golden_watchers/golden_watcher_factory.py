@@ -19,6 +19,7 @@ from impl.golden_watchers.atest_golden_watcher import AtestGoldenWatcher
 from impl.golden_watchers.robolectric_golden_watcher import RobolectricGoldenWatcher
 from impl.golden_watchers.presubmit_golden_watcher import PresubmitGoldenWatcher
 from impl.golden_watchers.golden_file_watcher import GoldenFileWatcher
+from impl.golden_watchers.empty_watcher import EmptyWatcher
 
 class GoldenWatcherFactory:
 
@@ -48,6 +49,8 @@ class GoldenWatcherFactory:
 
                 return GoldenFileWatcher(tmpdir, adb_client)
 
+            case GoldenWatcherTypes.NONE:
+                return EmptyWatcher()
             case _:
                 print("No such Golden Watcher exists.")
                 raise ValueError("Imporper Golden Watcher Type.")

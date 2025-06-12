@@ -24,6 +24,7 @@ import os
 import requests
 from impl.constants import GOLDEN_ACCESS_TOKEN_HEADER
 from impl.zip_to_video_converter import ZipToVideoConverter
+from impl.gerrit_downloader import GerritDownloader
 from impl.fetch_presubmit_test_artifact import FetchPresubmitTestArtifacts
 from impl.golden_watchers.golden_watcher_factory import GoldenWatcherFactory
 from impl.golden_watchers.golden_watcher_types import GoldenWatcherTypes
@@ -82,6 +83,17 @@ class WatchWebAppRequestHandler(http.server.BaseHTTPRequestHandler):
                     golden.golden_repo_path, "application/json"
                 )
                 return
+        elif parsed.path.startswith("/getGerrit"):
+            query_params = urllib.parse.parse_qs(parsed.query)
+            # query_params.get() returns a list. Picking out the first element from it
+            leftLinkValues = query_params.get('leftLink')
+            rightLinkValues = query_params.get('rightLink')
+            leftLink = leftLinkValues[0] if leftLinkValues else None
+            rightLink = rightLinkValues[0] if rightLinkValues else None
+            gerrit_downloader = GerritDownloader()
+            res = gerrit_downloader.download(left=leftLink, right=rightLink)
+            self.send_json(res)
+            return
 
         self.send_error(404)
 

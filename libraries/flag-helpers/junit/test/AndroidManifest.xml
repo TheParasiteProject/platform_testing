@@ -19,7 +19,9 @@
     <application>
         <uses-library android:name="android.test.runner" />
     </application>
-
+    <uses-sdk
+        android:minSdkVersion="29"
+        android:targetSdkVersion="36" />
     <instrumentation android:name="androidx.test.runner.AndroidJUnitRunner"
                      android:targetPackage="android.platform.test.flag.junit" />
 

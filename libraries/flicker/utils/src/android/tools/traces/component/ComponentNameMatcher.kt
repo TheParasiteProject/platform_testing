@@ -162,6 +162,13 @@ class ComponentNameMatcher(var component: ComponentName) : IComponentNameMatcher
 
         @JvmField val DEFAULT_TASK_DISPLAY_AREA = ComponentNameMatcher("", "DefaultTaskDisplayArea")
 
+        @JvmField
+        val DESKTOP_WALLPAPER_ACTIVITY =
+            ComponentNameMatcher(
+                "com.android.systemui",
+                "com.android.wm.shell.desktopmode.DesktopWallpaperActivity",
+            )
+
         @JvmField val BUBBLE = ComponentNameMatcher("", "Bubbles!")
 
         @JvmField
