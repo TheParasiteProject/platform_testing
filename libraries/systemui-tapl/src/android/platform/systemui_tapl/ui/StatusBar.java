@@ -74,6 +74,7 @@ public class StatusBar {
     private static final String STATUS_BAR_CHIP_CONTENT_ID = "ongoing_activity_chip_content";
     // Corresponds to ScreenRecordChipViewModel.KEY
     private static final String SCREEN_RECORDING_CHIP_ID = "ScreenRecord";
+    private static final String PRIVACY_CHIP_ID = "privacy_chip";
     static final String SCREEN_RECORD_DESC_STRING = "Recording screen";
     static final String SILENT_ICON_DESC_PREFIX_STRING = "Ringer silent";
     static final String VIBRATE_ICON_DESC_PREFIX_STRING = "Ringer vibrate";
@@ -391,6 +392,14 @@ public class StatusBar {
     public void clickNotificationChip(String notificationKey) {
         verifyNotificationChipIsVisible(notificationKey, /* text= */ null);
         DeviceHelpers.waitForObj(sysuiResSelector(notificationKey)).click();
+    }
+
+    /** Assert that the privacy chip is visible. */
+    public void verifyPrivacyChipIsVisible() {
+        DeviceHelpers.INSTANCE.assertVisible(
+                statusBarSelector(PRIVACY_CHIP_ID),
+                LONG_WAIT,
+                () -> "Privacy chip should be visible in status bar.");
     }
 
     /** Assert there is at least one status icon visible. */
