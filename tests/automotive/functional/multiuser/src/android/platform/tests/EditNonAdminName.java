@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2024 The Android Open Source Project
+ * Copyright (C) 2025 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 
 package android.platform.tests;
 
+import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertTrue;
 
 import android.content.pm.UserInfo;
@@ -34,7 +35,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 @RunWith(AndroidJUnit4.class)
-public class EditAdminName {
+public class EditNonAdminName {
 
     public String INITIAL_USERNAME;
     public static final String EDIT_USERNAME = "editedName";
@@ -44,24 +45,24 @@ public class EditAdminName {
 
     private static final String LOG_TAG = EditAdminName.class.getSimpleName();
 
-    public EditAdminName() {
+    public EditNonAdminName() {
         mUsersHelper = new HelperAccessor<>(IAutoUserHelper.class);
         mSettingHelper = new HelperAccessor<>(IAutoSettingHelper.class);
     }
 
     @Before
-    public void getUserNameFromSettings() {
+    public void createNewNonAdminUser() {
         Log.i(LOG_TAG, "Act: Get current userinfo");
         UserInfo initialUser = mMultiUserHelper.getCurrentForegroundUserInfo();
         INITIAL_USERNAME = initialUser.name;
+        Log.i(LOG_TAG, "Act: Add new non admin user");
+        mUsersHelper.get().addUserQuickSettings(initialUser.name);
     }
 
     @After
-    public void goBackToHomeScreen() {
-        Log.i(LOG_TAG, "Act: Edit initial user's name");
-        mUsersHelper.get().editUserName(INITIAL_USERNAME);
-        Log.i(LOG_TAG, "Act: Go back to settings");
-        mSettingHelper.get().goBackToSettingsScreen();
+    public void deleteNonAdminUser() {
+        Log.i(LOG_TAG, "Act: Delete non admin user");
+        mUsersHelper.get().deleteCurrentUser();
     }
 
     @Test
@@ -69,8 +70,8 @@ public class EditAdminName {
         Log.i(LOG_TAG, "Act: Open Profile & Accounts setting");
         mSettingHelper.get().openSetting(SettingsConstants.PROFILE_ACCOUNT_SETTINGS);
 
-        Log.i(LOG_TAG, "Assert: Current user is admin");
-        assertTrue("User is not admin", mSettingHelper.get().checkMenuExists("Signed in as admin"));
+        Log.i(LOG_TAG, "Assert: Current user is non admin user");
+        assertFalse("User is admin", mSettingHelper.get().checkMenuExists("Signed in as admin"));
 
         Log.i(LOG_TAG, "Act: Edit initial user's name");
         mUsersHelper.get().editUserName(EDIT_USERNAME);
