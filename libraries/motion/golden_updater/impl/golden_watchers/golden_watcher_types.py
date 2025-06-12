@@ -20,3 +20,4 @@ class GoldenWatcherTypes(enum.Enum):
     FILE = "file"
     ROBOLECTRIC = "robolectric"
     PRESUBMIT = 'presubmit'
+    NONE = "none"
