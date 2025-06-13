@@ -36,7 +36,9 @@ import android.annotation.Nullable;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.platform.helpers.foldable.UnfoldAnimationTestingUtils;
+import android.platform.systemui_tapl.controller.NotificationController;
 import android.platform.uiautomatorhelpers.DeviceHelpers;
+import android.platform.uiautomatorhelpers.WaitUtils;
 
 import androidx.test.uiautomator.By;
 import androidx.test.uiautomator.BySelector;
@@ -48,6 +50,7 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.function.Predicate;
 import java.util.regex.Pattern;
 
 /** System UI test automation object representing status bar. */
@@ -92,6 +95,32 @@ public class StatusBar {
 
     private BySelector statusBarDescContainsSelector(String contentDescription) {
         return sysuiDescContainsSelector(contentDescription, mDisplayId);
+    }
+
+    /**
+     * Posts a specified number of notifications and then waits for a condition on the notification
+     * icon count to be met.
+     *
+     * @return The final notification icon count observed when the {@code countCondition} was met.
+     */
+    public int postNotificationsAndAssertOnIconCount(
+            int notificationCount, Predicate<Integer> countCondition) {
+        final NotificationController controller = NotificationController.get();
+        int initialNotificationCount = getNotificationIconCount();
+        controller.postNotifications(notificationCount, true /* isMessaging */);
+
+        final int[] newNotificationCount = {0};
+        WaitUtils.ensureThat(
+                "Notification icon count didn't update as expected, initial count: "
+                        + initialNotificationCount
+                        + ", new count: "
+                        + newNotificationCount[0],
+                () -> {
+                    newNotificationCount[0] = getNotificationIconCount();
+                    return countCondition.test(newNotificationCount[0]);
+                });
+
+        return newNotificationCount[0];
     }
 
     private static List<UiObject2> getNotificationIconsObjects(int displayId) {
