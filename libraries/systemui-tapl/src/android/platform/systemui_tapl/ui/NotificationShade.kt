@@ -53,7 +53,8 @@ import kotlin.math.floor
 /** System UI test automation object representing the notification shade. */
 class NotificationShade internal constructor(val displayId: Int = DEFAULT_DISPLAY) {
     init {
-        if (CommonUtils.isSplitShade()) {
+        // SplitShade is deprecated with SceneContainer, this assertion is not relevant there.
+        if (!Flags.sceneContainer() && CommonUtils.isSplitShade()) {
             val qsBounds = quickSettingsContainer.visibleBounds
             val notificationBounds = notificationShadeScrollContainer.visibleBounds
             assertWithMessage(
