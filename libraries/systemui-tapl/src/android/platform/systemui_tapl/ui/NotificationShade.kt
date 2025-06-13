@@ -290,8 +290,24 @@ class NotificationShade internal constructor(val displayId: Int = DEFAULT_DISPLA
             else NotificationShadeType.NORMAL
         }
 
-    /** Opens quick settings via swipe. */
+    /** Opens quick settings. */
     fun openQuickSettings(): QuickSettings {
+        try {
+            return openQuickSettingsWithShellCommand()
+        } catch (e: Exception) {
+            return openQuickSettingsWithSwipe()
+        }
+    }
+
+    /** Opens quick settings. */
+    fun openQuickSettingsWithShellCommand(): QuickSettings {
+        uiDevice.executeShellCommand("cmd statusbar expand-settings")
+        waitForObj(sysuiResSelector("quick_settings_panel", displayId))
+        return QuickSettings(displayId)
+    }
+
+    /** Opens quick settings via swipe. */
+    fun openQuickSettingsWithSwipe(): QuickSettings {
         val device = uiDevice
         // Swipe in first quarter to avoid desktop windowing app handle interactions.
         val swipeXCoordinate = device.getDisplayWidth(displayId) / 4
