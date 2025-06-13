@@ -199,6 +199,22 @@ class NotificationShade internal constructor(val displayId: Int = DEFAULT_DISPLA
 
     /** Closes the shade. */
     fun close() {
+        try {
+            closeWithShellCommand()
+        } catch (e: Exception) {
+            // if the shell command fails, use BetterSwipe
+            closeWithSwipe()
+        }
+    }
+
+    /** Closes the shade using "adb shell cmd statusbar collapse". */
+    fun closeWithShellCommand() {
+        uiDevice.executeShellCommand("cmd statusbar collapse")
+        waitForShadeToClose(displayId)
+    }
+
+    /** Closes the shade with a swipe. */
+    fun closeWithSwipe() {
         val device = uiDevice
         // Swipe in third quarter to avoid desktop windowing app handle interactions, and due to
         // the flexiglass notification shade not always being responsive on left side (b/406203539)
