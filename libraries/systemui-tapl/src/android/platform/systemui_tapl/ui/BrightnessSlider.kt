@@ -60,18 +60,16 @@ class BrightnessSlider internal constructor(private val displayId: Int = DEFAULT
                 sliderBounds.centerY().toFloat(),
             )
         // NOTE: This control logic is less than clean.
-        if (Flags.qsUiRefactorComposeFragment()) {
+        if (Flags.qsUiRefactorComposeFragment() || Flags.sceneContainer()) {
             BetterSwipe.swipe(
                 pointFrom, pointTo, swipeDuration, PRECISE_GESTURE_INTERPOLATOR, displayId)
-            if (Flags.qsUiRefactorComposeFragment()) {
-                // In this case, the slider is moved to an overlay, then we verify:
-                // The notification shade is not visible, but
-                sysuiResSelector(UI_NOTIFICATION_SHADE_ID, displayId).assertInvisible()
-                // The actual slider is visible, and
-                sysuiResSelector(UI_BRIGHTNESS_SLIDER_ID, displayId).assertVisible()
-                // The bounds haven't changed.
-                assertThat(slider.visibleBounds).isEqualTo(sliderBounds)
-            }
+            // In this case, the slider is moved to an overlay, then we verify:
+            // The notification shade is not visible, but
+            sysuiResSelector(UI_NOTIFICATION_SHADE_ID, displayId).assertInvisible()
+            // The actual slider is visible, and
+            sysuiResSelector(UI_BRIGHTNESS_SLIDER_ID, displayId).assertVisible()
+            // The bounds haven't changed.
+            assertThat(slider.visibleBounds).isEqualTo(sliderBounds)
         } else {
             var mirrorBounds: Rect? = null
             BetterSwipe.swipe(pointFrom, displayId) {
