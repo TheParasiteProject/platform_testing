@@ -50,7 +50,7 @@ public class BluetoothAdapterSnippet implements Snippet {
     // Default timeout in seconds.
     private static final int TIMEOUT_TOGGLE_STATE_SEC = 30;
     // Default timeout in seconds for UI update.
-    private static final int TIMEOUT_UI_UPDATE_SEC = 4;
+    private static final int TIMEOUT_UI_UPDATE_SEC = 8;
     private final Context mContext;
     private static final BluetoothAdapter sBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
     private static final Pattern TEXT_PATTERN_ALLOW =
@@ -142,6 +142,58 @@ public class BluetoothAdapterSnippet implements Snippet {
             throw new BluetoothAdapterSnippetException(
                     String.format(
                             "Bluetooth did not turn on within %ss.", TIMEOUT_TOGGLE_STATE_SEC));
+        }
+    }
+
+    /**
+     * Become discoverable in bluetooth with larger tolerance on UI update timeout than
+     * btBecomeDiscoverable from
+     * https://github.com/google/mobly-bundled-snippets/blob/master/src/main/java/com/google/android/mobly/snippet/bundled/bluetooth/BluetoothAdapterSnippet.java.
+     */
+    @Rpc(description = "Become discoverable in Bluetooth.")
+    public void btBecomeDiscoverableWithLongerWait(Integer duration) throws Throwable {
+        if (!sBluetoothAdapter.isEnabled()) {
+            throw new BluetoothAdapterSnippetException(
+                    "Bluetooth is not enabled, cannot become discoverable.");
+        }
+        if (Build.VERSION.SDK_INT >= 31) {
+            // BluetoothAdapter#setScanMode is removed from public SDK for 31 and above, so uses an
+            // intent instead.
+            UiDevice uiDevice = getUiDevice();
+            Intent discoverableIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_DISCOVERABLE);
+            discoverableIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            discoverableIntent.putExtra(BluetoothAdapter.EXTRA_DISCOVERABLE_DURATION, duration);
+            // Triggers the system UI popup to ask for explicit permission.
+            mContext.startActivity(discoverableIntent);
+            // Clicks the "ALLOW" button.
+            BySelector allowButtonSelector = By.text(TEXT_PATTERN_ALLOW).clickable(true);
+            if (!Utils.waitUntil(
+                    () -> uiDevice.findObject(allowButtonSelector) != null,
+                    TIMEOUT_UI_UPDATE_SEC)) {
+                throw new BluetoothAdapterSnippetException(
+                        String.format(
+                                "Bluetooth permission request dialog did not show up within %ss.",
+                                TIMEOUT_UI_UPDATE_SEC));
+            }
+            uiDevice.findObject(allowButtonSelector).click();
+        } else if (Build.VERSION.SDK_INT >= 30) {
+            if (!(boolean)
+                    Utils.invokeByReflection(
+                            sBluetoothAdapter,
+                            "setScanMode",
+                            BluetoothAdapter.SCAN_MODE_CONNECTABLE_DISCOVERABLE,
+                            (long) duration * 1000)) {
+                throw new BluetoothAdapterSnippetException("Failed to become discoverable.");
+            }
+        } else {
+            if (!(boolean)
+                    Utils.invokeByReflection(
+                            sBluetoothAdapter,
+                            "setScanMode",
+                            BluetoothAdapter.SCAN_MODE_CONNECTABLE_DISCOVERABLE,
+                            duration)) {
+                throw new BluetoothAdapterSnippetException("Failed to become discoverable.");
+            }
         }
     }
 }
