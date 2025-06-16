@@ -246,6 +246,54 @@ public class SpectatioUiUtil {
         }
     }
 
+    // all the javadoc comments on these hardkey methods are copy-pasted from ui automator docs
+    // that's all they do
+
+    /** Simulates a short press on the MENU button. */
+    public void pressMenu() {
+        mDevice.pressMenu();
+    }
+
+    /** Simulates a short press on the SEARCH button. */
+    public void pressSearch() {
+        mDevice.pressSearch();
+    }
+
+    /** Simulates a short press on the CENTER button. */
+    public void pressDPadCenter() {
+        mDevice.pressDPadCenter();
+    }
+
+    /** Simulates a short press on the DOWN button. */
+    public void pressDPadDown() {
+        mDevice.pressDPadDown();
+    }
+
+    /** Simulates a short press on the UP button. */
+    public void pressDPadUp() {
+        mDevice.pressDPadUp();
+    }
+
+    /** Simulates a short press on the LEFT button. */
+    public void pressDPadLeft() {
+        mDevice.pressDPadLeft();
+    }
+
+    /** Simulates a short press on the RIGHT button. */
+    public void pressDPadRight() {
+        mDevice.pressDPadRight();
+    }
+
+    /** Simulates a short press on the DELETE key. */
+    public void pressDelete() {
+        mDevice.pressDelete();
+    }
+
+    /** Simulates a short press on the ENTER key. */
+    public void pressEnter() {
+        mDevice.pressEnter();
+    }
+
     public void clickAndWait(UiObject2 uiObject) {
         validateUiObjectAndThrowIllegalArgumentException(uiObject, /* action= */ "Click");
         uiObject.click();
