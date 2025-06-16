@@ -19,6 +19,7 @@ package android.tools.traces.io
 import android.tools.Tag
 import android.tools.Timestamp
 import android.tools.Timestamps
+import android.tools.io.Artifact
 import android.tools.io.FLICKER_IO_TAG
 import android.tools.io.ResultArtifactDescriptor
 import android.tools.io.RunStatus
@@ -27,6 +28,7 @@ import android.tools.io.TransitionTimeRange
 import android.tools.withTracing
 import android.util.Log
 import java.io.File
+import kotlin.collections.toTypedArray
 
 /** Helper class to create run result artifact files */
 open class ResultWriter {
@@ -90,15 +92,35 @@ open class ResultWriter {
                 Log.w(FLICKER_IO_TAG, "Writing result with $runStatus run status")
             }
 
-            val artifact =
+            val screenRecordings = files.filter { it.key.traceType == TraceType.SCREEN_RECORDING }
+            val otherTraces = files.filter { it.key.traceType != TraceType.SCREEN_RECORDING }
+
+            val winscopeArtifact =
                 ArtifactBuilder()
                     .withName(testIdentifier)
                     .withOutputDir(outputDir)
                     .withStatus(runStatus)
-                    .withFiles(files)
+                    .withFiles(otherTraces)
                     .build()
+
+            require(screenRecordings.size <= 1) { "Screen recording should be a single file" }
+            val screenRecording =
+                if (screenRecordings.isEmpty()) {
+                    null
+                } else {
+                    ArtifactBuilder()
+                        .withName(testIdentifier)
+                        .withOutputDir(outputDir)
+                        .withStatus(runStatus)
+                        .withFiles(screenRecordings)
+                        .build()
+                }
+
+            val artifacts =
+                arrayOf(winscopeArtifact, screenRecording).filterNotNull().toTypedArray<Artifact>()
+
             ResultData(
-                arrayOf(artifact),
+                artifacts,
                 TransitionTimeRange(transitionStartTime, transitionEndTime),
                 executionError,
             )
