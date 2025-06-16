@@ -18,25 +18,13 @@ package android.tools.traces.io
 
 import android.tools.Scenario
 import android.tools.io.Artifact
-import android.tools.io.BUFFER_SIZE
-import android.tools.io.FLICKER_IO_TAG
-import android.tools.io.ResultArtifactDescriptor
 import android.tools.io.RunStatus
 import android.tools.io.TraceType
 import android.tools.traces.deleteIfExists
 import android.tools.withTracing
-import android.util.Log
-import java.io.BufferedInputStream
-import java.io.BufferedOutputStream
-import java.io.ByteArrayOutputStream
 import java.io.File
-import java.io.FileInputStream
-import java.io.FileNotFoundException
-import java.io.IOException
-import java.util.zip.ZipEntry
-import java.util.zip.ZipInputStream
 
-class FileArtifact
+abstract class FileArtifact
 internal constructor(
     private val scenario: Scenario,
     artifactFile: File,
@@ -80,18 +68,6 @@ internal constructor(
         file.deleteIfExists()
     }
 
-    override fun hasTrace(descriptor: ResultArtifactDescriptor): Boolean {
-        var found = false
-        forEachFileInZip { found = found || (it.name == descriptor.fileNameInArtifact) }
-        return found
-    }
-
-    override fun traceCount(): Int {
-        var count = 0
-        forEachFileInZip { count++ }
-        return count
-    }
-
     override fun toString(): String = fileName
 
     override fun equals(other: Any?): Boolean {
@@ -109,79 +85,6 @@ internal constructor(
 
     /** updates the artifact status to [newStatus] */
     private fun getNewFilePath(newStatus: RunStatus): File {
-        return file.resolveSibling(newStatus.generateArchiveNameFor(scenario, counter))
-    }
-
-    @Throws(IOException::class)
-    override fun readBytes(descriptor: ResultArtifactDescriptor): ByteArray? {
-        Log.d(FLICKER_IO_TAG, "Reading descriptor=$descriptor from $this")
-
-        var foundFile = false
-        val outByteArray = ByteArrayOutputStream()
-        val tmpBuffer = ByteArray(BUFFER_SIZE)
-        withZipFile {
-            var zipEntry: ZipEntry? = it.nextEntry
-            while (zipEntry != null) {
-                if (zipEntry.name == descriptor.fileNameInArtifact) {
-                    val outputStream = BufferedOutputStream(outByteArray, BUFFER_SIZE)
-                    try {
-                        var size = it.read(tmpBuffer, 0, BUFFER_SIZE)
-                        while (size > 0) {
-                            outputStream.write(tmpBuffer, 0, size)
-                            size = it.read(tmpBuffer, 0, BUFFER_SIZE)
-                        }
-                        it.closeEntry()
-                    } finally {
-                        outputStream.flush()
-                        outputStream.close()
-                    }
-                    foundFile = true
-                    break
-                }
-                zipEntry = it.nextEntry
-            }
-        }
-
-        return if (foundFile) outByteArray.toByteArray() else null
-    }
-
-    private fun withZipFile(predicate: (ZipInputStream) -> Unit) {
-        if (!file.exists()) {
-            val directory = file.parentFile
-            val files =
-                try {
-                    directory?.listFiles()?.filterNot { it.isDirectory }?.map { it.absolutePath }
-                } catch (e: Throwable) {
-                    null
-                }
-            throw FileNotFoundException(
-                buildString {
-                    append(file)
-                    appendLine(" could not be found!")
-                    append("Found ")
-                    append(files?.joinToString()?.ifEmpty { "no files" })
-                    append(" in ")
-                    append(directory?.absolutePath)
-                }
-            )
-        }
-
-        val zipInputStream = ZipInputStream(BufferedInputStream(FileInputStream(file), BUFFER_SIZE))
-        try {
-            predicate(zipInputStream)
-        } finally {
-            zipInputStream.closeEntry()
-            zipInputStream.close()
-        }
-    }
-
-    private fun forEachFileInZip(predicate: (ZipEntry) -> Unit) {
-        withZipFile {
-            var zipEntry: ZipEntry? = it.nextEntry
-            while (zipEntry != null) {
-                predicate(zipEntry)
-                zipEntry = it.nextEntry
-            }
-        }
+        return file.resolveSibling(newStatus.generateArchiveNameFor(scenario, counter, type))
     }
 }
