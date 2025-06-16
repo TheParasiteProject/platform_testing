@@ -79,11 +79,11 @@ fun getScenarioTraces(scenario: String): FlickerBuilder.TraceFiles {
     lateinit var eventLog: File
     val traces =
         mapOf<String, (File) -> Unit>(
-            "wm_trace$WINSCOPE_EXT" to { wmTrace = it },
-            "trace$PERFETTO_EXT" to { perfettoTrace = it },
-            "wm_transition_trace$WINSCOPE_EXT" to { wmTransitionTrace = it },
-            "shell_transition_trace$WINSCOPE_EXT" to { shellTransitionTrace = it },
-            "eventlog$WINSCOPE_EXT" to { eventLog = it },
+            "wm_trace.$WINSCOPE_EXT" to { wmTrace = it },
+            "trace.$PERFETTO_EXT" to { perfettoTrace = it },
+            "wm_transition_trace.$WINSCOPE_EXT" to { wmTransitionTrace = it },
+            "shell_transition_trace.$WINSCOPE_EXT" to { shellTransitionTrace = it },
+            "eventlog.$WINSCOPE_EXT" to { eventLog = it },
         )
     for ((traceFileName, resultSetter) in traces.entries) {
         val traceBytes = readAsset("scenarios/$scenario/$traceFileName")
