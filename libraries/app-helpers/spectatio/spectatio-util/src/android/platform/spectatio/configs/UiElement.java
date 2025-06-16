@@ -129,6 +129,8 @@ public class UiElement {
                 return By.text(Pattern.compile(mValue, Pattern.CASE_INSENSITIVE));
             case JsonConfigConstants.TEXT_CONTAINS:
                 return By.textContains(mValue);
+            case JsonConfigConstants.TEXT_MATCHES:
+                return By.text(Pattern.compile(mValue));
             case JsonConfigConstants.DESCRIPTION:
                 return By.desc(Pattern.compile(mValue, Pattern.CASE_INSENSITIVE));
             case JsonConfigConstants.DESCRIPTION_CONTAINS:
@@ -177,6 +179,9 @@ public class UiElement {
                 break;
             case JsonConfigConstants.TEXT_CONTAINS:
                 s.textContains(mValue);
+                break;
+            case JsonConfigConstants.TEXT_MATCHES:
+                s.text(Pattern.compile(mValue));
                 break;
             case JsonConfigConstants.DESCRIPTION:
                 s.desc(Pattern.compile(mValue, Pattern.CASE_INSENSITIVE));

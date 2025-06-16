@@ -16,12 +16,15 @@
 
 package android.platform.systemui_tapl.controller;
 
+import static android.platform.helpers.CommonUtils.executeShellCommand;
 import static android.platform.uiautomatorhelpers.DeviceHelpers.getUiDevice;
 import static android.platform.uiautomatorhelpers.DeviceHelpers.shell;
 
 /** Controller for manipulating status bar state. */
 public class StatusBarController {
     private static final String SHOW_BATTERY_PERCENT_SETTING = "status_bar_show_battery_percent";
+    private static final String ENABLE_DND_SHELL_CMD = "cmd notification set_dnd on";
+    private static final String DISABLE_DND_SHELL_CMD = "cmd notification set_dnd off";
 
     private StatusBarController() {}
 
@@ -54,5 +57,14 @@ public class StatusBarController {
         boolean wasPercentageVisible = shouldShowBatteryPercentage();
         setBatteryPercentageVisibleInternal(visible);
         return wasPercentageVisible;
+    }
+
+    /**
+     * Enable/Disable Dnd icon on status bar.
+     *
+     * @param enable True to enable, false to disable.
+     */
+    public void updateDndIcon(boolean enable) {
+        executeShellCommand(enable ? ENABLE_DND_SHELL_CMD : DISABLE_DND_SHELL_CMD);
     }
 }

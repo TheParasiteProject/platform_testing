@@ -387,6 +387,27 @@ public class SettingsSystemHelperImpl extends AbstractStandardAppHelper
         return isUsageinGB;
     }
 
+    /** {@inheritDoc} */
+    @Override
+    public void openLocalSystemUpdate() {
+        UiObject2 localSystemUpdateMenu =
+                getMenu(getUiElementFromConfig(AutomotiveConfigConstants.LOCAL_SYSTEM_UPDATE));
+        getSpectatioUiUtil()
+                .validateUiObject(
+                        localSystemUpdateMenu,
+                        String.format("Unable to find UI Element for Local System Update menu"));
+        getSpectatioUiUtil().clickAndWait(localSystemUpdateMenu);
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    public boolean isLocalSystemUpdateVolumesPresent() {
+        return getSpectatioUiUtil()
+                .hasUiElement(
+                        getUiElementFromConfig(
+                                AutomotiveConfigConstants.LOCAL_SYSTEM_UPDATE_VOLUME));
+    }
+
     private UiObject2 getMenu(BySelector selector) {
         UiObject2 object =
                 mScrollUtility.scrollAndFindUiObject(

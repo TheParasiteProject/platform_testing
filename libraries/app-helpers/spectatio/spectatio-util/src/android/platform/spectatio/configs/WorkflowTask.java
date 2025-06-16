@@ -497,6 +497,69 @@ public class WorkflowTask {
                     spectatioUiUtil.wakeUp();
                 }
                 break;
+            case "MENU":
+                if (isLongPress) {
+                    throwRuntimeException("Long Press", key, workflowName, "Not Supported");
+                } else {
+                    spectatioUiUtil.pressMenu();
+                }
+                break;
+            case "SEARCH":
+                if (isLongPress) {
+                    throwRuntimeException("Long Press", key, workflowName, "Not Supported");
+                } else {
+                    spectatioUiUtil.pressSearch();
+                }
+                break;
+            case "DPAD_CENTER":
+                if (isLongPress) {
+                    throwRuntimeException("Long Press", key, workflowName, "Not Supported");
+                } else {
+                    spectatioUiUtil.pressDPadCenter();
+                }
+                break;
+            case "DPAD_DOWN":
+                if (isLongPress) {
+                    throwRuntimeException("Long Press", key, workflowName, "Not Supported");
+                } else {
+                    spectatioUiUtil.pressDPadDown();
+                }
+                break;
+            case "DPAD_UP":
+                if (isLongPress) {
+                    throwRuntimeException("Long Press", key, workflowName, "Not Supported");
+                } else {
+                    spectatioUiUtil.pressDPadUp();
+                }
+                break;
+            case "DPAD_LEFT":
+                if (isLongPress) {
+                    throwRuntimeException("Long Press", key, workflowName, "Not Supported");
+                } else {
+                    spectatioUiUtil.pressDPadLeft();
+                }
+                break;
+            case "DPAD_RIGHT":
+                if (isLongPress) {
+                    throwRuntimeException("Long Press", key, workflowName, "Not Supported");
+                } else {
+                    spectatioUiUtil.pressDPadRight();
+                }
+                break;
+            case "DELETE":
+                if (isLongPress) {
+                    throwRuntimeException("Long Press", key, workflowName, "Not Supported");
+                } else {
+                    spectatioUiUtil.pressDelete();
+                }
+                break;
+            case "ENTER":
+                if (isLongPress) {
+                    throwRuntimeException("Long Press", key, workflowName, "Not Supported");
+                } else {
+                    spectatioUiUtil.pressEnter();
+                }
+                break;
             default:
                 throwRuntimeException("Config", key, workflowName, "Not Supported");
         }

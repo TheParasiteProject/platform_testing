@@ -190,6 +190,15 @@ public interface IAutoSettingHelper extends IAppHelper {
     void searchAndSelect(String item, int selectedIndex);
 
     /**
+     * Setup expectations: full settings facet is open.
+     *
+     * <p>search in settings app.
+     *
+     * @param item to be searched.
+     */
+    void searchSettings(String item);
+
+    /**
      * Setup expectations: search result is open.
      *
      * <p>verify page title contains the searched item.
@@ -265,4 +274,25 @@ public interface IAutoSettingHelper extends IAppHelper {
      * <p>This method presses settings back
      */
     void pressSettingsBackNavIcon();
+
+    /**
+     * Setup expectation: Soft keyboard is open.
+     *
+     * <p>closes softkeyboard.
+     */
+    void hideSoftKeyboard();
+
+    /**
+     * Setup expectation: Search settings is open.
+     *
+     * <p>This method checks if all searched settings page names are disolayed.
+     */
+    boolean isAllSettingsDisplayed(String setting);
+
+    /**
+     * Setup expectation: Search settings is open.
+     *
+     * <p>This method checks if number of search results count is matched.
+     */
+    boolean isNumberOfResultsDisplayed(int count);
 }

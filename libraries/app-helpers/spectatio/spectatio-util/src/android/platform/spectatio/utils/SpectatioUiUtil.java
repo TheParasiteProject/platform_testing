@@ -47,6 +47,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
+import java.util.regex.Pattern;
 
 public class SpectatioUiUtil {
     private static final String LOG_TAG = SpectatioUiUtil.class.getSimpleName();
@@ -244,6 +245,54 @@ public class SpectatioUiUtil {
         } catch (RemoteException ex) {
             throw new IllegalStateException("Failed to wake up device.", ex);
         }
+    }
+
+    // all the javadoc comments on these hardkey methods are copy-pasted from ui automator docs
+    // that's all they do
+
+    /** Simulates a short press on the MENU button. */
+    public void pressMenu() {
+        mDevice.pressMenu();
+    }
+
+    /** Simulates a short press on the SEARCH button. */
+    public void pressSearch() {
+        mDevice.pressSearch();
+    }
+
+    /** Simulates a short press on the CENTER button. */
+    public void pressDPadCenter() {
+        mDevice.pressDPadCenter();
+    }
+
+    /** Simulates a short press on the DOWN button. */
+    public void pressDPadDown() {
+        mDevice.pressDPadDown();
+    }
+
+    /** Simulates a short press on the UP button. */
+    public void pressDPadUp() {
+        mDevice.pressDPadUp();
+    }
+
+    /** Simulates a short press on the LEFT button. */
+    public void pressDPadLeft() {
+        mDevice.pressDPadLeft();
+    }
+
+    /** Simulates a short press on the RIGHT button. */
+    public void pressDPadRight() {
+        mDevice.pressDPadRight();
+    }
+
+    /** Simulates a short press on the DELETE key. */
+    public void pressDelete() {
+        mDevice.pressDelete();
+    }
+
+    /** Simulates a short press on the ENTER key. */
+    public void pressEnter() {
+        mDevice.pressEnter();
     }
 
     public void clickAndWait(UiObject2 uiObject) {
@@ -1221,6 +1270,7 @@ public class SpectatioUiUtil {
                     JsonConfigConstants.SCROLLABLE,
                     JsonConfigConstants.TEXT,
                     JsonConfigConstants.TEXT_CONTAINS,
+                    JsonConfigConstants.TEXT_MATCHES,
                     JsonConfigConstants.DESCRIPTION,
                     JsonConfigConstants.DESCRIPTION_CONTAINS,
                     JsonConfigConstants.CLASS,
@@ -1253,6 +1303,8 @@ public class SpectatioUiUtil {
                 return uiObject.getText().equalsIgnoreCase(expected);
             case JsonConfigConstants.TEXT_CONTAINS:
                 return uiObject.getText().contains(expected);
+            case JsonConfigConstants.TEXT_MATCHES:
+                return Pattern.matches(expected, uiObject.getText());
             case JsonConfigConstants.DESCRIPTION:
                 return uiObject.getContentDescription().equalsIgnoreCase(expected);
             case JsonConfigConstants.DESCRIPTION_CONTAINS:
