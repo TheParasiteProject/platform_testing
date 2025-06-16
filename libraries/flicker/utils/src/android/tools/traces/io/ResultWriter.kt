@@ -77,6 +77,7 @@ open class ResultWriter {
             "Add trace result file=$artifact type=$traceType tag=$tag scenario=$scenario",
         )
         val fileDescriptor = ResultArtifactDescriptor(traceType, tag)
+        require(!files.containsKey(fileDescriptor)) { "File already added: $fileDescriptor" }
         files[fileDescriptor] = artifact
     }
 
