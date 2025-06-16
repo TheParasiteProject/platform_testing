@@ -756,4 +756,5 @@ public class AutomotiveConfigConstants {
     public static final String SOFT_KEYBOARD_HIDE_BUTTON = "SOFT_KEYBOARD_HIDE_BUTTON";
 
     public static final String RECENT_APPS_THUMBNAIL = "RECENT_APPS_THUMBNAIL";
+    public static final String SEARCH_RESULTS_TITLE = "SEARCH_RESULTS_TITLE";
 }

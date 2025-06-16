@@ -302,6 +302,61 @@ public class SettingHelperImpl extends AbstractStandardAppHelper implements IAut
 
     /** {@inheritDoc} */
     @Override
+    public void searchSettings(String item) {
+        BySelector searchButtonSelector = getUiElementFromConfig(AutomotiveConfigConstants.SEARCH);
+        UiObject2 searchButton = getSpectatioUiUtil().findUiObject(searchButtonSelector);
+        getSpectatioUiUtil().validateUiObject(searchButton, AutomotiveConfigConstants.SEARCH);
+        getSpectatioUiUtil().clickAndWait(searchButton);
+        getSpectatioUiUtil().waitForIdle();
+
+        BySelector searchBoxSelector = getUiElementFromConfig(AutomotiveConfigConstants.SEARCH_BOX);
+        UiObject2 searchBox = getSpectatioUiUtil().findUiObject(searchBoxSelector);
+        getSpectatioUiUtil().validateUiObject(searchBox, AutomotiveConfigConstants.SEARCH_BOX);
+        searchBox.setText(item);
+        BySelector searchResultsSelector =
+                getUiElementFromConfig(AutomotiveConfigConstants.SEARCH_RESULTS_TITLE);
+        getSpectatioUiUtil().waitForUiObject(searchResultsSelector);
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    public void hideSoftKeyboard() {
+        BySelector softKeyboardHideButtonSelector =
+                getUiElementFromConfig(AutomotiveConfigConstants.SOFT_KEYBOARD_HIDE_BUTTON);
+        if (getSpectatioUiUtil().hasUiElement(softKeyboardHideButtonSelector)) {
+            UiObject2 softKeyboardHideButtonObject =
+                    getSpectatioUiUtil().findUiObject(softKeyboardHideButtonSelector);
+            getSpectatioUiUtil().clickAndWait(softKeyboardHideButtonObject);
+        }
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    public boolean isAllSettingsDisplayed(String setting) {
+        boolean flag = true;
+        BySelector searchResultsSelector =
+                getUiElementFromConfig(AutomotiveConfigConstants.SEARCH_RESULTS_TITLE);
+        List<UiObject2> searchResultsList =
+                getSpectatioUiUtil().findUiObjects(searchResultsSelector);
+        for (UiObject2 object : searchResultsList) {
+            String title = object.getText().toLowerCase(Locale.ENGLISH);
+            if (!title.contains(setting)) flag = false;
+        }
+        return flag;
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    public boolean isNumberOfResultsDisplayed(int count) {
+        BySelector searchResultsSelector =
+                getUiElementFromConfig(AutomotiveConfigConstants.SEARCH_RESULTS_TITLE);
+        List<UiObject2> searchResultsList =
+                getSpectatioUiUtil().findUiObjects(searchResultsSelector);
+        return count == searchResultsList.size();
+    }
+
+    /** {@inheritDoc} */
+    @Override
     public boolean isValidPageTitle(String item) {
         UiObject2 pageTitle = getPageTitle();
         return pageTitle.getText().contains(item);

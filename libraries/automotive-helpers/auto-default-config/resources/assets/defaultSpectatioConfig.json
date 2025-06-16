@@ -1738,6 +1738,11 @@
       "TYPE": "RESOURCE_ID",
       "VALUE": "car_ui_toolbar_search_bar"
     },
+    "SEARCH_RESULTS_TITLE": {
+      "TYPE": "RESOURCE_ID",
+      "VALUE": "title",
+      "PACKAGE": "android"
+    },
     "SEARCH_RESULTS": {
       "TYPE": "MULTIPLE",
       "SPECIFIERS": [
