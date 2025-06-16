@@ -650,7 +650,9 @@ public class AutomotiveConfigConstants {
     public static final String STORAGE_OPTIONS_SUMMARY = "STORAGE_OPTIONS_SUMMARY";
     public static final String STORAGE_FILES_SETTINGS = "STORAGE_FILES_SETTINGS";
     public static final String STORAGE_SYSTEM_SETTINGS = "STORAGE_SYSTEM_SETTINGS";
-
+    // Local System Update
+    public static final String LOCAL_SYSTEM_UPDATE = "LOCAL_SYSTEM_UPDATE";
+    public static final String LOCAL_SYSTEM_UPDATE_VOLUME = "LOCAL_SYSTEM_UPDATE_VOLUME";
 
     // Car Sms Messenger
     public static final String SMS_PACKAGE = "SMS_PACKAGE";
