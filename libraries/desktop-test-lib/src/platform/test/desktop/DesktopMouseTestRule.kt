@@ -216,6 +216,26 @@ class DesktopMouseTestRule() : TestRule {
     }
 
     /**
+     * Performs a mouse click of the specified [button], or a primary-button click by default, at
+     * the current cursor location.
+     */
+    fun click(@VirtualMouseButtonEvent.Button button: Int = BUTTON_PRIMARY) {
+        resourceTracker.requireVirtualMouse.sendButtonEvent(
+            VirtualMouseButtonEvent.Builder()
+                .setAction(ACTION_BUTTON_PRESS)
+                .setButtonCode(button)
+                .build()
+        )
+
+        resourceTracker.requireVirtualMouse.sendButtonEvent(
+            VirtualMouseButtonEvent.Builder()
+                .setAction(ACTION_BUTTON_RELEASE)
+                .setButtonCode(button)
+                .build()
+        )
+    }
+
+    /**
      * Moves the mouse cursor to the `(targetXPx, targetYPx)` on target display. If the target
      * display is different from the current display, it finds a path and moves the cursor across
      * display(s).
