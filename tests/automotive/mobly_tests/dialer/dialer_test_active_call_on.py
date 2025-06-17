@@ -33,6 +33,8 @@ class DialerActiveCallOn(bluetooth_sms_base_test.BluetoothSMSBaseTest):
     def setup_class(self):
         super().setup_class()
         self.phone_utils = (phone_device_utils.PhoneDeviceUtils(self.phone_notpaired))
+        ro_product_name = str(self.target.adb.shell(constants.GET_PRODUCT_NAME))
+        self.use_dialer_simulator = constants.CF_X86_64_PHONE in ro_product_name
 
     def setup_test(self):
         # Pair the devices
@@ -48,12 +50,15 @@ class DialerActiveCallOn(bluetooth_sms_base_test.BluetoothSMSBaseTest):
         self.call_utils.press_active_call_toggle()
         asserts.assert_true(self.call_utils.is_active_call_enabled(),
                             "Expected Active Call to be enabled after pressing the toggle.")
-
+        self.call_utils.press_home()
         # Call the paired phone device (from an unpaired phone) and answer the call.
         # call from the unpaired phone to the paired phone
-        callee_number = self.target.mbs.getPhoneNumber()
-        self.phone_utils.call_number_from_home_screen(callee_number)
-        self.call_utils.press_home()
+        if self.use_dialer_simulator:
+            # simulate incoming call
+            self.target.adb.shell(constants.DIALER_SIMULATOR_INCOMING_CALL_COMMAND.format(phone_number="900900900", name="Jane Doe"))
+        else:
+            callee_number = self.target.mbs.getPhoneNumber()
+            self.phone_utils.call_number_from_home_screen(callee_number)
 
         # Receive and answer the call
         self.call_utils.wait_with_log(10)
@@ -67,8 +72,10 @@ class DialerActiveCallOn(bluetooth_sms_base_test.BluetoothSMSBaseTest):
         )
 
     def teardown_test(self):
+        # End call
+        self.call_utils.end_call_using_adb_command(self.target)
+
         # Navigate to dialer settings
-        self.call_utils.end_call_using_adb_command(self.phone_notpaired)
         self.call_utils.open_phone_app()
         self.call_utils.open_dialer_settings()
         self.call_utils.press_active_call_toggle()
