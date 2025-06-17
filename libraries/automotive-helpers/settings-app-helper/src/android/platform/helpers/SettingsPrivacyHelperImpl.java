@@ -364,6 +364,17 @@ public class SettingsPrivacyHelperImpl extends AbstractStandardAppHelper
         getSpectatioUiUtil().waitForIdle();
     }
 
+    /** {@inheritDoc} */
+    @Override
+    public void unblockButton() {
+        UiObject2 unblockObject =
+                getSpectatioUiUtil()
+                        .findUiObject(getUiElementFromConfig(AutomotiveConfigConstants.UNBLOCK));
+        getSpectatioUiUtil().validateUiObject(unblockObject, AutomotiveConfigConstants.UNBLOCK);
+        getSpectatioUiUtil().clickAndWait(unblockObject);
+        getSpectatioUiUtil().waitForIdle();
+    }
+
     /** Returns true if the assistant app's default permission "Allow" is enabled. */
     @Override
     public boolean isAllowDefaultPermission() {
