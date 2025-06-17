@@ -99,7 +99,7 @@ open class ResultWriter {
                     .withFiles(files)
                     .build()
             ResultData(
-                artifact,
+                arrayOf(artifact),
                 TransitionTimeRange(transitionStartTime, transitionEndTime),
                 executionError,
             )

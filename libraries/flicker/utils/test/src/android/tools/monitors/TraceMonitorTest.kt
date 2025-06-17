@@ -30,6 +30,7 @@ import android.tools.traces.io.ResultReader
 import android.tools.traces.monitors.TraceMonitor
 import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.uiautomator.UiDevice
+import androidx.tracing.trace
 import com.google.common.truth.Truth
 import org.junit.After
 import org.junit.Before
@@ -50,7 +51,9 @@ abstract class TraceMonitorTest<T : TraceMonitor> {
 
     @Before
     open fun before() {
-        Truth.assertWithMessage("Trace already enabled before starting test")
+        Truth.assertWithMessage(
+                "Trace ${traceMonitor.traceType} already enabled before starting test"
+            )
             .that(traceMonitor.isEnabled)
             .isFalse()
     }
@@ -62,7 +65,7 @@ abstract class TraceMonitorTest<T : TraceMonitor> {
             traceMonitor.stop(newTestResultWriter())
         }
         outputFileName(RunStatus.RUN_EXECUTED).deleteIfExists()
-        Truth.assertWithMessage("Failed to disable trace at end of test")
+        Truth.assertWithMessage("Failed to disable ${traceMonitor.traceType} trace at end of test")
             .that(traceMonitor.isEnabled)
             .isFalse()
     }

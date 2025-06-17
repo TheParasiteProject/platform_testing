@@ -62,7 +62,7 @@ internal fun getTraceReaderFromScenario(scenario: String): Reader {
         }
 
     return ParsedTracesReader(
-        artifact = TestArtifact(scenario),
+        artifacts = arrayOf(TestArtifact(scenario)),
         wmTrace = LegacyWindowManagerTraceParser().parse(scenarioTraces.wmTrace.readBytes()),
         layersTrace = layersTrace,
         transitionsTrace = transitionsTrace,

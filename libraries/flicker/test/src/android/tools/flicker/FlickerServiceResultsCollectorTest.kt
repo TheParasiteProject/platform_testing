@@ -354,7 +354,7 @@ class FlickerServiceResultsCollectorTest {
         Mockito.`when`(mockTraceCollector.stop())
             .thenReturn(
                 ParsedTracesReader(
-                    artifact = TestArtifact.EMPTY,
+                    artifacts = arrayOf(TestArtifact.EMPTY),
                     wmTrace = MockWindowManagerTraceBuilder().build(),
                     layersTrace = MockLayersTraceBuilder().build(),
                     transitionsTrace = TransitionsTrace(emptyList()),

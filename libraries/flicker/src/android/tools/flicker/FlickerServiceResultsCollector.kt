@@ -26,7 +26,9 @@ import android.tools.flicker.assertions.AssertionResult
 import android.tools.flicker.config.FlickerServiceConfig
 import android.tools.flicker.config.ScenarioId
 import android.tools.io.Reader
+import android.tools.io.ResultArtifactDescriptor
 import android.tools.io.RunStatus
+import android.tools.io.TraceType
 import android.tools.traces.getDefaultFlickerOutputDir
 import android.util.Log
 import androidx.test.platform.app.InstrumentationRegistry
@@ -192,7 +194,7 @@ constructor(
                 Log.i(LOG_TAG, "Processing traces")
                 val scenarios = flickerService.detectScenarios(reader)
                 val results = scenarios.flatMap { it.generateAssertions() }.map { it.execute() }
-                reader.artifact.updateStatus(RunStatus.RUN_EXECUTED)
+                reader.artifacts.forEach { it.updateStatus(RunStatus.RUN_EXECUTED) }
                 Log.i(LOG_TAG, "Got ${results.size} results")
                 assertionResults.addAll(results)
                 if (description != null) {
@@ -206,9 +208,9 @@ constructor(
                     detectedScenariosByTest[description] = scenarios.map { it.type }.distinct()
                 }
                 if (results.any { it.status == AssertionResult.Status.FAIL }) {
-                    reader.artifact.updateStatus(RunStatus.ASSERTION_FAILED)
+                    reader.updateStatus(RunStatus.ASSERTION_FAILED)
                 } else {
-                    reader.artifact.updateStatus(RunStatus.ASSERTION_SUCCESS)
+                    reader.updateStatus(RunStatus.ASSERTION_SUCCESS)
                 }
 
                 Log.v(LOG_TAG, "Adding metric $FLICKER_ASSERTIONS_COUNT_KEY = ${results.size}")
@@ -219,8 +221,22 @@ constructor(
 
                 results
             } finally {
-                Log.v(LOG_TAG, "Adding metric $WINSCOPE_FILE_PATH_KEY = ${reader.artifactPath}")
-                dataRecord.addStringMetric(WINSCOPE_FILE_PATH_KEY, reader.artifactPath)
+                // We want to report the Perfetto trace which contains all the relevant data
+                // CB will pull the file specified by the WINSCOPE_FILE_PATH_KEY metric
+                val perfettoDescriptor = ResultArtifactDescriptor(TraceType.PERFETTO)
+                require(reader.artifacts.count { it.hasTrace(perfettoDescriptor) } <= 1) {
+                    "Expected at most a single artifact with a Perfetto trace..."
+                }
+                val targetArtifact =
+                    reader.artifacts.firstOrNull { it.hasTrace(perfettoDescriptor) }
+                        // Fallback to the first artifact if no Perfetto trace is found
+                        ?: reader.artifacts.first()
+
+                Log.v(
+                    LOG_TAG,
+                    "Adding metric $WINSCOPE_FILE_PATH_KEY = ${targetArtifact.absolutePath}",
+                )
+                dataRecord.addStringMetric(WINSCOPE_FILE_PATH_KEY, targetArtifact.absolutePath)
             }
         }
     }

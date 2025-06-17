@@ -76,11 +76,14 @@ class FlickerServiceTracesCollectorTest {
         testApp.launchViaIntent(wmHelper)
         testApp.exit(wmHelper)
         val reader = collector.stop()
-        val tracePath = reader.artifactPath
 
-        require(tracePath.isNotEmpty()) { "Artifact path missing in result" }
-        val traceFile = File(tracePath)
-        Truth.assertThat(traceFile.exists()).isTrue()
+        for (artifact in reader.artifacts) {
+            val tracePath = artifact.absolutePath
+
+            require(tracePath.isNotEmpty()) { "Artifact path missing in result" }
+            val traceFile = File(tracePath)
+            Truth.assertThat(traceFile.exists()).isTrue()
+        }
     }
 
     @Test
@@ -97,11 +100,14 @@ class FlickerServiceTracesCollectorTest {
         testApp.launchViaIntent(wmHelper)
         testApp.exit(wmHelper)
         val reader = collector.stop()
-        val tracePath = reader.artifactPath
 
-        require(tracePath.isNotEmpty()) { "Artifact path missing in result" }
-        val traceFile = File(tracePath)
-        assertArchiveContainsFiles(traceFile, possibleExpectedTraces)
+        for (artifact in reader.artifacts) {
+            val tracePath = artifact.absolutePath
+
+            require(tracePath.isNotEmpty()) { "Artifact path missing in result" }
+            val traceFile = File(tracePath)
+            assertArchiveContainsFiles(traceFile, possibleExpectedTraces)
+        }
     }
 
     @Test

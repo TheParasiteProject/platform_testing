@@ -33,7 +33,7 @@ class SubjectsParserTest {
     @Test
     fun failFileNotFound() {
         val data = newTestResultWriter().write()
-        data.artifact.deleteIfExists()
+        data.artifacts.forEach { it.deleteIfExists() }
         val parser = SubjectsParser(ResultReader(data, TRACE_CONFIG_REQUIRE_CHANGES))
         assertThrows<FileNotFoundException> {
             parser.getSubjectOfType(Tag.ALL, LayersTraceSubject::class)

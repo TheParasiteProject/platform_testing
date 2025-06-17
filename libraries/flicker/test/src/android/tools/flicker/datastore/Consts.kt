@@ -26,14 +26,14 @@ object Consts {
 
     internal val TEST_RESULT =
         ResultData(
-            _artifact = TestArtifact("TEST_RESULT"),
+            _artifacts = arrayOf(TestArtifact("TEST_RESULT")),
             _transitionTimeRange = TransitionTimeRange(Timestamps.empty(), Timestamps.empty()),
             _executionError = null,
         )
 
     internal val RESULT_FAILURE =
         ResultData(
-            _artifact = TestArtifact("RESULT_FAILURE"),
+            _artifacts = arrayOf(TestArtifact("RESULT_FAILURE")),
             _transitionTimeRange = TransitionTimeRange(Timestamps.empty(), Timestamps.empty()),
             _executionError = null,
         )

@@ -18,14 +18,17 @@ package android.tools.io
 
 import android.tools.Timestamps
 import android.tools.testutils.CleanFlickerEnvironmentRule
+import android.tools.testutils.TestTraces
 import android.tools.testutils.assertThrows
 import android.tools.testutils.newTestResultWriter
 import android.tools.testutils.outputFileName
 import android.tools.traces.TRACE_CONFIG_REQUIRE_CHANGES
 import android.tools.traces.deleteIfExists
+import android.tools.traces.io.ResultData
 import android.tools.traces.io.ResultReader
 import com.google.common.truth.Truth
 import java.io.FileNotFoundException
+import kotlin.io.path.createTempDirectory
 import org.junit.Before
 import org.junit.ClassRule
 import org.junit.FixMethodOrder
@@ -44,11 +47,72 @@ class ResultReaderTest {
     @Test
     fun failFileNotFound() {
         val data = newTestResultWriter().write()
-        data.artifact.deleteIfExists()
+        data.artifacts.forEach { it.deleteIfExists() }
         val reader = ResultReader(data, TRACE_CONFIG_REQUIRE_CHANGES)
         assertThrows<FileNotFoundException> {
             reader.readTransitionsTrace() ?: error("Should have failed")
         }
+    }
+
+    @Test
+    fun emptyResult() {
+        val result =
+            ResultData(
+                emptyArray(),
+                TransitionTimeRange(Timestamps.empty(), Timestamps.empty()),
+                null,
+            )
+        val reader = ResultReader(result, TRACE_CONFIG_REQUIRE_CHANGES)
+        Truth.assertThat(reader.countFiles()).isEqualTo(0)
+        Truth.assertThat(reader.hasTraceFile(TraceType.WM)).isFalse()
+        Truth.assertThat(reader.runStatus).isEqualTo(RunStatus.UNDEFINED)
+    }
+
+    @Test
+    fun canReadFromMultipleArtifacts() {
+        val writer1 =
+            newTestResultWriter()
+                .withOutputDir(createTempDirectory().toFile())
+                .addTraceResult(TraceType.EVENT_LOG, TestTraces.EventLog.FILE)
+        val result1 = writer1.write()
+
+        val writer2 =
+            newTestResultWriter()
+                .withOutputDir(createTempDirectory().toFile())
+                .addTraceResult(TraceType.PERFETTO, TestTraces.LayerTrace.FILE)
+        val result2 = writer2.write()
+
+        val combinedArtifacts = result1.artifacts + result2.artifacts
+        val combinedResult = ResultData(combinedArtifacts, result1.transitionTimeRange, null)
+
+        val reader = ResultReader(combinedResult, TRACE_CONFIG_REQUIRE_CHANGES)
+
+        Truth.assertThat(reader.countFiles()).isEqualTo(2)
+        Truth.assertThat(reader.hasTraceFile(TraceType.EVENT_LOG)).isTrue()
+        Truth.assertThat(reader.hasTraceFile(TraceType.PERFETTO)).isTrue()
+        Truth.assertThat(reader.readEventLogTrace()).isNotNull()
+        Truth.assertThat(reader.readLayersTrace()).isNotNull()
+    }
+
+    @Test
+    fun updateStatusOnAllArtifacts() {
+        val writer1 =
+            newTestResultWriter().withOutputDir(createTempDirectory().toFile()).setRunComplete()
+        val result1 = writer1.write()
+
+        val writer2 =
+            newTestResultWriter().withOutputDir(createTempDirectory().toFile()).setRunComplete()
+        val result2 = writer2.write()
+
+        val combinedArtifacts = result1.artifacts + result2.artifacts
+        val combinedResult = ResultData(combinedArtifacts, result1.transitionTimeRange, null)
+
+        val reader = ResultReader(combinedResult, TRACE_CONFIG_REQUIRE_CHANGES)
+        reader.result.updateStatus(RunStatus.ASSERTION_SUCCESS)
+
+        Truth.assertThat(reader.runStatus).isEqualTo(RunStatus.ASSERTION_SUCCESS)
+        Truth.assertThat(result1.runStatus).isEqualTo(RunStatus.ASSERTION_SUCCESS)
+        Truth.assertThat(result2.runStatus).isEqualTo(RunStatus.ASSERTION_SUCCESS)
     }
 
     @Test
@@ -61,8 +125,15 @@ class ResultReaderTest {
         Truth.assertThat(reader.runStatus).isEqualTo(RunStatus.ASSERTION_SUCCESS)
         Truth.assertThat(reader.runStatus).isEqualTo(slicedReader.runStatus)
 
-        Truth.assertThat(reader.artifactPath).contains(RunStatus.ASSERTION_SUCCESS.prefix)
-        Truth.assertThat(reader.artifactPath).isEqualTo(slicedReader.artifactPath)
+        for (artifact in reader.result.artifacts) {
+            Truth.assertThat(artifact.runStatus).isEqualTo(reader.runStatus)
+            Truth.assertThat(artifact.absolutePath).contains(RunStatus.ASSERTION_SUCCESS.prefix)
+        }
+
+        for (i in reader.result.artifacts.indices) {
+            Truth.assertThat(reader.result.artifacts[i].absolutePath)
+                .isEqualTo(slicedReader.result.artifacts[i].absolutePath)
+        }
     }
 
     companion object {
