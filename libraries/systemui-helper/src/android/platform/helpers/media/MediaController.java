@@ -205,6 +205,11 @@ public class MediaController {
         return mDevice.swipe(startX, bound.centerY(), endX, bound.centerY(), 10);
     }
 
+    public UiObject2 deviceSuggestionPill() {
+        return mUiObject.wait(
+                Until.findObject(By.res(PKG, "device_suggestion_button")), WAIT_TIME_MILLIS);
+    }
+
     public Rect getVisibleBound() {
         return mUiObject.getVisibleBounds();
     }
