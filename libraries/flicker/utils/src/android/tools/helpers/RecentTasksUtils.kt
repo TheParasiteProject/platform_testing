@@ -17,11 +17,12 @@
 package android.tools.helpers
 
 import android.app.Instrumentation
+import androidx.test.uiautomator.UiDevice
 
 object RecentTasksUtils {
     @JvmStatic
     fun clearAllVisibleRecentTasks(instrumentation: Instrumentation) {
-        instrumentation.uiAutomation.executeShellCommand(
+        UiDevice.getInstance(instrumentation).executeShellCommand(
             "dumpsys activity service SystemUIService WMShell recents clearAll"
         )
     }

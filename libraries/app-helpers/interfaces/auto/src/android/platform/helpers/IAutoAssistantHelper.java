@@ -32,4 +32,25 @@ public interface IAutoAssistantHelper extends IAppHelper {
      * <p>This method is used to verify microphone in status bar.
      */
     boolean isAssistantPlateDisplayed();
+
+    /**
+     * Setup expectations: Assistant Plate is open
+     *
+     * <p>This method clicks on Cancel/ Close buton on Assistant plate
+     */
+    void cancelAssistantPlate();
+
+    /**
+     * Setup expectations: Assistant Panel is open
+     *
+     * <p>This method waits for given seconds to Assistant Panel to dismiss
+     */
+    boolean isAssistantPanelDismissed();
+
+    /**
+     * Setup expectations: Microphone Panel is open
+     *
+     * <p>This method waits for given seconds to Microphone Panel to dismiss
+     */
+    boolean isMicophonePanelDismissed();
 }
