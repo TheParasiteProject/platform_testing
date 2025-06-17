@@ -467,6 +467,19 @@ public class SpectatioUiUtil {
     }
 
     /**
+     * Waits for a UI element to be gone within a specified timeout.
+     *
+     * @param selector The BySelector used to locate the element.
+     * @param timeout The maximum time to wait in milliseconds.
+     * @return The UiObject2 representing the found element, or null if it's not found within the
+     *     timeout.
+     */
+    public boolean waitForUiObjectToBeGone(BySelector selector, int timeout) {
+        Log.i(LOG_TAG, "Waiting for UI Object to Disappear: " + selector);
+        return mDevice.wait(Until.gone(selector), timeout);
+    }
+
+    /**
      * Waits for a UI element to appear using the default timeout.
      *
      * @param selector The BySelector used to locate the element.
