@@ -34,7 +34,6 @@ import android.platform.uiautomatorhelpers.DeviceHelpers.assertVisible
 import android.platform.uiautomatorhelpers.DeviceHelpers.betterSwipe
 import android.platform.uiautomatorhelpers.DeviceHelpers.uiDevice
 import android.platform.uiautomatorhelpers.DeviceHelpers.waitForNullableObj
-import android.platform.uiautomatorhelpers.DeviceHelpers.waitForObj
 import android.platform.uiautomatorhelpers.FailedEnsureException
 import android.view.Display.DEFAULT_DISPLAY
 import android.view.InputDevice
@@ -87,7 +86,7 @@ class Root private constructor(val displayId: Int = DEFAULT_DISPLAY) {
     /** Opens the notification shade via two fingers wipe. */
     fun openNotificationShadeViaTwoFingersSwipe(): NotificationShade {
         assertWithMessage(
-                "two finger swipe is only supported on the default display, because it relies on " +
+            "two finger swipe is only supported on the default display, because it relies on " +
                     "UiObject#performTwoPointerGesture, and UiObject has no concept of displayId " +
                     "(unlike UiObject2)"
             )
@@ -231,7 +230,7 @@ class Root private constructor(val displayId: Int = DEFAULT_DISPLAY) {
     ) {
         if (assertIsHunState) {
             assertWithMessage(
-                    "HUN state Assertion usage error: Notification: ${identity.title} " +
+                "HUN state Assertion usage error: Notification: ${identity.title} " +
                         "| You can only assert the HUN State of a notification that has an action " +
                         "button."
                 )
@@ -241,13 +240,6 @@ class Root private constructor(val displayId: Int = DEFAULT_DISPLAY) {
         assertThrows(IllegalStateException::class.java) {
             findHeadsUpNotification(identity, assertIsHunState = false)
         }
-    }
-
-    /** Opens quick settings. */
-    fun openQuickSettings(): QuickSettings {
-        uiDevice.executeShellCommand("cmd statusbar expand-settings")
-        waitForObj(sysuiResSelector("quick_settings_panel", displayId))
-        return QuickSettings(displayId)
     }
 
     /** Opens the quick settings via AccessibilityService.GLOBAL_ACTION_QUICK_SETTINGS. */
