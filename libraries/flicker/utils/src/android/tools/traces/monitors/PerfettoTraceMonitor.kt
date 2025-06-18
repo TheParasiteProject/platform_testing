@@ -54,6 +54,13 @@ open class PerfettoTraceMonitor(val config: TraceConfig) : TraceMonitor() {
         val stdout = String(executeShellCommand(command, config.toByteArray()))
         val pid = stdout.trim().toInt()
 
+        val psResult = String(executeShellCommand("ps -p $pid"))
+        if (!psResult.contains(pid.toString())) {
+            throw RuntimeException(
+                "Perfetto tracing session failed to start! " + "Check the logs for more details..."
+            )
+        }
+
         perfettoPid = pid
         allPerfettoPidsLock.lock()
         try {
@@ -64,7 +71,11 @@ open class PerfettoTraceMonitor(val config: TraceConfig) : TraceMonitor() {
     }
 
     override fun doStop(): File {
-        require(isEnabled) { "Attempted to stop disabled trace monitor" }
+        require(isEnabled) {
+            "Attempted to stop disabled trace monitor. " +
+                "The Perfetto tracing session likely failed to start... " +
+                "See the logs for more details..."
+        }
         killPerfettoProcess(requireNotNull(perfettoPid))
         waitPerfettoProcessExits(requireNotNull(perfettoPid))
         perfettoPid = null
