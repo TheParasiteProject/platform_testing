@@ -32,14 +32,8 @@ class MonitorUtilsTest {
 
     @Test
     fun withTracing() {
-        val debugFile =
-            InstrumentationRegistry.getInstrumentation()
-                .targetContext
-                .filesDir
-                .resolve("uiTrace-MonitorUtilsTest-withTracing.winscope")
-
         val trace =
-            android.tools.traces.monitors.withTracing(debugFile = debugFile) {
+            android.tools.traces.monitors.withTracing {
                 device.pressHome()
                 device.pressRecentApps()
             }
