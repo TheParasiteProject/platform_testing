@@ -298,7 +298,7 @@ public class SettingUserHelperImpl extends AbstractStandardAppHelper implements 
     @Override
     public boolean toggle(String buttonText) {
         boolean currentStatus = isToggleOn(buttonText);
-        getSpectatioUiUtil().clickAndWait(mEnableOption);
+        getSpectatioUiUtil().clickAndWait(mEnableOption, 10000);
         boolean finalStatus = isToggleOn(buttonText);
         return finalStatus != currentStatus;
     }
