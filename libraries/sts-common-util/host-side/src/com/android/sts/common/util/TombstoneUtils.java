@@ -71,11 +71,10 @@ public class TombstoneUtils {
             throws DeviceNotAvailableException {
         final IFileEntry tombstonesPath = device.getFileEntry(TOMBSTONES_PATH);
         final boolean useTombstoneFiles = tombstonesPath != null; // can't read
-        Collection<IFileEntry> existingDeviceTombstoneFiles = Collections.emptyList();
         if (useTombstoneFiles) {
-            existingDeviceTombstoneFiles = tombstonesPath.getChildren(/* useCache */ false);
+            // clear existing tombstones
+            CommandUtil.runAndCheck(device, "rm -f " + TOMBSTONES_PATH + "/*");
         }
-        final Collection<IFileEntry> excludeTombstoneFiles = existingDeviceTombstoneFiles;
 
         if (!useTombstoneFiles) {
             // clear existing tombstones so we only check new ones
@@ -125,9 +124,7 @@ public class TombstoneUtils {
                 // collect tombstones
                 List<Tombstone> tombstones = null;
                 if (useTombstoneFiles) {
-                    tombstones =
-                            getTombstonesFromDeviceFiles(
-                                    device, tombstonesPath, excludeTombstoneFiles);
+                    tombstones = getTombstonesFromDeviceFiles(device, tombstonesPath);
                     CLog.d(String.format("got %d tombstones from files", tombstones.size()));
                 } else {
                     // fallback to logcat
@@ -141,23 +138,10 @@ public class TombstoneUtils {
     }
 
     private static List<Tombstone> getTombstonesFromDeviceFiles(
-            ITestDevice device, IFileEntry tombstoneDirectory, Collection<IFileEntry> excludeFiles)
+            ITestDevice device, IFileEntry tombstoneDirectory)
             throws DeviceNotAvailableException, IOException, FileNotFoundException {
-        Map<String, IFileEntry> excludeMap =
-                excludeFiles.stream().collect(Collectors.toMap(IFileEntry::getName, f -> f));
         Collection<IFileEntry> deviceTombstoneFiles =
-                tombstoneDirectory.getChildren(/* useCache */ false).stream()
-                        .filter(
-                                f -> {
-                                    // if the file has the same creation time as the exclude, filter
-                                    // it out
-                                    IFileEntry excludeFile = excludeMap.get(f.getName());
-                                    if (excludeFile != null) {
-                                        return !f.getTime().equals(excludeFile.getTime());
-                                    }
-                                    return true;
-                                })
-                        .collect(Collectors.toList());
+                tombstoneDirectory.getChildren(/* useCache */ false);
         Collection<IFileEntry> deviceProtoTombstoneFiles =
                 deviceTombstoneFiles.stream()
                         .filter(f -> f.getName().endsWith(".pb"))
