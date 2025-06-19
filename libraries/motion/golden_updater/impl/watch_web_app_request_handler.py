@@ -28,6 +28,8 @@ from impl.gerrit_downloader import GerritDownloader
 from impl.fetch_presubmit_test_artifact import FetchPresubmitTestArtifacts
 from impl.golden_watchers.golden_watcher_factory import GoldenWatcherFactory
 from impl.golden_watchers.golden_watcher_types import GoldenWatcherTypes
+from impl.serial_finder import ADBSerialFinder
+from impl.adb_client import AdbClient
 
 class WatchWebAppRequestHandler(http.server.BaseHTTPRequestHandler):
     secret_token = None
@@ -35,6 +37,8 @@ class WatchWebAppRequestHandler(http.server.BaseHTTPRequestHandler):
     android_build_top = None
     this_server_address = None
     presubmit_fetch_client = None
+    adb_client = None
+    golden_watcher_cache = {}
 
     def __init__(self, *args, **kwargs):
         self.root_directory = path.abspath(path.dirname(__file__))
@@ -118,6 +122,8 @@ class WatchWebAppRequestHandler(http.server.BaseHTTPRequestHandler):
             self.service_presubmit_artifact_list(message["invocation_id"])
         elif parsed.path == '/service/fetch_artifact':
             self.service_fetch_artifacts(message["resource_id"])
+        elif parsed.path == "/service/mode":
+            self.switch_mode(message["mode"])
         else:
             self.send_error(404)
 
@@ -255,6 +261,61 @@ class WatchWebAppRequestHandler(http.server.BaseHTTPRequestHandler):
                 self.send_error(exception.response.status_code, str(exception))
         except Exception as exception:
             self.send_error(500, str(exception))
+
+    def switch_mode(self, mode: GoldenWatcherTypes):
+        print(f'Switched to: {mode}')
+
+        #If found in cache, served from cache.
+        #If files changed then need to run refresh.
+
+        if mode in WatchWebAppRequestHandler.golden_watcher_cache:
+            (WatchWebAppRequestHandler
+            .golden_watcher) = WatchWebAppRequestHandler.golden_watcher_cache[mode]
+
+        else:
+            try:
+                match(mode):
+                    case GoldenWatcherTypes.ROBOLECTRIC.value:
+                        (WatchWebAppRequestHandler
+                        .golden_watcher) = GoldenWatcherFactory.create_watcher(
+                                            GoldenWatcherTypes.ROBOLECTRIC,
+                                            WatchWebAppRequestHandler.golden_watcher.temp_dir
+                                        )
+
+                    case GoldenWatcherTypes.ATEST.value:
+                        (WatchWebAppRequestHandler
+                        .golden_watcher) = GoldenWatcherFactory.create_watcher(
+                                            GoldenWatcherTypes.ATEST,
+                                            WatchWebAppRequestHandler.golden_watcher.temp_dir
+                                        )
+
+                    case GoldenWatcherTypes.ADB.value:
+                        if not WatchWebAppRequestHandler.adb_client:
+                            serial = ADBSerialFinder.get_serial()
+                            if not serial:
+                                raise Exception("ADB Serial not found.")
+
+                            WatchWebAppRequestHandler.adb_client = AdbClient(serial)
+                            if not WatchWebAppRequestHandler.adb_client.run_as_root():
+                                raise Exception("Cannot run ADB as root.")
+
+                        (WatchWebAppRequestHandler
+                        .golden_watcher) = GoldenWatcherFactory.create_watcher(
+                                            GoldenWatcherTypes.ADB,
+                                            WatchWebAppRequestHandler.golden_watcher.temp_dir,
+                                            WatchWebAppRequestHandler.adb_client
+                                        )
+                    case _:
+                        raise ValueError("Mode not supported")
+
+                (WatchWebAppRequestHandler
+                .golden_watcher_cache[mode]) = WatchWebAppRequestHandler.golden_watcher
+            except Exception as ex:
+                print(f"Failure occurred: {ex}")
+                self.send_error(503)
+                return
+
+        self.service_list_goldens()
 
     def service_refresh_goldens(self, clear):
         if clear:

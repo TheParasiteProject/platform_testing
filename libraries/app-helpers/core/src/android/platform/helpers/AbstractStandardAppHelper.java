@@ -317,7 +317,8 @@ public abstract class AbstractStandardAppHelper implements IAppHelper {
         Trace.endSection();
     }
 
-    private void idleApp() {
+    /** Cover for SystemClock.sleep, for a number of millis equal to app-idle_ms */
+    public void idleApp() {
         if (mAppIdle != 0) {
             Log.v(LOG_TAG, String.format("Idle app for %d ms", mAppIdle));
             SystemClock.sleep(mAppIdle);

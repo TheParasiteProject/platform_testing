@@ -408,11 +408,7 @@ constructor(
                         it.layerState.visibleLayers.firstOrNull { layer ->
                             componentMatcher.layerMatchesAnyOf(layer)
                         }
-                    layer?.let {
-                        // TODO(pablogamito): Remove non-null assertion once visibleRegion in
-                        // LayerProperties is no longer nullable.
-                        compareFn(layer.visibleRegion ?: Region(), expectedRegion)
-                    } ?: false
+                    layer?.let { compareFn(layer.visibleRegion, expectedRegion) } ?: false
                 }
             )
 

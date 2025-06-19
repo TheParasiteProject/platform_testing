@@ -59,13 +59,13 @@ class GoldenWatcherFactoryTest(unittest.TestCase):
     @patch('impl.golden_watchers.golden_watcher_factory.GoldenFileWatcher', new=FakeGoldenFileWatcher)
     def test_create_watcher_creates_GoldenFileWatcher(self):
         fake_adb_client = FakeADBClient()
-        golden_watcher = GoldenWatcherFactory.create_watcher(GoldenWatcherTypes.FILE, "tmp", fake_adb_client)
+        golden_watcher = GoldenWatcherFactory.create_watcher(GoldenWatcherTypes.ADB, "tmp", fake_adb_client)
         self.assertEqual(golden_watcher.temp_dir, "tmp")
         self.assertEqual(golden_watcher.adb_client, fake_adb_client)
 
     def test_create_watcher_fails_creating_GoldenFileWatcher(self):
         with self.assertRaises(ValueError) as e:
-            GoldenWatcherFactory.create_watcher(GoldenWatcherTypes.FILE, "tmp")
+            GoldenWatcherFactory.create_watcher(GoldenWatcherTypes.ADB, "tmp")
         self.assertEqual(e.exception.args[0], "adb client not found")
 
     def test_create_watcher_fails_for_unknown_type(self):

@@ -13,11 +13,23 @@
 # limitations under the License.
 #
 
-import enum
+import subprocess
 
-class GoldenWatcherTypes(enum.Enum):
-    ATEST = "atest"
-    ADB = "adb"
-    ROBOLECTRIC = "robolectric"
-    PRESUBMIT = 'presubmit'
-    NONE = "none"
+class ADBSerialFinder:
+
+    @staticmethod
+    def get_serial():
+        devices_response = subprocess.run(
+            ["adb", "devices"], check=True, capture_output=True
+        ).stdout.decode("utf-8")
+        lines = [s for s in devices_response.splitlines() if s.strip()]
+
+        if len(lines) == 1:
+            print("no adb devices found")
+            return None
+
+        if len(lines) > 2:
+            print("multiple adb devices found, specify --serial")
+            return None
+
+        return lines[1].split("\t")[0]
