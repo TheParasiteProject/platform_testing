@@ -27,7 +27,7 @@ from impl.adb_client import AdbClient
 from impl.watch_web_app_request_handler import WatchWebAppRequestHandler
 from impl.argument_parser import ArgumentParser
 from impl.token_generator import TokenGenerator
-from impl.serial_finder import ADBSerialFinder
+from impl.adb_serial_finder import ADBSerialFinder
 
 def main():
 

@@ -17,6 +17,7 @@
 package android.tools.io
 
 interface Artifact {
+    val type: TraceType
     val runStatus: RunStatus
     val absolutePath: String
     val fileName: String

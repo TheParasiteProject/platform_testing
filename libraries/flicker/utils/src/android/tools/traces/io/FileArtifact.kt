@@ -22,6 +22,7 @@ import android.tools.io.BUFFER_SIZE
 import android.tools.io.FLICKER_IO_TAG
 import android.tools.io.ResultArtifactDescriptor
 import android.tools.io.RunStatus
+import android.tools.io.TraceType
 import android.tools.traces.deleteIfExists
 import android.tools.withTracing
 import android.util.Log
@@ -36,8 +37,12 @@ import java.util.zip.ZipEntry
 import java.util.zip.ZipInputStream
 
 class FileArtifact
-internal constructor(private val scenario: Scenario, artifactFile: File, private val counter: Int) :
-    Artifact {
+internal constructor(
+    private val scenario: Scenario,
+    artifactFile: File,
+    private val counter: Int,
+    override val type: TraceType,
+) : Artifact {
     var file: File = artifactFile
         private set
 

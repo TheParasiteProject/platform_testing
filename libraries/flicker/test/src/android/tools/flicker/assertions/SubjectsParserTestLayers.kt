@@ -29,7 +29,7 @@ class SubjectsParserTestLayers : BaseSubjectsParserTest() {
     override val expectedStartTime = TestTraces.LayerTrace.START_TIME
     override val expectedEndTime = TestTraces.LayerTrace.END_TIME
     override val subjectName = "SF Trace"
-    override val traceType = TraceType.SF
+    override val traceType = TraceType.PERFETTO
 
     override fun getTime(timestamp: Timestamp) = timestamp.systemUptimeNanos
 

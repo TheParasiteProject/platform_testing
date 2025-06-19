@@ -96,6 +96,19 @@ public class SpectatioUiUtil {
     }
 
     /**
+     * Defines the text match, allowing for a text search on UI device
+     *
+     * <p>EXACT: Matches the text exactly
+     *
+     * <p>CONTAINS: Matches if the text contains
+     *
+     */
+    public enum TextMatchType {
+        EXACT,
+        CONTAINS
+    }
+
+    /**
      * Defines the swipe speed based on the number of steps.
      *
      * <p><a
@@ -463,6 +476,26 @@ public class SpectatioUiUtil {
      */
     public UiObject2 waitForUiObject(BySelector selector) {
         return waitForUiObject(selector, TEN_SECONDS_WAIT);
+    }
+
+    /**
+     * Waits for a UI Text element to appear within a specified timeout.
+     *
+     * @param text to search on device UI.
+     * @param timeout The maximum time to wait in milliseconds.
+     * @param type EXACT, CONTAINS
+     * @return Returns True if the text is found, else return False.
+     */
+    public boolean waitForText(String text, int timeout, TextMatchType type) {
+        Log.i(LOG_TAG, "Waiting for UI element: " + text);
+        validateText(text, /* type= */ "Text");
+        BySelector selector =
+                switch (type) {
+                    case EXACT -> By.text(text);
+                    case CONTAINS -> By.textContains(text);
+                    default -> throw new IllegalArgumentException("Unknown match type:" + type);
+                };
+        return mDevice.wait(Until.hasObject(selector), timeout);
     }
 
     /**

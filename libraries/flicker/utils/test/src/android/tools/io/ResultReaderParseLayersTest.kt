@@ -20,9 +20,9 @@ import android.tools.Timestamp
 import android.tools.testutils.TestTraces
 import android.tools.traces.io.ResultReader
 
-/** Tests for [ResultReader] parsing [TraceType.SF] */
+/** Tests for [ResultReader] parsing [TraceType.PERFETTO] */
 class ResultReaderParseLayersTest : BaseResultReaderTestParseTrace() {
-    override val assetFiles = mapOf(TraceType.SF to TestTraces.LayerTrace.FILE)
+    override val assetFiles = mapOf(TraceType.PERFETTO to TestTraces.LayerTrace.FILE)
     override val traceName = "Layers trace"
     override val startTimeTrace = TestTraces.LayerTrace.START_TIME
     override val endTimeTrace = TestTraces.LayerTrace.END_TIME

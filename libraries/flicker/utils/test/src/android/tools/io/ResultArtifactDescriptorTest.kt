@@ -28,10 +28,10 @@ import org.junit.runners.MethodSorters
 class ResultArtifactDescriptorTest {
     @Test
     fun generateDescriptorFromTrace() {
-        createDescriptorAndValidateFileName(TraceType.SF)
+        createDescriptorAndValidateFileName(TraceType.PERFETTO)
         createDescriptorAndValidateFileName(TraceType.WM)
-        createDescriptorAndValidateFileName(TraceType.TRANSACTION)
-        createDescriptorAndValidateFileName(TraceType.TRANSACTION)
+        createDescriptorAndValidateFileName(TraceType.PERFETTO)
+        createDescriptorAndValidateFileName(TraceType.PERFETTO)
         createDescriptorAndValidateFileName(TraceType.SCREEN_RECORDING)
         createDescriptorAndValidateFileName(TraceType.WM_DUMP)
         createDescriptorAndValidateFileName(TraceType.SF_DUMP)
@@ -39,10 +39,10 @@ class ResultArtifactDescriptorTest {
 
     @Test
     fun generateDescriptorFromTraceWithTags() {
-        createDescriptorAndValidateFileNameWithTag(TraceType.SF)
+        createDescriptorAndValidateFileNameWithTag(TraceType.PERFETTO)
         createDescriptorAndValidateFileNameWithTag(TraceType.WM)
-        createDescriptorAndValidateFileNameWithTag(TraceType.TRANSACTION)
-        createDescriptorAndValidateFileNameWithTag(TraceType.TRANSACTION)
+        createDescriptorAndValidateFileNameWithTag(TraceType.PERFETTO)
+        createDescriptorAndValidateFileNameWithTag(TraceType.PERFETTO)
         createDescriptorAndValidateFileNameWithTag(TraceType.SCREEN_RECORDING)
         createDescriptorAndValidateFileNameWithTag(TraceType.WM_DUMP)
         createDescriptorAndValidateFileNameWithTag(TraceType.SF_DUMP)

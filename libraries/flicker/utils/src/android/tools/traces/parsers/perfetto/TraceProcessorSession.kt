@@ -38,7 +38,7 @@ interface TraceProcessorSession {
         @JvmStatic
         fun <T> loadPerfettoTrace(trace: ByteArray, predicate: (TraceProcessorSession) -> T): T {
             return withTracing("TraceProcessorSession#loadPerfettoTrace") {
-                val traceFile = File.createTempFile(TraceType.SF.fileName, "")
+                val traceFile = File.createTempFile(TraceType.PERFETTO.fileName, "")
                 FileOutputStream(traceFile).use { it.write(trace) }
                 val result =
                     TraceProcessor.runServer {
