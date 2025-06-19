@@ -20,7 +20,8 @@ package android.tools.io
 
 import android.tools.FLICKER_TAG
 
-const val WINSCOPE_EXT = ".winscope"
-const val PERFETTO_EXT = ".perfetto-trace"
+const val WINSCOPE_EXT = "winscope"
+const val PERFETTO_EXT = "perfetto-trace"
+const val WINSCOPE_ZIP_EXT = "winscope.zip"
 const val FLICKER_IO_TAG = "$FLICKER_TAG-IO"
 const val BUFFER_SIZE = 2048
