@@ -134,7 +134,7 @@ open class ResultReader(_result: IResultData, internal val traceConfig: TraceCon
     @Throws(IOException::class)
     override fun readLayersTrace(): LayersTrace? {
         return withTracing("readLayersTrace") {
-            val descriptor = ResultArtifactDescriptor(TraceType.SF)
+            val descriptor = ResultArtifactDescriptor(TraceType.PERFETTO)
             artifact.readBytes(descriptor)?.let {
                 val trace =
                     TraceProcessorSession.loadPerfettoTrace(it) { session ->
@@ -191,7 +191,7 @@ open class ResultReader(_result: IResultData, internal val traceConfig: TraceCon
         }
 
     private fun doReadTransactionsTrace(from: Timestamp, to: Timestamp): TransactionsTrace? {
-        val traceData = artifact.readBytes(ResultArtifactDescriptor(TraceType.TRANSACTION))
+        val traceData = artifact.readBytes(ResultArtifactDescriptor(TraceType.PERFETTO))
         return traceData?.let {
             val trace =
                 TraceProcessorSession.loadPerfettoTrace(traceData) { session ->

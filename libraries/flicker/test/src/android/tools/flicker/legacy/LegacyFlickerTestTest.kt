@@ -59,7 +59,7 @@ class LegacyFlickerTestTest {
     fun executesLayers() {
         val predicate: (FlickerTest) -> Unit = { it.assertLayers { executionCount++ } }
         doWriteTraceExecuteAssertionAndVerify(
-            TraceType.SF,
+            TraceType.PERFETTO,
             predicate,
             TestTraces.LayerTrace.FILE,
             expectedExecutionCount = 2,
@@ -70,7 +70,7 @@ class LegacyFlickerTestTest {
     fun executesLayerStart() {
         val predicate: (FlickerTest) -> Unit = { it.assertLayersStart { executionCount++ } }
         doWriteTraceExecuteAssertionAndVerify(
-            TraceType.SF,
+            TraceType.PERFETTO,
             predicate,
             TestTraces.LayerTrace.FILE,
             expectedExecutionCount = 2,
@@ -81,7 +81,7 @@ class LegacyFlickerTestTest {
     fun executesLayerEnd() {
         val predicate: (FlickerTest) -> Unit = { it.assertLayersEnd { executionCount++ } }
         doWriteTraceExecuteAssertionAndVerify(
-            TraceType.SF,
+            TraceType.PERFETTO,
             predicate,
             TestTraces.LayerTrace.FILE,
             expectedExecutionCount = 2,
@@ -91,25 +91,25 @@ class LegacyFlickerTestTest {
     @Test
     fun doesNotExecuteLayersWithoutTrace() {
         val predicate: (FlickerTest) -> Unit = { it.assertLayers { executionCount++ } }
-        doExecuteAssertionWithoutTraceAndVerifyNotExecuted(TraceType.SF, predicate)
+        doExecuteAssertionWithoutTraceAndVerifyNotExecuted(TraceType.PERFETTO, predicate)
     }
 
     @Test
     fun doesNotExecuteLayersStartWithoutTrace() {
         val predicate: (FlickerTest) -> Unit = { it.assertLayersStart { executionCount++ } }
-        doExecuteAssertionWithoutTraceAndVerifyNotExecuted(TraceType.SF, predicate)
+        doExecuteAssertionWithoutTraceAndVerifyNotExecuted(TraceType.PERFETTO, predicate)
     }
 
     @Test
     fun doesNotExecuteLayersEndWithoutTrace() {
         val predicate: (FlickerTest) -> Unit = { it.assertLayersEnd { executionCount++ } }
-        doExecuteAssertionWithoutTraceAndVerifyNotExecuted(TraceType.SF, predicate)
+        doExecuteAssertionWithoutTraceAndVerifyNotExecuted(TraceType.PERFETTO, predicate)
     }
 
     @Test
     fun doesNotExecuteLayerTagWithoutTag() {
         val predicate: (FlickerTest) -> Unit = { it.assertLayersTag("tag") { executionCount++ } }
-        doExecuteAssertionWithoutTraceAndVerifyNotExecuted(TraceType.SF, predicate)
+        doExecuteAssertionWithoutTraceAndVerifyNotExecuted(TraceType.PERFETTO, predicate)
     }
 
     @Test

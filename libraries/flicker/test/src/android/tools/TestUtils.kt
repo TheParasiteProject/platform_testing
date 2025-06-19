@@ -74,15 +74,11 @@ internal fun getTraceReaderFromScenario(scenario: String): Reader {
 fun getScenarioTraces(scenario: String): FlickerBuilder.TraceFiles {
     lateinit var wmTrace: File
     lateinit var perfettoTrace: File
-    lateinit var wmTransitionTrace: File
-    lateinit var shellTransitionTrace: File
     lateinit var eventLog: File
     val traces =
         mapOf<String, (File) -> Unit>(
             "wm_trace.$WINSCOPE_EXT" to { wmTrace = it },
             "trace.$PERFETTO_EXT" to { perfettoTrace = it },
-            "wm_transition_trace.$WINSCOPE_EXT" to { wmTransitionTrace = it },
-            "shell_transition_trace.$WINSCOPE_EXT" to { shellTransitionTrace = it },
             "eventlog.$WINSCOPE_EXT" to { eventLog = it },
         )
     for ((traceFileName, resultSetter) in traces.entries) {
@@ -92,13 +88,7 @@ fun getScenarioTraces(scenario: String): FlickerBuilder.TraceFiles {
         resultSetter.invoke(traceFile)
     }
 
-    return FlickerBuilder.TraceFiles(
-        wmTrace,
-        perfettoTrace,
-        wmTransitionTrace,
-        shellTransitionTrace,
-        eventLog,
-    )
+    return FlickerBuilder.TraceFiles(wmTrace, perfettoTrace, eventLog)
 }
 
 fun createMockedFlicker(

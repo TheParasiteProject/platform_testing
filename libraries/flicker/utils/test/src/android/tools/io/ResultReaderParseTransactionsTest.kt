@@ -20,9 +20,9 @@ import android.tools.Timestamp
 import android.tools.testutils.TestTraces
 import android.tools.traces.io.ResultReader
 
-/** Tests for [ResultReader] parsing [TraceType.TRANSACTION] */
+/** Tests for [ResultReader] parsing [TraceType.PERFETTO] */
 class ResultReaderParseTransactionsTest : BaseResultReaderTestParseTrace() {
-    override val assetFiles = mapOf(TraceType.TRANSACTION to TestTraces.TransactionTrace.FILE)
+    override val assetFiles = mapOf(TraceType.PERFETTO to TestTraces.TransactionTrace.FILE)
     override val traceName = "Transactions trace"
     override val startTimeTrace = TestTraces.TransactionTrace.START_TIME
     override val endTimeTrace = TestTraces.TransactionTrace.END_TIME

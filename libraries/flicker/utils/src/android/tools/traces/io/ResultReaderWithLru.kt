@@ -53,7 +53,7 @@ open class ResultReaderWithLru(
     /** {@inheritDoc} */
     @Throws(IOException::class)
     override fun readLayersTrace(): LayersTrace? {
-        val descriptor = ResultArtifactDescriptor(TraceType.SF)
+        val descriptor = ResultArtifactDescriptor(TraceType.PERFETTO)
         val key = CacheKey(reader.artifact.stableId, descriptor, reader.transitionTimeRange)
         return layersTraceCache.logAndReadTrace(key) { reader.readLayersTrace() }
     }

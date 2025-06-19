@@ -133,12 +133,13 @@ class ResultWriterTest {
 
     @Test
     fun writeLayersTrace() {
-        val writer = newTestResultWriter().addTraceResult(TraceType.SF, TestTraces.LayerTrace.FILE)
+        val writer =
+            newTestResultWriter().addTraceResult(TraceType.PERFETTO, TestTraces.LayerTrace.FILE)
         val result = writer.write()
         val reader = ResultReader(result, TRACE_CONFIG_REQUIRE_CHANGES)
         Truth.assertWithMessage("File count").that(reader.countFiles()).isEqualTo(1)
         Truth.assertWithMessage("Has file with type")
-            .that(reader.hasTraceFile(TraceType.SF))
+            .that(reader.hasTraceFile(TraceType.PERFETTO))
             .isTrue()
     }
 
@@ -146,35 +147,12 @@ class ResultWriterTest {
     fun writeTransactionTrace() {
         val writer =
             newTestResultWriter()
-                .addTraceResult(TraceType.TRANSACTION, TestTraces.TransactionTrace.FILE)
+                .addTraceResult(TraceType.PERFETTO, TestTraces.TransactionTrace.FILE)
         val result = writer.write()
         val reader = ResultReader(result, TRACE_CONFIG_REQUIRE_CHANGES)
         Truth.assertWithMessage("File count").that(reader.countFiles()).isEqualTo(1)
         Truth.assertWithMessage("Has file with type")
-            .that(reader.hasTraceFile(TraceType.TRANSACTION))
-            .isTrue()
-    }
-
-    @Test
-    fun writeTransitionTrace() {
-        val writer =
-            newTestResultWriter()
-                .addTraceResult(
-                    TraceType.LEGACY_WM_TRANSITION,
-                    TestTraces.LegacyTransitionTrace.WM_FILE,
-                )
-                .addTraceResult(
-                    TraceType.LEGACY_SHELL_TRANSITION,
-                    TestTraces.LegacyTransitionTrace.SHELL_FILE,
-                )
-        val result = writer.write()
-        val reader = ResultReader(result, TRACE_CONFIG_REQUIRE_CHANGES)
-        Truth.assertWithMessage("File count").that(reader.countFiles()).isEqualTo(2)
-        Truth.assertWithMessage("Has file with type")
-            .that(reader.hasTraceFile(TraceType.LEGACY_WM_TRANSITION))
-            .isTrue()
-        Truth.assertWithMessage("Has file with type")
-            .that(reader.hasTraceFile(TraceType.LEGACY_SHELL_TRANSITION))
+            .that(reader.hasTraceFile(TraceType.PERFETTO))
             .isTrue()
     }
 
@@ -183,33 +161,15 @@ class ResultWriterTest {
         val writer =
             newTestResultWriter()
                 .addTraceResult(TraceType.WM, TestTraces.LegacyWMTrace.FILE)
-                .addTraceResult(TraceType.SF, TestTraces.LayerTrace.FILE)
-                .addTraceResult(TraceType.TRANSACTION, TestTraces.TransactionTrace.FILE)
-                .addTraceResult(
-                    TraceType.LEGACY_WM_TRANSITION,
-                    TestTraces.LegacyTransitionTrace.WM_FILE,
-                )
-                .addTraceResult(
-                    TraceType.LEGACY_SHELL_TRANSITION,
-                    TestTraces.LegacyTransitionTrace.SHELL_FILE,
-                )
+                .addTraceResult(TraceType.PERFETTO, TestTraces.LayerTrace.FILE)
         val result = writer.write()
         val reader = ResultReader(result, TRACE_CONFIG_REQUIRE_CHANGES)
-        Truth.assertWithMessage("File count").that(reader.countFiles()).isEqualTo(4)
+        Truth.assertWithMessage("File count").that(reader.countFiles()).isEqualTo(2)
         Truth.assertWithMessage("Has file with type")
             .that(reader.hasTraceFile(TraceType.WM))
             .isTrue()
         Truth.assertWithMessage("Has file with type")
-            .that(reader.hasTraceFile(TraceType.SF))
-            .isTrue()
-        Truth.assertWithMessage("Has file with type")
-            .that(reader.hasTraceFile(TraceType.LEGACY_WM_TRANSITION))
-            .isTrue()
-        Truth.assertWithMessage("Has file with type")
-            .that(reader.hasTraceFile(TraceType.LEGACY_SHELL_TRANSITION))
-            .isTrue()
-        Truth.assertWithMessage("Has file with type")
-            .that(reader.hasTraceFile(TraceType.TRANSACTION))
+            .that(reader.hasTraceFile(TraceType.PERFETTO))
             .isTrue()
     }
 
