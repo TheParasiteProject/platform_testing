@@ -28,7 +28,7 @@ from impl.gerrit_downloader import GerritDownloader
 from impl.fetch_presubmit_test_artifact import FetchPresubmitTestArtifacts
 from impl.golden_watchers.golden_watcher_factory import GoldenWatcherFactory
 from impl.golden_watchers.golden_watcher_types import GoldenWatcherTypes
-from impl.serial_finder import ADBSerialFinder
+from impl.adb_serial_finder import ADBSerialFinder
 from impl.adb_client import AdbClient
 
 class WatchWebAppRequestHandler(http.server.BaseHTTPRequestHandler):
