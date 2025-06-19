@@ -19,9 +19,11 @@ package android.tools.testutils
 import android.tools.io.Artifact
 import android.tools.io.ResultArtifactDescriptor
 import android.tools.io.RunStatus
+import android.tools.io.TraceType
 
 class TestArtifact(artifactIdentifier: String) : Artifact {
 
+    override val type = TraceType.WINSCOPE_ZIP
     override val absolutePath = "IN_MEMORY/$artifactIdentifier"
     override val stableId = artifactIdentifier
     override val fileName = absolutePath

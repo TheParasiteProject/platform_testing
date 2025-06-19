@@ -20,6 +20,7 @@ import android.content.Context
 import android.tools.Scenario
 import android.tools.Timestamps
 import android.tools.io.Reader
+import android.tools.io.TraceType
 import android.tools.io.TransitionTimeRange
 import android.tools.traces.TRACE_CONFIG_REQUIRE_CHANGES
 import androidx.test.platform.app.InstrumentationRegistry
@@ -27,10 +28,14 @@ import java.io.File
 import java.io.IOException
 
 object TraceReaderUtils {
-    fun getTraceReaderFromAsset(scenario: Scenario, path: String): Reader {
+    fun getTraceReaderFromAsset(
+        scenario: Scenario,
+        path: String,
+        type: TraceType = TraceType.WINSCOPE_ZIP,
+    ): Reader {
         val file = readAssetAsFile(path)
 
-        val artifact = FileArtifact(scenario, file, 0)
+        val artifact = FileArtifact(scenario, file, 0, type)
 
         val result =
             ResultData(

@@ -21,6 +21,7 @@ import android.tools.io.BUFFER_SIZE
 import android.tools.io.FLICKER_IO_TAG
 import android.tools.io.ResultArtifactDescriptor
 import android.tools.io.RunStatus
+import android.tools.io.TraceType
 import android.tools.traces.deleteIfExists
 import android.tools.withTracing
 import android.util.Log
@@ -63,7 +64,7 @@ class ArtifactBuilder {
 
             writeToZip(artifactFile, files)
 
-            FileArtifact(scenario, artifactFile, counter)
+            FileArtifact(scenario, artifactFile, counter, TraceType.WINSCOPE_ZIP)
         }
     }
 
