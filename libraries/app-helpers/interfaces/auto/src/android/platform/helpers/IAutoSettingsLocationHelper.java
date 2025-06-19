@@ -74,4 +74,11 @@ public interface IAutoSettingsLocationHelper extends IAppHelper {
      * <p>Clicks View All in location settings
      */
     void clickViewAll();
+
+    /**
+     * Setup expectations: Enable Location
+     *
+     * <p>Method enables the location using adb command
+     */
+    void enableLocationUsingAdb();
 }

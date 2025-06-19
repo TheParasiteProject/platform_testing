@@ -18,10 +18,12 @@ package android.platform.tests;
 
 import static junit.framework.Assert.assertTrue;
 
+import android.platform.helpers.AutomotiveConfigConstants;
 import android.platform.helpers.HelperAccessor;
 import android.platform.helpers.IAutoSettingHelper;
 import android.platform.helpers.IAutoSettingsLocationHelper;
 import android.platform.helpers.SettingsConstants;
+import android.platform.test.annotations.RequiresFlagsEnabled;
 import android.util.Log;
 
 import androidx.test.runner.AndroidJUnit4;
@@ -32,34 +34,26 @@ import org.junit.runner.RunWith;
 
 @RunWith(AndroidJUnit4.class)
 public class LocationAccessTest {
-
     private HelperAccessor<IAutoSettingsLocationHelper> mSettingLocationHelper;
     private HelperAccessor<IAutoSettingHelper> mSettingHelper;
     private final String APP_NAME = "Google Maps";
     private static final String LOG_TAG = LocationAccessTest.class.getSimpleName();
 
     public LocationAccessTest() {
+
         mSettingHelper = new HelperAccessor<>(IAutoSettingHelper.class);
         mSettingLocationHelper = new HelperAccessor<>(IAutoSettingsLocationHelper.class);
     }
 
     @Before
     public void setup() {
-        Log.i(LOG_TAG, "Act: Open Location settings");
+        Log.i(LOG_TAG, "Act: Enable Location");
+        mSettingLocationHelper.get().enableLocationUsingAdb();
+        Log.i(LOG_TAG, "Act: Open Settings Location");
         mSettingHelper.get().openSetting(SettingsConstants.LOCATION_SETTINGS);
-        Log.i(LOG_TAG, "Assert: Location settings is open");
+        Log.i(LOG_TAG, "Assert: Location setting is open");
         assertTrue(
-                "Location settings did not open",
-                mSettingHelper.get().checkMenuExists("Location access"));
-        Log.i(LOG_TAG, "Act: Open Location Access sub-setting");
-        mSettingLocationHelper.get().locationAccess();
-        Log.i(LOG_TAG, "Act: Get Location ON status");
-        boolean defaultState = mSettingLocationHelper.get().isLocationOn();
-        Log.i(LOG_TAG, "Act: Toggle Location status to ON");
-        mSettingLocationHelper.get().toggleLocation(!defaultState);
-        mSettingLocationHelper.get().toggleLocation(defaultState);
-        Log.i(LOG_TAG, "Act: Go back to Settings screen");
-        mSettingHelper.get().pressSettingsBackNavIcon();
+                "Location settings did not open", mSettingHelper.get().checkMenuExists("Location"));
     }
 
     @Test
@@ -73,7 +67,11 @@ public class LocationAccessTest {
         Log.i(LOG_TAG, "Assert: Recently accessed app is displaying");
         assertTrue(
                 "Recently accessed app is not displaying",
-                mSettingHelper.get().checkMenuExists(APP_NAME));
+                mSettingHelper
+                        .get()
+                        .scrollAndCheckMenuExists(
+                                AutomotiveConfigConstants
+                                        .LOCATION_SETTINGS_RECENTLY_ACCESSED_MAPS));
     }
 
     @Test

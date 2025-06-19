@@ -24,6 +24,7 @@ import android.net.wifi.WifiManager;
 import android.os.UserHandle;
 import android.platform.helpers.ScrollUtility.ScrollActions;
 import android.platform.helpers.ScrollUtility.ScrollDirection;
+import android.platform.spectatio.utils.SpectatioUiUtil;
 import android.util.Log;
 
 import androidx.test.InstrumentationRegistry;
@@ -41,6 +42,7 @@ public class SettingHelperImpl extends AbstractStandardAppHelper implements IAut
     private static final String LOG_TAG = SettingHelperImpl.class.getSimpleName();
 
     private static final String SCREEN_BRIGHTNESS = "screen_brightness";
+    private static final int WAIT_MS = 20000;
 
     private ScrollUtility mScrollUtility;
 
@@ -491,7 +493,8 @@ public class SettingHelperImpl extends AbstractStandardAppHelper implements IAut
     /** {@inheritDoc} */
     @Override
     public boolean checkMenuExists(String setting) {
-        return getSpectatioUiUtil().hasUiElement(setting);
+        return getSpectatioUiUtil()
+                .waitForText(setting, WAIT_MS, SpectatioUiUtil.TextMatchType.EXACT);
     }
 
     /** {@inheritDoc} */
