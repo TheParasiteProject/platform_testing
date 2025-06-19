@@ -44,6 +44,7 @@ class ContactSearchAndCall(bluetooth_base_test.BluetoothBaseTest):
         # Navigate to the Contacts page
         expected_first_name = constants.EXPECTED_CONTACT_FULL_NAME
         self.call_utils.open_phone_app()
+        self.bt_utils.allow_permissions_after_pairing()
         self.call_utils.open_contacts()
         self.call_utils.wait_with_log(5)
 

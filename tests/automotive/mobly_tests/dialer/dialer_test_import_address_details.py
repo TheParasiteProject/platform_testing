@@ -58,6 +58,7 @@ class ImportAddressDetailsTest(bluetooth_base_test.BluetoothBaseTest):
         # Open the dialer app, and then the contacts page
         self.call_utils.open_phone_app()
         self.call_utils.wait_with_log(2)
+        self.bt_utils.allow_permissions_after_pairing()
         self.call_utils.open_contacts()
         self.call_utils.wait_with_log(2)
         self.call_utils.open_first_contact_details()
