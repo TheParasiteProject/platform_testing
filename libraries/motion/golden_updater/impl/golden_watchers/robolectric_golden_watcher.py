@@ -20,7 +20,6 @@ import datetime
 import shutil
 from impl.cached_golden import CachedGolden
 from impl.golden_watchers.golden_watcher import GoldenWatcher
-from impl.golden_watchers.golden_watcher_types import GoldenWatcherTypes
 
 class RobolectricGoldenWatcher(GoldenWatcher):
 
@@ -29,7 +28,6 @@ class RobolectricGoldenWatcher(GoldenWatcher):
         self.latest_dir = latest_dir
         self.cached_goldens = {}
         self.cached_golden_service = cached_golden_service
-        self.type = GoldenWatcherTypes.ROBOLECTRIC
         self.refresh_golden_files()
 
     def refresh_golden_files(self):

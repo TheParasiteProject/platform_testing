@@ -17,14 +17,14 @@ import os
 import hashlib
 from impl.cached_golden import CachedGolden
 from impl.golden_watchers.golden_watcher import GoldenWatcher
-from impl.golden_watchers.golden_watcher_types import GoldenWatcherTypes
 
 class GoldenFileWatcher(GoldenWatcher):
 
     def __init__(self, temp_dir, adb_client, cached_golden_service=CachedGolden):
         self.temp_dir = temp_dir
+        if not os.path.isdir(self.temp_dir):
+            os.makedirs(self.temp_dir, exist_ok=True)
         self.adb_client = adb_client
-        self.type = GoldenWatcherTypes.ADB
 
         # name -> CachedGolden
         self.cached_goldens = {}
