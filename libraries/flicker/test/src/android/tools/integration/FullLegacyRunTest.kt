@@ -19,6 +19,7 @@ package android.tools.integration
 import android.app.Instrumentation
 import android.graphics.Region
 import android.platform.test.annotations.Presubmit
+import android.platform.test.annotations.RequiresDevice
 import android.tools.Scenario
 import android.tools.device.apphelpers.MessagingAppHelper
 import android.tools.flicker.annotation.FlickerServiceCompatible
@@ -46,6 +47,7 @@ import org.junit.runners.Parameterized
  *
  * To run this test: `atest FlickerLibTestE2e:FullLegacyRunTest`
  */
+@RequiresDevice
 @FlickerServiceCompatible(expectedCujs = ["ENTIRE_TRACE"])
 @RunWith(Parameterized::class)
 @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
