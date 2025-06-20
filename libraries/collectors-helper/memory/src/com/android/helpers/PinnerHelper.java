@@ -146,17 +146,26 @@ public class PinnerHelper implements ICollectorHelper<String> {
     int totalFilesCount = 0;
     int totalBytes = 0;
     HashSet<String> groups = new HashSet<>();
-    for (PinnedFileStat stat : stats) {
-      // individual pinned file sizes.
-      mPinnerMap.put(
-          String.format("pinner_%s_%s_bytes", stat.getGroupName(), stat.getFilename()),
-          String.valueOf(stat.getBytesPinned()));
+        for (PinnedFileStat stat : stats) {
+            String key = "";
+            if (stat.getGroupName().contains("webview")
+                    && stat.getFilename().contains("TrichromeLibrary")) {
+                key =
+                        String.format(
+                                "pinner_%s_%s_bytes", stat.getGroupName(), "TrichromeLibrary.apk");
+            } else {
+                key = String.format("pinner_%s_%s_bytes", stat.getGroupName(), stat.getFilename());
+            }
+
+            // individual pinned file sizes.
+            mPinnerMap.put(key, String.valueOf(stat.getBytesPinned()));
       totalBytes += stat.getBytesPinned();
       totalFilesCount++;
       if (!groups.contains(stat.getGroupName())) {
         groups.add(stat.getGroupName());
       }
     }
+
     for (String group : groups) {
       long filesInGroup =
           stats.stream().filter(f -> f.getGroupName().equals(group)).count();
