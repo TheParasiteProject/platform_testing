@@ -27,17 +27,27 @@ enum class RunStatus(val prefix: String, val isFailure: Boolean) {
     PARSING_FAILURE("FAILED_PARSING", true),
     ASSERTION_FAILED("FAIL", true);
 
-    fun generateArchiveNameFor(scenario: Scenario, counter: Int): String = buildString {
-        append(prefix)
-        append("__")
-        append(scenario)
-        if (counter > 0) {
-            append("_")
-            append(counter)
+    fun generateArchiveNameFor(scenario: Scenario, counter: Int, type: TraceType): String =
+        buildString {
+            append(prefix)
+            append("__")
+            append(scenario)
+
+            if (type != TraceType.WINSCOPE_ZIP) {
+                append("_")
+                append(type.fileName.removeSuffix(".${type.fileExtension}"))
+            }
+
+            if (counter > 0) {
+                append("_")
+                append(counter)
+            }
+
+            if (!type.fileExtension.contains("winscope")) {
+                append(".winscope")
+            }
+            append(".${type.fileExtension}")
         }
-        append(".winscope")
-        append(".zip")
-    }
 
     companion object {
         @JvmStatic

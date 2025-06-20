@@ -35,7 +35,12 @@ object TraceReaderUtils {
     ): Reader {
         val file = readAssetAsFile(path)
 
-        val artifact = FileArtifact(scenario, file, 0, type)
+        val artifact =
+            if (type == TraceType.WINSCOPE_ZIP) {
+                WinscopeZipArtifact(scenario, file, 0)
+            } else {
+                SingleTraceFileArtifact(scenario, file, 0, type)
+            }
 
         val result =
             ResultData(
