@@ -32,7 +32,7 @@ import android.tools.traces.TRACE_CONFIG_REQUIRE_CHANGES
 data class LegacyFlickerTest(
     private val scenarioBuilder: ScenarioBuilder = ScenarioBuilder(),
     private val resultReaderProvider: (Scenario) -> Reader = {
-        android.tools.flicker.datastore.CachedResultReader(it, TRACE_CONFIG_REQUIRE_CHANGES)
+        CachedResultReader(it, TRACE_CONFIG_REQUIRE_CHANGES)
     },
     private val subjectsParserProvider: (Reader) -> SubjectsParser = { SubjectsParser(it) },
     private val runnerProvider: (Scenario) -> AssertionRunner = {

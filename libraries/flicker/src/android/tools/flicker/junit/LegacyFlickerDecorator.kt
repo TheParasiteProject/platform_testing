@@ -107,11 +107,6 @@ class LegacyFlickerDecorator(
         return errors
     }
 
-    private val providerMethod: FrameworkMethod
-        get() =
-            getCandidateProviderMethods(testClass).firstOrNull()
-                ?: error("Provider method not found")
-
     companion object {
         private fun getCandidateProviderMethods(testClass: TestClass): List<FrameworkMethod> =
             testClass.getAnnotatedMethods(FlickerBuilderProvider::class.java) ?: emptyList()

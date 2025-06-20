@@ -16,6 +16,7 @@
 
 package android.tools.integration
 
+import android.tools.flicker.datastore.CachedResultReader
 import android.tools.flicker.legacy.LegacyFlickerTest
 import android.tools.flicker.subject.exceptions.SimpleFlickerAssertionError
 import android.tools.io.RunStatus
@@ -66,11 +67,7 @@ class AssertionErrorTest {
             .that(result.exceptionOrNull())
             .hasMessageThat()
             .contains(TestUtils.FAILURE)
-        val reader =
-            android.tools.flicker.datastore.CachedResultReader(
-                TEST_SCENARIO,
-                TRACE_CONFIG_REQUIRE_CHANGES,
-            )
+        val reader = CachedResultReader(TEST_SCENARIO, TRACE_CONFIG_REQUIRE_CHANGES)
         Truth.assertWithMessage("Run status")
             .that(reader.runStatus)
             .isEqualTo(RunStatus.ASSERTION_FAILED)
@@ -78,11 +75,7 @@ class AssertionErrorTest {
     }
 
     private fun assertArtifactExists() {
-        val reader =
-            android.tools.flicker.datastore.CachedResultReader(
-                TEST_SCENARIO,
-                TRACE_CONFIG_REQUIRE_CHANGES,
-            )
+        val reader = CachedResultReader(TEST_SCENARIO, TRACE_CONFIG_REQUIRE_CHANGES)
         val file = File(reader.artifactPath)
         Truth.assertWithMessage("Files exist").that(file.exists()).isTrue()
     }

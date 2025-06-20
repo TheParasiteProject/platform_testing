@@ -27,7 +27,7 @@ import org.junit.Test
 class RunStatusTest {
     @Test
     fun fromFileNameGetsCorrectStatus() {
-        for (status in RunStatus.values()) {
+        for (status in RunStatus.entries) {
             val artifact =
                 ArtifactBuilder()
                     .withScenario(TEST_SCENARIO)

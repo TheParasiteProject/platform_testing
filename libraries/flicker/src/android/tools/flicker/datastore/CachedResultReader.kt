@@ -25,11 +25,7 @@ import android.tools.traces.io.ResultReaderWithLru
 class CachedResultReader(
     private val scenario: Scenario,
     traceConfig: TraceConfigs,
-    private val reader: Reader =
-        ResultReaderWithLru(
-            android.tools.flicker.datastore.DataStore.getResult(scenario),
-            traceConfig,
-        ),
+    private val reader: Reader = ResultReaderWithLru(DataStore.getResult(scenario), traceConfig),
 ) : Reader by reader {
     override fun toString(): String = "$scenario ($reader)"
 }

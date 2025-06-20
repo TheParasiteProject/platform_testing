@@ -33,7 +33,7 @@ import org.junit.Test
 class CachedResultReaderTest {
     @Before
     fun setup() {
-        android.tools.flicker.datastore.DataStore.clear()
+        DataStore.clear()
     }
 
     @Test
@@ -41,12 +41,8 @@ class CachedResultReaderTest {
         val writer = newTestResultWriter()
         writer.addTraceResult(TraceType.EVENT_LOG, TestTraces.EventLog.FILE)
         val result = writer.write()
-        android.tools.flicker.datastore.DataStore.addResult(TEST_SCENARIO, result)
-        val reader =
-            android.tools.flicker.datastore.CachedResultReader(
-                TEST_SCENARIO,
-                TRACE_CONFIG_REQUIRE_CHANGES,
-            )
+        DataStore.addResult(TEST_SCENARIO, result)
+        val reader = CachedResultReader(TEST_SCENARIO, TRACE_CONFIG_REQUIRE_CHANGES)
         val actual = reader.readEventLogTrace()
         Truth.assertWithMessage("Event log size").that(actual).isNotNull()
     }

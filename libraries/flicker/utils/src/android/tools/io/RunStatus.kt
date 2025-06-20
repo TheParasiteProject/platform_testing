@@ -67,6 +67,6 @@ enum class RunStatus(val prefix: String, val isFailure: Boolean) {
             }
         }
 
-        val ALL: List<RunStatus> = RunStatus.values().toList()
+        val ALL: List<RunStatus> = entries
     }
 }

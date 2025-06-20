@@ -36,9 +36,9 @@ class CachedResultWriterTest {
         val writer = newTestCachedResultWriter()
         val expected = writer.write()
         Truth.assertWithMessage("Has key in store")
-            .that(android.tools.flicker.datastore.DataStore.containsResult(TEST_SCENARIO))
+            .that(DataStore.containsResult(TEST_SCENARIO))
             .isTrue()
-        val actual = android.tools.flicker.datastore.DataStore.getResult(TEST_SCENARIO)
+        val actual = DataStore.getResult(TEST_SCENARIO)
         Truth.assertWithMessage("Has key in store").that(expected).isEqualTo(actual)
     }
 
@@ -51,7 +51,7 @@ class CachedResultWriterTest {
                 writer.write()
             }
         Truth.assertWithMessage("Has key in store")
-            .that(android.tools.flicker.datastore.DataStore.containsResult(TEST_SCENARIO))
+            .that(DataStore.containsResult(TEST_SCENARIO))
             .isTrue()
         assertExceptionMessage(failure, TEST_SCENARIO.toString())
         assertExceptionMessage(failure, "already in data store")

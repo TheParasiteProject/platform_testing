@@ -30,7 +30,7 @@ import org.junit.Test
 class ArtifactBuilderTest {
     @Test
     fun buildArtifactAndFileExists() {
-        for (status in RunStatus.values()) {
+        for (status in RunStatus.entries) {
             val artifact = createDefaultArtifactBuilder(status).build()
             Truth.assertWithMessage("Artifact exists").that(artifact.file.exists()).isTrue()
             artifact.deleteIfExists()
@@ -39,7 +39,7 @@ class ArtifactBuilderTest {
 
     @Test
     fun buildArtifactWithStatus() {
-        for (status in RunStatus.values()) {
+        for (status in RunStatus.entries) {
             val artifact = createDefaultArtifactBuilder(status).build()
             val statusFromFile = RunStatus.fromFileName(artifact.file.name)
             Truth.assertWithMessage("Run status").that(statusFromFile).isEqualTo(status)

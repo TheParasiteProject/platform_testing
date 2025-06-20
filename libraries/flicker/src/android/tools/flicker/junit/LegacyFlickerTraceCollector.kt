@@ -18,6 +18,7 @@ package android.tools.flicker.junit
 
 import android.tools.Scenario
 import android.tools.flicker.TracesCollector
+import android.tools.flicker.datastore.CachedResultReader
 import android.tools.io.Reader
 import android.tools.traces.TRACE_CONFIG_REQUIRE_CHANGES
 import android.util.Log
@@ -29,10 +30,7 @@ class LegacyFlickerTraceCollector(private val scenario: Scenario) : TracesCollec
 
     override fun stop(): Reader {
         Log.d("FAAS", "LegacyFlickerTraceCollector#stop")
-        return android.tools.flicker.datastore.CachedResultReader(
-            scenario,
-            TRACE_CONFIG_REQUIRE_CHANGES,
-        )
+        return CachedResultReader(scenario, TRACE_CONFIG_REQUIRE_CHANGES)
     }
 
     override fun cleanup() {
