@@ -16,7 +16,6 @@
 
 package android.tools.traces.io
 
-import android.tools.Scenario
 import android.tools.io.Artifact
 import android.tools.io.RunStatus
 import android.tools.io.TraceType
@@ -26,7 +25,7 @@ import java.io.File
 
 abstract class FileArtifact
 internal constructor(
-    private val scenario: Scenario,
+    private val testIdentifier: String,
     artifactFile: File,
     private val counter: Int,
     override val type: TraceType,
@@ -35,7 +34,7 @@ internal constructor(
         private set
 
     init {
-        require(!scenario.isEmpty) { "Scenario shouldn't be empty" }
+        require(testIdentifier.isNotEmpty()) { "Test identifier shouldn't be empty" }
     }
 
     override val runStatus: RunStatus
@@ -49,7 +48,7 @@ internal constructor(
     override val fileName: String
         get() = file.name
 
-    override val stableId: String = "$scenario$counter"
+    override val stableId: String = "$testIdentifier$counter"
 
     override fun updateStatus(newStatus: RunStatus) {
         val currFile = file
@@ -85,6 +84,6 @@ internal constructor(
 
     /** updates the artifact status to [newStatus] */
     private fun getNewFilePath(newStatus: RunStatus): File {
-        return file.resolveSibling(newStatus.generateArchiveNameFor(scenario, counter, type))
+        return file.resolveSibling(newStatus.generateArchiveNameFor(testIdentifier, counter, type))
     }
 }

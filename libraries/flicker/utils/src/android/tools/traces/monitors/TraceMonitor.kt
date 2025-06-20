@@ -16,7 +16,6 @@
 
 package android.tools.traces.monitors
 
-import android.tools.ScenarioBuilder
 import android.tools.function.Supplier
 import android.tools.io.TraceType
 import android.tools.traces.io.IResultData
@@ -120,9 +119,8 @@ abstract class TraceMonitor : ITransitionMonitor {
 
     private fun createWriter(): ResultWriter {
         val className = this::class.simpleName ?: error("Missing class name for $this")
-        val scenario = ScenarioBuilder().forClass(className).build()
         val tmpDir = createTempDirectory("withTracing").toFile()
-        return ResultWriter().forScenario(scenario).withOutputDir(tmpDir)
+        return ResultWriter().withName(className).withOutputDir(tmpDir)
     }
 
     companion object {

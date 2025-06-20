@@ -166,15 +166,15 @@ class LegacyFlickerServiceDecorator(
         test: Any,
         testScenario: Scenario,
     ): Collection<InjectedTestCase> {
-        if (!DataStore.containsResult(testScenario)) {
+        if (!DataStore.containsResult(testScenario.key)) {
             val description =
                 Description.createTestDescription(
                     this::class.java.simpleName,
                     "computeFlickerServiceTests",
                 )
-            transitionRunner.runTransition(testScenario, test, description)
+            transitionRunner.runTransition(testScenario.key, test, description)
         }
-        val reader = CachedResultReader(testScenario, TRACE_CONFIG_REQUIRE_CHANGES)
+        val reader = CachedResultReader(testScenario.key, TRACE_CONFIG_REQUIRE_CHANGES)
 
         val expectedScenarios =
             testClass.annotations
@@ -185,7 +185,7 @@ class LegacyFlickerServiceDecorator(
                 .toSet()
 
         return FlickerServiceDecorator.getFaasTestCases(
-            testScenario,
+            testScenario.key,
             expectedScenarios,
             "",
             reader,

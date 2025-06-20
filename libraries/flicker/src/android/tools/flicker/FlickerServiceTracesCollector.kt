@@ -17,7 +17,6 @@
 package android.tools.flicker
 
 import android.tools.FLICKER_TAG
-import android.tools.Scenario
 import android.tools.flicker.Utils.ALL_MONITORS
 import android.tools.io.Reader
 import android.tools.io.TraceType
@@ -31,30 +30,32 @@ import kotlin.io.path.createTempDirectory
 class FlickerServiceTracesCollector
 @JvmOverloads
 constructor(private val outputDir: File = createTempDirectory().toFile()) : TracesCollector {
-    private var scenario: Scenario? = null
+    private var testIdentifier: String = ""
 
     private val traceMonitors = ALL_MONITORS.filter { it.traceType != TraceType.SCREEN_RECORDING }
 
-    override fun start(scenario: Scenario) {
+    override fun start(testIdentifier: String) {
         reportErrorsBlock("Failed to start traces") {
-            require(this.scenario == null) { "Trace still running" }
+            require(this.testIdentifier.isEmpty()) { "Trace still running" }
             traceMonitors.forEach { it.start() }
-            this.scenario = scenario
+            this.testIdentifier = testIdentifier
         }
     }
 
     override fun stop(): Reader {
         return reportErrorsBlock("Failed to stop traces") {
-            val scenario = this.scenario
-            require(scenario != null) { "Scenario not set - make sure trace was started properly" }
+            val testIdentifier = testIdentifier
+            require(testIdentifier.isNotEmpty()) {
+                "Scenario not set - make sure trace was started properly"
+            }
 
             Log.v(LOG_TAG, "Creating output directory for trace files")
             outputDir.mkdirs()
 
             Log.v(LOG_TAG, "Stopping trace monitors")
-            val writer = ResultWriter().forScenario(scenario).withOutputDir(outputDir)
+            val writer = ResultWriter().withName(testIdentifier).withOutputDir(outputDir)
             traceMonitors.reversed().forEach { it.stop(writer) }
-            this.scenario = null
+            this.testIdentifier = ""
             val result = writer.write()
 
             ResultReaderWithLru(result, SERVICE_TRACE_CONFIG)

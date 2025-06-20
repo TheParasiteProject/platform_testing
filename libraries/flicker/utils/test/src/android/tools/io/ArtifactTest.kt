@@ -16,6 +16,7 @@
 
 package android.tools.io
 
+import android.tools.testutils.TEST_SCENARIO_KEY
 import android.tools.testutils.createDefaultArtifactBuilder
 import com.google.common.truth.Truth
 import kotlin.io.path.createTempDirectory
@@ -26,17 +27,21 @@ class ArtifactTest {
     fun equalityTestSameFile() {
         val outputDir = createTempDirectory().toFile()
 
-        val artifact1 = createDefaultArtifactBuilder(RunStatus.RUN_FAILED, outputDir).build()
+        val artifact1 =
+            createDefaultArtifactBuilder(TEST_SCENARIO_KEY, RunStatus.RUN_FAILED, outputDir).build()
         artifact1.file.delete()
-        val artifact2 = createDefaultArtifactBuilder(RunStatus.RUN_FAILED, outputDir).build()
+        val artifact2 =
+            createDefaultArtifactBuilder(TEST_SCENARIO_KEY, RunStatus.RUN_FAILED, outputDir).build()
         Truth.assertWithMessage("Artifacts are equal").that(artifact1).isEqualTo(artifact2)
     }
 
     @Test
     fun equalityTestDifferentFile() {
         val outputDir = createTempDirectory().toFile()
-        val artifact1 = createDefaultArtifactBuilder(RunStatus.RUN_FAILED, outputDir).build()
-        val artifact2 = createDefaultArtifactBuilder(RunStatus.RUN_FAILED, outputDir).build()
+        val artifact1 =
+            createDefaultArtifactBuilder(TEST_SCENARIO_KEY, RunStatus.RUN_FAILED, outputDir).build()
+        val artifact2 =
+            createDefaultArtifactBuilder(TEST_SCENARIO_KEY, RunStatus.RUN_FAILED, outputDir).build()
         Truth.assertWithMessage("Artifacts are equal").that(artifact1).isNotEqualTo(artifact2)
     }
 }

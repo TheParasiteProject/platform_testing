@@ -17,7 +17,7 @@
 package android.tools.io
 
 import android.tools.testutils.CleanFlickerEnvironmentRule
-import android.tools.testutils.TEST_SCENARIO
+import android.tools.testutils.TEST_SCENARIO_KEY
 import android.tools.testutils.createDefaultArtifactBuilder
 import android.tools.traces.io.ArtifactBuilder
 import com.google.common.truth.Truth
@@ -31,7 +31,7 @@ class ArtifactBuilderTest {
     @Test
     fun buildArtifactAndFileExists() {
         for (status in RunStatus.entries) {
-            val artifact = createDefaultArtifactBuilder(status).build()
+            val artifact = createDefaultArtifactBuilder(TEST_SCENARIO_KEY, status).build()
             Truth.assertWithMessage("Artifact exists").that(artifact.file.exists()).isTrue()
             artifact.deleteIfExists()
         }
@@ -40,7 +40,7 @@ class ArtifactBuilderTest {
     @Test
     fun buildArtifactWithStatus() {
         for (status in RunStatus.entries) {
-            val artifact = createDefaultArtifactBuilder(status).build()
+            val artifact = createDefaultArtifactBuilder(TEST_SCENARIO_KEY, status).build()
             val statusFromFile = RunStatus.fromFileName(artifact.file.name)
             Truth.assertWithMessage("Run status").that(statusFromFile).isEqualTo(status)
             artifact.deleteIfExists()
@@ -49,10 +49,8 @@ class ArtifactBuilderTest {
 
     @Test
     fun buildArtifactWithScenario() {
-        val artifact = createDefaultArtifactBuilder(RunStatus.RUN_FAILED).build()
-        Truth.assertWithMessage("Scenario")
-            .that(artifact.file.name)
-            .contains(TEST_SCENARIO.toString())
+        val artifact = createDefaultArtifactBuilder(TEST_SCENARIO_KEY, RunStatus.RUN_FAILED).build()
+        Truth.assertWithMessage("Scenario").that(artifact.file.name).contains(TEST_SCENARIO_KEY)
         artifact.deleteIfExists()
     }
 
@@ -60,7 +58,12 @@ class ArtifactBuilderTest {
     fun buildArtifactWithOutputDir() {
         val expectedDir = createTempDirectory().toFile()
         val artifact =
-            createDefaultArtifactBuilder(RunStatus.RUN_FAILED, outputDir = expectedDir).build()
+            createDefaultArtifactBuilder(
+                    TEST_SCENARIO_KEY,
+                    RunStatus.RUN_FAILED,
+                    outputDir = expectedDir,
+                )
+                .build()
         Truth.assertWithMessage("Output dir").that(artifact.file.parentFile).isEqualTo(expectedDir)
         artifact.deleteIfExists()
     }
@@ -70,7 +73,12 @@ class ArtifactBuilderTest {
         val expectedDescriptor = ResultArtifactDescriptor(TraceType.WM)
         val expectedFiles = mapOf(expectedDescriptor to File.createTempFile("test", ""))
         val artifact =
-            createDefaultArtifactBuilder(RunStatus.RUN_FAILED, files = expectedFiles).build()
+            createDefaultArtifactBuilder(
+                    TEST_SCENARIO_KEY,
+                    RunStatus.RUN_FAILED,
+                    files = expectedFiles,
+                )
+                .build()
         Truth.assertWithMessage("Trace count").that(artifact.traceCount()).isEqualTo(1)
         Truth.assertWithMessage("Trace type").that(artifact.hasTrace(expectedDescriptor)).isTrue()
         artifact.deleteIfExists()
@@ -78,7 +86,7 @@ class ArtifactBuilderTest {
 
     @Test
     fun buildArtifactAvoidDuplicate() {
-        val builder = createDefaultArtifactBuilder(RunStatus.RUN_FAILED)
+        val builder = createDefaultArtifactBuilder(TEST_SCENARIO_KEY, RunStatus.RUN_FAILED)
         val artifact1 = builder.build()
         val artifact2 = builder.build()
 
@@ -94,7 +102,7 @@ class ArtifactBuilderTest {
 
     @Test
     fun buildTwoArtifactsThatAreDifferentWithSameStatus() {
-        val builder = createDefaultArtifactBuilder(RunStatus.RUN_FAILED)
+        val builder = createDefaultArtifactBuilder(TEST_SCENARIO_KEY, RunStatus.RUN_FAILED)
         val artifact1 = builder.build()
         val artifact2 = builder.build()
 
@@ -103,21 +111,23 @@ class ArtifactBuilderTest {
 
     @Test
     fun buildTwoArtifactsThatAreDifferent() {
-        val artifact1 = createDefaultArtifactBuilder(RunStatus.RUN_FAILED).build()
-        val artifact2 = createDefaultArtifactBuilder(RunStatus.PARSING_FAILURE).build()
+        val artifact1 =
+            createDefaultArtifactBuilder(TEST_SCENARIO_KEY, RunStatus.RUN_FAILED).build()
+        val artifact2 =
+            createDefaultArtifactBuilder(TEST_SCENARIO_KEY, RunStatus.PARSING_FAILURE).build()
         Truth.assertWithMessage("Artifacts are equal").that(artifact1).isNotEqualTo(artifact2)
     }
 
     @Test(expected = IllegalStateException::class)
     fun failArtifactWithoutStatus() {
         ArtifactBuilder()
-            .withScenario(TEST_SCENARIO)
+            .withName(TEST_SCENARIO_KEY)
             .withOutputDir(createTempDirectory().toFile())
             .withFiles(emptyMap())
             .build()
     }
 
-    @Test(expected = IllegalStateException::class)
+    @Test(expected = IllegalArgumentException::class)
     fun failArtifactWithoutScenario() {
         ArtifactBuilder()
             .withOutputDir(createTempDirectory().toFile())
@@ -129,7 +139,7 @@ class ArtifactBuilderTest {
     @Test(expected = IllegalStateException::class)
     fun failArtifactWithoutOutputDir() {
         ArtifactBuilder()
-            .withScenario(TEST_SCENARIO)
+            .withName(TEST_SCENARIO_KEY)
             .withStatus(RunStatus.RUN_FAILED)
             .withFiles(emptyMap())
             .build()

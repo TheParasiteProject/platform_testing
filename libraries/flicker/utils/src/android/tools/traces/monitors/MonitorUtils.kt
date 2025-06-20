@@ -22,7 +22,6 @@
 
 package android.tools.traces.monitors
 
-import android.tools.ScenarioBuilder
 import android.tools.Tag
 import android.tools.io.Reader
 import android.tools.io.TraceType
@@ -168,10 +167,7 @@ fun withTracing(
 ): Reader {
     val tmpFile = File.createTempFile("recordTraces", "")
     val tmpDir = tmpFile.parentFile ?: error("Temp dir should not be null")
-    val writer =
-        ResultWriter()
-            .forScenario(ScenarioBuilder().forClass(tmpFile.name).build())
-            .withOutputDir(tmpDir)
+    val writer = ResultWriter().withName(tmpFile.name).withOutputDir(tmpDir)
 
     try {
         traceMonitors.forEach { it.start() }

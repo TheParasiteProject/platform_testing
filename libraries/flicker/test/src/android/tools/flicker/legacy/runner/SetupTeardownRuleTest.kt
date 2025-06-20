@@ -19,7 +19,7 @@ package android.tools.flicker.legacy.runner
 import android.tools.flicker.legacy.AbstractFlickerTestData
 import android.tools.flicker.legacy.FlickerTestData
 import android.tools.testutils.CleanFlickerEnvironmentRule
-import android.tools.testutils.TEST_SCENARIO
+import android.tools.testutils.TEST_SCENARIO_KEY
 import android.tools.testutils.assertThrows
 import android.tools.traces.io.ResultWriter
 import android.tools.traces.parsers.WindowManagerStateHelper
@@ -88,7 +88,7 @@ class SetupTeardownRuleTest {
             return SetupTeardownRule(
                 mockedFlicker,
                 ResultWriter(),
-                TEST_SCENARIO,
+                TEST_SCENARIO_KEY,
                 setupCommands,
                 teardownCommands,
                 WindowManagerStateHelper(),

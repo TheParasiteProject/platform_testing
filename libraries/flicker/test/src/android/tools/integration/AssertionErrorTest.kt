@@ -16,12 +16,13 @@
 
 package android.tools.integration
 
+import android.tools.Scenario
 import android.tools.flicker.datastore.CachedResultReader
 import android.tools.flicker.legacy.LegacyFlickerTest
 import android.tools.flicker.subject.exceptions.SimpleFlickerAssertionError
 import android.tools.io.RunStatus
 import android.tools.testutils.CleanFlickerEnvironmentRule
-import android.tools.testutils.TEST_SCENARIO
+import android.tools.testutils.TEST_SCENARIO_KEY
 import android.tools.traces.TRACE_CONFIG_REQUIRE_CHANGES
 import androidx.test.filters.FlakyTest
 import com.google.common.truth.Truth
@@ -39,7 +40,8 @@ import org.junit.Test
 @FlakyTest(bugId = 362942901)
 class AssertionErrorTest {
     private var assertionExecuted = false
-    private val testParam = LegacyFlickerTest().also { it.initialize(TEST_SCENARIO.testClass) }
+    private val scenario: Scenario
+    private val testParam = LegacyFlickerTest().also { scenario = it.initialize(TEST_SCENARIO_KEY) }
 
     @Before
     fun setup() {
@@ -67,7 +69,7 @@ class AssertionErrorTest {
             .that(result.exceptionOrNull())
             .hasMessageThat()
             .contains(TestUtils.FAILURE)
-        val reader = CachedResultReader(TEST_SCENARIO, TRACE_CONFIG_REQUIRE_CHANGES)
+        val reader = CachedResultReader(scenario.key, TRACE_CONFIG_REQUIRE_CHANGES)
         Truth.assertWithMessage("Run status")
             .that(reader.runStatus)
             .isEqualTo(RunStatus.ASSERTION_FAILED)
@@ -75,7 +77,7 @@ class AssertionErrorTest {
     }
 
     private fun assertArtifactExists() {
-        val reader = CachedResultReader(TEST_SCENARIO, TRACE_CONFIG_REQUIRE_CHANGES)
+        val reader = CachedResultReader(scenario.key, TRACE_CONFIG_REQUIRE_CHANGES)
 
         for (artifact in reader.artifacts) {
             val file = File(artifact.absolutePath)

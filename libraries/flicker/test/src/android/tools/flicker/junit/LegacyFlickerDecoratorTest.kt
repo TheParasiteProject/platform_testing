@@ -63,8 +63,8 @@ class LegacyFlickerDecoratorTest {
 
     @Test
     fun callsTransitionRunnerToRunTransition() {
-        val scenario =
-            ScenarioBuilder().forClass(TestUtils.DummyTestClassValid::class.java.name).build()
+        val className = TestUtils.DummyTestClassValid::class.java.name
+        val scenario = ScenarioBuilder().forClass(className).build()
         val test =
             TestWithParameters(
                 "test",
@@ -89,7 +89,7 @@ class LegacyFlickerDecoratorTest {
 
         decorator.getMethodInvoker(method, test = invokerTest).evaluate()
 
-        Mockito.verify(mockTransitionRunner).runTransition(scenario, invokerTest, description)
+        Mockito.verify(mockTransitionRunner).runTransition(scenario.key, invokerTest, description)
     }
 
     @Test
@@ -123,7 +123,7 @@ class LegacyFlickerDecoratorTest {
 
         Truth.assertWithMessage("Executed").that(TestUtils.executionCount).isEqualTo(1)
         Truth.assertWithMessage("In Datastore")
-            .that(DataStore.containsResult(TestUtils.DummyTestClassValid.SCENARIO))
+            .that(DataStore.containsResult(TestUtils.DummyTestClassValid.SCENARIO.key))
             .isTrue()
     }
 

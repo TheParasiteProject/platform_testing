@@ -19,11 +19,11 @@ package android.tools.flicker.datastore
 import android.tools.traces.io.IResultData
 import android.tools.traces.io.ResultWriter
 
-/** Result writer that adds data of a [scenario] to the [DataStore] */
+/** Result writer that adds data of a [testIdentifier] to the [DataStore] */
 class CachedResultWriter : ResultWriter() {
     override fun write(): IResultData {
         val result = super.write()
-        DataStore.addResult(scenario, result)
+        DataStore.addResult(testIdentifier, result)
         return result
     }
 }

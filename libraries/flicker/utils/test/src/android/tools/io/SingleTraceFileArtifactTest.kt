@@ -16,7 +16,7 @@
 
 package android.tools.io
 
-import android.tools.testutils.TEST_SCENARIO
+import android.tools.testutils.TEST_SCENARIO_KEY
 import android.tools.traces.io.SingleTraceFileArtifact
 import com.google.common.truth.Truth
 import java.io.File
@@ -49,7 +49,7 @@ class SingleTraceFileArtifactTest {
     @Test
     fun hasTraceMatchesType() {
         val traceFile = createTestFile("trace.pb")
-        val artifact = SingleTraceFileArtifact(TEST_SCENARIO, traceFile, 0, TraceType.PERFETTO)
+        val artifact = SingleTraceFileArtifact(TEST_SCENARIO_KEY, traceFile, 0, TraceType.PERFETTO)
         val descriptor = ResultArtifactDescriptor(TraceType.PERFETTO)
         Truth.assertThat(artifact.hasTrace(descriptor)).isTrue()
     }
@@ -57,7 +57,7 @@ class SingleTraceFileArtifactTest {
     @Test
     fun hasTraceMismatchesType() {
         val traceFile = createTestFile("trace.pb")
-        val artifact = SingleTraceFileArtifact(TEST_SCENARIO, traceFile, 0, TraceType.PERFETTO)
+        val artifact = SingleTraceFileArtifact(TEST_SCENARIO_KEY, traceFile, 0, TraceType.PERFETTO)
         val descriptor = ResultArtifactDescriptor(TraceType.WM)
         Truth.assertThat(artifact.hasTrace(descriptor)).isFalse()
     }
@@ -65,7 +65,7 @@ class SingleTraceFileArtifactTest {
     @Test
     fun traceCountIsAlwaysOne() {
         val traceFile = createTestFile("trace.pb")
-        val artifact = SingleTraceFileArtifact(TEST_SCENARIO, traceFile, 0, TraceType.PERFETTO)
+        val artifact = SingleTraceFileArtifact(TEST_SCENARIO_KEY, traceFile, 0, TraceType.PERFETTO)
         Truth.assertThat(artifact.traceCount()).isEqualTo(1)
     }
 
@@ -73,7 +73,7 @@ class SingleTraceFileArtifactTest {
     fun readBytesDescriptorMatchesType() {
         val content = "This is transaction data"
         val traceFile = createTestFile("transaction.pb", content)
-        val artifact = SingleTraceFileArtifact(TEST_SCENARIO, traceFile, 0, TraceType.PERFETTO)
+        val artifact = SingleTraceFileArtifact(TEST_SCENARIO_KEY, traceFile, 0, TraceType.PERFETTO)
         val descriptor = ResultArtifactDescriptor(TraceType.PERFETTO)
         val bytes = artifact.readBytes(descriptor)
         Truth.assertThat(bytes).isNotNull()
@@ -83,7 +83,7 @@ class SingleTraceFileArtifactTest {
     @Test
     fun readBytesDescriptorMismatchesType() {
         val traceFile = createTestFile("some_other_trace.pb")
-        val artifact = SingleTraceFileArtifact(TEST_SCENARIO, traceFile, 0, TraceType.PERFETTO)
+        val artifact = SingleTraceFileArtifact(TEST_SCENARIO_KEY, traceFile, 0, TraceType.PERFETTO)
         val descriptor = ResultArtifactDescriptor(TraceType.WM)
         Truth.assertThat(artifact.readBytes(descriptor)).isNull()
     }
@@ -96,7 +96,7 @@ class SingleTraceFileArtifactTest {
             nonExistentFile.delete()
         }
         val artifact =
-            SingleTraceFileArtifact(TEST_SCENARIO, nonExistentFile, 0, TraceType.PERFETTO)
+            SingleTraceFileArtifact(TEST_SCENARIO_KEY, nonExistentFile, 0, TraceType.PERFETTO)
         val descriptor = ResultArtifactDescriptor(TraceType.PERFETTO)
         // This should attempt to read the non-existent file because types match,
         // leading to parent FileArtifact.readBytes() throwing FileNotFoundException
@@ -107,7 +107,7 @@ class SingleTraceFileArtifactTest {
     fun readBytesUnderlyingFileDeletedAfterCreationThrowsException() {
         val content = "Initial content"
         val traceFile = createTestFile("deletable_trace.pb", content)
-        val artifact = SingleTraceFileArtifact(TEST_SCENARIO, traceFile, 0, TraceType.PERFETTO)
+        val artifact = SingleTraceFileArtifact(TEST_SCENARIO_KEY, traceFile, 0, TraceType.PERFETTO)
         val descriptor = ResultArtifactDescriptor(TraceType.PERFETTO)
 
         // Read once, should work
@@ -128,16 +128,20 @@ class SingleTraceFileArtifactTest {
     @Test
     fun updateStatusRenamesFile() {
         val initialFileName =
-            RunStatus.RUN_EXECUTED.generateArchiveNameFor(TEST_SCENARIO, 0, TraceType.PERFETTO)
+            RunStatus.RUN_EXECUTED.generateArchiveNameFor(TEST_SCENARIO_KEY, 0, TraceType.PERFETTO)
         val traceFile = createTestFile(initialFileName)
-        val artifact = SingleTraceFileArtifact(TEST_SCENARIO, traceFile, 0, TraceType.PERFETTO)
+        val artifact = SingleTraceFileArtifact(TEST_SCENARIO_KEY, traceFile, 0, TraceType.PERFETTO)
 
         Truth.assertThat(artifact.file.name).isEqualTo(initialFileName)
         Truth.assertThat(artifact.runStatus).isEqualTo(RunStatus.RUN_EXECUTED)
 
         artifact.updateStatus(RunStatus.ASSERTION_SUCCESS)
         val newFileName =
-            RunStatus.ASSERTION_SUCCESS.generateArchiveNameFor(TEST_SCENARIO, 0, TraceType.PERFETTO)
+            RunStatus.ASSERTION_SUCCESS.generateArchiveNameFor(
+                TEST_SCENARIO_KEY,
+                0,
+                TraceType.PERFETTO,
+            )
 
         Truth.assertThat(artifact.runStatus).isEqualTo(RunStatus.ASSERTION_SUCCESS)
         Truth.assertThat(artifact.file.name).isEqualTo(newFileName)
@@ -148,7 +152,7 @@ class SingleTraceFileArtifactTest {
     @Test
     fun deleteIfExistsDeletesFile() {
         val traceFile = createTestFile("toBeDeleted.pb")
-        val artifact = SingleTraceFileArtifact(TEST_SCENARIO, traceFile, 0, TraceType.PERFETTO)
+        val artifact = SingleTraceFileArtifact(TEST_SCENARIO_KEY, traceFile, 0, TraceType.PERFETTO)
         Truth.assertThat(artifact.file.exists()).isTrue()
         artifact.deleteIfExists()
         Truth.assertThat(artifact.file.exists()).isFalse()
@@ -157,8 +161,8 @@ class SingleTraceFileArtifactTest {
     @Test
     fun equalityTestSameUnderlyingFile() {
         val traceFile = createTestFile("file.pb")
-        val artifact1 = SingleTraceFileArtifact(TEST_SCENARIO, traceFile, 0, TraceType.PERFETTO)
-        val artifact2 = SingleTraceFileArtifact(TEST_SCENARIO, traceFile, 0, TraceType.PERFETTO)
+        val artifact1 = SingleTraceFileArtifact(TEST_SCENARIO_KEY, traceFile, 0, TraceType.PERFETTO)
+        val artifact2 = SingleTraceFileArtifact(TEST_SCENARIO_KEY, traceFile, 0, TraceType.PERFETTO)
         Truth.assertThat(artifact1).isEqualTo(artifact2)
     }
 
@@ -171,8 +175,10 @@ class SingleTraceFileArtifactTest {
         traceFile2.parentFile.mkdirs()
         traceFile2.writeText("data")
 
-        val artifact1 = SingleTraceFileArtifact(TEST_SCENARIO, traceFile1, 0, TraceType.PERFETTO)
-        val artifact2 = SingleTraceFileArtifact(TEST_SCENARIO, traceFile2, 0, TraceType.PERFETTO)
+        val artifact1 =
+            SingleTraceFileArtifact(TEST_SCENARIO_KEY, traceFile1, 0, TraceType.PERFETTO)
+        val artifact2 =
+            SingleTraceFileArtifact(TEST_SCENARIO_KEY, traceFile2, 0, TraceType.PERFETTO)
         Truth.assertThat(artifact1).isNotEqualTo(artifact2)
         outputDir2.deleteRecursively()
     }
@@ -181,8 +187,10 @@ class SingleTraceFileArtifactTest {
     fun equalityTestDifferentUnderlyingFilesDifferentName() {
         val traceFile1 = createTestFile("file1.pb")
         val traceFile2 = createTestFile("file2.pb")
-        val artifact1 = SingleTraceFileArtifact(TEST_SCENARIO, traceFile1, 0, TraceType.PERFETTO)
-        val artifact2 = SingleTraceFileArtifact(TEST_SCENARIO, traceFile2, 0, TraceType.PERFETTO)
+        val artifact1 =
+            SingleTraceFileArtifact(TEST_SCENARIO_KEY, traceFile1, 0, TraceType.PERFETTO)
+        val artifact2 =
+            SingleTraceFileArtifact(TEST_SCENARIO_KEY, traceFile2, 0, TraceType.PERFETTO)
         Truth.assertThat(artifact1).isNotEqualTo(artifact2)
     }
 }

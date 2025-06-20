@@ -16,7 +16,6 @@
 
 package android.tools.flicker.legacy.runner
 
-import android.tools.Scenario
 import android.tools.flicker.junit.Utils
 import android.tools.flicker.legacy.FlickerTestData
 import android.tools.traces.io.ResultWriter
@@ -31,7 +30,7 @@ import org.junit.runners.model.Statement
  *
  * @param flicker test definition
  * @param resultWriter to write
- * @param scenario to run the transition
+ * @param testIdentifier to identify the transition
  * @param setupCommands to run before the transition
  * @param teardownCommands to run after the transition
  * @param wmHelper to stabilize the UI before/after transitions
@@ -39,7 +38,7 @@ import org.junit.runners.model.Statement
 class SetupTeardownRule(
     private val flicker: FlickerTestData,
     private val resultWriter: ResultWriter,
-    private val scenario: Scenario,
+    private val testIdentifier: String,
     private val setupCommands: List<FlickerTestData.() -> Any> = flicker.transitionSetup,
     private val teardownCommands: List<FlickerTestData.() -> Any> = flicker.transitionTeardown,
     private val wmHelper: WindowManagerStateHelper = flicker.wmHelper,
@@ -59,7 +58,7 @@ class SetupTeardownRule(
 
     private fun doRunTransitionSetup(description: Description?) {
         withTracing("doRunTransitionSetup") {
-            Utils.notifyRunnerProgress(scenario, "Running transition setup for $description")
+            Utils.notifyRunnerProgress(testIdentifier, "Running transition setup for $description")
             setupCommands.forEach { it.invoke(flicker) }
             Utils.doWaitForUiStabilize(wmHelper)
         }
@@ -67,7 +66,10 @@ class SetupTeardownRule(
 
     private fun doRunTransitionTeardown(description: Description?) {
         withTracing("doRunTransitionTeardown") {
-            Utils.notifyRunnerProgress(scenario, "Running transition teardown for $description")
+            Utils.notifyRunnerProgress(
+                testIdentifier,
+                "Running transition teardown for $description",
+            )
             teardownCommands.forEach { it.invoke(flicker) }
             Utils.doWaitForUiStabilize(wmHelper)
         }

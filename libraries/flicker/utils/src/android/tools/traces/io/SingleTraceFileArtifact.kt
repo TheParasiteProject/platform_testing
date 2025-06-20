@@ -16,7 +16,6 @@
 
 package android.tools.traces.io
 
-import android.tools.Scenario
 import android.tools.io.FLICKER_IO_TAG
 import android.tools.io.ResultArtifactDescriptor
 import android.tools.io.TraceType
@@ -25,11 +24,11 @@ import java.io.File
 import java.io.IOException
 
 class SingleTraceFileArtifact(
-    scenario: Scenario,
+    testIdentifier: String,
     artifactFile: File,
     counter: Int,
     type: TraceType,
-) : FileArtifact(scenario, artifactFile, counter, type) {
+) : FileArtifact(testIdentifier, artifactFile, counter, type) {
 
     override fun hasTrace(descriptor: ResultArtifactDescriptor) = type == descriptor.traceType
 

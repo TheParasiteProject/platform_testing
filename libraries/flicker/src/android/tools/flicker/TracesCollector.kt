@@ -16,11 +16,10 @@
 
 package android.tools.flicker
 
-import android.tools.Scenario
 import android.tools.io.Reader
 
 interface TracesCollector {
-    fun start(scenario: Scenario)
+    fun start(testIdentifier: String)
 
     fun stop(): Reader
 

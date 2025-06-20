@@ -24,18 +24,17 @@ import android.tools.flicker.assertions.AssertionRunner
 import android.tools.flicker.assertions.BaseFlickerTest
 import android.tools.flicker.assertions.SubjectsParser
 import android.tools.flicker.datastore.CachedAssertionRunner
-import android.tools.flicker.datastore.CachedResultReader
 import android.tools.io.Reader
 import android.tools.traces.TRACE_CONFIG_REQUIRE_CHANGES
 
 /** Specification of a flicker test for JUnit ParameterizedRunner class */
 data class LegacyFlickerTest(
     private val scenarioBuilder: ScenarioBuilder = ScenarioBuilder(),
-    private val resultReaderProvider: (Scenario) -> Reader = {
-        CachedResultReader(it, TRACE_CONFIG_REQUIRE_CHANGES)
+    private val resultReaderProvider: (String) -> Reader = {
+        android.tools.flicker.datastore.CachedResultReader(it, TRACE_CONFIG_REQUIRE_CHANGES)
     },
     private val subjectsParserProvider: (Reader) -> SubjectsParser = { SubjectsParser(it) },
-    private val runnerProvider: (Scenario) -> AssertionRunner = {
+    private val runnerProvider: (String) -> AssertionRunner = {
         val reader = resultReaderProvider(it)
         CachedAssertionRunner(it, reader)
     },
@@ -43,7 +42,7 @@ data class LegacyFlickerTest(
     var scenario: ScenarioImpl = ScenarioBuilder().createEmptyScenario() as ScenarioImpl
         private set
 
-    override fun toString(): String = scenario.toString()
+    override fun toString(): String = scenario.key
 
     fun initialize(testClass: String): Scenario {
         scenario = scenarioBuilder.forClass(testClass).build() as ScenarioImpl
@@ -52,10 +51,10 @@ data class LegacyFlickerTest(
 
     /** Obtains a reader for the flicker result artifact */
     val reader: Reader
-        get() = resultReaderProvider(scenario)
+        get() = resultReaderProvider(scenario.key)
 
     override fun doProcess(assertion: AssertionData) {
         require(!scenario.isEmpty) { "Scenario shouldn't be empty" }
-        runnerProvider.invoke(scenario).runAssertion(assertion)?.let { throw it }
+        runnerProvider.invoke(scenario.key).runAssertion(assertion)?.let { throw it }
     }
 }

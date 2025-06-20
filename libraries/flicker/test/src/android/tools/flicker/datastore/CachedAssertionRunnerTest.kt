@@ -24,7 +24,7 @@ import android.tools.flicker.subject.events.EventLogSubject
 import android.tools.flicker.subject.exceptions.SimpleFlickerAssertionError
 import android.tools.io.RunStatus
 import android.tools.testutils.CleanFlickerEnvironmentRule
-import android.tools.testutils.TEST_SCENARIO
+import android.tools.testutils.TEST_SCENARIO_KEY
 import android.tools.testutils.assertExceptionMessage
 import android.tools.testutils.newTestResultWriter
 import android.tools.traces.monitors.events.EventLogMonitor
@@ -48,20 +48,20 @@ class CachedAssertionRunnerTest {
     fun setup() {
         DataStore.clear()
         executionCount = 0
-        val writer = newTestResultWriter(TEST_SCENARIO)
+        val writer = newTestResultWriter(TEST_SCENARIO_KEY)
         val monitor = EventLogMonitor()
         monitor.start()
         monitor.stop(writer)
         val result = writer.write()
-        DataStore.addResult(TEST_SCENARIO, result)
+        DataStore.addResult(TEST_SCENARIO_KEY, result)
     }
 
     @Test
     fun executes() {
-        val runner = CachedAssertionRunner(TEST_SCENARIO)
+        val runner = CachedAssertionRunner(TEST_SCENARIO_KEY)
         val firstAssertionResult = runner.runAssertion(assertionSuccess)
         val lastAssertionResult = runner.runAssertion(assertionSuccess)
-        val result = DataStore.getResult(TEST_SCENARIO)
+        val result = DataStore.getResult(TEST_SCENARIO_KEY)
 
         Truth.assertWithMessage("Executed").that(executionCount).isEqualTo(2)
         Truth.assertWithMessage("Run status")
@@ -73,10 +73,10 @@ class CachedAssertionRunnerTest {
 
     @Test
     fun executesFailure() {
-        val runner = CachedAssertionRunner(TEST_SCENARIO)
+        val runner = CachedAssertionRunner(TEST_SCENARIO_KEY)
         val firstAssertionResult = runner.runAssertion(assertionFailure)
         val lastAssertionResult = runner.runAssertion(assertionFailure)
-        val result = DataStore.getResult(TEST_SCENARIO)
+        val result = DataStore.getResult(TEST_SCENARIO_KEY)
 
         Truth.assertWithMessage("Executed").that(executionCount).isEqualTo(2)
         Truth.assertWithMessage("Run status")
@@ -93,10 +93,10 @@ class CachedAssertionRunnerTest {
 
     @Test
     fun updatesRunStatusFailureFirst() {
-        val runner = CachedAssertionRunner(TEST_SCENARIO)
+        val runner = CachedAssertionRunner(TEST_SCENARIO_KEY)
         val firstAssertionResult = runner.runAssertion(assertionFailure)
         val lastAssertionResult = runner.runAssertion(assertionSuccess)
-        val result = DataStore.getResult(TEST_SCENARIO)
+        val result = DataStore.getResult(TEST_SCENARIO_KEY)
 
         Truth.assertWithMessage("Executed").that(executionCount).isEqualTo(2)
         assertExceptionMessage(firstAssertionResult, Consts.FAILURE)
@@ -108,10 +108,10 @@ class CachedAssertionRunnerTest {
 
     @Test
     fun updatesRunStatusFailureLast() {
-        val runner = CachedAssertionRunner(TEST_SCENARIO)
+        val runner = CachedAssertionRunner(TEST_SCENARIO_KEY)
         val firstAssertionResult = runner.runAssertion(assertionSuccess)
         val lastAssertionResult = runner.runAssertion(assertionFailure)
-        val result = DataStore.getResult(TEST_SCENARIO)
+        val result = DataStore.getResult(TEST_SCENARIO_KEY)
 
         Truth.assertWithMessage("Executed").that(executionCount).isEqualTo(2)
         Truth.assertWithMessage("Expected exception").that(firstAssertionResult).isNull()

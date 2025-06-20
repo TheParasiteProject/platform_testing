@@ -16,7 +16,6 @@
 
 package android.tools.flicker
 
-import android.tools.Scenario
 import android.tools.io.Reader
 import android.tools.traces.TRACE_CONFIG_REQUIRE_CHANGES
 import android.tools.traces.io.ResultReaderWithLru
@@ -72,12 +71,13 @@ object Utils {
     @JvmStatic
     @JvmOverloads
     fun captureTrace(
-        scenario: Scenario,
+        testIdentifier: String,
         outputDir: File = createTempDirectory().toFile(),
         monitors: List<TraceMonitor> = ALL_MONITORS,
         actions: Consumer<ResultWriter>,
     ): Reader {
-        val writer = ResultWriter().forScenario(scenario).withOutputDir(outputDir).setRunComplete()
+        val writer =
+            ResultWriter().withName(testIdentifier).withOutputDir(outputDir).setRunComplete()
         monitors.fold({ actions.accept(writer) }) { action, monitor ->
             { monitor.withTracing(writer) { action() } }
         }()

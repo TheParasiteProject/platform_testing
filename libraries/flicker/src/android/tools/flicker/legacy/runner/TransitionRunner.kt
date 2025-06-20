@@ -16,7 +16,6 @@
 
 package android.tools.flicker.legacy.runner
 
-import android.tools.Scenario
 import android.tools.flicker.legacy.FlickerTestData
 import android.tools.flicker.rules.ArtifactSaverRule
 import android.tools.traces.io.IResultData
@@ -27,18 +26,18 @@ import org.junit.rules.TestRule
 import org.junit.runner.Description
 
 /**
- * Transition runner that executes a default device setup (based on [scenario]) as well as the
+ * Transition runner that executes a default device setup (based on [testIdentifier]) as well as the
  * flicker setup/transition/teardown
  */
 class TransitionRunner(
-    private val scenario: Scenario,
+    private val testIdentifier: String,
     private val setupRules: List<TestRule>,
-    private val resultWriter: ResultWriter = android.tools.flicker.datastore.CachedResultWriter(),
+    private val resultWriter: ResultWriter,
 ) {
     /** Executes [flicker] transition and returns the result */
     fun execute(flicker: FlickerTestData, description: Description?): IResultData {
         return withTracing("TransitionRunner:execute") {
-            resultWriter.forScenario(scenario).withOutputDir(flicker.outputDir)
+            resultWriter.withName(testIdentifier).withOutputDir(flicker.outputDir)
 
             val ruleChain = buildTestRuleChain(flicker)
             try {
@@ -72,13 +71,13 @@ class TransitionRunner(
                 listOf(
                     TraceMonitorRule(
                         flicker.traceMonitors,
-                        scenario,
+                        testIdentifier,
                         flicker.wmHelper,
                         resultWriter,
                     ),
                     *flicker.rules.toTypedArray(),
-                    SetupTeardownRule(flicker, resultWriter, scenario),
-                    TransitionExecutionRule(flicker, resultWriter, scenario),
+                    SetupTeardownRule(flicker, resultWriter, testIdentifier),
+                    TransitionExecutionRule(flicker, resultWriter, testIdentifier),
                 )
 
         return rules.foldIndexed(RuleChain.outerRule(errorRule)) { index, chain, rule ->

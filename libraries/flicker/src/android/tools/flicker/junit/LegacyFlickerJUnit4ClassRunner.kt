@@ -98,15 +98,20 @@ class LegacyFlickerJUnit4ClassRunner(
             private val instrumentation: Instrumentation =
                 InstrumentationRegistry.getInstrumentation()
 
-            override fun runTransition(scenario: Scenario, test: Any, description: Description?) {
+            override fun runTransition(
+                testIdentifier: String,
+                test: Any,
+                description: Description?,
+            ) {
                 withTracing("LegacyFlickerJUnit4ClassRunner#runTransition") {
-                    Log.v(FLICKER_TAG, "Creating flicker object for $scenario")
+                    val scenario = scenario ?: error("Expected to have a scenario to run")
+                    Log.v(FLICKER_TAG, "Creating flicker object for $testIdentifier")
                     val builder = getFlickerBuilder(test)
-                    Log.v(FLICKER_TAG, "Creating flicker object for $scenario")
+                    Log.v(FLICKER_TAG, "Creating flicker object for $testIdentifier")
                     val flicker = builder.build()
                     val runner =
                         TransitionRunner(
-                            scenario,
+                            testIdentifier,
                             setupRules = defaultSetupRules(scenario, instrumentation),
                             resultWriter = CachedResultWriter(),
                         )
