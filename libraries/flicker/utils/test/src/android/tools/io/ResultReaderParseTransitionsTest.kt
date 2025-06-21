@@ -28,7 +28,6 @@ class ResultReaderParseTransitionsTest : BaseResultReaderTestParseTrace() {
     override val endTimeTrace = TestTraces.TransitionTrace.END_TIME
     override val validSliceTime = TestTraces.TransitionTrace.VALID_SLICE_TIME
     override val invalidSliceTime = TestTraces.TransitionTrace.INVALID_SLICE_TIME
-    override val invalidSizeMessage = "Transitions trace cannot be empty"
     override val expectedSlicedTraceSize = 1
 
     override fun doParse(reader: ResultReader) = reader.readTransitionsTrace()

@@ -19,7 +19,6 @@ package android.tools.monitors
 import android.tools.device.apphelpers.BrowserAppHelper
 import android.tools.io.TraceType
 import android.tools.testutils.CleanFlickerEnvironmentRule
-import android.tools.traces.SERVICE_TRACE_CONFIG
 import android.tools.traces.io.IResultData
 import android.tools.traces.io.ResultReader
 import android.tools.traces.monitors.PerfettoTraceMonitor
@@ -279,8 +278,7 @@ class PerfettoTraceMonitorTest : TraceMonitorTest<PerfettoTraceMonitor>() {
             .filesDir
             .resolve("$testName.winscope")
 
-    private fun buildResultReader(resultData: IResultData): ResultReader =
-        ResultReader(resultData, SERVICE_TRACE_CONFIG)
+    private fun buildResultReader(resultData: IResultData): ResultReader = ResultReader(resultData)
 
     companion object {
         @ClassRule @JvmField val ENV_CLEANUP = CleanFlickerEnvironmentRule()

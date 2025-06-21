@@ -20,7 +20,6 @@ import android.tools.Cache
 import android.tools.io.TraceType
 import android.tools.testutils.CleanFlickerEnvironmentRule
 import android.tools.testutils.readAsset
-import android.tools.traces.SERVICE_TRACE_CONFIG
 import android.tools.traces.io.ResultReader
 import android.tools.traces.monitors.PerfettoTraceMonitor
 import android.tools.traces.parsers.perfetto.TraceProcessorSession
@@ -62,7 +61,7 @@ class WindowManagerTraceParserTest {
         val device = UiDevice.getInstance(InstrumentationRegistry.getInstrumentation())
         val monitor = PerfettoTraceMonitor.Builder().enableWindowManagerTrace().build()
         val reader =
-            monitor.withTracing(resultReaderProvider = { ResultReader(it, SERVICE_TRACE_CONFIG) }) {
+            monitor.withTracing(resultReaderProvider = { ResultReader(it) }) {
                 device.pressHome()
                 device.pressRecentApps()
             }

@@ -25,7 +25,6 @@ import android.tools.testutils.assertExceptionMessage
 import android.tools.testutils.assertThrows
 import android.tools.testutils.newTestResultWriter
 import android.tools.testutils.outputFileName
-import android.tools.traces.TRACE_CONFIG_REQUIRE_CHANGES
 import android.tools.traces.deleteIfExists
 import android.tools.traces.io.ResultReader
 import android.tools.traces.io.ResultWriter
@@ -66,7 +65,7 @@ class ResultWriterTest {
         Truth.assertWithMessage("Transition end time")
             .that(result.transitionTimeRange.end)
             .isEqualTo(Timestamps.max())
-        val reader = ResultReader(result, TRACE_CONFIG_REQUIRE_CHANGES)
+        val reader = ResultReader(result)
         Truth.assertWithMessage("File count").that(reader.countFiles()).isEqualTo(0)
     }
 
@@ -125,7 +124,7 @@ class ResultWriterTest {
         val writer =
             newTestResultWriter().addTraceResult(TraceType.WM, TestTraces.LegacyWMTrace.FILE)
         val result = writer.write()
-        val reader = ResultReader(result, TRACE_CONFIG_REQUIRE_CHANGES)
+        val reader = ResultReader(result)
         Truth.assertWithMessage("File count").that(reader.countFiles()).isEqualTo(1)
         Truth.assertWithMessage("Has file with type")
             .that(reader.hasTraceFile(TraceType.WM))
@@ -137,7 +136,7 @@ class ResultWriterTest {
         val writer =
             newTestResultWriter().addTraceResult(TraceType.PERFETTO, TestTraces.LayerTrace.FILE)
         val result = writer.write()
-        val reader = ResultReader(result, TRACE_CONFIG_REQUIRE_CHANGES)
+        val reader = ResultReader(result)
         Truth.assertWithMessage("File count").that(reader.countFiles()).isEqualTo(1)
         Truth.assertWithMessage("Has file with type")
             .that(reader.hasTraceFile(TraceType.PERFETTO))
@@ -150,7 +149,7 @@ class ResultWriterTest {
             newTestResultWriter()
                 .addTraceResult(TraceType.PERFETTO, TestTraces.TransactionTrace.FILE)
         val result = writer.write()
-        val reader = ResultReader(result, TRACE_CONFIG_REQUIRE_CHANGES)
+        val reader = ResultReader(result)
         Truth.assertWithMessage("File count").that(reader.countFiles()).isEqualTo(1)
         Truth.assertWithMessage("Has file with type")
             .that(reader.hasTraceFile(TraceType.PERFETTO))
@@ -164,7 +163,7 @@ class ResultWriterTest {
                 .addTraceResult(TraceType.WM, TestTraces.LegacyWMTrace.FILE)
                 .addTraceResult(TraceType.PERFETTO, TestTraces.LayerTrace.FILE)
         val result = writer.write()
-        val reader = ResultReader(result, TRACE_CONFIG_REQUIRE_CHANGES)
+        val reader = ResultReader(result)
         Truth.assertWithMessage("File count").that(reader.countFiles()).isEqualTo(2)
         Truth.assertWithMessage("Has file with type")
             .that(reader.hasTraceFile(TraceType.WM))

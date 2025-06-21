@@ -17,15 +17,10 @@
 package android.tools.io
 
 import android.tools.Timestamp
-import android.tools.Timestamps
 import android.tools.Trace
 import android.tools.testutils.CleanFlickerEnvironmentRule
-import android.tools.testutils.TestTraces
-import android.tools.testutils.assertExceptionMessage
-import android.tools.testutils.assertThrows
 import android.tools.testutils.newTestResultWriter
 import android.tools.testutils.outputFileName
-import android.tools.traces.TRACE_CONFIG_REQUIRE_CHANGES
 import android.tools.traces.deleteIfExists
 import android.tools.traces.io.ResultReader
 import android.tools.traces.io.ResultWriter
@@ -44,8 +39,6 @@ abstract class BaseResultReaderTestParseTrace {
     protected abstract val validSliceTime: Timestamp
     protected abstract val invalidSliceTime: Timestamp
     protected abstract val expectedSlicedTraceSize: Int
-    protected open val invalidSizeMessage: String
-        get() = "$traceName contained 0 entries, expected at least 2"
 
     protected abstract fun doParse(reader: ResultReader): Trace<*>?
 
@@ -66,7 +59,7 @@ abstract class BaseResultReaderTestParseTrace {
         val writer = setupWriter(newTestResultWriter())
         val result = writer.write()
 
-        val reader = ResultReader(result, TRACE_CONFIG_REQUIRE_CHANGES)
+        val reader = ResultReader(result)
         val trace = doParse(reader) ?: error("$traceName not built")
 
         Truth.assertWithMessage(traceName).that(trace.entries).isNotEmpty()
@@ -82,7 +75,7 @@ abstract class BaseResultReaderTestParseTrace {
     fun readTraceNullWhenDoesNotExist() {
         val writer = newTestResultWriter()
         val result = writer.write()
-        val reader = ResultReader(result, TRACE_CONFIG_REQUIRE_CHANGES)
+        val reader = ResultReader(result)
         val trace = doParse(reader)
 
         Truth.assertWithMessage(traceName).that(trace).isNull()
@@ -95,25 +88,13 @@ abstract class BaseResultReaderTestParseTrace {
                 .setTransitionStartTime(startTimeTrace)
                 .setTransitionEndTime(validSliceTime)
                 .write()
-        val reader = ResultReader(result, TestTraces.TEST_TRACE_CONFIG)
+        val reader = ResultReader(result)
         val trace = doParse(reader) ?: error("$traceName not built")
 
         Truth.assertWithMessage(traceName).that(trace.entries).hasSize(expectedSlicedTraceSize)
         Truth.assertWithMessage("$traceName start")
             .that(getTime(trace.entries.first().timestamp))
             .isEqualTo(getTime(startTimeTrace))
-    }
-
-    @Test
-    open fun readTraceAndSliceTraceByTimestampAndFailInvalidSize() {
-        val result =
-            setupWriter(newTestResultWriter()).setTransitionEndTime(Timestamps.min()).write()
-        val reader = ResultReader(result, TRACE_CONFIG_REQUIRE_CHANGES)
-        val exception =
-            assertThrows<IllegalArgumentException> {
-                doParse(reader) ?: error("$traceName not built")
-            }
-        assertExceptionMessage(exception, invalidSizeMessage)
     }
 
     companion object {

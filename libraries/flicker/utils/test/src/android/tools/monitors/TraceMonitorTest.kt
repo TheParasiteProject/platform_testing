@@ -23,8 +23,6 @@ import android.tools.io.TraceType
 import android.tools.testutils.CleanFlickerEnvironmentRule
 import android.tools.testutils.newTestResultWriter
 import android.tools.testutils.outputFileName
-import android.tools.traces.SERVICE_TRACE_CONFIG
-import android.tools.traces.TRACE_CONFIG_REQUIRE_CHANGES
 import android.tools.traces.deleteIfExists
 import android.tools.traces.io.ResultReader
 import android.tools.traces.monitors.TraceMonitor
@@ -95,7 +93,7 @@ abstract class TraceMonitorTest<T : TraceMonitor> {
         val writer = newTestResultWriter()
         traceMonitor.stop(writer)
         val result = writer.write()
-        val reader = ResultReader(result, TRACE_CONFIG_REQUIRE_CHANGES)
+        val reader = ResultReader(result)
         Truth.assertWithMessage("Trace file exists ${traceMonitor.traceType}")
             .that(reader.hasTraceFile(traceMonitor.traceType, tag))
             .isTrue()
@@ -110,9 +108,7 @@ abstract class TraceMonitorTest<T : TraceMonitor> {
     @Test
     open fun withTracing() {
         val reader =
-            traceMonitor.withTracing(
-                resultReaderProvider = { ResultReader(it, SERVICE_TRACE_CONFIG) }
-            ) {
+            traceMonitor.withTracing(resultReaderProvider = { ResultReader(it) }) {
                 device.pressHome()
                 device.pressRecentApps()
             }

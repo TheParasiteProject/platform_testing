@@ -21,7 +21,6 @@ import android.tools.Timestamps
 import android.tools.io.Reader
 import android.tools.io.TraceType
 import android.tools.io.TransitionTimeRange
-import android.tools.traces.TRACE_CONFIG_REQUIRE_CHANGES
 import androidx.test.platform.app.InstrumentationRegistry
 import java.io.File
 import java.io.IOException
@@ -51,7 +50,7 @@ object TraceReaderUtils {
                 null,
             )
 
-        return ResultReaderWithLru(result, TRACE_CONFIG_REQUIRE_CHANGES)
+        return ResultReaderWithLru(result)
     }
 
     @Throws(IOException::class)

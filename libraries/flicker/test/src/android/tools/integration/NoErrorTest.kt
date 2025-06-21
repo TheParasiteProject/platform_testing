@@ -23,7 +23,6 @@ import android.tools.flicker.legacy.LegacyFlickerTest
 import android.tools.io.RunStatus
 import android.tools.testutils.CleanFlickerEnvironmentRule
 import android.tools.testutils.TEST_SCENARIO_KEY
-import android.tools.traces.TRACE_CONFIG_REQUIRE_CHANGES
 import androidx.test.filters.FlakyTest
 import com.google.common.truth.Truth
 import java.io.File
@@ -217,7 +216,7 @@ class NoErrorTest {
     private fun assertPredicatePasses(predicate: () -> Unit) {
         predicate.invoke()
         Truth.assertWithMessage("Executed").that(assertionExecuted).isTrue()
-        val reader = CachedResultReader(scenario.key, TRACE_CONFIG_REQUIRE_CHANGES)
+        val reader = CachedResultReader(scenario.key)
         Truth.assertWithMessage("Run status")
             .that(reader.runStatus)
             .isEqualTo(RunStatus.ASSERTION_SUCCESS)
@@ -225,7 +224,7 @@ class NoErrorTest {
     }
 
     private fun assertArtifactExists() {
-        val reader = CachedResultReader(scenario.key, TRACE_CONFIG_REQUIRE_CHANGES)
+        val reader = CachedResultReader(scenario.key)
 
         for (artifact in reader.artifacts) {
             val file = File(artifact.absolutePath)

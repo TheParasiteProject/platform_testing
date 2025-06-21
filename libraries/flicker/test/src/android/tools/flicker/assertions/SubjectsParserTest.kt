@@ -21,7 +21,6 @@ import android.tools.flicker.subject.layers.LayersTraceSubject
 import android.tools.testutils.CleanFlickerEnvironmentRule
 import android.tools.testutils.assertThrows
 import android.tools.testutils.newTestResultWriter
-import android.tools.traces.TRACE_CONFIG_REQUIRE_CHANGES
 import android.tools.traces.io.ResultReader
 import java.io.FileNotFoundException
 import org.junit.ClassRule
@@ -34,7 +33,7 @@ class SubjectsParserTest {
     fun failFileNotFound() {
         val data = newTestResultWriter().write()
         data.artifacts.forEach { it.deleteIfExists() }
-        val parser = SubjectsParser(ResultReader(data, TRACE_CONFIG_REQUIRE_CHANGES))
+        val parser = SubjectsParser(ResultReader(data))
         assertThrows<FileNotFoundException> {
             parser.getSubjectOfType(Tag.ALL, LayersTraceSubject::class)
         }

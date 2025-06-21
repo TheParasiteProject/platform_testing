@@ -20,7 +20,6 @@ import android.tools.io.TraceType
 import android.tools.monitors.TraceMonitorTest
 import android.tools.testutils.CleanFlickerEnvironmentRule
 import android.tools.testutils.newTestResultWriter
-import android.tools.traces.TRACE_CONFIG_REQUIRE_CHANGES
 import android.tools.traces.events.CujEvent
 import android.tools.traces.events.CujType
 import android.tools.traces.events.EventLog.Companion.MAGIC_NUMBER
@@ -96,7 +95,7 @@ class EventLogMonitorTest : TraceMonitorTest<EventLogMonitor>() {
         )
         val result = writer.write()
 
-        val reader = ResultReader(result, TRACE_CONFIG_REQUIRE_CHANGES)
+        val reader = ResultReader(result)
         val eventLog = reader.readEventLogTrace()
         requireNotNull(eventLog) { "EventLog was null" }
 
@@ -152,7 +151,7 @@ class EventLogMonitorTest : TraceMonitorTest<EventLogMonitor>() {
         monitor.stop(writer)
         val result = writer.write()
 
-        val reader = ResultReader(result, TRACE_CONFIG_REQUIRE_CHANGES)
+        val reader = ResultReader(result)
         val eventLog = reader.readEventLogTrace()
         requireNotNull(eventLog) { "EventLog was null" }
 
@@ -198,7 +197,7 @@ class EventLogMonitorTest : TraceMonitorTest<EventLogMonitor>() {
         monitor.stop(writer)
         val result = writer.write()
 
-        val reader = ResultReader(result, TRACE_CONFIG_REQUIRE_CHANGES)
+        val reader = ResultReader(result)
         val eventLog = reader.readEventLogTrace()
         requireNotNull(eventLog) { "EventLog was null" }
 
@@ -244,7 +243,7 @@ class EventLogMonitorTest : TraceMonitorTest<EventLogMonitor>() {
         val writer = newTestResultWriter()
         monitor.stop(writer)
         val result = writer.write()
-        val reader = ResultReader(result, TRACE_CONFIG_REQUIRE_CHANGES)
+        val reader = ResultReader(result)
 
         Truth.assertWithMessage("Trace not found")
             .that(reader.hasTraceFile(TraceType.EVENT_LOG))
@@ -275,7 +274,7 @@ class EventLogMonitorTest : TraceMonitorTest<EventLogMonitor>() {
         monitor.stop(writer)
         val result = writer.write()
 
-        val reader = ResultReader(result, TRACE_CONFIG_REQUIRE_CHANGES)
+        val reader = ResultReader(result)
         val eventLog = reader.readEventLogTrace() ?: error("EventLog should have been created")
 
         Truth.assertThat(eventLog.focusEvents).hasSize(1)
@@ -316,7 +315,7 @@ class EventLogMonitorTest : TraceMonitorTest<EventLogMonitor>() {
         monitor.stop(writer)
         val result = writer.write()
 
-        val reader = ResultReader(result, TRACE_CONFIG_REQUIRE_CHANGES)
+        val reader = ResultReader(result)
         val eventLog = reader.readEventLogTrace() ?: error("EventLog should have been created")
 
         Truth.assertThat(eventLog.focusEvents).hasSize(1)
@@ -346,7 +345,7 @@ class EventLogMonitorTest : TraceMonitorTest<EventLogMonitor>() {
         monitor.stop(writer)
         val result = writer.write()
 
-        val reader = ResultReader(result, TRACE_CONFIG_REQUIRE_CHANGES)
+        val reader = ResultReader(result)
         val eventLog = reader.readEventLogTrace() ?: error("EventLog should have been created")
 
         assertEquals(2, eventLog.cujEvents.size)
@@ -380,7 +379,7 @@ class EventLogMonitorTest : TraceMonitorTest<EventLogMonitor>() {
         monitor.stop(writer)
         val result = writer.write()
 
-        val reader = ResultReader(result, TRACE_CONFIG_REQUIRE_CHANGES)
+        val reader = ResultReader(result)
         val eventLog = reader.readEventLogTrace() ?: error("EventLog should have been created")
 
         // There maybe be some random CUJ events triggered in the background
@@ -435,7 +434,7 @@ class EventLogMonitorTest : TraceMonitorTest<EventLogMonitor>() {
         monitor.stop(writer)
         val result = writer.write()
 
-        val reader = ResultReader(result, TRACE_CONFIG_REQUIRE_CHANGES)
+        val reader = ResultReader(result)
         val eventLog = reader.readEventLogTrace()
         requireNotNull(eventLog) { "EventLog should have been created" }
 
