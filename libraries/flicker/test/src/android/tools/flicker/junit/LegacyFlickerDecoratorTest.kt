@@ -18,6 +18,7 @@ package android.tools.flicker.junit
 
 import android.annotation.SuppressLint
 import android.tools.ScenarioBuilder
+import android.tools.flicker.datastore.DataStore
 import android.tools.flicker.legacy.FlickerBuilder
 import android.tools.flicker.legacy.LegacyFlickerTest
 import android.tools.testutils.CleanFlickerEnvironmentRule
@@ -38,7 +39,7 @@ import org.mockito.Mockito
 class LegacyFlickerDecoratorTest {
     @Before
     fun setup() {
-        android.tools.flicker.datastore.DataStore.clear()
+        DataStore.clear()
     }
 
     @Test
@@ -122,11 +123,7 @@ class LegacyFlickerDecoratorTest {
 
         Truth.assertWithMessage("Executed").that(TestUtils.executionCount).isEqualTo(1)
         Truth.assertWithMessage("In Datastore")
-            .that(
-                android.tools.flicker.datastore.DataStore.containsResult(
-                    TestUtils.DummyTestClassValid.SCENARIO
-                )
-            )
+            .that(DataStore.containsResult(TestUtils.DummyTestClassValid.SCENARIO))
             .isTrue()
     }
 

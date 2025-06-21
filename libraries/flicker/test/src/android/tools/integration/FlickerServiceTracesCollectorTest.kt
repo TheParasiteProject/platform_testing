@@ -17,6 +17,7 @@
 package android.tools.integration
 
 import android.app.Instrumentation
+import android.platform.test.annotations.RequiresDevice
 import android.tools.device.apphelpers.ClockAppHelper
 import android.tools.flicker.FlickerServiceTracesCollector
 import android.tools.flicker.isShellTransitionsEnabled
@@ -41,6 +42,7 @@ import org.junit.runners.MethodSorters
  * Contains [FlickerServiceTracesCollector] tests. To run this test: `atest
  * FlickerLibTestE2e:FlickerServiceTracesCollectorTest`
  */
+@RequiresDevice
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 class FlickerServiceTracesCollectorTest {
     val instrumentation: Instrumentation = InstrumentationRegistry.getInstrumentation()

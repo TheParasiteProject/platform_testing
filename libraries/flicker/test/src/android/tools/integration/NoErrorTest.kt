@@ -16,6 +16,7 @@
 
 package android.tools.integration
 
+import android.platform.test.annotations.RequiresDevice
 import android.tools.flicker.legacy.LegacyFlickerTest
 import android.tools.io.RunStatus
 import android.tools.testutils.CleanFlickerEnvironmentRule
@@ -38,6 +39,7 @@ import org.mockito.junit.MockitoJUnitRunner
  *
  * To run this test: `atest FlickerLibTestE2e:NoErrorTest`
  */
+@RequiresDevice
 @RunWith(MockitoJUnitRunner::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 @FlakyTest(bugId = 362942901)

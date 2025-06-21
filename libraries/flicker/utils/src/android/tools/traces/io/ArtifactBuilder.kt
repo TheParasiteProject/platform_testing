@@ -59,12 +59,19 @@ class ArtifactBuilder {
         return withTracing("ArtifactBuilder#build") {
             val scenario = scenario ?: error("Missing scenario")
             require(!scenario.isEmpty) { "Scenario shouldn't be empty" }
+            // TODO: Add this require check, for now some tests still create an empty artifact...
+            // require(files.isNotEmpty()) { "No files to add to artifact" }
+
+            val artifactType = getArtifactType()
             val artifactFile = createArtifactFile()
-            Log.d(FLICKER_IO_TAG, "Creating artifact archive at $artifactFile")
 
-            writeToZip(artifactFile, files)
-
-            FileArtifact(scenario, artifactFile, counter, TraceType.WINSCOPE_ZIP)
+            if (artifactType == TraceType.WINSCOPE_ZIP) {
+                writeToZip(artifactFile, files)
+                WinscopeZipArtifact(scenario, artifactFile, counter)
+            } else {
+                files.values.first().copyTo(artifactFile, overwrite = true)
+                SingleTraceFileArtifact(scenario, artifactFile, counter, artifactType)
+            }
         }
     }
 
@@ -81,10 +88,11 @@ class ArtifactBuilder {
         val runStatus = runStatus ?: error("Missing run status")
         val scenario = scenario ?: error("Missing scenario")
         val outputDir = outputDir ?: error("Missing output dir")
+        val artifactType = getArtifactType()
 
-        var artifactAlreadyExists = existsArchiveFor(outputDir, scenario, counter)
+        var artifactAlreadyExists = existsArtifactFor(outputDir, scenario, counter, artifactType)
         while (artifactAlreadyExists && counter < 100) {
-            artifactAlreadyExists = existsArchiveFor(outputDir, scenario, ++counter)
+            artifactAlreadyExists = existsArtifactFor(outputDir, scenario, ++counter, artifactType)
         }
 
         require(!artifactAlreadyExists) {
@@ -98,12 +106,34 @@ class ArtifactBuilder {
                 "Directory contains ${files?.joinToString()?.ifEmpty { "no files" }}"
         }
 
-        return runStatus.generateArchiveNameFor(scenario, counter)
+        return runStatus.generateArchiveNameFor(scenario, counter, artifactType)
     }
 
-    private fun existsArchiveFor(outputDir: File, scenario: Scenario, counter: Int): Boolean {
-        return RunStatus.values().any {
-            outputDir.resolve(it.generateArchiveNameFor(scenario, counter)).exists()
+    private fun existsArtifactFor(
+        outputDir: File,
+        scenario: Scenario,
+        counter: Int,
+        artifactType: TraceType,
+    ): Boolean {
+        return RunStatus.entries.any {
+            outputDir.resolve(it.generateArchiveNameFor(scenario, counter, artifactType)).exists()
+        }
+    }
+
+    private fun getArtifactType(): TraceType {
+        val files = files
+
+        // TODO: Remove and add assertion that files.isNotEmpty(), for now testing creates empty
+        //  artifacts so we need this case until we update all the tests to always provide an
+        //  artifact.
+        if (files.isEmpty()) {
+            return TraceType.WINSCOPE_ZIP
+        }
+
+        return if (files.size > 1) {
+            TraceType.WINSCOPE_ZIP
+        } else {
+            files.keys.first().traceType
         }
     }
 

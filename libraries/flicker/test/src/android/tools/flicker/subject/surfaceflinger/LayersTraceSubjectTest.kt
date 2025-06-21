@@ -21,6 +21,7 @@ import android.tools.Cache
 import android.tools.CleanFlickerEnvironmentRuleWithDataStore
 import android.tools.ScenarioBuilder
 import android.tools.Timestamps
+import android.tools.flicker.datastore.DataStore
 import android.tools.flicker.legacy.LegacyFlickerTest
 import android.tools.flicker.subject.layers.LayersTraceSubject
 import android.tools.flicker.subject.region.RegionSubject
@@ -256,7 +257,7 @@ class LayersTraceSubjectTest {
         // greater or equal to the previous one
         val areas =
             animation.map {
-                val region = it.layer.visibleRegion ?: Region()
+                val region = it.layer.visibleRegion
                 val bounds = region.bounds
                 val area = bounds.width() * bounds.height()
                 area
@@ -346,7 +347,7 @@ class LayersTraceSubjectTest {
         val flicker = LegacyFlickerTest(builder, { _ -> reader })
         val scenario = flicker.initialize("test")
         val result = Mockito.mock(IResultData::class.java)
-        android.tools.flicker.datastore.DataStore.addResult(scenario, result)
+        DataStore.addResult(scenario, result)
         flicker.assertLayers {
             invoke("snapshotStartingWindowLayerCoversExactlyOnApp") {
                 val snapshotLayers =
@@ -355,7 +356,7 @@ class LayersTraceSubjectTest {
                             subject.isVisible
                     }
                 val visibleAreas =
-                    snapshotLayers.mapNotNull { snapshotLayer -> snapshotLayer.layer.visibleRegion }
+                    snapshotLayers.map { snapshotLayer -> snapshotLayer.layer.visibleRegion }
                 val snapshotRegion = RegionSubject(visibleAreas, timestamp)
                 // Verify the size of snapshotRegion covers appVisibleRegion exactly in animation.
                 if (!snapshotRegion.region.isEmpty) {
@@ -367,7 +368,6 @@ class LayersTraceSubjectTest {
     }
 
     companion object {
-        private const val LABEL = "ImeActivity"
         private const val FLICKER_APP_PACKAGE = "com.android.server.wm.flicker.testapp"
 
         private val DISPLAY_REGION = Region(0, 0, 1440, 2880)

@@ -38,34 +38,30 @@ import org.junit.Test
 class CachedAssertionRunnerTest {
     private var executionCount = 0
 
-    private val assertionSuccess =
-        android.tools.flicker.datastore.CachedAssertionRunnerTest.Companion.newAssertionData {
-            executionCount++
-        }
-    private val assertionFailure =
-        android.tools.flicker.datastore.CachedAssertionRunnerTest.Companion.newAssertionData {
-            executionCount++
-            throw SimpleFlickerAssertionError(android.tools.flicker.datastore.Consts.FAILURE)
-        }
+    private val assertionSuccess = newAssertionData { executionCount++ }
+    private val assertionFailure = newAssertionData {
+        executionCount++
+        throw SimpleFlickerAssertionError(Consts.FAILURE)
+    }
 
     @Before
     fun setup() {
-        android.tools.flicker.datastore.DataStore.clear()
+        DataStore.clear()
         executionCount = 0
         val writer = newTestResultWriter(TEST_SCENARIO)
         val monitor = EventLogMonitor()
         monitor.start()
         monitor.stop(writer)
         val result = writer.write()
-        android.tools.flicker.datastore.DataStore.addResult(TEST_SCENARIO, result)
+        DataStore.addResult(TEST_SCENARIO, result)
     }
 
     @Test
     fun executes() {
-        val runner = android.tools.flicker.datastore.CachedAssertionRunner(TEST_SCENARIO)
+        val runner = CachedAssertionRunner(TEST_SCENARIO)
         val firstAssertionResult = runner.runAssertion(assertionSuccess)
         val lastAssertionResult = runner.runAssertion(assertionSuccess)
-        val result = android.tools.flicker.datastore.DataStore.getResult(TEST_SCENARIO)
+        val result = DataStore.getResult(TEST_SCENARIO)
 
         Truth.assertWithMessage("Executed").that(executionCount).isEqualTo(2)
         Truth.assertWithMessage("Run status")
@@ -77,18 +73,18 @@ class CachedAssertionRunnerTest {
 
     @Test
     fun executesFailure() {
-        val runner = android.tools.flicker.datastore.CachedAssertionRunner(TEST_SCENARIO)
+        val runner = CachedAssertionRunner(TEST_SCENARIO)
         val firstAssertionResult = runner.runAssertion(assertionFailure)
         val lastAssertionResult = runner.runAssertion(assertionFailure)
-        val result = android.tools.flicker.datastore.DataStore.getResult(TEST_SCENARIO)
+        val result = DataStore.getResult(TEST_SCENARIO)
 
         Truth.assertWithMessage("Executed").that(executionCount).isEqualTo(2)
         Truth.assertWithMessage("Run status")
             .that(result.runStatus)
             .isEqualTo(RunStatus.ASSERTION_FAILED)
 
-        assertExceptionMessage(firstAssertionResult, android.tools.flicker.datastore.Consts.FAILURE)
-        assertExceptionMessage(lastAssertionResult, android.tools.flicker.datastore.Consts.FAILURE)
+        assertExceptionMessage(firstAssertionResult, Consts.FAILURE)
+        assertExceptionMessage(lastAssertionResult, Consts.FAILURE)
         Truth.assertWithMessage("Same exception")
             .that(firstAssertionResult)
             .hasMessageThat()
@@ -97,13 +93,13 @@ class CachedAssertionRunnerTest {
 
     @Test
     fun updatesRunStatusFailureFirst() {
-        val runner = android.tools.flicker.datastore.CachedAssertionRunner(TEST_SCENARIO)
+        val runner = CachedAssertionRunner(TEST_SCENARIO)
         val firstAssertionResult = runner.runAssertion(assertionFailure)
         val lastAssertionResult = runner.runAssertion(assertionSuccess)
-        val result = android.tools.flicker.datastore.DataStore.getResult(TEST_SCENARIO)
+        val result = DataStore.getResult(TEST_SCENARIO)
 
         Truth.assertWithMessage("Executed").that(executionCount).isEqualTo(2)
-        assertExceptionMessage(firstAssertionResult, android.tools.flicker.datastore.Consts.FAILURE)
+        assertExceptionMessage(firstAssertionResult, Consts.FAILURE)
         Truth.assertWithMessage("Expected exception").that(lastAssertionResult).isNull()
         Truth.assertWithMessage("Run status")
             .that(result.runStatus)
@@ -112,14 +108,14 @@ class CachedAssertionRunnerTest {
 
     @Test
     fun updatesRunStatusFailureLast() {
-        val runner = android.tools.flicker.datastore.CachedAssertionRunner(TEST_SCENARIO)
+        val runner = CachedAssertionRunner(TEST_SCENARIO)
         val firstAssertionResult = runner.runAssertion(assertionSuccess)
         val lastAssertionResult = runner.runAssertion(assertionFailure)
-        val result = android.tools.flicker.datastore.DataStore.getResult(TEST_SCENARIO)
+        val result = DataStore.getResult(TEST_SCENARIO)
 
         Truth.assertWithMessage("Executed").that(executionCount).isEqualTo(2)
         Truth.assertWithMessage("Expected exception").that(firstAssertionResult).isNull()
-        assertExceptionMessage(lastAssertionResult, android.tools.flicker.datastore.Consts.FAILURE)
+        assertExceptionMessage(lastAssertionResult, Consts.FAILURE)
         Truth.assertWithMessage("Run status")
             .that(result.runStatus)
             .isEqualTo(RunStatus.ASSERTION_FAILED)

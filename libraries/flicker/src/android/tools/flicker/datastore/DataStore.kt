@@ -36,26 +36,21 @@ object DataStore {
 
     @VisibleForTesting
     fun clear() {
-        android.tools.flicker.datastore.DataStore.cachedResults = mutableMapOf()
-        android.tools.flicker.datastore.DataStore.cachedFlickerServiceAssertions = mutableMapOf()
+        cachedResults = mutableMapOf()
+        cachedFlickerServiceAssertions = mutableMapOf()
     }
 
-    fun backup(): android.tools.flicker.datastore.DataStore.Backup {
-        return android.tools.flicker.datastore.DataStore.Backup(
-            android.tools.flicker.datastore.DataStore.cachedResults.toMutableMap(),
-            android.tools.flicker.datastore.DataStore.cachedFlickerServiceAssertions.toMutableMap(),
-        )
+    fun backup(): Backup {
+        return Backup(cachedResults.toMutableMap(), cachedFlickerServiceAssertions.toMutableMap())
     }
 
-    fun restore(backup: android.tools.flicker.datastore.DataStore.Backup) {
-        android.tools.flicker.datastore.DataStore.cachedResults = backup.cachedResults
-        android.tools.flicker.datastore.DataStore.cachedFlickerServiceAssertions =
-            backup.cachedFlickerServiceAssertions
+    fun restore(backup: Backup) {
+        cachedResults = backup.cachedResults
+        cachedFlickerServiceAssertions = backup.cachedFlickerServiceAssertions
     }
 
     /** @return if the store has results for [scenario] */
-    fun containsResult(scenario: Scenario): Boolean =
-        android.tools.flicker.datastore.DataStore.cachedResults.containsKey(scenario)
+    fun containsResult(scenario: Scenario): Boolean = cachedResults.containsKey(scenario)
 
     /**
      * Adds [result] to the store with [scenario] as id
@@ -63,10 +58,8 @@ object DataStore {
      * @throws IllegalStateException is [scenario] already exists in the data store
      */
     fun addResult(scenario: Scenario, result: IResultData) {
-        require(!android.tools.flicker.datastore.DataStore.containsResult(scenario)) {
-            "Result for $scenario already in data store"
-        }
-        android.tools.flicker.datastore.DataStore.cachedResults[scenario] = result
+        require(!containsResult(scenario)) { "Result for $scenario already in data store" }
+        cachedResults[scenario] = result
     }
 
     /**
@@ -75,10 +68,10 @@ object DataStore {
      * @throws IllegalStateException is [scenario] doesn't exist in the data store
      */
     fun replaceResult(scenario: Scenario, newResult: IResultData) {
-        if (!android.tools.flicker.datastore.DataStore.containsResult(scenario)) {
+        if (!containsResult(scenario)) {
             error("Result for $scenario not in data store")
         }
-        android.tools.flicker.datastore.DataStore.cachedResults[scenario] = newResult
+        cachedResults[scenario] = newResult
     }
 
     /**
@@ -86,30 +79,26 @@ object DataStore {
      * @throws IllegalStateException is [scenario] doesn't exist in the data store
      */
     fun getResult(scenario: Scenario): IResultData =
-        android.tools.flicker.datastore.DataStore.cachedResults[scenario]
-            ?: error("No value for $scenario")
+        cachedResults[scenario] ?: error("No value for $scenario")
 
     /** @return if the store has results for [scenario] */
     fun containsFlickerServiceResult(scenario: Scenario): Boolean =
-        android.tools.flicker.datastore.DataStore.cachedFlickerServiceAssertions.containsKey(
-            scenario
-        )
+        cachedFlickerServiceAssertions.containsKey(scenario)
 
     fun addFlickerServiceAssertions(
         scenario: Scenario,
         groupedAssertions: Map<ScenarioInstance, Collection<ScenarioAssertion>>,
     ) {
-        if (android.tools.flicker.datastore.DataStore.containsFlickerServiceResult(scenario)) {
+        if (containsFlickerServiceResult(scenario)) {
             error("Result for $scenario already in data store")
         }
-        android.tools.flicker.datastore.DataStore.cachedFlickerServiceAssertions[scenario] =
-            groupedAssertions
+        cachedFlickerServiceAssertions[scenario] = groupedAssertions
     }
 
     fun getFlickerServiceAssertions(
         scenario: Scenario
     ): Map<ScenarioInstance, Collection<ScenarioAssertion>> {
-        return android.tools.flicker.datastore.DataStore.cachedFlickerServiceAssertions[scenario]
+        return cachedFlickerServiceAssertions[scenario]
             ?: error("No flicker service results for $scenario")
     }
 }

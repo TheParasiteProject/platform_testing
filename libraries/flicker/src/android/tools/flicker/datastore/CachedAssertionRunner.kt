@@ -31,8 +31,7 @@ import android.tools.withTracing
  */
 class CachedAssertionRunner(
     private val scenario: Scenario,
-    resultReader: Reader =
-        android.tools.flicker.datastore.CachedResultReader(scenario, TRACE_CONFIG_REQUIRE_CHANGES),
+    resultReader: Reader = CachedResultReader(scenario, TRACE_CONFIG_REQUIRE_CHANGES),
 ) : BaseAssertionRunner(resultReader) {
     override fun doUpdateStatus(newStatus: RunStatus) {
         return withTracing("${this::class.simpleName}#doUpdateStatus") {

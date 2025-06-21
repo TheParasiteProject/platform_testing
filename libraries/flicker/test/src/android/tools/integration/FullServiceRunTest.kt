@@ -18,6 +18,7 @@ package android.tools.integration
 
 import android.app.Instrumentation
 import android.graphics.Region
+import android.platform.test.annotations.RequiresDevice
 import android.tools.Timestamps
 import android.tools.device.apphelpers.MessagingAppHelper
 import android.tools.flicker.AssertionInvocationGroup
@@ -56,6 +57,7 @@ import org.junit.runners.model.Statement
  *
  * To run this test: `atest FlickerLibTestE2e:FullServiceRunTest`
  */
+@RequiresDevice
 @RunWith(FlickerServiceJUnit4ClassRunner::class)
 class FullServiceRunTest {
     private val instrumentation: Instrumentation = InstrumentationRegistry.getInstrumentation()

@@ -28,6 +28,8 @@ import android.tools.flicker.annotation.FlickerServiceCompatible
 import android.tools.flicker.config.FlickerConfig
 import android.tools.flicker.config.FlickerServiceConfig
 import android.tools.flicker.config.ScenarioId
+import android.tools.flicker.datastore.CachedResultReader
+import android.tools.flicker.datastore.DataStore
 import android.tools.flicker.isShellTransitionsEnabled
 import android.tools.traces.TRACE_CONFIG_REQUIRE_CHANGES
 import android.tools.withTracing
@@ -164,7 +166,7 @@ class LegacyFlickerServiceDecorator(
         test: Any,
         testScenario: Scenario,
     ): Collection<InjectedTestCase> {
-        if (!android.tools.flicker.datastore.DataStore.containsResult(testScenario)) {
+        if (!DataStore.containsResult(testScenario)) {
             val description =
                 Description.createTestDescription(
                     this::class.java.simpleName,
@@ -172,11 +174,7 @@ class LegacyFlickerServiceDecorator(
                 )
             transitionRunner.runTransition(testScenario, test, description)
         }
-        val reader =
-            android.tools.flicker.datastore.CachedResultReader(
-                testScenario,
-                TRACE_CONFIG_REQUIRE_CHANGES,
-            )
+        val reader = CachedResultReader(testScenario, TRACE_CONFIG_REQUIRE_CHANGES)
 
         val expectedScenarios =
             testClass.annotations

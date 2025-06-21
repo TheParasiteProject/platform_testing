@@ -165,7 +165,6 @@ fun withTracing(
                 this.add(monitorBuilder.build())
             }
             .toList(),
-    debugFile: File? = null,
     predicate: Runnable,
 ): Reader {
     val tmpFile = File.createTempFile("recordTraces", "")
@@ -181,7 +180,7 @@ fun withTracing(
         traceMonitors.forEach { it.stop(writer) }
     }
     val reader = ResultReaderWithLru(writer.write(), SERVICE_TRACE_CONFIG)
-    debugFile?.writeBytes(reader.artifact.readBytes())
+
     return reader
 }
 

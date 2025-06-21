@@ -17,6 +17,7 @@
 package android.tools.flicker.config
 
 import android.app.Instrumentation
+import android.platform.test.annotations.RequiresDevice
 import android.platform.test.rule.NavigationModeRule
 import android.tools.NavBar
 import android.tools.ScenarioBuilder
@@ -38,6 +39,7 @@ import org.junit.FixMethodOrder
 import org.junit.Test
 import org.junit.runners.MethodSorters
 
+@RequiresDevice
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 class QuickswitchTest {
     val instrumentation: Instrumentation = InstrumentationRegistry.getInstrumentation()

@@ -23,7 +23,7 @@ import android.tools.traces.io.ResultWriter
 class CachedResultWriter : ResultWriter() {
     override fun write(): IResultData {
         val result = super.write()
-        android.tools.flicker.datastore.DataStore.addResult(scenario, result)
+        DataStore.addResult(scenario, result)
         return result
     }
 }
