@@ -18,11 +18,20 @@ package android.tools.flicker.junit
 
 import android.app.Instrumentation
 import android.os.Bundle
+import android.platform.test.rule.NavigationModeRule
+import android.platform.test.rule.PressHomeRule
+import android.platform.test.rule.UnlockScreenRule
 import android.platform.test.util.TestFilter
 import android.tools.FLICKER_TAG
 import android.tools.Scenario
+import android.tools.device.apphelpers.MessagingAppHelper
+import android.tools.flicker.datastore.CachedResultWriter
 import android.tools.flicker.legacy.FlickerBuilder
 import android.tools.flicker.legacy.runner.TransitionRunner
+import android.tools.flicker.rules.ChangeDisplayOrientationRule
+import android.tools.flicker.rules.LaunchAppRule
+import android.tools.flicker.rules.RemoveAllTasksButHomeRule
+import android.tools.rules.StopAllTracesRule
 import android.tools.withTracing
 import android.util.Log
 import androidx.test.platform.app.InstrumentationRegistry
@@ -34,6 +43,7 @@ import org.junit.FixMethodOrder
 import org.junit.Ignore
 import org.junit.internal.AssumptionViolatedException
 import org.junit.internal.runners.model.EachTestNotifier
+import org.junit.rules.TestRule
 import org.junit.runner.Description
 import org.junit.runner.manipulation.Filter
 import org.junit.runner.manipulation.InvalidOrderingException
@@ -94,7 +104,12 @@ class LegacyFlickerJUnit4ClassRunner(
                     val builder = getFlickerBuilder(test)
                     Log.v(FLICKER_TAG, "Creating flicker object for $scenario")
                     val flicker = builder.build()
-                    val runner = TransitionRunner(scenario, instrumentation)
+                    val runner =
+                        TransitionRunner(
+                            scenario,
+                            setupRules = defaultSetupRules(scenario, instrumentation),
+                            resultWriter = CachedResultWriter(),
+                        )
                     Log.v(FLICKER_TAG, "Running transition for $scenario")
                     runner.execute(flicker, description)
                 }
@@ -267,6 +282,24 @@ class LegacyFlickerJUnit4ClassRunner(
     override fun shouldRunBeforeOn(method: FrameworkMethod): Boolean = true
 
     override fun shouldRunAfterOn(method: FrameworkMethod): Boolean = true
+
+    private fun defaultSetupRules(
+        scenario: Scenario,
+        instrumentation: Instrumentation,
+    ): List<TestRule> =
+        listOf(
+            StopAllTracesRule(),
+            UnlockScreenRule(),
+            NavigationModeRule(scenario.navBarMode.value, false),
+            LaunchAppRule(MessagingAppHelper(instrumentation), clearCacheAfterParsing = false),
+            RemoveAllTasksButHomeRule(),
+            ChangeDisplayOrientationRule(
+                scenario.startRotation,
+                resetOrientationAfterTest = false,
+                clearCacheAfterParsing = false,
+            ),
+            PressHomeRule(),
+        )
 
     /**
      * ********************************************************************************************

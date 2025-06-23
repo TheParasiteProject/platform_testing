@@ -16,14 +16,12 @@
 
 package android.tools.flicker.legacy.runner
 
-import android.app.Instrumentation
 import android.tools.testutils.CleanFlickerEnvironmentRule
 import android.tools.testutils.TEST_SCENARIO
 import android.tools.testutils.assertThrows
 import android.tools.traces.io.ResultWriter
 import android.tools.traces.monitors.ITransitionMonitor
 import android.tools.traces.parsers.WindowManagerStateHelper
-import androidx.test.platform.app.InstrumentationRegistry
 import com.google.common.truth.Truth
 import org.junit.Before
 import org.junit.ClassRule
@@ -116,13 +114,11 @@ class TraceMonitorRuleTest {
 
     companion object {
         private fun createRule(traceMonitors: List<ITransitionMonitor>): TraceMonitorRule {
-            val instrumentation: Instrumentation = InstrumentationRegistry.getInstrumentation()
             return TraceMonitorRule(
                 traceMonitors,
                 TEST_SCENARIO,
                 WindowManagerStateHelper(),
                 ResultWriter(),
-                instrumentation,
             )
         }
 

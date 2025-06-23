@@ -16,7 +16,6 @@
 
 package android.tools.flicker.legacy.runner
 
-import android.app.Instrumentation
 import android.tools.flicker.legacy.AbstractFlickerTestData
 import android.tools.flicker.legacy.FlickerTestData
 import android.tools.testutils.CleanFlickerEnvironmentRule
@@ -24,7 +23,6 @@ import android.tools.testutils.TEST_SCENARIO
 import android.tools.testutils.assertThrows
 import android.tools.traces.io.ResultWriter
 import android.tools.traces.parsers.WindowManagerStateHelper
-import androidx.test.platform.app.InstrumentationRegistry
 import com.google.common.truth.Truth
 import org.junit.Before
 import org.junit.ClassRule
@@ -86,13 +84,11 @@ class SetupTeardownRuleTest {
             setupCommands: List<FlickerTestData.() -> Unit>,
             teardownCommands: List<FlickerTestData.() -> Unit>,
         ): SetupTeardownRule {
-            val instrumentation: Instrumentation = InstrumentationRegistry.getInstrumentation()
             val mockedFlicker = Mockito.mock(AbstractFlickerTestData::class.java)
             return SetupTeardownRule(
                 mockedFlicker,
                 ResultWriter(),
                 TEST_SCENARIO,
-                instrumentation,
                 setupCommands,
                 teardownCommands,
                 WindowManagerStateHelper(),

@@ -20,6 +20,7 @@ import android.annotation.SuppressLint
 import android.app.Instrumentation
 import android.tools.device.apphelpers.BrowserAppHelper
 import android.tools.device.apphelpers.MessagingAppHelper
+import android.tools.flicker.datastore.CachedResultWriter
 import android.tools.flicker.datastore.DataStore
 import android.tools.flicker.legacy.FlickerBuilder
 import android.tools.flicker.legacy.runner.TransitionRunner
@@ -61,7 +62,12 @@ object TestUtils {
         DataStore.clear()
         val flicker = createFlicker(onExecuted)
 
-        val runner = TransitionRunner(TEST_SCENARIO, instrumentation)
+        val runner =
+            TransitionRunner(
+                TEST_SCENARIO,
+                setupRules = emptyList(),
+                resultWriter = CachedResultWriter(),
+            )
         runner.execute(flicker, Description.createTestDescription(this::class.java, "test"))
     }
 }

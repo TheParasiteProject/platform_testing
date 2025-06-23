@@ -16,7 +16,6 @@
 
 package android.tools.flicker.legacy.runner
 
-import android.app.Instrumentation
 import android.tools.Scenario
 import android.tools.flicker.FlickerTag
 import android.tools.flicker.junit.Utils
@@ -41,7 +40,6 @@ import org.junit.runners.model.Statement
  * @param flicker test definition
  * @param resultWriter to write
  * @param scenario to run the transition
- * @param instrumentation to interact with the device
  * @param commands to run during the transition
  * @param wmHelper to stabilize the UI before/after transitions
  */
@@ -49,7 +47,6 @@ class TransitionExecutionRule(
     private val flicker: FlickerTestData,
     private val resultWriter: ResultWriter,
     private val scenario: Scenario,
-    private val instrumentation: Instrumentation = flicker.instrumentation,
     private val commands: List<FlickerTestData.() -> Any> = flicker.transitions,
     private val wmHelper: WindowManagerStateHelper = flicker.wmHelper,
 ) : TestRule {

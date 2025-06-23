@@ -16,22 +16,14 @@
 
 package android.tools.flicker.legacy.runner
 
-import android.app.Instrumentation
-import android.platform.test.rule.NavigationModeRule
-import android.platform.test.rule.PressHomeRule
-import android.platform.test.rule.UnlockScreenRule
 import android.tools.Scenario
-import android.tools.device.apphelpers.MessagingAppHelper
 import android.tools.flicker.legacy.FlickerTestData
 import android.tools.flicker.rules.ArtifactSaverRule
-import android.tools.flicker.rules.ChangeDisplayOrientationRule
-import android.tools.flicker.rules.LaunchAppRule
-import android.tools.flicker.rules.RemoveAllTasksButHomeRule
-import android.tools.rules.StopAllTracesRule
 import android.tools.traces.io.IResultData
 import android.tools.traces.io.ResultWriter
 import android.tools.withTracing
 import org.junit.rules.RuleChain
+import org.junit.rules.TestRule
 import org.junit.runner.Description
 
 /**
@@ -40,7 +32,7 @@ import org.junit.runner.Description
  */
 class TransitionRunner(
     private val scenario: Scenario,
-    private val instrumentation: Instrumentation,
+    private val setupRules: List<TestRule>,
     private val resultWriter: ResultWriter = android.tools.flicker.datastore.CachedResultWriter(),
 ) {
     /** Executes [flicker] transition and returns the result */
@@ -76,29 +68,18 @@ class TransitionRunner(
         val errorRule = ArtifactSaverRule()
 
         val rules =
-            listOf(
-                StopAllTracesRule(),
-                UnlockScreenRule(),
-                NavigationModeRule(scenario.navBarMode.value, false),
-                LaunchAppRule(MessagingAppHelper(instrumentation), clearCacheAfterParsing = false),
-                RemoveAllTasksButHomeRule(),
-                ChangeDisplayOrientationRule(
-                    scenario.startRotation,
-                    resetOrientationAfterTest = false,
-                    clearCacheAfterParsing = false,
-                ),
-                PressHomeRule(),
-                TraceMonitorRule(
-                    flicker.traceMonitors,
-                    scenario,
-                    flicker.wmHelper,
-                    resultWriter,
-                    instrumentation,
-                ),
-                *flicker.rules.toTypedArray(),
-                SetupTeardownRule(flicker, resultWriter, scenario, instrumentation),
-                TransitionExecutionRule(flicker, resultWriter, scenario, instrumentation),
-            )
+            setupRules +
+                listOf(
+                    TraceMonitorRule(
+                        flicker.traceMonitors,
+                        scenario,
+                        flicker.wmHelper,
+                        resultWriter,
+                    ),
+                    *flicker.rules.toTypedArray(),
+                    SetupTeardownRule(flicker, resultWriter, scenario),
+                    TransitionExecutionRule(flicker, resultWriter, scenario),
+                )
 
         return rules.foldIndexed(RuleChain.outerRule(errorRule)) { index, chain, rule ->
             chain.around(rule).let {
