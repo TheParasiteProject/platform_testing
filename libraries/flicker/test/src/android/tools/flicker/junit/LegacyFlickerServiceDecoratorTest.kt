@@ -17,6 +17,7 @@
 package android.tools.flicker.junit
 
 import android.annotation.SuppressLint
+import android.tools.flicker.datastore.DataStore
 import android.tools.flicker.isShellTransitionsEnabled
 import android.tools.flicker.legacy.LegacyFlickerTest
 import android.tools.testutils.CleanFlickerEnvironmentRule
@@ -35,7 +36,7 @@ import org.mockito.Mockito
 class LegacyFlickerServiceDecoratorTest {
     @Before
     fun setup() {
-        android.tools.flicker.datastore.DataStore.clear()
+        DataStore.clear()
     }
 
     @Test

@@ -23,6 +23,7 @@ import android.tools.traces.io.IResultData
 import android.tools.traces.io.IoUtils
 import android.tools.traces.io.ResultReader
 import android.tools.traces.io.ResultWriter
+import android.tools.withTracing
 import java.io.File
 import kotlin.io.path.createTempDirectory
 
@@ -41,7 +42,7 @@ abstract class TraceMonitor : ITransitionMonitor {
     protected open fun doStopTraces(): Map<TraceType, File> = mapOf(traceType to doStop())
 
     final override fun start() {
-        android.tools.withTracing("${this::class.simpleName}#start") {
+        withTracing("${this::class.simpleName}#start") {
             validateStart()
             doStart()
         }
@@ -60,7 +61,7 @@ abstract class TraceMonitor : ITransitionMonitor {
     override fun stop(writer: ResultWriter) {
         val artifacts =
             try {
-                android.tools.withTracing("${this::class.simpleName}#stop") {
+                withTracing("${this::class.simpleName}#stop") {
                     doStopTraces()
                         .map { (key, value) -> key to moveTraceFileToTmpDir(value) }
                         .toMap()
@@ -89,7 +90,7 @@ abstract class TraceMonitor : ITransitionMonitor {
      * @throws UnsupportedOperationException If tracing is already activated
      */
     fun withTracing(writer: ResultWriter, predicate: Runnable) {
-        android.tools.withTracing("${this::class.simpleName}#withTracing") {
+        withTracing("${this::class.simpleName}#withTracing") {
             try {
                 this.start()
                 predicate.run()
