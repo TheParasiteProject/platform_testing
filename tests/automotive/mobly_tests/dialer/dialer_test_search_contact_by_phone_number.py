@@ -45,6 +45,7 @@ class SearchContactByPhoneNumberTest(bluetooth_base_test.BluetoothBaseTest):
        expected_phone_number = constants.EXPECTED_PHONE_NUMBER
        expected_contact_name = constants.EXPECTED_CONTACT_FULL_NAME
        self.call_utils.open_phone_app()
+       self.bt_utils.allow_permissions_after_pairing()
        self.call_utils.open_contacts()
        self.call_utils.search_contact_by_name(
            expected_phone_number

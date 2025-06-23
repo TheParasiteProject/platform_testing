@@ -44,6 +44,7 @@ class ContactSearchByFirstNameTest(bluetooth_base_test.BluetoothBaseTest):
   def test_sort_contacts_by_first_name(self):
     # Navigate to the Contacts page
     self.call_utils.open_phone_app()
+    self.bt_utils.allow_permissions_after_pairing()
     self.call_utils.open_contacts()
     self.call_utils.wait_with_log(constants.DEFAULT_WAIT_TIME_FIVE_SECS)
     self.call_utils.search_contacts()
