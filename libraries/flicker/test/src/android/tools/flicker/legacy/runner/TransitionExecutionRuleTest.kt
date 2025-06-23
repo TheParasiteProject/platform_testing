@@ -17,7 +17,6 @@
 package android.tools.flicker.legacy.runner
 
 import android.annotation.SuppressLint
-import android.app.Instrumentation
 import android.os.SystemClock
 import android.tools.flicker.legacy.AbstractFlickerTestData
 import android.tools.flicker.legacy.FlickerTestData
@@ -31,7 +30,6 @@ import android.tools.traces.io.ResultReader
 import android.tools.traces.io.ResultWriter
 import android.tools.traces.monitors.TraceMonitor
 import android.tools.traces.parsers.WindowManagerStateHelper
-import androidx.test.platform.app.InstrumentationRegistry
 import com.google.common.truth.Truth
 import org.junit.Before
 import org.junit.ClassRule
@@ -191,7 +189,6 @@ class TransitionExecutionRuleTest {
             commands: List<FlickerTestData.() -> Unit>,
             writer: ResultWriter = newTestResultWriter(),
         ): TransitionExecutionRule {
-            val instrumentation: Instrumentation = InstrumentationRegistry.getInstrumentation()
             val mockedFlicker = Mockito.mock(AbstractFlickerTestData::class.java)
             val mockedMonitor = Mockito.mock(TraceMonitor::class.java)
             Mockito.`when`(mockedFlicker.traceMonitors).thenReturn(listOf(mockedMonitor))
@@ -199,7 +196,6 @@ class TransitionExecutionRuleTest {
                 mockedFlicker,
                 writer,
                 TEST_SCENARIO,
-                instrumentation,
                 commands,
                 WindowManagerStateHelper(),
             )

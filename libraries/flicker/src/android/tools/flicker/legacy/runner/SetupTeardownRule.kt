@@ -16,7 +16,6 @@
 
 package android.tools.flicker.legacy.runner
 
-import android.app.Instrumentation
 import android.tools.Scenario
 import android.tools.flicker.junit.Utils
 import android.tools.flicker.legacy.FlickerTestData
@@ -33,7 +32,6 @@ import org.junit.runners.model.Statement
  * @param flicker test definition
  * @param resultWriter to write
  * @param scenario to run the transition
- * @param instrumentation to interact with the device
  * @param setupCommands to run before the transition
  * @param teardownCommands to run after the transition
  * @param wmHelper to stabilize the UI before/after transitions
@@ -42,7 +40,6 @@ class SetupTeardownRule(
     private val flicker: FlickerTestData,
     private val resultWriter: ResultWriter,
     private val scenario: Scenario,
-    private val instrumentation: Instrumentation,
     private val setupCommands: List<FlickerTestData.() -> Any> = flicker.transitionSetup,
     private val teardownCommands: List<FlickerTestData.() -> Any> = flicker.transitionTeardown,
     private val wmHelper: WindowManagerStateHelper = flicker.wmHelper,

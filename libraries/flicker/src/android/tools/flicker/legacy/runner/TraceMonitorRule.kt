@@ -16,7 +16,6 @@
 
 package android.tools.flicker.legacy.runner
 
-import android.app.Instrumentation
 import android.tools.FLICKER_TAG
 import android.tools.Scenario
 import android.tools.flicker.junit.Utils
@@ -36,14 +35,12 @@ import org.junit.runners.model.Statement
  * @param scenario to run the transition
  * @param wmHelper to stabilize the UI before/after transitions
  * @param resultWriter to write
- * @param instrumentation to interact with the device
  */
 class TraceMonitorRule(
     private val traceMonitors: List<ITransitionMonitor>,
     private val scenario: Scenario,
     private val wmHelper: WindowManagerStateHelper,
     private val resultWriter: ResultWriter,
-    private val instrumentation: Instrumentation,
 ) : TestRule {
     override fun apply(base: Statement?, description: Description?): Statement {
         return object : Statement() {
