@@ -60,7 +60,7 @@ private fun readBytes(
     tag: String = Tag.ALL,
 ): ByteArray {
     val bytes = reader.readBytes(traceType, tag) ?: error("Missing trace $traceType")
-    reader.artifact.deleteIfExists()
+    reader.result.artifacts.forEach { it.deleteIfExists() }
     debugFile?.writeBytes(bytes)
     return bytes
 }

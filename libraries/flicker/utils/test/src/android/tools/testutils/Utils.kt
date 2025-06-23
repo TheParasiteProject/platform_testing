@@ -177,7 +177,7 @@ fun getWmTraceReaderFromAsset(
         }
 
     return ParsedTracesReader(
-        artifact = TestArtifact(relativePathWithoutExtension),
+        artifacts = arrayOf(TestArtifact(relativePathWithoutExtension)),
         wmTrace = trace,
     )
 }
@@ -205,7 +205,7 @@ fun getWmDumpReaderFromAsset(relativePathWithoutExtension: String): Reader {
             parseLegacyDump()
         }
     return ParsedTracesReader(
-        artifact = TestArtifact(relativePathWithoutExtension),
+        artifacts = arrayOf(TestArtifact(relativePathWithoutExtension)),
         wmTrace = wmTrace,
     )
 }
@@ -226,7 +226,10 @@ fun getLayerTraceReaderFromAsset(
                 }
                 .parse(session, from, to)
         }
-    return ParsedTracesReader(artifact = TestArtifact(relativePath), layersTrace = layersTrace)
+    return ParsedTracesReader(
+        artifacts = arrayOf(TestArtifact(relativePath)),
+        layersTrace = layersTrace,
+    )
 }
 
 @Throws(Exception::class)

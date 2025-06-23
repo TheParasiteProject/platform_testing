@@ -57,9 +57,8 @@ open class ResultReader(_result: IResultData, internal val traceConfig: TraceCon
     var result = _result
         internal set
 
-    override val artifact: Artifact = result.artifact
-    override val artifactPath: String
-        get() = result.artifact.absolutePath
+    override val artifacts: Array<Artifact>
+        get() = result.artifacts
 
     override val runStatus
         get() = result.runStatus
@@ -74,7 +73,17 @@ open class ResultReader(_result: IResultData, internal val traceConfig: TraceCon
         get() = result.executionError
 
     override fun readBytes(traceType: TraceType, tag: String): ByteArray? =
-        artifact.readBytes(ResultArtifactDescriptor(traceType, tag))
+        readBytes(ResultArtifactDescriptor(traceType, tag))
+
+    private fun readBytes(descriptor: ResultArtifactDescriptor): ByteArray? {
+        for (artifact in result.artifacts) {
+            if (artifact.hasTrace(descriptor)) {
+                return artifact.readBytes(descriptor)
+            }
+        }
+
+        return null
+    }
 
     /**
      * {@inheritDoc}
@@ -86,7 +95,7 @@ open class ResultReader(_result: IResultData, internal val traceConfig: TraceCon
         return withTracing("readWmState#$tag") {
             val descriptor = ResultArtifactDescriptor(TraceType.WM_DUMP, tag)
             Log.d(FLICKER_IO_TAG, "Reading WM trace descriptor=$descriptor from $result")
-            val traceData = artifact.readBytes(descriptor)
+            val traceData = readBytes(descriptor)
             traceData?.let {
                 if (android.tracing.Flags.perfettoWmDump()) {
                     TraceProcessorSession.loadPerfettoTrace(it) { session ->
@@ -135,7 +144,7 @@ open class ResultReader(_result: IResultData, internal val traceConfig: TraceCon
     override fun readLayersTrace(): LayersTrace? {
         return withTracing("readLayersTrace") {
             val descriptor = ResultArtifactDescriptor(TraceType.PERFETTO)
-            artifact.readBytes(descriptor)?.let {
+            readBytes(descriptor)?.let {
                 val trace =
                     TraceProcessorSession.loadPerfettoTrace(it) { session ->
                         LayersTraceParser()
@@ -168,7 +177,7 @@ open class ResultReader(_result: IResultData, internal val traceConfig: TraceCon
     override fun readLayersDump(tag: String): LayersTrace? {
         return withTracing("readLayersDump#$tag") {
             val descriptor = ResultArtifactDescriptor(TraceType.SF_DUMP, tag)
-            val traceData = artifact.readBytes(descriptor)
+            val traceData = readBytes(descriptor)
             if (traceData != null) {
                 TraceProcessorSession.loadPerfettoTrace(traceData) { session ->
                     LayersTraceParser().parse(session, clearCache = true)
@@ -191,7 +200,7 @@ open class ResultReader(_result: IResultData, internal val traceConfig: TraceCon
         }
 
     private fun doReadTransactionsTrace(from: Timestamp, to: Timestamp): TransactionsTrace? {
-        val traceData = artifact.readBytes(ResultArtifactDescriptor(TraceType.PERFETTO))
+        val traceData = readBytes(ResultArtifactDescriptor(TraceType.PERFETTO))
         return traceData?.let {
             val trace =
                 TraceProcessorSession.loadPerfettoTrace(traceData) { session ->
@@ -232,7 +241,7 @@ open class ResultReader(_result: IResultData, internal val traceConfig: TraceCon
     @Throws(IOException::class)
     override fun readProtoLogTrace(): ProtoLogTrace? {
         return withTracing("readProtoLogTrace") {
-            val traceData = artifact.readBytes(ResultArtifactDescriptor(TraceType.PERFETTO))
+            val traceData = readBytes(ResultArtifactDescriptor(TraceType.PERFETTO))
 
             traceData?.let {
                 TraceProcessorSession.loadPerfettoTrace(traceData) { session ->
@@ -248,7 +257,7 @@ open class ResultReader(_result: IResultData, internal val traceConfig: TraceCon
     }
 
     private fun readPerfettoWindowManagerTrace(): WindowManagerTrace? {
-        val traceData = artifact.readBytes(ResultArtifactDescriptor(TraceType.PERFETTO))
+        val traceData = readBytes(ResultArtifactDescriptor(TraceType.PERFETTO))
 
         return traceData?.let {
             TraceProcessorSession.loadPerfettoTrace(traceData) { session ->
@@ -259,7 +268,7 @@ open class ResultReader(_result: IResultData, internal val traceConfig: TraceCon
     }
 
     private fun readLegacyWindowManagerTrace(): WindowManagerTrace? {
-        val traceData = artifact.readBytes(ResultArtifactDescriptor(TraceType.WM))
+        val traceData = readBytes(ResultArtifactDescriptor(TraceType.WM))
 
         return traceData?.let {
             LegacyWindowManagerTraceParser()
@@ -274,7 +283,7 @@ open class ResultReader(_result: IResultData, internal val traceConfig: TraceCon
     }
 
     private fun readPerfettoTransitionsTrace(): TransitionsTrace? {
-        val traceData = artifact.readBytes(ResultArtifactDescriptor(TraceType.PERFETTO))
+        val traceData = readBytes(ResultArtifactDescriptor(TraceType.PERFETTO))
 
         return traceData?.let {
             TraceProcessorSession.loadPerfettoTrace(traceData) { session ->
@@ -297,7 +306,7 @@ open class ResultReader(_result: IResultData, internal val traceConfig: TraceCon
     override fun readEventLogTrace(): EventLog? {
         return withTracing("readEventLogTrace") {
             val descriptor = ResultArtifactDescriptor(TraceType.EVENT_LOG)
-            artifact.readBytes(descriptor)?.let {
+            readBytes(descriptor)?.let {
                 EventLogParser()
                     .parseSlice(it, from = transitionTimeRange.start, to = transitionTimeRange.end)
             }
@@ -321,11 +330,11 @@ open class ResultReader(_result: IResultData, internal val traceConfig: TraceCon
     override fun toString(): String = "$result"
 
     /** @return the number of files in the artifact */
-    @VisibleForTesting fun countFiles(): Int = artifact.traceCount()
+    @VisibleForTesting fun countFiles(): Int = result.artifacts.sumOf { it.traceCount() }
 
     /** @return if a file with type [traceType] linked to a [tag] exists in the artifact */
     fun hasTraceFile(traceType: TraceType, tag: String = Tag.ALL): Boolean {
         val descriptor = ResultArtifactDescriptor(traceType, tag)
-        return artifact.hasTrace(descriptor)
+        return result.artifacts.any { it.hasTrace(descriptor) }
     }
 }

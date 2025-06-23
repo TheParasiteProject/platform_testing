@@ -224,8 +224,11 @@ class NoErrorTest {
 
     private fun assertArtifactExists() {
         val reader = CachedResultReader(TEST_SCENARIO, TRACE_CONFIG_REQUIRE_CHANGES)
-        val file = File(reader.artifactPath)
-        Truth.assertWithMessage("Files exist").that(file.exists()).isTrue()
+
+        for (artifact in reader.artifacts) {
+            val file = File(artifact.absolutePath)
+            Truth.assertWithMessage("Files exist").that(file.exists()).isTrue()
+        }
     }
 
     companion object {

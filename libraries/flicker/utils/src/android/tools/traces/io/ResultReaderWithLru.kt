@@ -45,8 +45,14 @@ open class ResultReaderWithLru(
     /** {@inheritDoc} */
     @Throws(IOException::class)
     override fun readWmTrace(): WindowManagerTrace? {
-        val descriptor = ResultArtifactDescriptor(TraceType.WM)
-        val key = CacheKey(reader.artifact.stableId, descriptor, reader.transitionTimeRange)
+        val descriptor =
+            if (android.tracing.Flags.perfettoWmTracing()) {
+                ResultArtifactDescriptor(TraceType.PERFETTO)
+            } else {
+                ResultArtifactDescriptor(TraceType.WM)
+            }
+        val artifact = reader.artifacts.firstOrNull { it.hasTrace(descriptor) } ?: return null
+        val key = CacheKey(artifact.stableId, descriptor, reader.transitionTimeRange)
         return wmTraceCache.logAndReadTrace(key) { reader.readWmTrace() }
     }
 
@@ -54,7 +60,8 @@ open class ResultReaderWithLru(
     @Throws(IOException::class)
     override fun readLayersTrace(): LayersTrace? {
         val descriptor = ResultArtifactDescriptor(TraceType.PERFETTO)
-        val key = CacheKey(reader.artifact.stableId, descriptor, reader.transitionTimeRange)
+        val artifact = reader.artifacts.firstOrNull { it.hasTrace(descriptor) } ?: return null
+        val key = CacheKey(artifact.stableId, descriptor, reader.transitionTimeRange)
         return layersTraceCache.logAndReadTrace(key) { reader.readLayersTrace() }
     }
 
@@ -62,7 +69,8 @@ open class ResultReaderWithLru(
     @Throws(IOException::class)
     override fun readEventLogTrace(): EventLog? {
         val descriptor = ResultArtifactDescriptor(TraceType.EVENT_LOG)
-        val key = CacheKey(reader.artifact.stableId, descriptor, reader.transitionTimeRange)
+        val artifact = reader.artifacts.firstOrNull { it.hasTrace(descriptor) } ?: return null
+        val key = CacheKey(artifact.stableId, descriptor, reader.transitionTimeRange)
         return eventLogCache.logAndReadTrace(key) { reader.readEventLogTrace() }
     }
 

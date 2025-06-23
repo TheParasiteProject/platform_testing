@@ -17,6 +17,7 @@
 package android.tools.testutils
 
 import android.tools.Timestamp
+import android.tools.io.Artifact
 import android.tools.io.Reader
 import android.tools.io.RunStatus
 import android.tools.io.TraceType
@@ -30,7 +31,7 @@ import android.tools.traces.wm.WindowManagerTrace
 
 /** Reads parsed traces from in memory objects */
 class ParsedTracesReader(
-    override val artifact: TestArtifact,
+    override val artifacts: Array<Artifact>,
     private val wmTrace: WindowManagerTrace? = null,
     private val layersTrace: LayersTrace? = null,
     private val transitionsTrace: TransitionsTrace? = null,
@@ -44,8 +45,6 @@ class ParsedTracesReader(
 
     override val runStatus = RunStatus.UNDEFINED
     override val executionError = null
-    override val artifactPath: String
-        get() = artifact.absolutePath
 
     override fun readLayersTrace(): LayersTrace? = layersTrace
 
@@ -63,7 +62,7 @@ class ParsedTracesReader(
 
     override fun slice(startTimestamp: Timestamp, endTimestamp: Timestamp): ParsedTracesReader {
         return ParsedTracesReader(
-            artifact,
+            artifacts,
             wmTrace?.slice(startTimestamp, endTimestamp),
             layersTrace?.slice(startTimestamp, endTimestamp),
             transitionsTrace?.slice(startTimestamp, endTimestamp),

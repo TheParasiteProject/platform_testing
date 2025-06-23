@@ -87,7 +87,8 @@ class PerfettoTraceMonitorTest : TraceMonitorTest<PerfettoTraceMonitor>() {
                 resultReaderProvider = { buildResultReader(it) }
             ) {}
         val debugFile = getDebugFile("uiTrace-PerfettoTraceMonitorTest-layersDump")
-        debugFile.writeBytes(reader.artifact.readBytes())
+        Truth.assertThat(reader.artifacts).hasLength(1)
+        debugFile.writeBytes(reader.artifacts.first().readBytes())
         val traceData = reader.readBytes(TraceType.PERFETTO) ?: ByteArray(0)
         assertTrace(traceData)
 
@@ -110,7 +111,8 @@ class PerfettoTraceMonitorTest : TraceMonitorTest<PerfettoTraceMonitor>() {
                 device.pressRecentApps()
             }
         val debugFile = getDebugFile("uiTrace-PerfettoTraceMonitorTest-withTransitionTracingTest")
-        debugFile.writeBytes(reader.artifact.readBytes())
+        Truth.assertThat(reader.artifacts).hasLength(1)
+        debugFile.writeBytes(reader.artifacts.first().readBytes())
         val traceData = reader.readBytes(TraceType.PERFETTO) ?: ByteArray(0)
         assertTrace(traceData)
 
@@ -136,7 +138,8 @@ class PerfettoTraceMonitorTest : TraceMonitorTest<PerfettoTraceMonitor>() {
                 imeApp.openIME(wmHelper)
             }
         val debugFile = getDebugFile("uiTrace-PerfettoTraceMonitorTest-imeTracingTest")
-        debugFile.writeBytes(reader.artifact.readBytes())
+        Truth.assertThat(reader.artifacts).hasLength(1)
+        debugFile.writeBytes(reader.artifacts.first().readBytes())
         val traceData = reader.readBytes(TraceType.PERFETTO) ?: ByteArray(0)
         assertTrace(traceData)
 
@@ -180,7 +183,8 @@ class PerfettoTraceMonitorTest : TraceMonitorTest<PerfettoTraceMonitor>() {
                 device.pressRecentApps()
             }
         val debugFile = getDebugFile("uiTrace-PerfettoTraceMonitorTest-viewCaptureTracingTest")
-        debugFile.writeBytes(reader.artifact.readBytes())
+        Truth.assertThat(reader.artifacts).hasLength(1)
+        debugFile.writeBytes(reader.artifacts.first().readBytes())
         val traceData = reader.readBytes(TraceType.PERFETTO) ?: ByteArray(0)
         assertTrace(traceData)
 
@@ -215,7 +219,8 @@ class PerfettoTraceMonitorTest : TraceMonitorTest<PerfettoTraceMonitor>() {
                 device.pressRecentApps()
             }
         val debugFile = getDebugFile("uiTrace-PerfettoTraceMonitorTest-windowManagerTracingTest")
-        debugFile.writeBytes(reader.artifact.readBytes())
+        Truth.assertThat(reader.artifacts).hasLength(1)
+        debugFile.writeBytes(reader.artifacts.first().readBytes())
         val traceData = reader.readBytes(TraceType.PERFETTO) ?: ByteArray(0)
         assertTrace(traceData)
 
@@ -247,7 +252,8 @@ class PerfettoTraceMonitorTest : TraceMonitorTest<PerfettoTraceMonitor>() {
                 resultReaderProvider = { buildResultReader(it) }
             ) {}
         val debugFile = getDebugFile("uiTrace-PerfettoTraceMonitorTest-windowManagerDumpTest")
-        debugFile.writeBytes(reader.artifact.readBytes())
+        Truth.assertThat(reader.artifacts).hasLength(1)
+        debugFile.writeBytes(reader.artifacts.first().readBytes())
         val traceData = reader.readBytes(TraceType.PERFETTO) ?: ByteArray(0)
         assertTrace(traceData)
 

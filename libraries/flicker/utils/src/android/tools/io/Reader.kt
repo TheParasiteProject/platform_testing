@@ -28,8 +28,7 @@ import android.tools.traces.wm.WindowManagerTrace
 
 /** Helper class to read results from a flicker artifact */
 interface Reader {
-    val artifact: Artifact
-    val artifactPath: String
+    val artifacts: Array<Artifact>
     val executionError: Throwable?
     val runStatus: RunStatus
     val isFailure: Boolean
@@ -70,4 +69,9 @@ interface Reader {
      *   doesn't exist
      */
     fun readBytes(traceType: TraceType, tag: String = Tag.ALL): ByteArray?
+
+    /** Updates the status of the artifacts to [status] (including updating the file names) */
+    fun updateStatus(status: RunStatus) {
+        artifacts.forEach { it.updateStatus(status) }
+    }
 }
