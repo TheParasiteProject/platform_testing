@@ -168,10 +168,11 @@ fun withTracing(
     predicate: Runnable,
 ): Reader {
     val tmpFile = File.createTempFile("recordTraces", "")
+    val tmpDir = tmpFile.parentFile ?: error("Temp dir should not be null")
     val writer =
         ResultWriter()
             .forScenario(ScenarioBuilder().forClass(tmpFile.name).build())
-            .withOutputDir(tmpFile.parentFile)
+            .withOutputDir(tmpDir)
 
     try {
         traceMonitors.forEach { it.start() }
