@@ -142,7 +142,6 @@ fun withTransactionsTracing(debugFile: File? = null, predicate: Runnable): Trans
  * executing the commands defined in the [predicate].
  *
  * @param traceMonitors List of monitors to start
- * @param debugFile File to keep a copy of the parsed trace, leave null to not keep any copies
  * @param predicate Commands to execute
  * @throws UnsupportedOperationException If tracing is already activated
  */
@@ -182,20 +181,4 @@ fun withTracing(
     val reader = ResultReaderWithLru(writer.write(), SERVICE_TRACE_CONFIG)
 
     return reader
-}
-
-/**
- * Acquire the [WindowManagerTrace] and [LayersTrace] with the device state changes that happen when
- * executing the commands defined in the [predicate].
- *
- * @param predicate Commands to execute
- * @return a pair containing the WM and SF traces
- * @throws UnsupportedOperationException If tracing is already activated
- */
-fun recordTraces(predicate: Runnable): ResultReader {
-    return PerfettoTraceMonitor.newBuilder()
-        .enableLayersTrace()
-        .enableWindowManagerTrace()
-        .build()
-        .withTracing(resultReaderProvider = { buildResultReader(it) }, predicate)
 }
