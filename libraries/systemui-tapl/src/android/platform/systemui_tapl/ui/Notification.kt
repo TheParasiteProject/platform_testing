@@ -215,7 +215,10 @@ internal constructor(
 
         // Expansion indicator be visible on the expanded state, and hidden on the collapsed one.
         if (wasExpanded) {
-            assertThat(notification.wait(Until.gone(selectorWhenExpanded), TIMEOUT_MS)).isTrue()
+            notification.assertVisibility(selectorWhenExpanded, visible = false) {
+                "Failed to verify that the notification was collapsed. " +
+                    "Expected selector '$selectorWhenExpanded' to be gone after collapsing."
+            }
 
             notification.assertVisibility(By.text(APP_NAME), false)
             notification.assertVisibility(
@@ -224,8 +227,10 @@ internal constructor(
             )
             notification.assertVisibility(By.text(NOTIFICATION_BIG_TEXT), false)
         } else {
-            assertThat(notification.wait(Until.hasObject(selectorWhenExpanded), TIMEOUT_MS))
-                .isTrue()
+            notification.assertVisibility(selectorWhenExpanded, visible = true) {
+                "Failed to verify that the notification was expanded. " +
+                    "Expected selector '$selectorWhenExpanded' to be present after expanding."
+            }
 
             // Expanded state must contain app name.
             notification.assertVisibility(By.text(APP_NAME), true)
