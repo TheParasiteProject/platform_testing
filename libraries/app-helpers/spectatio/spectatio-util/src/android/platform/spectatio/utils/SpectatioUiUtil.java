@@ -385,6 +385,10 @@ public class SpectatioUiUtil {
 
     @SuppressWarnings("DiscouragedApi")
     private String populateShellCommand(String command) {
+        if (!command.contains("$user_id")) {
+            return command;
+        }
+
         // Map of supported substitutions
         String userId;
         try {
