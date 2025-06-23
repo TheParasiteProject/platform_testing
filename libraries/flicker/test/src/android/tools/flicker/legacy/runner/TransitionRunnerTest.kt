@@ -17,7 +17,6 @@
 package android.tools.flicker.legacy.runner
 
 import android.annotation.SuppressLint
-import android.app.Instrumentation
 import android.os.SystemClock
 import android.tools.createMockedFlicker
 import android.tools.flicker.legacy.FlickerTestData
@@ -30,7 +29,6 @@ import android.tools.traces.io.ResultReader
 import android.tools.traces.io.ResultWriter
 import android.tools.traces.monitors.ITransitionMonitor
 import android.view.WindowManagerGlobal
-import androidx.test.platform.app.InstrumentationRegistry
 import com.google.common.truth.Truth
 import org.junit.After
 import org.junit.ClassRule
@@ -70,7 +68,8 @@ class TransitionRunnerTest {
 
     @Test
     fun runsTransition() {
-        val runner = TransitionRunner(TEST_SCENARIO, instrumentation, ResultWriter())
+        val runner =
+            TransitionRunner(TEST_SCENARIO, setupRules = emptyList(), resultWriter = ResultWriter())
         val dummyMonitor = dummyMonitor()
         val mockedFlicker =
             createMockedFlicker(
@@ -92,7 +91,8 @@ class TransitionRunnerTest {
 
     @Test
     fun failsWithNoTransitions() {
-        val runner = TransitionRunner(TEST_SCENARIO, instrumentation, ResultWriter())
+        val runner =
+            TransitionRunner(TEST_SCENARIO, setupRules = emptyList(), resultWriter = ResultWriter())
         val dummyMonitor = dummyMonitor()
         val mockedFlicker =
             createMockedFlicker(
@@ -112,7 +112,8 @@ class TransitionRunnerTest {
 
     @Test
     fun failsWithTransitionError() {
-        val runner = TransitionRunner(TEST_SCENARIO, instrumentation, ResultWriter())
+        val runner =
+            TransitionRunner(TEST_SCENARIO, setupRules = emptyList(), resultWriter = ResultWriter())
         val dummyMonitor = dummyMonitor()
         val mockedFlicker =
             createMockedFlicker(
@@ -133,7 +134,8 @@ class TransitionRunnerTest {
 
     @Test
     fun failsWithSetupErrorAndHasTraces() {
-        val runner = TransitionRunner(TEST_SCENARIO, instrumentation, ResultWriter())
+        val runner =
+            TransitionRunner(TEST_SCENARIO, setupRules = emptyList(), resultWriter = ResultWriter())
         val dummyMonitor = dummyMonitor()
         val mockedFlicker =
             createMockedFlicker(
@@ -154,7 +156,8 @@ class TransitionRunnerTest {
 
     @Test
     fun failsWithTeardownErrorAndHasTraces() {
-        val runner = TransitionRunner(TEST_SCENARIO, instrumentation, ResultWriter())
+        val runner =
+            TransitionRunner(TEST_SCENARIO, setupRules = emptyList(), resultWriter = ResultWriter())
         val dummyMonitor = dummyMonitor()
         val mockedFlicker =
             createMockedFlicker(
@@ -215,8 +218,6 @@ class TransitionRunnerTest {
         }
 
     companion object {
-        private val instrumentation: Instrumentation = InstrumentationRegistry.getInstrumentation()
-
         @ClassRule @JvmField val ENV_CLEANUP = CleanFlickerEnvironmentRule()
     }
 }

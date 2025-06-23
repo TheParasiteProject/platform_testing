@@ -25,7 +25,7 @@ import android.tools.io.TransitionTimeRange
 interface IResultData {
     val transitionTimeRange: TransitionTimeRange
     val executionError: Throwable?
-    val artifact: Artifact
+    val artifacts: Array<Artifact>
     val runStatus: RunStatus
 
     /** updates the artifact status to [newStatus] */

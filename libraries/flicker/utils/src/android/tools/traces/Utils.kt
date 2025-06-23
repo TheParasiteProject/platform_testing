@@ -138,7 +138,7 @@ fun getCurrentState(
             .withTracing(resultReaderProvider = { ResultReader(it, SERVICE_TRACE_CONFIG) }) {}
     val perfettoTrace = reader.readBytes(TraceType.PERFETTO) ?: ByteArray(0)
 
-    reader.artifact.deleteIfExists()
+    reader.artifacts.forEach { it.deleteIfExists() }
 
     val wmDump =
         if (android.tracing.Flags.perfettoWmDump()) {

@@ -18,7 +18,9 @@ package android.tools.traces.io
 
 import android.tools.Timestamp
 import android.tools.io.Artifact
+import android.tools.io.ResultArtifactDescriptor
 import android.tools.io.RunStatus
+import android.tools.io.TraceType
 import android.tools.io.TransitionTimeRange
 
 /**
@@ -29,15 +31,25 @@ import android.tools.io.TransitionTimeRange
  * @param _executionError Transition execution error (if any)
  */
 open class ResultData(
-    _artifact: Artifact,
+    _artifacts: Array<Artifact>,
     _transitionTimeRange: TransitionTimeRange,
     _executionError: Throwable?,
 ) : IResultData {
-    final override val artifact: Artifact = _artifact
+    final override val artifacts: Array<Artifact> = _artifacts
     final override val transitionTimeRange: TransitionTimeRange = _transitionTimeRange
     final override val executionError: Throwable? = _executionError
     final override val runStatus: RunStatus
-        get() = artifact.runStatus
+        get() {
+            val status = artifacts.firstOrNull()?.runStatus ?: RunStatus.UNDEFINED
+            require(artifacts.all { it.runStatus == status }) {
+                "Sanity check failure: Not all artifacts have the same status"
+            }
+            return status
+        }
+
+    init {
+        validateArtifacts()
+    }
 
     /** {@inheritDoc} */
     override fun slice(startTimestamp: Timestamp, endTimestamp: Timestamp) = apply {
@@ -48,14 +60,14 @@ open class ResultData(
             "endTimestamp ($endTimestamp) has missing timestamps"
         }
         return ResultData(
-            artifact,
+            artifacts,
             TransitionTimeRange(startTimestamp, endTimestamp),
             executionError,
         )
     }
 
     override fun toString(): String = buildString {
-        append(artifact)
+        append(artifacts)
         append(" (status=")
         append(runStatus)
         executionError?.let {
@@ -66,5 +78,24 @@ open class ResultData(
     }
 
     /** {@inheritDoc} */
-    override fun updateStatus(newStatus: RunStatus) = apply { artifact.updateStatus(newStatus) }
+    override fun updateStatus(newStatus: RunStatus) = apply {
+        artifacts.forEach { it.updateStatus(newStatus) }
+    }
+
+    private fun validateArtifacts() {
+        val typeToArtifact = mutableMapOf<TraceType, Artifact>()
+
+        for (artifact in artifacts) {
+            for (traceType in TraceType.entries) {
+                if (artifact.hasTrace(ResultArtifactDescriptor(traceType))) {
+                    require(!typeToArtifact.containsKey(traceType)) {
+                        "Sanity check failure: multiple artifacts for trace type $traceType. " +
+                            "Included in $artifact and ${typeToArtifact[traceType]}"
+                    }
+
+                    typeToArtifact.put(traceType, artifact)
+                }
+            }
+        }
+    }
 }

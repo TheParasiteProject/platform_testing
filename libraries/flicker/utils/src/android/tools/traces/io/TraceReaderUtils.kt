@@ -44,7 +44,7 @@ object TraceReaderUtils {
 
         val result =
             ResultData(
-                artifact,
+                arrayOf(artifact),
                 // TODO (b/408161530): We need to somehow store this in the trace or pass it in some
                 //  way otherwise we will be analyzing too much data (the test rules, before and
                 //  after blocks included)

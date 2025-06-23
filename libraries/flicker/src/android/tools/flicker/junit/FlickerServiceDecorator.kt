@@ -31,6 +31,7 @@ import android.tools.flicker.annotation.FlickerConfigProvider
 import android.tools.flicker.assertions.ScenarioAssertion
 import android.tools.flicker.config.FlickerConfig
 import android.tools.flicker.config.ScenarioId
+import android.tools.flicker.datastore.DataStore
 import android.tools.io.Reader
 import android.tools.traces.getDefaultFlickerOutputDir
 import android.tools.traces.io.TraceReaderUtils.getTraceReaderFromAsset
@@ -407,22 +408,13 @@ class FlickerServiceDecorator(
             reader: Reader,
             flickerService: FlickerService,
         ): Map<ScenarioInstance, Collection<ScenarioAssertion>> {
-            if (
-                !android.tools.flicker.datastore.DataStore.containsFlickerServiceResult(
-                    testScenario
-                )
-            ) {
+            if (!DataStore.containsFlickerServiceResult(testScenario)) {
                 val detectedScenarios = flickerService.detectScenarios(reader)
                 val groupedAssertions = detectedScenarios.associateWith { it.generateAssertions() }
-                android.tools.flicker.datastore.DataStore.addFlickerServiceAssertions(
-                    testScenario,
-                    groupedAssertions,
-                )
+                DataStore.addFlickerServiceAssertions(testScenario, groupedAssertions)
             }
 
-            return android.tools.flicker.datastore.DataStore.getFlickerServiceAssertions(
-                testScenario
-            )
+            return DataStore.getFlickerServiceAssertions(testScenario)
         }
 
         internal fun getFaasTestCases(

@@ -17,6 +17,7 @@
 package android.tools.integration
 
 import android.platform.test.annotations.RequiresDevice
+import android.tools.flicker.datastore.CachedResultReader
 import android.tools.flicker.legacy.LegacyFlickerTest
 import android.tools.io.RunStatus
 import android.tools.testutils.CleanFlickerEnvironmentRule
@@ -214,11 +215,7 @@ class NoErrorTest {
     private fun assertPredicatePasses(predicate: () -> Unit) {
         predicate.invoke()
         Truth.assertWithMessage("Executed").that(assertionExecuted).isTrue()
-        val reader =
-            android.tools.flicker.datastore.CachedResultReader(
-                TEST_SCENARIO,
-                TRACE_CONFIG_REQUIRE_CHANGES,
-            )
+        val reader = CachedResultReader(TEST_SCENARIO, TRACE_CONFIG_REQUIRE_CHANGES)
         Truth.assertWithMessage("Run status")
             .that(reader.runStatus)
             .isEqualTo(RunStatus.ASSERTION_SUCCESS)
@@ -226,13 +223,12 @@ class NoErrorTest {
     }
 
     private fun assertArtifactExists() {
-        val reader =
-            android.tools.flicker.datastore.CachedResultReader(
-                TEST_SCENARIO,
-                TRACE_CONFIG_REQUIRE_CHANGES,
-            )
-        val file = File(reader.artifactPath)
-        Truth.assertWithMessage("Files exist").that(file.exists()).isTrue()
+        val reader = CachedResultReader(TEST_SCENARIO, TRACE_CONFIG_REQUIRE_CHANGES)
+
+        for (artifact in reader.artifacts) {
+            val file = File(artifact.absolutePath)
+            Truth.assertWithMessage("Files exist").that(file.exists()).isTrue()
+        }
     }
 
     companion object {

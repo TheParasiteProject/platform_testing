@@ -26,7 +26,6 @@ import android.tools.traces.parsers.WindowManagerStateHelper
 import android.tools.withTracing
 import android.util.Log
 import androidx.test.platform.app.InstrumentationRegistry
-import org.junit.runner.Description
 
 /** Helper class for flicker transition rules */
 object Utils {
@@ -66,11 +65,4 @@ object Utils {
         results.putString(Instrumentation.REPORT_KEY_STREAMRESULT, "$msg\n")
         instrumentation.sendStatus(1, results)
     }
-
-    internal fun expandDescription(description: Description?, suffix: String): Description? =
-        Description.createTestDescription(
-            description?.className,
-            "${description?.displayName}-$suffix",
-            description?.annotations?.toTypedArray(),
-        )
 }

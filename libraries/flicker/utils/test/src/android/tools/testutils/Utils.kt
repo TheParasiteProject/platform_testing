@@ -117,7 +117,7 @@ fun assertArchiveContainsFiles(archivePath: File, possibleExpectedFiles: List<Li
 
     val messageActualFiles = "[${actualFiles.joinToString(", ")}]"
     val messageExpectedFiles =
-        "${possibleExpectedFiles.map { "[${it.joinToString(", ")}]"}.joinToString(", ")}"
+        possibleExpectedFiles.joinToString(", ") { "[${it.joinToString(", ")}]" }
     Truth.assertWithMessage(
             "Trace archive doesn't contain expected traces." +
                 "\n Actual: $messageActualFiles" +
@@ -177,7 +177,7 @@ fun getWmTraceReaderFromAsset(
         }
 
     return ParsedTracesReader(
-        artifact = TestArtifact(relativePathWithoutExtension),
+        artifacts = arrayOf(TestArtifact(relativePathWithoutExtension)),
         wmTrace = trace,
     )
 }
@@ -205,7 +205,7 @@ fun getWmDumpReaderFromAsset(relativePathWithoutExtension: String): Reader {
             parseLegacyDump()
         }
     return ParsedTracesReader(
-        artifact = TestArtifact(relativePathWithoutExtension),
+        artifacts = arrayOf(TestArtifact(relativePathWithoutExtension)),
         wmTrace = wmTrace,
     )
 }
@@ -226,7 +226,10 @@ fun getLayerTraceReaderFromAsset(
                 }
                 .parse(session, from, to)
         }
-    return ParsedTracesReader(artifact = TestArtifact(relativePath), layersTrace = layersTrace)
+    return ParsedTracesReader(
+        artifacts = arrayOf(TestArtifact(relativePath)),
+        layersTrace = layersTrace,
+    )
 }
 
 @Throws(Exception::class)
@@ -281,12 +284,6 @@ fun createDefaultArtifactBuilder(
 
 fun getLauncherPackageName() =
     UiDevice.getInstance(InstrumentationRegistry.getInstrumentation()).launcherPackageName
-
-fun getSystemUiUidName(): String {
-    val packageManager = InstrumentationRegistry.getInstrumentation().context.getPackageManager()
-    val uid = packageManager.getApplicationInfo(SYSTEMUI_PACKAGE, 0).uid
-    return requireNotNull(packageManager.getNameForUid(uid))
-}
 
 fun newEmptyRootContainer(orientation: Int = 0, layerId: Int = 0) =
     RootWindowContainer(

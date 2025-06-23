@@ -61,7 +61,11 @@ class ExceptionMessageBuilder {
 
     fun setActual(value: Any?) = setActual(listOf(value?.toString() ?: "null"))
 
-    fun setReader(value: Reader) = addExtraDescription("Artifact", value.artifact)
+    fun setReader(value: Reader) {
+        for (artifact in value.artifacts) {
+            addExtraDescription("${artifact.type} Artifact", artifact)
+        }
+    }
 
     fun addExtraDescription(key: String, value: Any?) = addExtraDescription(Fact(key, value))
 

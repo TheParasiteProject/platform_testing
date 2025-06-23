@@ -18,6 +18,8 @@ from urllib.parse import urlparse, unquote
 import base64
 import uuid
 import json
+from enum import Enum
+from impl.enums import DataSource
 
 class GerritDownloader:
     def __init__(self, subprocess_run_func = subprocess.run):
@@ -86,7 +88,7 @@ class GerritDownloader:
         golden_data["testTime"] = 0
         golden_data["actualData"] = rightJson
         golden_data["expectedData"] = leftJson
-        golden_data["isLocalData"] = True
+        golden_data["dataSource"] = DataSource.GERRIT.value
         golden_list.append(golden_data)
         return golden_list
 
