@@ -54,7 +54,7 @@ class TestGerritDownloader(unittest.TestCase):
         self.assertEqual(golden_data['testClassName'], 'my-test-file.json')
         self.assertEqual(golden_data['expectedData'], self.left_json)
         self.assertEqual(golden_data['actualData'], self.right_json)
-        self.assertTrue(golden_data['isLocalData'])
+        self.assertEqual(golden_data['dataSource'], DataSource.GERRIT.value)
 
     def test_download_subprocess_exception(self):
         self.mock_subprocess_run.side_effect = subprocess.CalledProcessError(1, 'gob-curl')
