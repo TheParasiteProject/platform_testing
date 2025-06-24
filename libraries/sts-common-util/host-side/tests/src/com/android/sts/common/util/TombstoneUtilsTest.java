@@ -27,7 +27,9 @@ import com.android.sts.common.CommandUtil;
 import com.android.sts.common.ProcessUtil;
 import com.android.sts.common.util.TombstoneUtils.Config.BacktraceFilterPattern;
 import com.android.tradefed.device.DeviceNotAvailableException;
+import com.android.tradefed.device.IFileEntry;
 import com.android.tradefed.device.ITestDevice;
+import com.android.tradefed.log.LogUtil.CLog;
 import com.android.tradefed.testtype.DeviceJUnit4ClassRunner;
 import com.android.tradefed.testtype.junit4.BaseHostJUnit4Test;
 
@@ -585,5 +587,48 @@ public class TombstoneUtilsTest extends BaseHostJUnit4Test {
                                                                 "sensors.ssc.so",
                                                                 "sensor_factory::discover_sensors"))))
                 .isNotEqualTo(EMPTY_TOMBSTONE_LIST);
+    }
+
+    @Test
+    public void testWithAssertNoCrashesClearsExistingTombstones() throws Exception {
+        ITestDevice device = getDevice();
+
+        // create a 'SIGSEGV' crash to generate a tombstone
+        String pgrepRegex = "sleep";
+        assumeTrue(device.enableAdbRoot());
+        ProcessUtil.killAll(device, pgrepRegex, /* timeoutMs */ 60_000, /* expectExist */ false);
+        try {
+            new java.lang.Thread(
+                            () -> {
+                                try {
+                                    device.executeShellCommand("sleep 60");
+                                } catch (DeviceNotAvailableException e) {
+                                    CLog.e(e);
+                                }
+                            })
+                    .start();
+            Map<Integer, String> pidsMap = ProcessUtil.waitProcessRunning(getDevice(), pgrepRegex);
+            Optional<Integer> pid = pidsMap.keySet().stream().findAny();
+            assumeTrue(pid.isPresent());
+            ProcessUtil.killPid(
+                    getDevice(), pid.get(), /* SIGSEGV */ 11, ProcessUtil.PROCESS_WAIT_TIMEOUT_MS);
+
+            // fail the test if the tombstone created above is not cleared
+            try (AutoCloseable a =
+                    TombstoneUtils.withAssertNoSecurityCrashes(
+                            device,
+                            new TombstoneUtils.Config()
+                                    .setSignals(TombstoneUtils.Signals.SIGABRT))) {
+                final IFileEntry tombstonesPath = device.getFileEntry("/data/tombstones");
+                if (tombstonesPath != null) {
+                    int currentTombstonesSize =
+                            tombstonesPath.getChildren(/* useCache */ false).size();
+                    assertThat(currentTombstonesSize).isEqualTo(0);
+                }
+            }
+        } finally {
+            CommandUtil.runAndCheck(device, "rm -f /data/tombstones/*");
+            device.disableAdbRoot();
+        }
     }
 }
