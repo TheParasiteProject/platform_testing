@@ -17,7 +17,6 @@
 package android.tools.traces.io
 
 import android.content.Context
-import android.tools.Scenario
 import android.tools.Timestamps
 import android.tools.io.Reader
 import android.tools.io.TraceType
@@ -29,7 +28,7 @@ import java.io.IOException
 
 object TraceReaderUtils {
     fun getTraceReaderFromAsset(
-        scenario: Scenario,
+        testIdentifier: String,
         path: String,
         type: TraceType = TraceType.WINSCOPE_ZIP,
     ): Reader {
@@ -37,9 +36,9 @@ object TraceReaderUtils {
 
         val artifact =
             if (type == TraceType.WINSCOPE_ZIP) {
-                WinscopeZipArtifact(scenario, file, 0)
+                WinscopeZipArtifact(testIdentifier, file, 0)
             } else {
-                SingleTraceFileArtifact(scenario, file, 0, type)
+                SingleTraceFileArtifact(testIdentifier, file, 0, type)
             }
 
         val result =

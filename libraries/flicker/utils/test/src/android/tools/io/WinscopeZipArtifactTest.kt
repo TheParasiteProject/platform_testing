@@ -16,7 +16,7 @@
 
 package android.tools.io
 
-import android.tools.testutils.TEST_SCENARIO
+import android.tools.testutils.TEST_SCENARIO_KEY
 import android.tools.traces.io.WinscopeZipArtifact
 import com.google.common.truth.Truth
 import java.io.File
@@ -67,7 +67,7 @@ class WinscopeZipArtifactTest {
                 TraceType.SCREEN_RECORDING.fileName to "data2",
             )
         val zipFile = createTestZipFile("archive.zip", filesInZip)
-        val artifact = WinscopeZipArtifact(TEST_SCENARIO, zipFile, 0)
+        val artifact = WinscopeZipArtifact(TEST_SCENARIO_KEY, zipFile, 0)
         Truth.assertThat(artifact.hasTrace(ResultArtifactDescriptor(TraceType.PERFETTO))).isTrue()
         Truth.assertThat(artifact.hasTrace(ResultArtifactDescriptor(TraceType.SCREEN_RECORDING)))
             .isTrue()
@@ -77,7 +77,7 @@ class WinscopeZipArtifactTest {
     fun hasTraceFileDoesNotExistInZip() {
         val filesInZip = mapOf("trace1.pb" to "data1")
         val zipFile = createTestZipFile("archive.zip", filesInZip)
-        val artifact = WinscopeZipArtifact(TEST_SCENARIO, zipFile, 0)
+        val artifact = WinscopeZipArtifact(TEST_SCENARIO_KEY, zipFile, 0)
         val descriptor = ResultArtifactDescriptor(TraceType.WM)
         Truth.assertThat(artifact.hasTrace(descriptor)).isFalse()
     }
@@ -87,14 +87,14 @@ class WinscopeZipArtifactTest {
         val filesInZip =
             mapOf("trace1.pb" to "data1", "trace2.wintrace" to "data2", "log.txt" to "log")
         val zipFile = createTestZipFile("archive.zip", filesInZip)
-        val artifact = WinscopeZipArtifact(TEST_SCENARIO, zipFile, 0)
+        val artifact = WinscopeZipArtifact(TEST_SCENARIO_KEY, zipFile, 0)
         Truth.assertThat(artifact.traceCount()).isEqualTo(filesInZip.size)
     }
 
     @Test
     fun traceCountEmptyZip() {
         val zipFile = createTestZipFile("empty.zip", emptyMap())
-        val artifact = WinscopeZipArtifact(TEST_SCENARIO, zipFile, 0)
+        val artifact = WinscopeZipArtifact(TEST_SCENARIO_KEY, zipFile, 0)
         Truth.assertThat(artifact.traceCount()).isEqualTo(0)
     }
 
@@ -107,7 +107,7 @@ class WinscopeZipArtifactTest {
                 TraceType.SCREEN_RECORDING.fileName to "other data",
             )
         val zipFile = createTestZipFile("archive.zip", filesInZip)
-        val artifact = WinscopeZipArtifact(TEST_SCENARIO, zipFile, 0)
+        val artifact = WinscopeZipArtifact(TEST_SCENARIO_KEY, zipFile, 0)
         val descriptor = ResultArtifactDescriptor(TraceType.PERFETTO)
         val bytes = artifact.readBytes(descriptor)
         Truth.assertThat(bytes).isNotNull()
@@ -118,7 +118,7 @@ class WinscopeZipArtifactTest {
     fun readBytesDescriptorFileDoesNotExistInZip() {
         val filesInZip = mapOf("actual_trace.pb" to "some data")
         val zipFile = createTestZipFile("archive.zip", filesInZip)
-        val artifact = WinscopeZipArtifact(TEST_SCENARIO, zipFile, 0)
+        val artifact = WinscopeZipArtifact(TEST_SCENARIO_KEY, zipFile, 0)
         val descriptor = ResultArtifactDescriptor(TraceType.WM)
         Truth.assertThat(artifact.readBytes(descriptor)).isNull()
     }
@@ -126,7 +126,7 @@ class WinscopeZipArtifactTest {
     @Test(expected = FileNotFoundException::class)
     fun readBytesDescriptorZipFileNotFoundThrowsException() {
         val nonExistentZip = File(outputDir, "non_existent.zip")
-        val artifact = WinscopeZipArtifact(TEST_SCENARIO, nonExistentZip, 0)
+        val artifact = WinscopeZipArtifact(TEST_SCENARIO_KEY, nonExistentZip, 0)
         val descriptor = ResultArtifactDescriptor(TraceType.PERFETTO)
         artifact.readBytes(descriptor) // Should throw
     }
@@ -135,7 +135,7 @@ class WinscopeZipArtifactTest {
     fun readBytesZipDeletedAfterCreationThrowsException() {
         val filesInZip = mapOf(TraceType.PERFETTO.fileName to "data")
         val zipFile = createTestZipFile("deletable.zip", filesInZip)
-        val artifact = WinscopeZipArtifact(TEST_SCENARIO, zipFile, 0)
+        val artifact = WinscopeZipArtifact(TEST_SCENARIO_KEY, zipFile, 0)
         val descriptor = ResultArtifactDescriptor(TraceType.PERFETTO)
 
         // Read once, should work
@@ -156,9 +156,13 @@ class WinscopeZipArtifactTest {
     @Test
     fun updateStatusRenamesZipFile() {
         val initialFileName =
-            RunStatus.RUN_EXECUTED.generateArchiveNameFor(TEST_SCENARIO, 0, TraceType.WINSCOPE_ZIP)
+            RunStatus.RUN_EXECUTED.generateArchiveNameFor(
+                TEST_SCENARIO_KEY,
+                0,
+                TraceType.WINSCOPE_ZIP,
+            )
         val zipFile = createTestZipFile(initialFileName, mapOf("entry.txt" to "data"))
-        val artifact = WinscopeZipArtifact(TEST_SCENARIO, zipFile, 0)
+        val artifact = WinscopeZipArtifact(TEST_SCENARIO_KEY, zipFile, 0)
 
         Truth.assertThat(artifact.file.name).isEqualTo(initialFileName)
         Truth.assertThat(artifact.runStatus).isEqualTo(RunStatus.RUN_EXECUTED)
@@ -166,7 +170,7 @@ class WinscopeZipArtifactTest {
         artifact.updateStatus(RunStatus.ASSERTION_SUCCESS)
         val newFileName =
             RunStatus.ASSERTION_SUCCESS.generateArchiveNameFor(
-                TEST_SCENARIO,
+                TEST_SCENARIO_KEY,
                 0,
                 TraceType.WINSCOPE_ZIP,
             )
@@ -180,7 +184,7 @@ class WinscopeZipArtifactTest {
     @Test
     fun deleteIfExistsDeletesZipFile() {
         val zipFile = createTestZipFile("toBeDeleted.zip", mapOf("entry.txt" to "data"))
-        val artifact = WinscopeZipArtifact(TEST_SCENARIO, zipFile, 0)
+        val artifact = WinscopeZipArtifact(TEST_SCENARIO_KEY, zipFile, 0)
         Truth.assertThat(artifact.file.exists()).isTrue()
         artifact.deleteIfExists()
         Truth.assertThat(artifact.file.exists()).isFalse()
@@ -189,8 +193,8 @@ class WinscopeZipArtifactTest {
     @Test
     fun equalityTestSameUnderlyingZipFile() {
         val zipFile = createTestZipFile("file.zip", mapOf("a" to "b"))
-        val artifact1 = WinscopeZipArtifact(TEST_SCENARIO, zipFile, 0)
-        val artifact2 = WinscopeZipArtifact(TEST_SCENARIO, zipFile, 0)
+        val artifact1 = WinscopeZipArtifact(TEST_SCENARIO_KEY, zipFile, 0)
+        val artifact2 = WinscopeZipArtifact(TEST_SCENARIO_KEY, zipFile, 0)
         Truth.assertThat(artifact1).isEqualTo(artifact2)
     }
 
@@ -206,8 +210,8 @@ class WinscopeZipArtifactTest {
             zos.closeEntry()
         }
 
-        val artifact1 = WinscopeZipArtifact(TEST_SCENARIO, zipFile1, 0)
-        val artifact2 = WinscopeZipArtifact(TEST_SCENARIO, zipFile2, 0)
+        val artifact1 = WinscopeZipArtifact(TEST_SCENARIO_KEY, zipFile1, 0)
+        val artifact2 = WinscopeZipArtifact(TEST_SCENARIO_KEY, zipFile2, 0)
         Truth.assertThat(artifact1).isNotEqualTo(artifact2)
         outputDir2.deleteRecursively()
     }
@@ -216,8 +220,8 @@ class WinscopeZipArtifactTest {
     fun equalityTestDifferentUnderlyingZipFilesDifferentName() {
         val zipFile1 = createTestZipFile("file1.zip", mapOf("a" to "b"))
         val zipFile2 = createTestZipFile("file2.zip", mapOf("a" to "b"))
-        val artifact1 = WinscopeZipArtifact(TEST_SCENARIO, zipFile1, 0)
-        val artifact2 = WinscopeZipArtifact(TEST_SCENARIO, zipFile2, 0)
+        val artifact1 = WinscopeZipArtifact(TEST_SCENARIO_KEY, zipFile1, 0)
+        val artifact2 = WinscopeZipArtifact(TEST_SCENARIO_KEY, zipFile2, 0)
         Truth.assertThat(artifact1).isNotEqualTo(artifact2)
     }
 }

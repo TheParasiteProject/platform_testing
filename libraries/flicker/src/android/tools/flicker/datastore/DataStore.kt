@@ -16,7 +16,6 @@
 
 package android.tools.flicker.datastore
 
-import android.tools.Scenario
 import android.tools.flicker.ScenarioInstance
 import android.tools.flicker.assertions.ScenarioAssertion
 import android.tools.traces.io.IResultData
@@ -24,14 +23,14 @@ import androidx.annotation.VisibleForTesting
 
 /** In memory data store for flicker transitions, assertions and results */
 object DataStore {
-    private var cachedResults = mutableMapOf<Scenario, IResultData>()
+    private var cachedResults = mutableMapOf<String, IResultData>()
     private var cachedFlickerServiceAssertions =
-        mutableMapOf<Scenario, Map<ScenarioInstance, Collection<ScenarioAssertion>>>()
+        mutableMapOf<String, Map<ScenarioInstance, Collection<ScenarioAssertion>>>()
 
     data class Backup(
-        val cachedResults: MutableMap<Scenario, IResultData>,
+        val cachedResults: MutableMap<String, IResultData>,
         val cachedFlickerServiceAssertions:
-            MutableMap<Scenario, Map<ScenarioInstance, Collection<ScenarioAssertion>>>,
+            MutableMap<String, Map<ScenarioInstance, Collection<ScenarioAssertion>>>,
     )
 
     @VisibleForTesting
@@ -49,56 +48,54 @@ object DataStore {
         cachedFlickerServiceAssertions = backup.cachedFlickerServiceAssertions
     }
 
-    /** @return if the store has results for [scenario] */
-    fun containsResult(scenario: Scenario): Boolean = cachedResults.containsKey(scenario)
+    /** @return if the store has results for [key] */
+    fun containsResult(key: String): Boolean = cachedResults.containsKey(key)
 
     /**
-     * Adds [result] to the store with [scenario] as id
+     * Adds [result] to the store with [key] as id
      *
-     * @throws IllegalStateException is [scenario] already exists in the data store
+     * @throws IllegalStateException is [key] already exists in the data store
      */
-    fun addResult(scenario: Scenario, result: IResultData) {
-        require(!containsResult(scenario)) { "Result for $scenario already in data store" }
-        cachedResults[scenario] = result
+    fun addResult(key: String, result: IResultData) {
+        require(!containsResult(key)) { "Result for $key already in data store" }
+        cachedResults[key] = result
     }
 
     /**
-     * Replaces the old value [scenario] result in the store by [newResult]
+     * Replaces the old value [key] result in the store by [newResult]
      *
-     * @throws IllegalStateException is [scenario] doesn't exist in the data store
+     * @throws IllegalStateException is [key] doesn't exist in the data store
      */
-    fun replaceResult(scenario: Scenario, newResult: IResultData) {
-        if (!containsResult(scenario)) {
-            error("Result for $scenario not in data store")
+    fun replaceResult(key: String, newResult: IResultData) {
+        if (!containsResult(key)) {
+            error("Result for $key not in data store")
         }
-        cachedResults[scenario] = newResult
+        cachedResults[key] = newResult
     }
 
     /**
-     * @return the result for [scenario]
-     * @throws IllegalStateException is [scenario] doesn't exist in the data store
+     * @return the result for [key]
+     * @throws IllegalStateException is [key] doesn't exist in the data store
      */
-    fun getResult(scenario: Scenario): IResultData =
-        cachedResults[scenario] ?: error("No value for $scenario")
+    fun getResult(key: String): IResultData = cachedResults[key] ?: error("No value for $key")
 
-    /** @return if the store has results for [scenario] */
-    fun containsFlickerServiceResult(scenario: Scenario): Boolean =
-        cachedFlickerServiceAssertions.containsKey(scenario)
+    /** @return if the store has results for [key] */
+    fun containsFlickerServiceResult(key: String): Boolean =
+        cachedFlickerServiceAssertions.containsKey(key)
 
     fun addFlickerServiceAssertions(
-        scenario: Scenario,
+        key: String,
         groupedAssertions: Map<ScenarioInstance, Collection<ScenarioAssertion>>,
     ) {
-        if (containsFlickerServiceResult(scenario)) {
-            error("Result for $scenario already in data store")
+        if (containsFlickerServiceResult(key)) {
+            error("Result for $key already in data store")
         }
-        cachedFlickerServiceAssertions[scenario] = groupedAssertions
+        cachedFlickerServiceAssertions[key] = groupedAssertions
     }
 
     fun getFlickerServiceAssertions(
-        scenario: Scenario
+        key: String
     ): Map<ScenarioInstance, Collection<ScenarioAssertion>> {
-        return cachedFlickerServiceAssertions[scenario]
-            ?: error("No flicker service results for $scenario")
+        return cachedFlickerServiceAssertions[key] ?: error("No flicker service results for $key")
     }
 }

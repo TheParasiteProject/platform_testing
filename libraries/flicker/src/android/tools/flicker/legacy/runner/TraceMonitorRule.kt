@@ -17,7 +17,6 @@
 package android.tools.flicker.legacy.runner
 
 import android.tools.FLICKER_TAG
-import android.tools.Scenario
 import android.tools.flicker.junit.Utils
 import android.tools.traces.io.ResultWriter
 import android.tools.traces.monitors.ITransitionMonitor
@@ -32,13 +31,13 @@ import org.junit.runners.model.Statement
  * Test rule to start and stop trace monitors and update [resultWriter]
  *
  * @param traceMonitors to collect device data
- * @param scenario to run the transition
+ * @param testIdentifier to identify the transition
  * @param wmHelper to stabilize the UI before/after transitions
  * @param resultWriter to write
  */
 class TraceMonitorRule(
     private val traceMonitors: List<ITransitionMonitor>,
-    private val scenario: Scenario,
+    private val testIdentifier: String,
     private val wmHelper: WindowManagerStateHelper,
     private val resultWriter: ResultWriter,
 ) : TestRule {
@@ -68,7 +67,7 @@ class TraceMonitorRule(
 
     private fun doStartMonitors(description: Description?) {
         withTracing("doStartMonitors") {
-            Utils.notifyRunnerProgress(scenario, "Starting traces for $description")
+            Utils.notifyRunnerProgress(testIdentifier, "Starting traces for $description")
             traceMonitors.forEach {
                 try {
                     it.start()
@@ -82,7 +81,7 @@ class TraceMonitorRule(
 
     private fun doStopMonitors(description: Description?) {
         withTracing("doStopMonitors") {
-            Utils.notifyRunnerProgress(scenario, "Stopping traces for $description")
+            Utils.notifyRunnerProgress(testIdentifier, "Stopping traces for $description")
             val errors =
                 traceMonitors.map {
                     runCatching {

@@ -44,10 +44,10 @@ class LegacyFlickerDecorator(
     override fun getMethodInvoker(method: FrameworkMethod, test: Any): Statement {
         return object : Statement() {
             override fun evaluate() {
-                requireNotNull(scenario) { "Expected to have a scenario to run" }
+                val scenario = scenario ?: error("Expected to have a scenario to run")
                 val description = getChildDescription(method)
-                if (!android.tools.flicker.datastore.DataStore.containsResult(scenario)) {
-                    transitionRunner.runTransition(scenario, test, description)
+                if (!DataStore.containsResult(scenario.key)) {
+                    transitionRunner.runTransition(scenario.key, test, description)
                 }
                 inner?.getMethodInvoker(method, test)?.evaluate()
             }

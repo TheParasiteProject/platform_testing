@@ -18,7 +18,6 @@ package android.tools.flicker.junit
 
 import android.app.Instrumentation
 import android.os.Bundle
-import android.tools.Scenario
 import android.tools.flicker.legacy.runner.FLICKER_RUNNER_TAG
 import android.tools.traces.ConditionList
 import android.tools.traces.ConditionsFactory
@@ -45,14 +44,6 @@ object Utils {
         withTracing("doWaitForUiStabilize") {
             wmHelper.StateSyncBuilder().add(UI_STABLE_CONDITIONS).waitFor()
         }
-    }
-
-    internal fun notifyRunnerProgress(
-        scenario: Scenario,
-        msg: String,
-        instrumentation: Instrumentation = InstrumentationRegistry.getInstrumentation(),
-    ) {
-        notifyRunnerProgress(scenario.key, msg, instrumentation)
     }
 
     internal fun notifyRunnerProgress(

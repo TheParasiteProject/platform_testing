@@ -17,7 +17,7 @@
 package android.tools.io
 
 import android.tools.testutils.CleanFlickerEnvironmentRule
-import android.tools.testutils.TEST_SCENARIO
+import android.tools.testutils.TEST_SCENARIO_KEY
 import android.tools.traces.io.ArtifactBuilder
 import com.google.common.truth.Truth
 import kotlin.io.path.createTempDirectory
@@ -30,7 +30,7 @@ class RunStatusTest {
         for (status in RunStatus.entries) {
             val artifact =
                 ArtifactBuilder()
-                    .withScenario(TEST_SCENARIO)
+                    .withName(TEST_SCENARIO_KEY)
                     .withOutputDir(createTempDirectory().toFile())
                     .withStatus(status)
                     .withFiles(emptyMap())

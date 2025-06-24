@@ -19,7 +19,7 @@ package android.tools.flicker.datastore
 import android.annotation.SuppressLint
 import android.tools.CleanFlickerEnvironmentRuleWithDataStore
 import android.tools.newTestCachedResultWriter
-import android.tools.testutils.TEST_SCENARIO
+import android.tools.testutils.TEST_SCENARIO_KEY
 import android.tools.testutils.assertExceptionMessage
 import android.tools.testutils.assertThrows
 import com.google.common.truth.Truth
@@ -33,27 +33,27 @@ class CachedResultWriterTest {
 
     @Test
     fun writeToStore() {
-        val writer = newTestCachedResultWriter()
+        val writer = newTestCachedResultWriter(TEST_SCENARIO_KEY)
         val expected = writer.write()
         Truth.assertWithMessage("Has key in store")
-            .that(DataStore.containsResult(TEST_SCENARIO))
+            .that(DataStore.containsResult(TEST_SCENARIO_KEY))
             .isTrue()
-        val actual = DataStore.getResult(TEST_SCENARIO)
+        val actual = DataStore.getResult(TEST_SCENARIO_KEY)
         Truth.assertWithMessage("Has key in store").that(expected).isEqualTo(actual)
     }
 
     @Test
     fun writeToStoreFailsWhenWriteTwice() {
-        val writer = newTestCachedResultWriter()
+        val writer = newTestCachedResultWriter(TEST_SCENARIO_KEY)
         val failure =
             assertThrows<IllegalArgumentException> {
                 writer.write()
                 writer.write()
             }
         Truth.assertWithMessage("Has key in store")
-            .that(DataStore.containsResult(TEST_SCENARIO))
+            .that(DataStore.containsResult(TEST_SCENARIO_KEY))
             .isTrue()
-        assertExceptionMessage(failure, TEST_SCENARIO.toString())
+        assertExceptionMessage(failure, TEST_SCENARIO_KEY)
         assertExceptionMessage(failure, "already in data store")
     }
 }

@@ -19,7 +19,7 @@ package android.tools.flicker.datastore
 import android.annotation.SuppressLint
 import android.tools.CleanFlickerEnvironmentRuleWithDataStore
 import android.tools.io.TraceType
-import android.tools.testutils.TEST_SCENARIO
+import android.tools.testutils.TEST_SCENARIO_KEY
 import android.tools.testutils.TestTraces
 import android.tools.testutils.newTestResultWriter
 import android.tools.traces.TRACE_CONFIG_REQUIRE_CHANGES
@@ -38,11 +38,11 @@ class CachedResultReaderTest {
 
     @Test
     fun readFromStore() {
-        val writer = newTestResultWriter()
+        val writer = newTestResultWriter(TEST_SCENARIO_KEY)
         writer.addTraceResult(TraceType.EVENT_LOG, TestTraces.EventLog.FILE)
         val result = writer.write()
-        DataStore.addResult(TEST_SCENARIO, result)
-        val reader = CachedResultReader(TEST_SCENARIO, TRACE_CONFIG_REQUIRE_CHANGES)
+        DataStore.addResult(TEST_SCENARIO_KEY, result)
+        val reader = CachedResultReader(TEST_SCENARIO_KEY, TRACE_CONFIG_REQUIRE_CHANGES)
         val actual = reader.readEventLogTrace()
         Truth.assertWithMessage("Event log size").that(actual).isNotNull()
     }

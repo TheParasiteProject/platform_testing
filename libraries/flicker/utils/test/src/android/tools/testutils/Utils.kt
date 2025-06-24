@@ -17,9 +17,7 @@
 package android.tools.testutils
 
 import android.content.Context
-import android.tools.Scenario
 import android.tools.ScenarioBuilder
-import android.tools.ScenarioImpl
 import android.tools.Timestamp
 import android.tools.Timestamps
 import android.tools.io.Reader
@@ -57,7 +55,8 @@ fun CleanFlickerEnvironmentRule(): RuleChain =
         .around(StopAllTracesRule())
         .around(CacheCleanupRule())
 
-val TEST_SCENARIO = ScenarioBuilder().forClass("test").build() as ScenarioImpl
+const val TEST_SCENARIO_KEY = "test"
+val TEST_SCENARIO = ScenarioBuilder().forClass(TEST_SCENARIO_KEY).build()
 
 const val SYSTEMUI_PACKAGE = "com.android.systemui"
 
@@ -253,11 +252,9 @@ fun readAssetAsFile(relativePath: String): File {
     }
 }
 
-fun newTestResultWriter(
-    scenario: Scenario = ScenarioBuilder().forClass(kotlin.io.path.createTempFile().name).build()
-) =
+fun newTestResultWriter(testIdentifier: String = kotlin.io.path.createTempFile().name) =
     ResultWriter()
-        .forScenario(scenario)
+        .withName(testIdentifier)
         .withOutputDir(createTempDirectory().toFile())
         .setRunComplete()
 
@@ -272,12 +269,13 @@ fun outputFileName(status: RunStatus) =
     File("/sdcard/flicker/${status.prefix}__test_ROTATION_0_GESTURAL_NAV.winscope.zip")
 
 fun createDefaultArtifactBuilder(
+    testIdentifier: String,
     status: RunStatus,
     outputDir: File = createTempDirectory().toFile(),
     files: Map<ResultArtifactDescriptor, File> = emptyMap(),
 ) =
     ArtifactBuilder()
-        .withScenario(TEST_SCENARIO)
+        .withName(testIdentifier)
         .withOutputDir(outputDir)
         .withStatus(status)
         .withFiles(files)

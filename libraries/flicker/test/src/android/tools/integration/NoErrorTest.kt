@@ -17,11 +17,12 @@
 package android.tools.integration
 
 import android.platform.test.annotations.RequiresDevice
+import android.tools.Scenario
 import android.tools.flicker.datastore.CachedResultReader
 import android.tools.flicker.legacy.LegacyFlickerTest
 import android.tools.io.RunStatus
 import android.tools.testutils.CleanFlickerEnvironmentRule
-import android.tools.testutils.TEST_SCENARIO
+import android.tools.testutils.TEST_SCENARIO_KEY
 import android.tools.traces.TRACE_CONFIG_REQUIRE_CHANGES
 import androidx.test.filters.FlakyTest
 import com.google.common.truth.Truth
@@ -46,7 +47,8 @@ import org.mockito.junit.MockitoJUnitRunner
 @FlakyTest(bugId = 362942901)
 class NoErrorTest {
     private var assertionExecuted = false
-    private val testParam = LegacyFlickerTest().also { it.initialize(TEST_SCENARIO.testClass) }
+    private val scenario: Scenario
+    private val testParam = LegacyFlickerTest().also { scenario = it.initialize(TEST_SCENARIO_KEY) }
 
     @Before
     fun setup() {
@@ -215,7 +217,7 @@ class NoErrorTest {
     private fun assertPredicatePasses(predicate: () -> Unit) {
         predicate.invoke()
         Truth.assertWithMessage("Executed").that(assertionExecuted).isTrue()
-        val reader = CachedResultReader(TEST_SCENARIO, TRACE_CONFIG_REQUIRE_CHANGES)
+        val reader = CachedResultReader(scenario.key, TRACE_CONFIG_REQUIRE_CHANGES)
         Truth.assertWithMessage("Run status")
             .that(reader.runStatus)
             .isEqualTo(RunStatus.ASSERTION_SUCCESS)
@@ -223,7 +225,7 @@ class NoErrorTest {
     }
 
     private fun assertArtifactExists() {
-        val reader = CachedResultReader(TEST_SCENARIO, TRACE_CONFIG_REQUIRE_CHANGES)
+        val reader = CachedResultReader(scenario.key, TRACE_CONFIG_REQUIRE_CHANGES)
 
         for (artifact in reader.artifacts) {
             val file = File(artifact.absolutePath)

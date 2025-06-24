@@ -18,7 +18,7 @@ package android.tools.flicker.datastore
 
 import android.annotation.SuppressLint
 import android.tools.testutils.CleanFlickerEnvironmentRule
-import android.tools.testutils.TEST_SCENARIO
+import android.tools.testutils.TEST_SCENARIO_KEY
 import android.tools.testutils.assertExceptionMessage
 import android.tools.testutils.assertThrows
 import com.google.common.truth.Truth
@@ -35,9 +35,9 @@ class DataStoreTest {
 
     @Test
     fun addsElement() {
-        DataStore.addResult(TEST_SCENARIO, Consts.TEST_RESULT)
+        DataStore.addResult(TEST_SCENARIO_KEY, Consts.TEST_RESULT)
         Truth.assertWithMessage("Contains result")
-            .that(DataStore.containsResult(TEST_SCENARIO))
+            .that(DataStore.containsResult(TEST_SCENARIO_KEY))
             .isTrue()
     }
 
@@ -45,33 +45,33 @@ class DataStoreTest {
     fun throwsErrorAddElementTwice() {
         val failure =
             assertThrows<IllegalArgumentException> {
-                DataStore.addResult(TEST_SCENARIO, Consts.TEST_RESULT)
-                DataStore.addResult(TEST_SCENARIO, Consts.TEST_RESULT)
+                DataStore.addResult(TEST_SCENARIO_KEY, Consts.TEST_RESULT)
+                DataStore.addResult(TEST_SCENARIO_KEY, Consts.TEST_RESULT)
             }
         Truth.assertWithMessage("Contains result")
-            .that(DataStore.containsResult(TEST_SCENARIO))
+            .that(DataStore.containsResult(TEST_SCENARIO_KEY))
             .isTrue()
-        assertExceptionMessage(failure, TEST_SCENARIO.toString())
+        assertExceptionMessage(failure, TEST_SCENARIO_KEY)
     }
 
     @Test
     fun getsElement() {
-        DataStore.addResult(TEST_SCENARIO, Consts.TEST_RESULT)
-        val actual = DataStore.getResult(TEST_SCENARIO)
+        DataStore.addResult(TEST_SCENARIO_KEY, Consts.TEST_RESULT)
+        val actual = DataStore.getResult(TEST_SCENARIO_KEY)
         Truth.assertWithMessage("Expected result").that(actual).isEqualTo(Consts.TEST_RESULT)
     }
 
     @Test
     fun getsElementThrowErrorDoesNotExist() {
-        val failure = assertThrows<IllegalStateException> { DataStore.getResult(TEST_SCENARIO) }
-        assertExceptionMessage(failure, TEST_SCENARIO.toString())
+        val failure = assertThrows<IllegalStateException> { DataStore.getResult(TEST_SCENARIO_KEY) }
+        assertExceptionMessage(failure, TEST_SCENARIO_KEY)
     }
 
     @Test
     fun replacesElement() {
-        DataStore.addResult(TEST_SCENARIO, Consts.TEST_RESULT)
-        DataStore.replaceResult(TEST_SCENARIO, Consts.RESULT_FAILURE)
-        val actual = DataStore.getResult(TEST_SCENARIO)
+        DataStore.addResult(TEST_SCENARIO_KEY, Consts.TEST_RESULT)
+        DataStore.replaceResult(TEST_SCENARIO_KEY, Consts.RESULT_FAILURE)
+        val actual = DataStore.getResult(TEST_SCENARIO_KEY)
         Truth.assertWithMessage("Expected value").that(actual).isEqualTo(Consts.RESULT_FAILURE)
     }
 
@@ -79,9 +79,9 @@ class DataStoreTest {
     fun replacesElementThrowErrorDoesNotExist() {
         val failure =
             assertThrows<IllegalStateException> {
-                DataStore.replaceResult(TEST_SCENARIO, Consts.RESULT_FAILURE)
+                DataStore.replaceResult(TEST_SCENARIO_KEY, Consts.RESULT_FAILURE)
             }
-        assertExceptionMessage(failure, TEST_SCENARIO.toString())
+        assertExceptionMessage(failure, TEST_SCENARIO_KEY)
     }
 
     companion object {

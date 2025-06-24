@@ -16,8 +16,6 @@
 
 package android.tools.traces.io
 
-import android.tools.Scenario
-import android.tools.ScenarioBuilder
 import android.tools.Tag
 import android.tools.Timestamp
 import android.tools.Timestamps
@@ -32,7 +30,7 @@ import java.io.File
 
 /** Helper class to create run result artifact files */
 open class ResultWriter {
-    protected var scenario: Scenario = ScenarioBuilder().createEmptyScenario()
+    protected var testIdentifier: String = ""
     private var runStatus: RunStatus = RunStatus.UNDEFINED
     private val files = mutableMapOf<ResultArtifactDescriptor, File>()
     private var transitionStartTime = Timestamps.min()
@@ -40,8 +38,8 @@ open class ResultWriter {
     private var executionError: Throwable? = null
     private var outputDir: File? = null
 
-    /** Sets the artifact scenario to [_scenario] */
-    fun forScenario(_scenario: Scenario) = apply { scenario = _scenario }
+    /** Sets the artifact name to [value] */
+    fun withName(value: String) = apply { testIdentifier = value }
 
     /** Sets the artifact transition start time to [time] */
     fun setTransitionStartTime(time: Timestamp) = apply { transitionStartTime = time }
@@ -74,7 +72,7 @@ open class ResultWriter {
     fun addTraceResult(traceType: TraceType, artifact: File, tag: String = Tag.ALL) = apply {
         Log.d(
             FLICKER_IO_TAG,
-            "Add trace result file=$artifact type=$traceType tag=$tag scenario=$scenario",
+            "Add trace result file=$artifact type=$traceType tag=$tag testIdentifier=$testIdentifier",
         )
         val fileDescriptor = ResultArtifactDescriptor(traceType, tag)
         require(!files.containsKey(fileDescriptor)) { "File already added: $fileDescriptor" }
@@ -86,7 +84,7 @@ open class ResultWriter {
         return withTracing("write") {
             val outputDir = outputDir
             requireNotNull(outputDir) { "Output dir not configured" }
-            require(!scenario.isEmpty) { "Scenario shouldn't be empty" }
+            require(testIdentifier.isNotEmpty()) { "Test identifier shouldn't be empty" }
 
             if (runStatus == RunStatus.UNDEFINED) {
                 Log.w(FLICKER_IO_TAG, "Writing result with $runStatus run status")
@@ -94,7 +92,7 @@ open class ResultWriter {
 
             val artifact =
                 ArtifactBuilder()
-                    .withScenario(scenario)
+                    .withName(testIdentifier)
                     .withOutputDir(outputDir)
                     .withStatus(runStatus)
                     .withFiles(files)

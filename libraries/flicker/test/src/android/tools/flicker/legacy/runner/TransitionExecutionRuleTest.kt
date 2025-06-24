@@ -21,7 +21,7 @@ import android.os.SystemClock
 import android.tools.flicker.legacy.AbstractFlickerTestData
 import android.tools.flicker.legacy.FlickerTestData
 import android.tools.testutils.CleanFlickerEnvironmentRule
-import android.tools.testutils.TEST_SCENARIO
+import android.tools.testutils.TEST_SCENARIO_KEY
 import android.tools.testutils.assertExceptionMessage
 import android.tools.testutils.assertThrows
 import android.tools.testutils.newTestResultWriter
@@ -195,7 +195,7 @@ class TransitionExecutionRuleTest {
             return TransitionExecutionRule(
                 mockedFlicker,
                 writer,
-                TEST_SCENARIO,
+                TEST_SCENARIO_KEY,
                 commands,
                 WindowManagerStateHelper(),
             )
