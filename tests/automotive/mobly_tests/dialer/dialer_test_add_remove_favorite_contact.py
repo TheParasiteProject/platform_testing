@@ -48,7 +48,7 @@ class AddRemoveFavoriteContact(bluetooth_base_test.BluetoothBaseTest):
     """Tests add remove favorite contact."""
     contact_name = "Adam Allen"
     self.call_utils.open_phone_app()
-
+    self.bt_utils.allow_permissions_after_pairing()
     # Adding the contacts to favorites from the favorites tab and verifying it
     self.call_utils.add_favorites_from_favorites_tab(
         contact_name)

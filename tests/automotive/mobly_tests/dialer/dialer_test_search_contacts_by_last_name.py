@@ -45,6 +45,7 @@ class ContactSearchByLastNameTest(bluetooth_base_test.BluetoothBaseTest):
     # Navigate to the Contacts page
     expected_last_name = constants.EXPECTED_CONTACT_LAST_NAME
     self.call_utils.open_phone_app()
+    self.bt_utils.allow_permissions_after_pairing()
     self.call_utils.open_contacts()
     self.call_utils.wait_with_log(constants.DEFAULT_WAIT_TIME_FIVE_SECS)
     self.call_utils.search_contact_by_name(

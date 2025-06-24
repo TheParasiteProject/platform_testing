@@ -60,8 +60,8 @@ public class EditAdminName {
     public void goBackToHomeScreen() {
         Log.i(LOG_TAG, "Act: Edit initial user's name");
         mUsersHelper.get().editUserName(INITIAL_USERNAME);
-        Log.i(LOG_TAG, "Act: Go back to settings");
-        mSettingHelper.get().goBackToSettingsScreen();
+        Log.i(LOG_TAG, "Act: Go back to Home Screen");
+        mSettingHelper.get().exit();
     }
 
     @Test

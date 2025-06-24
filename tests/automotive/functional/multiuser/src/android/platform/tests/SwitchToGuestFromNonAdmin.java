@@ -75,11 +75,13 @@ public class SwitchToGuestFromNonAdmin {
         Log.i(LOG_TAG, "Act: Switch to new user");
         mMultiUserHelper.switchAndWaitForStable(
             mTargetUserId, MultiUserConstants.WAIT_FOR_IDLE_TIME_MS);
+        mUsersHelper.get().skipSetupWizard();
         Log.i(LOG_TAG, "Act: Get new userinfo");
         UserInfo newUser = mMultiUserHelper.getCurrentForegroundUserInfo();
         // switch to guest from new user
         Log.i(LOG_TAG, "Act: Switch to guest user");
         mUsersHelper.get().switchUsingUserIcon(GUEST);
+        mUsersHelper.get().skipSetupWizard();
         // verify the user switch
         Log.i(LOG_TAG, "Act: Get guest userinfo");
         UserInfo currentUser = mMultiUserHelper.getCurrentForegroundUserInfo();

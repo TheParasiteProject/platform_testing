@@ -96,16 +96,19 @@ class BTUtils:
         self.discoverer.mbs.btPairDevice(target_address)
         logging.info('Allowing time for contacts to sync')
         time.sleep(constants.SYNC_WAIT_TIME)
-        self.press_allow_on_phone()
+        self.allow_permissions_after_pairing()
         paired_devices = self.discoverer.mbs.btGetPairedDevices()
         _, paired_addresses = self.get_info_from_devices(paired_devices)
         asserts.assert_true(
             target_address in paired_addresses,
             'Failed to pair the target device %s over Bluetooth.' %
             target_address)
+        logging.info("BT pairing completed.")
+
+    def allow_permissions_after_pairing(self):
+        self.press_allow_on_phone()
         time.sleep(constants.DEFAULT_WAIT_TIME_FIVE_SECS)
         self.handle_assistant_pop_up()
-        logging.info("BT pairing completed.")
 
     def unpair(self):
         # unpair Discoverer device from Target

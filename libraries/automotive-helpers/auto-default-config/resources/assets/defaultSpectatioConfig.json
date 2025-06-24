@@ -3047,6 +3047,29 @@
           }
         }
       }
+    ],
+    "SKIP_SETUP_WIZARD": [
+      {
+        "NAME": "Skip SUW setup",
+        "TYPE": "COMMAND",
+        "CONFIG": {
+          "TEXT": "am broadcast -a com.google.android.setupservices.GOOGLE_SERVICES_ACCEPTED com.google.android.gms"
+        }
+      },
+      {
+        "NAME": "Skip Initial Setup",
+        "TYPE": "COMMAND",
+        "CONFIG": {
+          "TEXT": "settings put secure android.car.ENABLE_INITIAL_NOTICE_SCREEN_TO_USER 0"
+        }
+      },
+      {
+        "NAME": "Go to Home",
+        "TYPE": "PRESS",
+        "CONFIG": {
+          "TEXT": "HOME"
+        }
+      }
     ]
   }
 }

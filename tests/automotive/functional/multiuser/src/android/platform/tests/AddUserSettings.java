@@ -63,8 +63,8 @@ public class AddUserSettings {
 
     @After
     public void goBackToHomeScreen() {
-        Log.i(LOG_TAG, "Act: Go back to settings");
-        mSettingHelper.get().goBackToSettingsScreen();
+        Log.i(LOG_TAG, "Act: Go back to Home Screen");
+        mSettingHelper.get().exit();
     }
 
     @Test
@@ -79,8 +79,10 @@ public class AddUserSettings {
         Log.i(LOG_TAG, "Act: Get current userinfo");
         UserInfo newUser = mMultiUserHelper.getCurrentForegroundUserInfo();
         // switch from new user to initial user
-        Log.i(LOG_TAG, "Act: Switch to new user");
-        mUsersHelper.get().switchUser(newUser.name, initialUser.name);
+
+        Log.i(LOG_TAG, "Act: Switch to Initial user");
+        mMultiUserHelper.switchToUserId(initialUser.id);
+
         // verify new user is seen in list of users
         Log.i(LOG_TAG, "Assert: Newly created user in user ist");
         assertTrue(mMultiUserHelper.getUserByName(newUser.name) != null);
