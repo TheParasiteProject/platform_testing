@@ -67,6 +67,7 @@ public class NonAdminUserSettings {
         SystemClock.sleep(WAIT_TIME);
         mMultiUserHelper.switchAndWaitForStable(
                 mTargetUserId, MultiUserConstants.WAIT_FOR_IDLE_TIME_MS);
+        mUsersHelper.get().skipSetupWizard();
         Log.i(LOG_TAG, "Act: Open Profile & Account settings");
         mSettingHelper.get().openSetting(SettingsConstants.PROFILE_ACCOUNT_SETTINGS);
         Log.i(LOG_TAG, "Assert: Not able to see Manage other profiles option");

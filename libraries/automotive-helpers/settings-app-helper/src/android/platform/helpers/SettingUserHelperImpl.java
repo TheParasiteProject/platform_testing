@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package android.platform.helpers;
 
 import android.app.Instrumentation;
@@ -26,12 +25,10 @@ import androidx.test.uiautomator.UiObject2;
 
 /** Implementation of {@link IAutoUserHelper} to support tests of account settings */
 public class SettingUserHelperImpl extends AbstractStandardAppHelper implements IAutoUserHelper {
-
     // constants
     private static final String TAG = "SettingUserHelperImpl";
     private static final int MAX_WAIT_COUNT = 4;
-    private static final int WAIT_SEC = 20000;
-
+    private static final int WAIT_MS = 40000;
     private ScrollUtility mScrollUtility;
     private ScrollActions mScrollAction;
     private BySelector mBackwardButtonSelector;
@@ -39,7 +36,6 @@ public class SettingUserHelperImpl extends AbstractStandardAppHelper implements 
     private BySelector mScrollableElementSelector;
     private ScrollDirection mScrollDirection;
     private UiObject2 mEnableOption;
-
     public SettingUserHelperImpl(Instrumentation instr) {
         super(instr);
         mScrollUtility = ScrollUtility.getInstance(getSpectatioUiUtil());
@@ -63,32 +59,32 @@ public class SettingUserHelperImpl extends AbstractStandardAppHelper implements 
                         getActionFromConfig(
                                 AutomotiveConfigConstants.USER_SETTINGS_SCROLL_WAIT_TIME)));
     }
-
     /** {@inheritDoc} */
     @Override
     public String getPackage() {
         return getPackageFromConfig(AutomotiveConfigConstants.USER_SETTINGS_PACKAGE);
     }
-
     /** {@inheritDoc} */
     @Override
     public String getLauncherName() {
         throw new UnsupportedOperationException("Operation not supported.");
     }
-
     /** {@inheritDoc} */
     @Override
     public void dismissInitialDialogs() {
         // Nothing to dismiss
     }
-
     /** {@inheritDoc} */
     // Add a new user
     @Override
     public void addUser() {
         clickbutton(AutomotiveConfigConstants.USER_SETTINGS_ADD_PROFILE);
         clickbutton(AutomotiveConfigConstants.USER_SETTINGS_OK);
-        getSpectatioUiUtil().waitNSeconds(WAIT_SEC);
+        skipSetupWizard();
+        getSpectatioUiUtil()
+                .waitForUiObject(
+                        getUiElementFromConfig(AutomotiveConfigConstants.HOME_PROFILE_ICON_BUTTON),
+                        WAIT_MS);
     }
     // opens permission page of a user
     @Override
@@ -99,7 +95,6 @@ public class SettingUserHelperImpl extends AbstractStandardAppHelper implements 
         getSpectatioUiUtil().validateUiObject(userObject, String.format("User %s", user));
         getSpectatioUiUtil().clickAndWait(userObject);
     }
-
     // delete an existing user
     @Override
     public void deleteUser(String user) {
@@ -113,7 +108,6 @@ public class SettingUserHelperImpl extends AbstractStandardAppHelper implements 
             getSpectatioUiUtil().wait5Seconds();
         }
     }
-
     // delete self User
     @Override
     public void deleteCurrentUser() {
@@ -121,7 +115,6 @@ public class SettingUserHelperImpl extends AbstractStandardAppHelper implements 
         clickbutton(AutomotiveConfigConstants.USER_SETTINGS_DELETE);
         getSpectatioUiUtil().wait5Seconds();
     }
-
     /** {@inheritDoc} */
     // check if a user is present in the list of existing users
     @Override
@@ -159,7 +152,6 @@ public class SettingUserHelperImpl extends AbstractStandardAppHelper implements 
         }
         return false;
     }
-
     // switch User from current user to given user
     @Override
     public void switchUser(String userFrom, String userTo) {
@@ -172,15 +164,15 @@ public class SettingUserHelperImpl extends AbstractStandardAppHelper implements 
         UiObject2 userToObject = getSpectatioUiUtil().findUiObject(userToSelector);
         getSpectatioUiUtil().validateUiObject(userToObject, String.format("User %s", userTo));
         getSpectatioUiUtil().clickAndWait(userToObject);
-        while ((getSpectatioUiUtil()
-                                .findUiObject(
-                                        getUiElementFromConfig(
-                                                AutomotiveConfigConstants.HOME_BOTTOM_CARD))
-                        == null)
-                && count < MAX_WAIT_COUNT) {
-            getSpectatioUiUtil().waitNSeconds(WAIT_SEC);
-            count++;
-        }
+        BySelector homeSelector =
+                getUiElementFromConfig(AutomotiveConfigConstants.HOME_BOTTOM_CARD);
+        getSpectatioUiUtil().waitForUiObject(homeSelector, WAIT_MS);
+        skipSetupWizard();
+    }
+
+    @Override
+    public void skipSetupWizard() {
+        executeWorkflow(AutomotiveConfigConstants.SKIP_SETUP_WIZARD);
     }
 
     @Override
@@ -188,17 +180,10 @@ public class SettingUserHelperImpl extends AbstractStandardAppHelper implements 
         int count = 0;
         clickbutton(AutomotiveConfigConstants.HOME_PROFILE_ICON_BUTTON);
         clickbutton(userNameConfigKey);
-        while ((getSpectatioUiUtil()
-                                .findUiObject(
-                                        getUiElementFromConfig(
-                                                AutomotiveConfigConstants.HOME_BOTTOM_CARD))
-                        == null)
-                && count < MAX_WAIT_COUNT) {
-            getSpectatioUiUtil().waitNSeconds(WAIT_SEC);
-            count++;
-        }
+        BySelector homeSelector =
+                getUiElementFromConfig(AutomotiveConfigConstants.HOME_BOTTOM_CARD);
+        getSpectatioUiUtil().waitForUiObject(homeSelector, WAIT_MS);
     }
-
     @Override
     public String getProfileNameFromSettings() {
         BySelector profileNameSelector =
@@ -207,7 +192,6 @@ public class SettingUserHelperImpl extends AbstractStandardAppHelper implements 
         String profileNameText = profileName.getText();
         return profileNameText;
     }
-
     @Override
     public void editUserName(String name) {
         clickbutton(AutomotiveConfigConstants.USER_SETTINGS_RENAME);
@@ -219,7 +203,6 @@ public class SettingUserHelperImpl extends AbstractStandardAppHelper implements 
         clickbutton(AutomotiveConfigConstants.USER_SETTINGS_OK);
         getSpectatioUiUtil().wait1Second();
     }
-
     // add User via quick settings
     @Override
     public void addUserQuickSettings(String userFrom) {
@@ -227,7 +210,6 @@ public class SettingUserHelperImpl extends AbstractStandardAppHelper implements 
         getSpectatioUiUtil().wait1Second();
         addUser();
     }
-
     // make an existing user admin
     @Override
     public void makeUserAdmin(String user) {
@@ -240,7 +222,6 @@ public class SettingUserHelperImpl extends AbstractStandardAppHelper implements 
             clickbutton(AutomotiveConfigConstants.USER_SETTINGS_MAKE_ADMIN_CONFIRM);
         }
     }
-
     // click an on-screen element if expected text for that element is present
     private void clickbutton(String buttonText) {
         BySelector buttonSelector = getUiElementFromConfig(buttonText);
@@ -258,7 +239,6 @@ public class SettingUserHelperImpl extends AbstractStandardAppHelper implements 
         getSpectatioUiUtil().clickAndWait(buttonObject);
         getSpectatioUiUtil().wait1Second();
     }
-
     @Override
     public boolean isNewUserAnAdmin(String user) {
         boolean isUserAdmin = true;
@@ -283,7 +263,6 @@ public class SettingUserHelperImpl extends AbstractStandardAppHelper implements 
         }
         return isUserAdmin;
     }
-
     // go to quick Settings for switching User
     private void goToQuickSettings() {
         clickbutton(AutomotiveConfigConstants.HOME_PROFILE_ICON_BUTTON);
@@ -300,7 +279,6 @@ public class SettingUserHelperImpl extends AbstractStandardAppHelper implements 
         }
         return !isVisibleAddProfile;
     }
-
     @Override
     public boolean isToggleOn(String buttonText) {
         BySelector mEnableOptionSelector = getUiElementFromConfig(buttonText);

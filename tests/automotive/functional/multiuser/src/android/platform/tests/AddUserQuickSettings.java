@@ -59,8 +59,8 @@ public class AddUserQuickSettings {
 
     @After
     public void goBackToHomeScreen() {
-        Log.i(LOG_TAG, "Act: Go back to setting");
-        mSettingHelper.get().goBackToSettingsScreen();
+        Log.i(LOG_TAG, "Act: Go back to Home Screen");
+        mSettingHelper.get().exit();
     }
 
     @Test
@@ -74,14 +74,17 @@ public class AddUserQuickSettings {
         Log.i(LOG_TAG, "Act: Switch to new user");
         UserInfo newUser = mMultiUserHelper.getCurrentForegroundUserInfo();
         // switch from new user to initial user
+
         Log.i(LOG_TAG, "Act: Switch back to initial user");
-        mUsersHelper.get().switchUser(newUser.name, initialUser.name);
+        mMultiUserHelper.switchToUserId(initialUser.id);
+
         // verify new user is seen in list of users
         Log.i(LOG_TAG, "Assert: New user is listed in users list");
         assertTrue(mMultiUserHelper.getUserByName(newUser.name) != null);
         // Verify new user is non-admin Profile
         Log.i(LOG_TAG, "Act: Open Profile & Accounts setting");
         mSettingHelper.get().openSetting(SettingsConstants.PROFILE_ACCOUNT_SETTINGS);
+
         Log.i(LOG_TAG, "Assert: New user does not have Admin Access");
         assertFalse("New user has Admin Access", mUsersHelper.get().isNewUserAnAdmin(newUser.name));
         // remove new user

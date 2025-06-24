@@ -499,6 +499,7 @@ public class AutomotiveConfigConstants {
             "USER_SETTINGS_MANAGE_OTHER_PROFILES";
     public static final String USER_SETTINGS_SCROLL_MARGIN = "USER_SETTINGS_SCROLL_MARGIN";
     public static final String USER_SETTINGS_SCROLL_WAIT_TIME = "USER_SETTINGS_SCROLL_WAIT_TIME";
+    public static final String SKIP_SETUP_WIZARD = "SKIP_SETUP_WIZARD";
 
     // Account Settings Constants
     public static final String ACCOUNT_SETTINGS_SCROLL_ACTION = "ACCOUNT_SETTINGS_SCROLL_ACTION";

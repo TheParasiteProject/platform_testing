@@ -68,6 +68,7 @@ public class DeleteGuestSelfNotAllowed {
         // switch to Guest and verify the user switch
         Log.i(LOG_TAG, "Act: Switch to guest user");
         mUsersHelper.get().switchUsingUserIcon(GUEST);
+        mUsersHelper.get().skipSetupWizard();
         Log.i(LOG_TAG, "Act: Get current userinfo");
         UserInfo currentUser = mMultiUserHelper.getCurrentForegroundUserInfo();
         Log.i(LOG_TAG, "Assert: Current userinfo matches Guest userinfo ");
