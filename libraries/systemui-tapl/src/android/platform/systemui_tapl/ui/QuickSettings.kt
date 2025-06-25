@@ -16,11 +16,12 @@
 package android.platform.systemui_tapl.ui
 
 import android.graphics.PointF
-import android.platform.helpers.CommonUtils
 import android.platform.systemui_tapl.utils.DeviceUtils
 import android.platform.systemui_tapl.utils.DeviceUtils.sysuiResSelector
 import android.platform.systemui_tapl.utils.SETTINGS_PACKAGE
 import android.platform.systemui_tapl.utils.SYSUI_PACKAGE
+import android.platform.test.scenario.tapl_common.TaplUiDevice
+import android.platform.test.scenario.tapl_common.TaplUiObject
 import android.platform.uiautomatorhelpers.BetterSwipe
 import android.platform.uiautomatorhelpers.DeviceHelpers.assertInvisible
 import android.platform.uiautomatorhelpers.DeviceHelpers.assertVisible
@@ -37,18 +38,19 @@ import java.util.regex.Pattern
 
 /** System UI test automation object representing quick settings in the notification shade. */
 class QuickSettings internal constructor(val displayId: Int = DEFAULT_DISPLAY) {
+    // TODO(279061302): Remove TaplUiObject after BetterSwipe has a scroll wrapper.
+    private val pager: TaplUiObject
+
     private val clazzNamePattern = Pattern.compile("android\\.widget\\.((Switch)|(Button))")
 
     private val qsContainer = sysuiResSelector("quick_settings_panel", displayId)
     private val footerSelector = sysuiResSelector("qs_footer_actions", displayId)
+    private val pagerUISelector = sysuiResSelector(PAGER_UI_OBJECT_RES_ID, displayId)
 
     init {
         qsContainer.assertVisible { "Quick settings didn't open" }
-        if (!CommonUtils.isDualShade()) {
-            footerSelector.assertVisible()
-        } else {
-            waitForObj(sysuiResSelector(SETTINGS_BUTTON_RES_ID, displayId))
-        }
+        footerSelector.assertVisible()
+        pager = TaplUiDevice.waitForObject(pagerUISelector, "QS pager")
     }
 
     /** Presses Power button to open the power panel. */
@@ -117,6 +119,10 @@ class QuickSettings internal constructor(val displayId: Int = DEFAULT_DISPLAY) {
     fun close() {
         swipeUp()
         qsContainer.assertInvisible()
+    }
+
+    fun swipeLeft() {
+        pager.fling(Direction.LEFT, 0.5f)
     }
 
     private fun swipeUp() {
