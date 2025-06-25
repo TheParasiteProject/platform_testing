@@ -19,13 +19,13 @@ package android.tools.flicker.subject.surfaceflinger
 import android.graphics.Region
 import android.tools.Cache
 import android.tools.CleanFlickerEnvironmentRuleWithDataStore
-import android.tools.ScenarioBuilder
 import android.tools.Timestamps
 import android.tools.flicker.datastore.DataStore
 import android.tools.flicker.legacy.LegacyFlickerTest
 import android.tools.flicker.subject.layers.LayersTraceSubject
 import android.tools.flicker.subject.region.RegionSubject
 import android.tools.io.Reader
+import android.tools.testutils.TEST_SCENARIO_KEY
 import android.tools.testutils.TestComponents
 import android.tools.testutils.assertFail
 import android.tools.testutils.assertThatErrorContainsDebugInfo
@@ -343,11 +343,10 @@ class LayersTraceSubjectTest {
             )
         val component =
             ComponentNameMatcher(FLICKER_APP_PACKAGE, "$FLICKER_APP_PACKAGE.ImeActivity")
-        val builder = ScenarioBuilder()
-        val flicker = LegacyFlickerTest(builder, { _ -> reader })
-        val scenario = flicker.initialize("test")
+        val flicker = LegacyFlickerTest(resultReaderProvider = { _ -> reader })
+        val scenario = flicker.initialize(TEST_SCENARIO_KEY)
         val result = Mockito.mock(IResultData::class.java)
-        DataStore.addResult(scenario, result)
+        DataStore.addResult(scenario.key, result)
         flicker.assertLayers {
             invoke("snapshotStartingWindowLayerCoversExactlyOnApp") {
                 val snapshotLayers =

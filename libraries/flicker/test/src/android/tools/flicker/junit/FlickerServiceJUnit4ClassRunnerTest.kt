@@ -18,6 +18,7 @@ package android.tools.flicker.junit
 
 import android.app.Instrumentation
 import android.os.Bundle
+import android.platform.test.annotations.FlakyTest
 import android.tools.Scenario
 import android.tools.Timestamps
 import android.tools.device.apphelpers.BrowserAppHelper
@@ -75,10 +76,10 @@ class FlickerServiceJUnit4ClassRunnerTest {
         runner.run(RunNotifier())
 
         Truth.assertWithMessage("Test rule start should run before test block")
-            .that(testRuleStartTs)
+            .that(testRuleStartTs ?: error("testRuleStartTs must not be null"))
             .isLessThan(testStateTs)
         Truth.assertWithMessage("Test rule end should run after test block")
-            .that(testStateTs)
+            .that(testStateTs ?: error("testStateTs must not be null"))
             .isLessThan(testRuleEndTs)
 
         Truth.assertWithMessage("Test rule ran the wrong number of times")
@@ -87,6 +88,7 @@ class FlickerServiceJUnit4ClassRunnerTest {
     }
 
     @Test
+    @FlakyTest(bugId = 417746314)
     fun skipsNonBlockingTestsIfRequested() {
         val arguments = Bundle()
         arguments.putString(Scenario.FAAS_BLOCKING, "true")

@@ -28,7 +28,6 @@ class ResultReaderParseTransactionsTest : BaseResultReaderTestParseTrace() {
     override val endTimeTrace = TestTraces.TransactionTrace.END_TIME
     override val validSliceTime = TestTraces.TransactionTrace.VALID_SLICE_TIME
     override val invalidSliceTime = TestTraces.TransactionTrace.INVALID_SLICE_TIME
-    override val invalidSizeMessage = "Transactions trace cannot be empty"
     override val expectedSlicedTraceSize = 2
 
     override fun doParse(reader: ResultReader) = reader.readTransactionsTrace()

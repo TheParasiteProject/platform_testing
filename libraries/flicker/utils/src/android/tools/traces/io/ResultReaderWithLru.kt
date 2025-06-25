@@ -22,7 +22,6 @@ import android.tools.io.Reader
 import android.tools.io.ResultArtifactDescriptor
 import android.tools.io.TraceType
 import android.tools.io.TransitionTimeRange
-import android.tools.traces.TraceConfigs
 import android.tools.traces.events.EventLog
 import android.tools.traces.surfaceflinger.LayersTrace
 import android.tools.traces.wm.WindowManagerTrace
@@ -35,12 +34,10 @@ import java.io.IOException
  * Helper class to read results from a flicker artifact using a LRU
  *
  * @param result to read from
- * @param traceConfig
  */
 open class ResultReaderWithLru(
     result: IResultData,
-    traceConfig: TraceConfigs,
-    private val reader: ResultReader = ResultReader(result, traceConfig),
+    private val reader: ResultReader = ResultReader(result),
 ) : Reader by reader {
     /** {@inheritDoc} */
     @Throws(IOException::class)
@@ -77,7 +74,7 @@ open class ResultReaderWithLru(
     /** {@inheritDoc} */
     override fun slice(startTimestamp: Timestamp, endTimestamp: Timestamp): ResultReaderWithLru {
         val slicedReader = reader.slice(startTimestamp, endTimestamp)
-        return ResultReaderWithLru(slicedReader.result, slicedReader.traceConfig, slicedReader)
+        return ResultReaderWithLru(slicedReader.result, slicedReader)
     }
 
     private fun <TraceType> LruCache<CacheKey, TraceType>.logAndReadTrace(

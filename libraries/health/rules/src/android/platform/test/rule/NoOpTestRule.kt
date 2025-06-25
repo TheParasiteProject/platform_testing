@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 The Android Open Source Project
+ * Copyright (C) 2025 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,14 +14,18 @@
  * limitations under the License.
  */
 
-package android.tools.flicker
+package android.platform.test.rule
 
-import android.tools.io.Reader
+import org.junit.rules.TestRule
+import org.junit.runner.Description
+import org.junit.runners.model.Statement
 
-interface TracesCollector {
-    fun start(testIdentifier: String)
-
-    fun stop(): Reader
-
-    fun cleanup()
+/**
+ * A test rule that does nothing, presumably to use in cases where a rule may or may not be
+ * necessary for a given test.
+ */
+class NoOpTestRule : TestRule {
+    override fun apply(base: Statement, description: Description): Statement {
+        return base
+    }
 }

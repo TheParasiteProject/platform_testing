@@ -18,21 +18,18 @@ package android.tools.flicker.legacy
 
 import android.annotation.SuppressLint
 import android.tools.CleanFlickerEnvironmentRuleWithDataStore
-import android.tools.ScenarioBuilder
 import android.tools.flicker.assertions.FlickerTest
 import android.tools.flicker.datastore.CachedResultReader
 import android.tools.flicker.datastore.DataStore
 import android.tools.io.TraceType
 import android.tools.newTestCachedResultWriter
-import android.tools.testutils.TEST_SCENARIO
+import android.tools.testutils.TEST_SCENARIO_KEY
 import android.tools.testutils.TestTraces
 import android.tools.testutils.assertExceptionMessage
 import android.tools.testutils.assertThrows
-import android.tools.traces.TRACE_CONFIG_REQUIRE_CHANGES
 import android.tools.traces.io.ResultReader
 import com.google.common.truth.Truth
 import java.io.File
-import kotlin.io.path.name
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -203,11 +200,9 @@ class LegacyFlickerTestTest {
     @Test
     fun doesNotExecuteEventLogWithoutEventLog() {
         val predicate: (FlickerTest) -> Unit = { it.assertEventLog { executionCount++ } }
-        val scenarioName = kotlin.io.path.createTempFile().name
-        val scenario = ScenarioBuilder().forClass(scenarioName).build()
-        newTestCachedResultWriter(scenario).write()
         val flickerWrapper = LegacyFlickerTest()
-        flickerWrapper.initialize(scenarioName)
+        val scenario = flickerWrapper.initialize(TEST_SCENARIO_KEY)
+        newTestCachedResultWriter(scenario.key).write()
         // Each assertion is executed independently and not cached, only Flicker as a Service
         // assertions are cached
         predicate.invoke(flickerWrapper)
@@ -233,22 +228,19 @@ class LegacyFlickerTestTest {
         file: File?,
         expectedExecutionCount: Int,
     ) {
-        val writer = newTestCachedResultWriter()
+        val flickerWrapper =
+            LegacyFlickerTest(
+                resultReaderProvider = {
+                    CachedResultReader(it, reader = ResultReader(DataStore.getResult(it)))
+                }
+            )
+        val scenario = flickerWrapper.initialize(TEST_SCENARIO_KEY)
+        val writer = newTestCachedResultWriter(scenario.key)
         if (file != null) {
             writer.addTraceResult(traceType, file)
         }
         writer.write()
-        val flickerWrapper =
-            LegacyFlickerTest(
-                resultReaderProvider = {
-                    CachedResultReader(
-                        it,
-                        TRACE_CONFIG_REQUIRE_CHANGES,
-                        reader = ResultReader(DataStore.getResult(it), TRACE_CONFIG_REQUIRE_CHANGES),
-                    )
-                }
-            )
-        flickerWrapper.initialize(TEST_SCENARIO.testClass)
+
         // Each assertion is executed independently and not cached, only Flicker as a Service
         // assertions are cached
         predicate.invoke(flickerWrapper)

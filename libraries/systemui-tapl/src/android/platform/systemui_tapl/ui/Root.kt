@@ -188,7 +188,7 @@ class Root private constructor(val displayId: Int = DEFAULT_DISPLAY) {
         return NotificationShade(displayId)
     }
 
-    private val footerSelector = sysuiResSelector("qs_footer_actions", displayId)
+    private val qsSelector = sysuiResSelector("quick_settings_panel", displayId)
 
     private val notificationSwipeX: Float
         get() = uiDevice.getDisplayWidth(displayId) / 4f
@@ -255,9 +255,9 @@ class Root private constructor(val displayId: Int = DEFAULT_DISPLAY) {
         val device = uiDevice
         device.openQuickSettings()
         // Quick Settings isn't always open when this is complete. Explicitly wait for the Quick
-        // Settings footer to make sure that the buttons are accessible when the bar is open and
+        // Settings panel to make sure that the buttons are accessible when the bar is open and
         // this call is complete.
-        footerSelector.assertVisible()
+        qsSelector.assertVisible()
         // Wait an extra bit for the animation to complete. If we return to early, future callers
         // that are trying to find the location of the footer will get incorrect coordinates
         device.waitForIdle(LONG_TIMEOUT)

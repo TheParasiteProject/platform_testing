@@ -28,7 +28,6 @@ import android.tools.parsers.events.EventLogParser
 import android.tools.testrules.DataStoreCleanupRule
 import android.tools.testutils.CleanFlickerEnvironmentRule
 import android.tools.testutils.ParsedTracesReader
-import android.tools.testutils.TEST_SCENARIO
 import android.tools.testutils.TestArtifact
 import android.tools.testutils.readAsset
 import android.tools.traces.monitors.ITransitionMonitor
@@ -116,8 +115,8 @@ fun createMockedFlicker(
     return mockedFlicker
 }
 
-internal fun newTestCachedResultWriter(scenario: Scenario = TEST_SCENARIO) =
+internal fun newTestCachedResultWriter(testIdentifier: String) =
     CachedResultWriter()
-        .forScenario(scenario)
+        .withName(testIdentifier)
         .withOutputDir(createTempDirectory().toFile())
         .setRunComplete()

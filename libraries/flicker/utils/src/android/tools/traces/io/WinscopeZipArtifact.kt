@@ -16,7 +16,6 @@
 
 package android.tools.traces.io
 
-import android.tools.Scenario
 import android.tools.io.BUFFER_SIZE
 import android.tools.io.FLICKER_IO_TAG
 import android.tools.io.ResultArtifactDescriptor
@@ -32,8 +31,8 @@ import java.io.IOException
 import java.util.zip.ZipEntry
 import java.util.zip.ZipInputStream
 
-class WinscopeZipArtifact(scenario: Scenario, artifactFile: File, counter: Int) :
-    FileArtifact(scenario, artifactFile, counter, TraceType.WINSCOPE_ZIP) {
+class WinscopeZipArtifact(testIdentifier: String, artifactFile: File, counter: Int) :
+    FileArtifact(testIdentifier, artifactFile, counter, TraceType.WINSCOPE_ZIP) {
 
     override fun hasTrace(descriptor: ResultArtifactDescriptor): Boolean {
         var found = false

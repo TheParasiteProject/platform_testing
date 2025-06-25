@@ -19,7 +19,6 @@ package android.tools.parsers.wm
 import android.tools.Cache
 import android.tools.testutils.CleanFlickerEnvironmentRule
 import android.tools.testutils.readAsset
-import android.tools.traces.SERVICE_TRACE_CONFIG
 import android.tools.traces.io.ResultReader
 import android.tools.traces.monitors.wm.WindowManagerTraceMonitor
 import android.tools.traces.parsers.wm.LegacyWindowManagerTraceParser
@@ -56,9 +55,7 @@ class LegacyWindowManagerTraceParserTest {
 
         val device = UiDevice.getInstance(InstrumentationRegistry.getInstrumentation())
         val reader =
-            WindowManagerTraceMonitor().withTracing(
-                resultReaderProvider = { ResultReader(it, SERVICE_TRACE_CONFIG) }
-            ) {
+            WindowManagerTraceMonitor().withTracing(resultReaderProvider = { ResultReader(it) }) {
                 device.pressHome()
                 device.pressRecentApps()
             }

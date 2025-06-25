@@ -135,7 +135,7 @@ fun getCurrentState(
                 }
             }
             .build()
-            .withTracing(resultReaderProvider = { ResultReader(it, SERVICE_TRACE_CONFIG) }) {}
+            .withTracing(resultReaderProvider = { ResultReader(it) }) {}
     val perfettoTrace = reader.readBytes(TraceType.PERFETTO) ?: ByteArray(0)
 
     reader.artifacts.forEach { it.deleteIfExists() }

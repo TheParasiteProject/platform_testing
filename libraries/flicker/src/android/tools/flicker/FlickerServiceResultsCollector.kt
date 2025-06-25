@@ -20,8 +20,6 @@ import android.app.Instrumentation
 import android.device.collectors.BaseMetricListener
 import android.device.collectors.DataRecord
 import android.tools.FLICKER_TAG
-import android.tools.Scenario
-import android.tools.ScenarioBuilder
 import android.tools.flicker.assertions.AssertionResult
 import android.tools.flicker.config.FlickerServiceConfig
 import android.tools.flicker.config.ScenarioId
@@ -67,8 +65,8 @@ constructor(
     @VisibleForTesting
     val detectedScenariosByTest = mutableMapOf<Description, Collection<ScenarioId>>()
 
-    private var testRunScenario: Scenario? = null
-    private var testScenario: Scenario? = null
+    private var testRunIdentifier: String = ""
+    private var testIdentifier: String = ""
 
     init {
         setInstrumentation(instrumentation)
@@ -79,15 +77,11 @@ constructor(
             tracesCollector.cleanup() // Cleanup any trace archives from previous runs
 
             Log.i(LOG_TAG, "onTestRunStart :: collectMetricsPerTest = $collectMetricsPerTest")
+            val key = description.toString()
             if (!collectMetricsPerTest) {
                 hasFailedTest = false
-                val scenario =
-                    ScenarioBuilder()
-                        .forClass(description.testClass.canonicalName)
-                        .withDescriptionOverride("")
-                        .build()
-                testRunScenario = scenario
-                tracesCollector.start(scenario)
+                testRunIdentifier = key
+                tracesCollector.start(key)
             }
         }
     }
@@ -97,15 +91,9 @@ constructor(
             Log.i(LOG_TAG, "onTestStart :: collectMetricsPerTest = $collectMetricsPerTest")
             if (collectMetricsPerTest) {
                 hasFailedTest = false
-                val scenario =
-                    ScenarioBuilder()
-                        .forClass(
-                            "${description.testClass.canonicalName}#${description.methodName}"
-                        )
-                        .withDescriptionOverride("")
-                        .build()
-                testScenario = scenario
-                tracesCollector.start(scenario)
+                val key = "${description.testClass?.canonicalName}#${description.methodName}"
+                testIdentifier = key
+                tracesCollector.start(key)
             }
             testSkipped = false
         }
@@ -151,12 +139,8 @@ constructor(
                 return@errorReportingBlock collectFlickerMetrics(testData, reader, description)
             }
 
-            reportFlickerServiceStatus(
-                testData,
-                results,
-                testScenario ?: error("Test scenario should not be null"),
-                testData,
-            )
+            require(testIdentifier.isNotEmpty()) { "testIdentifier should not be empty" }
+            reportFlickerServiceStatus(testData, results, testIdentifier, testData)
         }
     }
 
@@ -175,12 +159,8 @@ constructor(
                 return@errorReportingBlock collectFlickerMetrics(runData, reader)
             }
 
-            reportFlickerServiceStatus(
-                runData,
-                results,
-                testRunScenario ?: error("Test run scenario should not be null"),
-                runData,
-            )
+            require(testRunIdentifier.isNotEmpty()) { "testRunIdentifier should not be empty" }
+            reportFlickerServiceStatus(runData, results, testRunIdentifier, runData)
         }
     }
 
@@ -301,14 +281,14 @@ constructor(
     private fun reportFlickerServiceStatus(
         record: DataRecord,
         results: Collection<AssertionResult>?,
-        scenario: Scenario,
+        testIdentifier: String,
         dataRecord: DataRecord,
     ) {
         val status = if (executionErrors.isEmpty()) OK_STATUS_CODE else EXECUTION_ERROR_STATUS_CODE
         record.addStringMetric(FAAS_STATUS_KEY, status.toString())
 
         val maxLineLength = 120
-        val statusFile = createFlickerServiceStatusFile(scenario)
+        val statusFile = createFlickerServiceStatusFile(testIdentifier)
         val flickerResultString = buildString {
             appendLine(
                 "FAAS_STATUS: ${if (executionErrors.isEmpty()) "OK" else "EXECUTION_ERROR"}\n"
@@ -354,8 +334,8 @@ constructor(
         dataRecord.addStringMetric(FAAS_RESULTS_FILE_PATH_KEY, statusFile.absolutePath)
     }
 
-    private fun createFlickerServiceStatusFile(scenario: Scenario): File {
-        val fileName = "FAAS_RESULTS_$scenario"
+    private fun createFlickerServiceStatusFile(testIdentifier: String): File {
+        val fileName = "FAAS_RESULTS_$testIdentifier"
 
         val outputDir = getDefaultFlickerOutputDir()
         // Ensure output directory exists

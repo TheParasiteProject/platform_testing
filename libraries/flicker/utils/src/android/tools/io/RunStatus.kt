@@ -16,8 +16,6 @@
 
 package android.tools.io
 
-import android.tools.Scenario
-
 /** Possible status of a flicker ru */
 enum class RunStatus(val prefix: String, val isFailure: Boolean) {
     UNDEFINED("UNDEFINED", false),
@@ -27,11 +25,11 @@ enum class RunStatus(val prefix: String, val isFailure: Boolean) {
     PARSING_FAILURE("FAILED_PARSING", true),
     ASSERTION_FAILED("FAIL", true);
 
-    fun generateArchiveNameFor(scenario: Scenario, counter: Int, type: TraceType): String =
+    fun generateArchiveNameFor(testIdentifier: String, counter: Int, type: TraceType): String =
         buildString {
             append(prefix)
             append("__")
-            append(scenario)
+            append(testIdentifier)
 
             if (type != TraceType.WINSCOPE_ZIP) {
                 append("_")

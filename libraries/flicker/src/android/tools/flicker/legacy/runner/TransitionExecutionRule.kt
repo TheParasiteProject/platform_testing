@@ -16,7 +16,6 @@
 
 package android.tools.flicker.legacy.runner
 
-import android.tools.Scenario
 import android.tools.flicker.FlickerTag
 import android.tools.flicker.junit.Utils
 import android.tools.flicker.legacy.FlickerTestData
@@ -39,14 +38,14 @@ import org.junit.runners.model.Statement
  *
  * @param flicker test definition
  * @param resultWriter to write
- * @param scenario to run the transition
+ * @param testIdentifier to identify the transition
  * @param commands to run during the transition
  * @param wmHelper to stabilize the UI before/after transitions
  */
 class TransitionExecutionRule(
     private val flicker: FlickerTestData,
     private val resultWriter: ResultWriter,
-    private val scenario: Scenario,
+    private val testIdentifier: String,
     private val commands: List<FlickerTestData.() -> Any> = flicker.transitions,
     private val wmHelper: WindowManagerStateHelper = flicker.wmHelper,
 ) : TestRule {
@@ -57,7 +56,10 @@ class TransitionExecutionRule(
             override fun evaluate() {
                 withTracing("transition") {
                     try {
-                        Utils.notifyRunnerProgress(scenario, "Running transition $description")
+                        Utils.notifyRunnerProgress(
+                            testIdentifier,
+                            "Running transition $description",
+                        )
                         doRunBeforeTransition()
                         commands.forEach { it.invoke(flicker) }
                         base?.evaluate()
@@ -72,7 +74,7 @@ class TransitionExecutionRule(
     private fun doRunBeforeTransition() {
         Utils.doWaitForUiStabilize(wmHelper)
         withTracing("doRunBeforeTransition") {
-            Utils.notifyRunnerProgress(scenario, "Running doRunBeforeTransition")
+            Utils.notifyRunnerProgress(testIdentifier, "Running doRunBeforeTransition")
             Log.d(FLICKER_RUNNER_TAG, "doRunBeforeTransition")
             val now = now()
             resultWriter.setTransitionStartTime(now)
@@ -90,7 +92,7 @@ class TransitionExecutionRule(
     private fun doRunAfterTransition() {
         Utils.doWaitForUiStabilize(wmHelper)
         withTracing("doRunAfterTransition") {
-            Utils.notifyRunnerProgress(scenario, "Running doRunAfterTransition")
+            Utils.notifyRunnerProgress(testIdentifier, "Running doRunAfterTransition")
             Log.d(FLICKER_RUNNER_TAG, "doRunAfterTransition")
             val now = now()
             resultWriter.setTransitionEndTime(now)
@@ -119,7 +121,7 @@ class TransitionExecutionRule(
 
     private fun doCreateTag(tag: String) {
         withTracing("doRunAfterTransition") {
-            Utils.notifyRunnerProgress(scenario, "Creating tag $tag")
+            Utils.notifyRunnerProgress(testIdentifier, "Creating tag $tag")
             doValidateTag(tag)
             tags.add(tag)
 

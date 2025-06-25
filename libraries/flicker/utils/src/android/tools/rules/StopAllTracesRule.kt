@@ -16,7 +16,6 @@
 
 package android.tools.rules
 
-import android.tools.ScenarioBuilder
 import android.tools.traces.io.ResultWriter
 import android.tools.traces.monitors.PerfettoTraceMonitor
 import android.tools.traces.monitors.TraceMonitor
@@ -46,9 +45,7 @@ class StopAllTracesRule : TestRule {
             }
             val resultWriter =
                 ResultWriter()
-                    .forScenario(
-                        ScenarioBuilder().forClass(kotlin.io.path.createTempFile().name).build()
-                    )
+                    .withName(kotlin.io.path.createTempFile().name)
                     .withOutputDir(createTempDirectory().toFile())
                     .setRunComplete()
             stop(resultWriter)

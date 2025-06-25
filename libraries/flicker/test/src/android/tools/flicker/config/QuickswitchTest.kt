@@ -20,7 +20,6 @@ import android.app.Instrumentation
 import android.platform.test.annotations.RequiresDevice
 import android.platform.test.rule.NavigationModeRule
 import android.tools.NavBar
-import android.tools.ScenarioBuilder
 import android.tools.device.apphelpers.BrowserAppHelper
 import android.tools.device.apphelpers.CameraAppHelper
 import android.tools.flicker.Utils
@@ -55,9 +54,8 @@ class QuickswitchTest {
         browser.launchViaIntent(wmHelper)
         camera.launchViaIntent(wmHelper)
 
-        val scenario = ScenarioBuilder().forClass("QuickSwitch").build()
         val reader =
-            Utils.captureTrace(scenario, getDefaultFlickerOutputDir()) {
+            Utils.captureTrace("QuickSwitch", getDefaultFlickerOutputDir()) {
                 tapl.launchedAppState.quickSwitchToPreviousApp()
 
                 wmHelper

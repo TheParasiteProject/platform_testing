@@ -19,9 +19,6 @@ package android.tools.monitors.wm
 import android.tools.io.TraceType
 import android.tools.monitors.TraceMonitorTest
 import android.tools.testutils.CleanFlickerEnvironmentRule
-import android.tools.testutils.newTestResultWriter
-import android.tools.traces.TRACE_CONFIG_REQUIRE_CHANGES
-import android.tools.traces.io.ResultReader
 import android.tools.traces.monitors.wm.WindowManagerTraceMonitor
 import com.android.server.wm.nano.WindowManagerTraceFileProto
 import com.google.common.truth.Truth
@@ -29,7 +26,6 @@ import org.junit.Assume
 import org.junit.Before
 import org.junit.ClassRule
 import org.junit.FixMethodOrder
-import org.junit.Test
 import org.junit.runners.MethodSorters
 
 /** Contains [WindowManagerTraceMonitor] tests. */

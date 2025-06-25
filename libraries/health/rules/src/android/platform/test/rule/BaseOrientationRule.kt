@@ -59,17 +59,23 @@ val UiDevice.orientation: Orientation
             PORTRAIT
         }
 
-val UiDevice.naturalOrientation: Orientation
-    get() {
-        if (isNaturalOrientation) {
-            return stableOrientation
-        }
-        return when (stableOrientation) {
-            LANDSCAPE -> PORTRAIT
-            PORTRAIT -> LANDSCAPE
-            else -> throw RuntimeException("Unexpected orientation: $stableOrientation.")
-        }
+/**
+ * Returns the device's natural orientation.
+ *
+ * @param currentOrientation An optional, pre-fetched orientation of the device.
+ * @return The natural [Orientation] of the device (e.g., PORTRAIT for a phone).
+ */
+fun UiDevice.naturalOrientation(currentOrientation: Orientation? = null): Orientation {
+    val presentOrientation = currentOrientation ?: stableOrientation
+    if (isNaturalOrientation) {
+        return presentOrientation
     }
+    return when (presentOrientation) {
+        LANDSCAPE -> PORTRAIT
+        PORTRAIT -> LANDSCAPE
+        else -> throw RuntimeException("Unexpected orientation: $presentOrientation.")
+    }
+}
 
 // This makes sure that the orientation stabilised before returning it.
 private val UiDevice.stableOrientation: Orientation
@@ -113,10 +119,16 @@ object RotationUtils {
         orientation: Orientation,
         timeoutDuration: Duration = Duration.ofSeconds(10),
     ) {
-        val expectedOrientation =
-            if (orientation == NATURAL) device.naturalOrientation else orientation
         setEnableLauncherRotation(true)
-        if (device.stableOrientation == expectedOrientation) {
+        val presentOrientation = device.stableOrientation
+        val expectedOrientation =
+            if (orientation == NATURAL) {
+                device.naturalOrientation(presentOrientation)
+            } else {
+                orientation
+            }
+
+        if (presentOrientation == expectedOrientation) {
             return
         }
 

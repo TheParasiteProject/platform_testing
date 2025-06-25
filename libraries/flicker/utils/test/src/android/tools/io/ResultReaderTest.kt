@@ -22,7 +22,6 @@ import android.tools.testutils.TestTraces
 import android.tools.testutils.assertThrows
 import android.tools.testutils.newTestResultWriter
 import android.tools.testutils.outputFileName
-import android.tools.traces.TRACE_CONFIG_REQUIRE_CHANGES
 import android.tools.traces.deleteIfExists
 import android.tools.traces.io.ResultData
 import android.tools.traces.io.ResultReader
@@ -48,7 +47,7 @@ class ResultReaderTest {
     fun failFileNotFound() {
         val data = newTestResultWriter().write()
         data.artifacts.forEach { it.deleteIfExists() }
-        val reader = ResultReader(data, TRACE_CONFIG_REQUIRE_CHANGES)
+        val reader = ResultReader(data)
         assertThrows<FileNotFoundException> {
             reader.readTransitionsTrace() ?: error("Should have failed")
         }
@@ -62,7 +61,7 @@ class ResultReaderTest {
                 TransitionTimeRange(Timestamps.empty(), Timestamps.empty()),
                 null,
             )
-        val reader = ResultReader(result, TRACE_CONFIG_REQUIRE_CHANGES)
+        val reader = ResultReader(result)
         Truth.assertThat(reader.countFiles()).isEqualTo(0)
         Truth.assertThat(reader.hasTraceFile(TraceType.WM)).isFalse()
         Truth.assertThat(reader.runStatus).isEqualTo(RunStatus.UNDEFINED)
@@ -85,7 +84,7 @@ class ResultReaderTest {
         val combinedArtifacts = result1.artifacts + result2.artifacts
         val combinedResult = ResultData(combinedArtifacts, result1.transitionTimeRange, null)
 
-        val reader = ResultReader(combinedResult, TRACE_CONFIG_REQUIRE_CHANGES)
+        val reader = ResultReader(combinedResult)
 
         Truth.assertThat(reader.countFiles()).isEqualTo(2)
         Truth.assertThat(reader.hasTraceFile(TraceType.EVENT_LOG)).isTrue()
@@ -107,7 +106,7 @@ class ResultReaderTest {
         val combinedArtifacts = result1.artifacts + result2.artifacts
         val combinedResult = ResultData(combinedArtifacts, result1.transitionTimeRange, null)
 
-        val reader = ResultReader(combinedResult, TRACE_CONFIG_REQUIRE_CHANGES)
+        val reader = ResultReader(combinedResult)
         reader.result.updateStatus(RunStatus.ASSERTION_SUCCESS)
 
         Truth.assertThat(reader.runStatus).isEqualTo(RunStatus.ASSERTION_SUCCESS)
@@ -118,7 +117,7 @@ class ResultReaderTest {
     @Test
     fun slicedResultKeepsStatusInSync() {
         val data = newTestResultWriter().setRunComplete().write()
-        val reader = ResultReader(data, TRACE_CONFIG_REQUIRE_CHANGES)
+        val reader = ResultReader(data)
         val slicedReader = reader.slice(Timestamps.min(), Timestamps.max())
         reader.result.updateStatus(RunStatus.ASSERTION_SUCCESS)
 

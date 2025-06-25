@@ -64,7 +64,7 @@ object TestUtils {
 
         val runner =
             TransitionRunner(
-                TEST_SCENARIO,
+                TEST_SCENARIO.key,
                 setupRules = emptyList(),
                 resultWriter = CachedResultWriter(),
             )

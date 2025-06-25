@@ -419,11 +419,17 @@ internal constructor(
      * performance on slower test devices.
      */
     fun replyWithText(text: String) {
-        // This sometimes has issues where it can't find the reply button due to a
-        // StaleObjectException, although the button is there. So we attempt each interaciton
-        // three times, separately.
-        retryIfStale(description = "find reply button", times = 3) {
-            notification.waitForObj(REPLY_BUTTON_SELECTOR, SHORT_WAIT).click()
+        // Skip finding reply button if the reply area is showing. This is typically for unlock
+        // reply cases.
+        // TODO(b/427434352): Clean up the workaround code in this method.
+        var sendSelector = notification.waitForNullableObj(REMOTE_INPUT_SEND_SELECTOR, SHORT_WAIT)
+        if (sendSelector == null) {
+            // This sometimes has issues where it can't find the reply button due to a
+            // StaleObjectException (b/303171388), although the button is there. So we attempt each
+            // interaction three times, separately.
+            retryIfStale(description = "find reply button", times = 3) {
+                notification.waitForObj(REPLY_BUTTON_SELECTOR, SHORT_WAIT).click()
+            }
         }
 
         var remoteInputSelector: UiObject2? = null
@@ -440,7 +446,6 @@ internal constructor(
         }
         remoteInputSelector?.text = text
 
-        var sendSelector: UiObject2? = null
         retryIfStale(description = "find send selector input", times = 3) {
             sendSelector = notification.waitForObj(REMOTE_INPUT_SEND_SELECTOR, SHORT_WAIT)
         }

@@ -17,7 +17,7 @@
 package android.tools.flicker.legacy.runner
 
 import android.tools.testutils.CleanFlickerEnvironmentRule
-import android.tools.testutils.TEST_SCENARIO
+import android.tools.testutils.TEST_SCENARIO_KEY
 import android.tools.testutils.assertThrows
 import android.tools.traces.io.ResultWriter
 import android.tools.traces.monitors.ITransitionMonitor
@@ -116,7 +116,7 @@ class TraceMonitorRuleTest {
         private fun createRule(traceMonitors: List<ITransitionMonitor>): TraceMonitorRule {
             return TraceMonitorRule(
                 traceMonitors,
-                TEST_SCENARIO,
+                TEST_SCENARIO_KEY,
                 WindowManagerStateHelper(),
                 ResultWriter(),
             )

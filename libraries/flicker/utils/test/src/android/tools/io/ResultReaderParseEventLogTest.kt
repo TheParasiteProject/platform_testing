@@ -32,7 +32,6 @@ class ResultReaderParseEventLogTest : BaseResultReaderTestParseTrace() {
     override val validSliceTime = TestTraces.EventLog.SLICE_TIME
     override val invalidSliceTime = startTimeTrace
     override val expectedSlicedTraceSize = 125
-    override val invalidSizeMessage: String = "'to' needs to be greater than 'from'"
 
     override fun doParse(reader: ResultReader) = reader.readEventLogTrace()
 

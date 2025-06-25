@@ -16,28 +16,26 @@
 
 package android.tools.flicker.datastore
 
-import android.tools.Scenario
 import android.tools.flicker.assertions.BaseAssertionRunner
 import android.tools.io.Reader
 import android.tools.io.RunStatus
-import android.tools.traces.TRACE_CONFIG_REQUIRE_CHANGES
 import android.tools.withTracing
 
 /**
  * Helper class to run an assertion on a flicker artifact from a [DataStore]
  *
- * @param scenario flicker scenario existing in the [DataStore]
+ * @param testIdentifier flicker scenario existing in the [DataStore]
  * @param resultReader helper class to read the flicker artifact
  */
 class CachedAssertionRunner(
-    private val scenario: Scenario,
-    resultReader: Reader = CachedResultReader(scenario, TRACE_CONFIG_REQUIRE_CHANGES),
+    private val testIdentifier: String,
+    resultReader: Reader = CachedResultReader(testIdentifier),
 ) : BaseAssertionRunner(resultReader) {
     override fun doUpdateStatus(newStatus: RunStatus) {
         return withTracing("${this::class.simpleName}#doUpdateStatus") {
-            val result = DataStore.getResult(scenario)
+            val result = DataStore.getResult(testIdentifier)
             result.updateStatus(newStatus)
-            DataStore.replaceResult(scenario, result)
+            DataStore.replaceResult(testIdentifier, result)
         }
     }
 }

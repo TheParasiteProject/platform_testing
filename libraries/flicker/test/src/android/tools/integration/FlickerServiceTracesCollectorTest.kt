@@ -59,7 +59,7 @@ class FlickerServiceTracesCollectorTest {
     fun canCollectTraces() {
         val wmHelper = WindowManagerStateHelper(instrumentation)
         val collector = FlickerServiceTracesCollector()
-        collector.start(TEST_SCENARIO)
+        collector.start(TEST_SCENARIO.key)
         testApp.launchViaIntent(wmHelper)
         testApp.exit(wmHelper)
         val reader = collector.stop()
@@ -72,7 +72,7 @@ class FlickerServiceTracesCollectorTest {
     fun reportsTraceFile() {
         val wmHelper = WindowManagerStateHelper(instrumentation)
         val collector = FlickerServiceTracesCollector()
-        collector.start(TEST_SCENARIO)
+        collector.start(TEST_SCENARIO.key)
         testApp.launchViaIntent(wmHelper)
         testApp.exit(wmHelper)
         val reader = collector.stop()
@@ -96,7 +96,7 @@ class FlickerServiceTracesCollectorTest {
 
         val wmHelper = WindowManagerStateHelper(instrumentation)
         val collector = FlickerServiceTracesCollector()
-        collector.start(TEST_SCENARIO)
+        collector.start(TEST_SCENARIO.key)
         testApp.launchViaIntent(wmHelper)
         testApp.exit(wmHelper)
         val reader = collector.stop()
@@ -113,7 +113,7 @@ class FlickerServiceTracesCollectorTest {
     @Test
     fun supportHavingNoTransitions() {
         val collector = FlickerServiceTracesCollector()
-        collector.start(TEST_SCENARIO)
+        collector.start(TEST_SCENARIO.key)
         val reader = collector.stop()
         val transitionTrace = reader.readTransitionsTrace() ?: error("Expected a transition trace")
         Truth.assertThat(transitionTrace.entries).isEmpty()

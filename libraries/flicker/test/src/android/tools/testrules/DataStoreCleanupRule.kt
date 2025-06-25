@@ -19,6 +19,7 @@ package android.tools.testrules
 import android.annotation.SuppressLint
 import android.tools.flicker.datastore.DataStore
 import android.tools.testutils.TEST_SCENARIO
+import android.tools.testutils.TEST_SCENARIO_KEY
 import org.junit.rules.TestWatcher
 import org.junit.runner.Description
 
@@ -26,24 +27,26 @@ import org.junit.runner.Description
 class DataStoreCleanupRule : TestWatcher() {
     override fun starting(description: Description?) {
         super.starting(description)
-        resetDataStore()
+        resetDataStore(TEST_SCENARIO.key)
+        resetDataStore(TEST_SCENARIO_KEY)
     }
 
     override fun finished(description: Description?) {
         super.finished(description)
-        resetDataStore()
+        resetDataStore(TEST_SCENARIO.key)
+        resetDataStore(TEST_SCENARIO_KEY)
     }
 
-    private fun resetDataStore() {
+    private fun resetDataStore(key: String) {
         val backup = DataStore.backup()
         DataStore.clear()
 
-        if (backup.cachedResults.containsKey(TEST_SCENARIO)) {
-            backup.cachedResults.remove(TEST_SCENARIO)
+        if (backup.cachedResults.containsKey(key)) {
+            backup.cachedResults.remove(key)
         }
 
-        if (backup.cachedFlickerServiceAssertions.containsKey(TEST_SCENARIO)) {
-            backup.cachedFlickerServiceAssertions.remove(TEST_SCENARIO)
+        if (backup.cachedFlickerServiceAssertions.containsKey(key)) {
+            backup.cachedFlickerServiceAssertions.remove(key)
         }
 
         DataStore.restore(backup)

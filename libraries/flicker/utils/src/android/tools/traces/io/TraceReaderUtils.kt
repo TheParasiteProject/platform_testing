@@ -17,19 +17,17 @@
 package android.tools.traces.io
 
 import android.content.Context
-import android.tools.Scenario
 import android.tools.Timestamps
 import android.tools.io.Reader
 import android.tools.io.TraceType
 import android.tools.io.TransitionTimeRange
-import android.tools.traces.TRACE_CONFIG_REQUIRE_CHANGES
 import androidx.test.platform.app.InstrumentationRegistry
 import java.io.File
 import java.io.IOException
 
 object TraceReaderUtils {
     fun getTraceReaderFromAsset(
-        scenario: Scenario,
+        testIdentifier: String,
         path: String,
         type: TraceType = TraceType.WINSCOPE_ZIP,
     ): Reader {
@@ -37,9 +35,9 @@ object TraceReaderUtils {
 
         val artifact =
             if (type == TraceType.WINSCOPE_ZIP) {
-                WinscopeZipArtifact(scenario, file, 0)
+                WinscopeZipArtifact(testIdentifier, file, 0)
             } else {
-                SingleTraceFileArtifact(scenario, file, 0, type)
+                SingleTraceFileArtifact(testIdentifier, file, 0, type)
             }
 
         val result =
@@ -52,7 +50,7 @@ object TraceReaderUtils {
                 null,
             )
 
-        return ResultReaderWithLru(result, TRACE_CONFIG_REQUIRE_CHANGES)
+        return ResultReaderWithLru(result)
     }
 
     @Throws(IOException::class)

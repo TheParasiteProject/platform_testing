@@ -19,8 +19,6 @@ package android.tools.flicker.junit
 import android.app.Instrumentation
 import android.device.collectors.util.SendToInstrumentation
 import android.os.Bundle
-import android.tools.Scenario
-import android.tools.ScenarioBuilder
 import android.tools.flicker.FlickerService
 import android.tools.flicker.FlickerServiceResultsCollector.Companion.FLICKER_ASSERTIONS_COUNT_KEY
 import android.tools.flicker.ScenarioInstance
@@ -62,8 +60,7 @@ class FlickerServiceDecorator(
 ) : AbstractFlickerRunnerDecorator(testClass, inner, instrumentation) {
     private val flickerService by lazy { flickerService ?: FlickerService(getFlickerConfig()) }
 
-    private val testClassName =
-        ScenarioBuilder().forClass("${testClass.name}${paramString ?: ""}").build()
+    private val testClassName = "${testClass.name}${paramString ?: ""}"
 
     override fun getChildDescription(method: FrameworkMethod): Description {
         return if (isMethodHandledByDecorator(method)) {
@@ -366,7 +363,7 @@ class FlickerServiceDecorator(
 
     private fun computeFlickerServiceTests(
         reader: Reader,
-        testScenario: Scenario,
+        testIdentifier: String,
         method: FrameworkMethod,
     ): Collection<InjectedTestCase> {
         val expectedScenarios =
@@ -378,7 +375,7 @@ class FlickerServiceDecorator(
                 .toSet()
 
         return getFaasTestCases(
-            testScenario,
+            testIdentifier,
             expectedScenarios,
             paramString ?: "",
             reader,
@@ -391,11 +388,11 @@ class FlickerServiceDecorator(
 
     companion object {
         private fun getDetectedScenarios(
-            testScenario: Scenario,
+            testIdentifier: String,
             reader: Reader,
             flickerService: FlickerService,
         ): Collection<ScenarioId> {
-            val groupedAssertions = getGroupedAssertions(testScenario, reader, flickerService)
+            val groupedAssertions = getGroupedAssertions(testIdentifier, reader, flickerService)
             return groupedAssertions.keys.map { it.type }.distinct()
         }
 
@@ -404,21 +401,21 @@ class FlickerServiceDecorator(
         }
 
         private fun getGroupedAssertions(
-            testScenario: Scenario,
+            testIdentifier: String,
             reader: Reader,
             flickerService: FlickerService,
         ): Map<ScenarioInstance, Collection<ScenarioAssertion>> {
-            if (!DataStore.containsFlickerServiceResult(testScenario)) {
+            if (!DataStore.containsFlickerServiceResult(testIdentifier)) {
                 val detectedScenarios = flickerService.detectScenarios(reader)
                 val groupedAssertions = detectedScenarios.associateWith { it.generateAssertions() }
-                DataStore.addFlickerServiceAssertions(testScenario, groupedAssertions)
+                DataStore.addFlickerServiceAssertions(testIdentifier, groupedAssertions)
             }
 
-            return DataStore.getFlickerServiceAssertions(testScenario)
+            return DataStore.getFlickerServiceAssertions(testIdentifier)
         }
 
         internal fun getFaasTestCases(
-            testScenario: Scenario,
+            testIdentifier: String,
             expectedScenarios: Set<ScenarioId>,
             paramString: String,
             reader: Reader,
@@ -427,7 +424,7 @@ class FlickerServiceDecorator(
             caller: IFlickerJUnitDecorator,
             skipNonBlocking: Boolean,
         ): Collection<InjectedTestCase> {
-            val groupedAssertions = getGroupedAssertions(testScenario, reader, flickerService)
+            val groupedAssertions = getGroupedAssertions(testIdentifier, reader, flickerService)
             val organizedScenarioInstances = groupedAssertions.keys.groupBy { it.type }
 
             val faasTestCases = mutableListOf<FlickerServiceCachedTestCase>()
@@ -472,7 +469,7 @@ class FlickerServiceDecorator(
                     metricBundle.putString(FLICKER_ASSERTIONS_COUNT_KEY, "${faasTestCases.size}")
                     SendToInstrumentation.sendBundle(instrumentation, metricBundle)
 
-                    Truth.assertThat(getDetectedScenarios(testScenario, reader, flickerService))
+                    Truth.assertThat(getDetectedScenarios(testIdentifier, reader, flickerService))
                         .containsAtLeastElementsIn(expectedScenarios)
                 }
 
