@@ -27,7 +27,6 @@ import android.tools.testutils.TEST_SCENARIO_KEY
 import android.tools.testutils.TestTraces
 import android.tools.testutils.assertExceptionMessage
 import android.tools.testutils.assertThrows
-import android.tools.traces.TRACE_CONFIG_REQUIRE_CHANGES
 import android.tools.traces.io.ResultReader
 import com.google.common.truth.Truth
 import java.io.File
@@ -232,11 +231,7 @@ class LegacyFlickerTestTest {
         val flickerWrapper =
             LegacyFlickerTest(
                 resultReaderProvider = {
-                    CachedResultReader(
-                        it,
-                        TRACE_CONFIG_REQUIRE_CHANGES,
-                        reader = ResultReader(DataStore.getResult(it), TRACE_CONFIG_REQUIRE_CHANGES),
-                    )
+                    CachedResultReader(it, reader = ResultReader(DataStore.getResult(it)))
                 }
             )
         val scenario = flickerWrapper.initialize(TEST_SCENARIO_KEY)

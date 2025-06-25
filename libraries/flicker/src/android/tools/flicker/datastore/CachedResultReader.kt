@@ -17,15 +17,12 @@
 package android.tools.flicker.datastore
 
 import android.tools.io.Reader
-import android.tools.traces.TraceConfigs
 import android.tools.traces.io.ResultReaderWithLru
 
 /** Helper class to read results of a [testIdentifier] from the [DataStore] */
 class CachedResultReader(
     private val testIdentifier: String,
-    traceConfig: TraceConfigs,
-    private val reader: Reader =
-        ResultReaderWithLru(DataStore.getResult(testIdentifier), traceConfig),
+    private val reader: Reader = ResultReaderWithLru(DataStore.getResult(testIdentifier)),
 ) : Reader by reader {
     override fun toString(): String = "$testIdentifier ($reader)"
 }

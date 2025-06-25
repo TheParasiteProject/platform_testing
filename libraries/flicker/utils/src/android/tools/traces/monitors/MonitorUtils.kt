@@ -25,8 +25,6 @@ package android.tools.traces.monitors
 import android.tools.Tag
 import android.tools.io.Reader
 import android.tools.io.TraceType
-import android.tools.traces.SERVICE_TRACE_CONFIG
-import android.tools.traces.TRACE_CONFIG_REQUIRE_CHANGES
 import android.tools.traces.io.IResultData
 import android.tools.traces.io.ResultReader
 import android.tools.traces.io.ResultReaderWithLru
@@ -43,8 +41,7 @@ import java.io.File
 import perfetto.protos.PerfettoConfig.SurfaceFlingerLayersConfig
 import perfetto.protos.PerfettoConfig.WindowManagerConfig
 
-private fun buildResultReader(resultData: IResultData): ResultReader =
-    ResultReader(resultData, TRACE_CONFIG_REQUIRE_CHANGES)
+private fun buildResultReader(resultData: IResultData): ResultReader = ResultReader(resultData)
 
 /**
  * Reads the Perfetto file form the result reader and keep (or not) a copy
@@ -175,7 +172,7 @@ fun withTracing(
     } finally {
         traceMonitors.forEach { it.stop(writer) }
     }
-    val reader = ResultReaderWithLru(writer.write(), SERVICE_TRACE_CONFIG)
+    val reader = ResultReaderWithLru(writer.write())
 
     return reader
 }

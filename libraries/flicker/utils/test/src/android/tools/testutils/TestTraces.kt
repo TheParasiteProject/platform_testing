@@ -17,8 +17,6 @@
 package android.tools.testutils
 
 import android.tools.Timestamps
-import android.tools.traces.TraceConfig
-import android.tools.traces.TraceConfigs
 
 object TestTraces {
     object LayerTrace {
@@ -133,16 +131,4 @@ object TestTraces {
 
     val TIME_5 = Timestamps.from(5, 5, 5)
     val TIME_10 = Timestamps.from(10, 10, 10)
-
-    val TEST_TRACE_CONFIG =
-        TraceConfigs(
-            wmTrace =
-                TraceConfig(required = false, allowNoChange = false, usingExistingTraces = false),
-            layersTrace =
-                TraceConfig(required = false, allowNoChange = false, usingExistingTraces = false),
-            transitionsTrace =
-                TraceConfig(required = false, allowNoChange = false, usingExistingTraces = false),
-            transactionsTrace =
-                TraceConfig(required = false, allowNoChange = false, usingExistingTraces = false),
-        )
 }

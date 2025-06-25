@@ -20,7 +20,6 @@ import android.tools.FLICKER_TAG
 import android.tools.flicker.Utils.ALL_MONITORS
 import android.tools.io.Reader
 import android.tools.io.TraceType
-import android.tools.traces.SERVICE_TRACE_CONFIG
 import android.tools.traces.io.ResultReaderWithLru
 import android.tools.traces.io.ResultWriter
 import android.util.Log
@@ -58,7 +57,7 @@ constructor(private val outputDir: File = createTempDirectory().toFile()) : Trac
             this.testIdentifier = ""
             val result = writer.write()
 
-            ResultReaderWithLru(result, SERVICE_TRACE_CONFIG)
+            ResultReaderWithLru(result)
         }
     }
 

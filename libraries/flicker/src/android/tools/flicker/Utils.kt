@@ -17,7 +17,6 @@
 package android.tools.flicker
 
 import android.tools.io.Reader
-import android.tools.traces.TRACE_CONFIG_REQUIRE_CHANGES
 import android.tools.traces.io.ResultReaderWithLru
 import android.tools.traces.io.ResultWriter
 import android.tools.traces.monitors.PerfettoTraceMonitor
@@ -83,7 +82,7 @@ object Utils {
         }()
         val result = writer.write()
 
-        return ResultReaderWithLru(result, TRACE_CONFIG_REQUIRE_CHANGES)
+        return ResultReaderWithLru(result)
     }
 }
 

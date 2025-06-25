@@ -19,10 +19,6 @@ package android.tools.io
 import android.tools.Timestamp
 import android.tools.testutils.TestTraces
 import android.tools.traces.io.ResultReader
-import org.junit.Assume.assumeTrue
-import org.junit.Before
-import org.junit.Ignore
-import org.junit.Test
 
 /** Tests for [ResultReader] parsing [TraceType.PROTOLOG] */
 class ResultReaderParseProtoLogTest : BaseResultReaderTestParseTrace() {
@@ -32,14 +28,9 @@ class ResultReaderParseProtoLogTest : BaseResultReaderTestParseTrace() {
     override val endTimeTrace = TestTraces.ProtoLogTrace.END_TIME
     override val validSliceTime = TestTraces.ProtoLogTrace.VALID_SLICE_TIME
     override val invalidSliceTime = TestTraces.ProtoLogTrace.INVALID_SLICE_TIME
-    override val invalidSizeMessage = "ProtoLog trace cannot be empty"
     override val expectedSlicedTraceSize = 1
 
     override fun doParse(reader: ResultReader) = reader.readProtoLogTrace()
 
     override fun getTime(traceTime: Timestamp) = traceTime.elapsedNanos
-
-    @Test
-    @Ignore("No restriction on protolog trace size")
-    override fun readTraceAndSliceTraceByTimestampAndFailInvalidSize() {}
 }

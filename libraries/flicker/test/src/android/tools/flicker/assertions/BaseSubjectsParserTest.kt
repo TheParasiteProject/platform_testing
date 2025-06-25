@@ -30,7 +30,6 @@ import android.tools.io.TraceType
 import android.tools.testutils.CleanFlickerEnvironmentRule
 import android.tools.testutils.newTestResultWriter
 import android.tools.testutils.outputFileName
-import android.tools.traces.TRACE_CONFIG_REQUIRE_CHANGES
 import android.tools.traces.deleteIfExists
 import android.tools.traces.io.ResultReader
 import android.tools.traces.io.ResultWriter
@@ -67,7 +66,7 @@ abstract class BaseSubjectsParserTest {
     fun parseTraceSubject() {
         val writer = writeTrace(newTestResultWriter())
         val result = writer.write()
-        val reader = ResultReader(result, TRACE_CONFIG_REQUIRE_CHANGES)
+        val reader = ResultReader(result)
         val parser = TestSubjectsParser(reader)
         val subject = doParseTrace(parser) ?: error("$subjectName not built")
 
@@ -94,7 +93,7 @@ abstract class BaseSubjectsParserTest {
     fun readTraceNullWhenDoesNotExist() {
         val writer = newTestResultWriter()
         val result = writer.write()
-        val reader = ResultReader(result, TRACE_CONFIG_REQUIRE_CHANGES)
+        val reader = ResultReader(result)
         val parser = TestSubjectsParser(reader)
         val subject = doParseTrace(parser)
 
@@ -104,7 +103,7 @@ abstract class BaseSubjectsParserTest {
     private fun doParseStateSubjectAndValidate(tag: String, expectedTime: Timestamp) {
         val writer = writeTrace(newTestResultWriter())
         val result = writer.write()
-        val reader = ResultReader(result, TRACE_CONFIG_REQUIRE_CHANGES)
+        val reader = ResultReader(result)
         val parser = TestSubjectsParser(reader)
         val subject = doParseState(parser, tag) ?: error("$subjectName tag=$tag not built")
 

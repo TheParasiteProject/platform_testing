@@ -25,7 +25,6 @@ import android.tools.testutils.TEST_SCENARIO_KEY
 import android.tools.testutils.assertExceptionMessage
 import android.tools.testutils.assertThrows
 import android.tools.testutils.newTestResultWriter
-import android.tools.traces.TRACE_CONFIG_REQUIRE_CHANGES
 import android.tools.traces.io.ResultReader
 import android.tools.traces.io.ResultWriter
 import android.tools.traces.monitors.TraceMonitor
@@ -121,7 +120,7 @@ class TransitionExecutionRuleTest {
         val rule = createRule(listOf(runCreateValidTags), writer)
         rule.apply(base = null, description = Consts.description(this)).evaluate()
         val result = writer.write()
-        val reader = ResultReader(result, TRACE_CONFIG_REQUIRE_CHANGES)
+        val reader = ResultReader(result)
         val wmStateValidTag1 =
             reader.readWmState(VALID_TAG_1) ?: error("Couldn't parse WM state for $VALID_TAG_1")
         val wmStateValidTag2 =

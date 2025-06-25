@@ -23,7 +23,6 @@ import android.tools.flicker.subject.exceptions.SimpleFlickerAssertionError
 import android.tools.io.RunStatus
 import android.tools.testutils.CleanFlickerEnvironmentRule
 import android.tools.testutils.TEST_SCENARIO_KEY
-import android.tools.traces.TRACE_CONFIG_REQUIRE_CHANGES
 import androidx.test.filters.FlakyTest
 import com.google.common.truth.Truth
 import java.io.File
@@ -69,7 +68,7 @@ class AssertionErrorTest {
             .that(result.exceptionOrNull())
             .hasMessageThat()
             .contains(TestUtils.FAILURE)
-        val reader = CachedResultReader(scenario.key, TRACE_CONFIG_REQUIRE_CHANGES)
+        val reader = CachedResultReader(scenario.key)
         Truth.assertWithMessage("Run status")
             .that(reader.runStatus)
             .isEqualTo(RunStatus.ASSERTION_FAILED)
@@ -77,7 +76,7 @@ class AssertionErrorTest {
     }
 
     private fun assertArtifactExists() {
-        val reader = CachedResultReader(scenario.key, TRACE_CONFIG_REQUIRE_CHANGES)
+        val reader = CachedResultReader(scenario.key)
 
         for (artifact in reader.artifacts) {
             val file = File(artifact.absolutePath)

@@ -25,13 +25,12 @@ import android.tools.flicker.assertions.BaseFlickerTest
 import android.tools.flicker.assertions.SubjectsParser
 import android.tools.flicker.datastore.CachedAssertionRunner
 import android.tools.io.Reader
-import android.tools.traces.TRACE_CONFIG_REQUIRE_CHANGES
 
 /** Specification of a flicker test for JUnit ParameterizedRunner class */
 data class LegacyFlickerTest(
     private val scenarioBuilder: ScenarioBuilder = ScenarioBuilder(),
     private val resultReaderProvider: (String) -> Reader = {
-        android.tools.flicker.datastore.CachedResultReader(it, TRACE_CONFIG_REQUIRE_CHANGES)
+        android.tools.flicker.datastore.CachedResultReader(it)
     },
     private val subjectsParserProvider: (Reader) -> SubjectsParser = { SubjectsParser(it) },
     private val runnerProvider: (String) -> AssertionRunner = {

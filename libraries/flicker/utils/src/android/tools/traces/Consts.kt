@@ -19,25 +19,3 @@
 package android.tools.traces
 
 internal const val LOG_TAG = "FLICKER-PARSER"
-
-val TRACE_CONFIG_REQUIRE_CHANGES =
-    TraceConfigs(
-        wmTrace = TraceConfig(required = true, allowNoChange = false, usingExistingTraces = false),
-        layersTrace =
-            TraceConfig(required = true, allowNoChange = false, usingExistingTraces = false),
-        transitionsTrace =
-            TraceConfig(required = false, allowNoChange = false, usingExistingTraces = false),
-        transactionsTrace =
-            TraceConfig(required = false, allowNoChange = false, usingExistingTraces = false),
-    )
-
-val SERVICE_TRACE_CONFIG =
-    TraceConfigs(
-        wmTrace = TraceConfig(required = false, allowNoChange = true, usingExistingTraces = false),
-        layersTrace =
-            TraceConfig(required = true, allowNoChange = true, usingExistingTraces = false),
-        transitionsTrace =
-            TraceConfig(required = true, allowNoChange = true, usingExistingTraces = false),
-        transactionsTrace =
-            TraceConfig(required = true, allowNoChange = true, usingExistingTraces = false),
-    )

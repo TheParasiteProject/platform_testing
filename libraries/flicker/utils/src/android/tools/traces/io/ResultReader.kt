@@ -24,8 +24,6 @@ import android.tools.io.Reader
 import android.tools.io.ResultArtifactDescriptor
 import android.tools.io.TraceType
 import android.tools.parsers.events.EventLogParser
-import android.tools.traces.TraceConfig
-import android.tools.traces.TraceConfigs
 import android.tools.traces.events.CujTrace
 import android.tools.traces.events.EventLog
 import android.tools.traces.parsers.perfetto.LayersTraceParser
@@ -49,12 +47,11 @@ import java.io.IOException
 /**
  * Helper class to read results from a flicker artifact
  *
- * @param _result to read from
- * @param traceConfig
+ * @param result to read from
  */
-open class ResultReader(_result: IResultData, internal val traceConfig: TraceConfigs) : Reader {
+open class ResultReader(result: IResultData) : Reader {
     @VisibleForTesting
-    var result = _result
+    var result = result
         internal set
 
     override val artifacts: Array<Artifact>
@@ -116,22 +113,11 @@ open class ResultReader(_result: IResultData, internal val traceConfig: TraceCon
     @Throws(IOException::class)
     override fun readWmTrace(): WindowManagerTrace? {
         return withTracing("readWmTrace") {
-            val trace =
-                if (android.tracing.Flags.perfettoWmTracing()) {
-                    readPerfettoWindowManagerTrace()
-                } else {
-                    readLegacyWindowManagerTrace()
-                }
-            if (trace != null) {
-                val minimumEntries = minimumTraceEntriesForConfig(traceConfig.wmTrace)
-                require(trace.entries.size >= minimumEntries) {
-                    "WM trace contained ${trace.entries.size} entries, " +
-                        "expected at least $minimumEntries... :: " +
-                        "transition starts at ${transitionTimeRange.start} and " +
-                        "ends at ${transitionTimeRange.end}."
-                }
+            if (android.tracing.Flags.perfettoWmTracing()) {
+                readPerfettoWindowManagerTrace()
+            } else {
+                readLegacyWindowManagerTrace()
             }
-            trace
         }
     }
 
@@ -145,25 +131,16 @@ open class ResultReader(_result: IResultData, internal val traceConfig: TraceCon
         return withTracing("readLayersTrace") {
             val descriptor = ResultArtifactDescriptor(TraceType.PERFETTO)
             readBytes(descriptor)?.let {
-                val trace =
-                    TraceProcessorSession.loadPerfettoTrace(it) { session ->
-                        LayersTraceParser()
-                            .parse(
-                                session,
-                                transitionTimeRange.start,
-                                transitionTimeRange.end,
-                                addInitialEntry = true,
-                                clearCache = true,
-                            )
-                    }
-                val minimumEntries = minimumTraceEntriesForConfig(traceConfig.layersTrace)
-                require(trace.entries.size >= minimumEntries) {
-                    "Layers trace contained ${trace.entries.size} entries, " +
-                        "expected at least $minimumEntries... :: " +
-                        "transition starts at ${transitionTimeRange.start} and " +
-                        "ends at ${transitionTimeRange.end}."
+                TraceProcessorSession.loadPerfettoTrace(it) { session ->
+                    LayersTraceParser()
+                        .parse(
+                            session,
+                            transitionTimeRange.start,
+                            transitionTimeRange.end,
+                            addInitialEntry = true,
+                            clearCache = true,
+                        )
                 }
-                trace
             }
         }
     }
@@ -177,13 +154,10 @@ open class ResultReader(_result: IResultData, internal val traceConfig: TraceCon
     override fun readLayersDump(tag: String): LayersTrace? {
         return withTracing("readLayersDump#$tag") {
             val descriptor = ResultArtifactDescriptor(TraceType.SF_DUMP, tag)
-            val traceData = readBytes(descriptor)
-            if (traceData != null) {
-                TraceProcessorSession.loadPerfettoTrace(traceData) { session ->
+            readBytes(descriptor)?.let {
+                TraceProcessorSession.loadPerfettoTrace(it) { session ->
                     LayersTraceParser().parse(session, clearCache = true)
                 }
-            } else {
-                null
             }
         }
     }
@@ -219,17 +193,16 @@ open class ResultReader(_result: IResultData, internal val traceConfig: TraceCon
     @Throws(IOException::class)
     override fun readTransitionsTrace(): TransitionsTrace? {
         return withTracing("readTransitionsTrace") {
-            val trace = readPerfettoTransitionsTrace()
-
-            if (trace == null) {
-                return@withTracing null
+            readBytes(ResultArtifactDescriptor(TraceType.PERFETTO))?.let {
+                TraceProcessorSession.loadPerfettoTrace(it) { session ->
+                    TransitionsTraceParser()
+                        .parse(
+                            session,
+                            from = transitionTimeRange.start,
+                            to = transitionTimeRange.end,
+                        )
+                }
             }
-
-            if (!traceConfig.transitionsTrace.allowNoChange) {
-                require(trace.entries.isNotEmpty()) { "Transitions trace cannot be empty" }
-            }
-
-            trace
         }
     }
 
@@ -282,21 +255,6 @@ open class ResultReader(_result: IResultData, internal val traceConfig: TraceCon
         }
     }
 
-    private fun readPerfettoTransitionsTrace(): TransitionsTrace? {
-        val traceData = readBytes(ResultArtifactDescriptor(TraceType.PERFETTO))
-
-        return traceData?.let {
-            TraceProcessorSession.loadPerfettoTrace(traceData) { session ->
-                TransitionsTraceParser()
-                    .parse(session, from = transitionTimeRange.start, to = transitionTimeRange.end)
-            }
-        }
-    }
-
-    private fun minimumTraceEntriesForConfig(config: TraceConfig): Int {
-        return if (config.allowNoChange) 1 else 2
-    }
-
     /**
      * {@inheritDoc}
      *
@@ -324,7 +282,7 @@ open class ResultReader(_result: IResultData, internal val traceConfig: TraceCon
     /** @return an [Reader] for the subsection of the trace we are reading in this reader */
     override fun slice(startTimestamp: Timestamp, endTimestamp: Timestamp): ResultReader {
         val slicedResult = result.slice(startTimestamp, endTimestamp)
-        return ResultReader(slicedResult, traceConfig)
+        return ResultReader(slicedResult)
     }
 
     override fun toString(): String = "$result"

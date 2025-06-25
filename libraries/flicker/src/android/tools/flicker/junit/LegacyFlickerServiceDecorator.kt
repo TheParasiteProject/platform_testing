@@ -31,7 +31,6 @@ import android.tools.flicker.config.ScenarioId
 import android.tools.flicker.datastore.CachedResultReader
 import android.tools.flicker.datastore.DataStore
 import android.tools.flicker.isShellTransitionsEnabled
-import android.tools.traces.TRACE_CONFIG_REQUIRE_CHANGES
 import android.tools.withTracing
 import android.util.Log
 import org.junit.runner.Description
@@ -174,7 +173,7 @@ class LegacyFlickerServiceDecorator(
                 )
             transitionRunner.runTransition(testScenario.key, test, description)
         }
-        val reader = CachedResultReader(testScenario.key, TRACE_CONFIG_REQUIRE_CHANGES)
+        val reader = CachedResultReader(testScenario.key)
 
         val expectedScenarios =
             testClass.annotations
