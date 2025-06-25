@@ -34,7 +34,6 @@ class ResultArtifactDescriptorTest {
         createDescriptorAndValidateFileName(TraceType.PERFETTO)
         createDescriptorAndValidateFileName(TraceType.SCREEN_RECORDING)
         createDescriptorAndValidateFileName(TraceType.WM_DUMP)
-        createDescriptorAndValidateFileName(TraceType.SF_DUMP)
     }
 
     @Test
@@ -45,7 +44,6 @@ class ResultArtifactDescriptorTest {
         createDescriptorAndValidateFileNameWithTag(TraceType.PERFETTO)
         createDescriptorAndValidateFileNameWithTag(TraceType.SCREEN_RECORDING)
         createDescriptorAndValidateFileNameWithTag(TraceType.WM_DUMP)
-        createDescriptorAndValidateFileNameWithTag(TraceType.SF_DUMP)
     }
 
     private fun createDescriptorAndValidateFileName(traceType: TraceType) {
