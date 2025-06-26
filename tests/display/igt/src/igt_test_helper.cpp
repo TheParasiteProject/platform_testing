@@ -49,17 +49,28 @@ std::optional<std::string> runCommand(const std::string &cmd) {
 
 TestResult getSubtestTestResultFromLog(const std::string &log,
                                        const std::string &subTestName) {
-  if (log.find("Subtest " + subTestName + ": FAIL") != std::string::npos) {
-    return TestResult::kFail;
-  } else if (log.find("Subtest " + subTestName + ": SKIP") !=
-             std::string::npos) {
-    return TestResult::kSkip;
-  } else if (log.find("Subtest " + subTestName + ": SUCCESS") !=
-             std::string::npos) {
-    return TestResult::kPass;
-  } else {
-    return TestResult::kUnknown;
+  std::string prefix;
+  // Some subtests are created through regexes with *, so we can't match the
+  // subtest name directly. For these, we look for a generic result string.
+  if (subTestName.find('*') == std::string::npos) {
+    prefix = "Subtest " + subTestName + ": ";
   }
+
+  // The order of checks is important. A single failure should fail the whole
+  // group. A success is better than a skip.
+  const std::array<std::pair<const char *, TestResult>, 3> kResultChecks = {{
+      {"FAIL", TestResult::kFail},
+      {"SUCCESS", TestResult::kPass},
+      {"SKIP", TestResult::kSkip},
+  }};
+
+  for (const auto &[resultStr, resultEnum] : kResultChecks) {
+    if (log.find(prefix + resultStr) != std::string::npos) {
+      return resultEnum;
+    }
+  }
+
+  return TestResult::kUnknown;
 }
 
 TestResult getTestResultFromLog(std::string &log) {

@@ -42,7 +42,7 @@ IgtSubtestParams subtests[] = {
     // Low Level Validation Tests
     {.name = "basic",
      .desc = "Check if addfb2 call works with given handle",
-     .rationale = "fundamentral fb mgmt"},
+     .rationale = "fundamental fb mgmt"},
 };
 
 TEST_P(KmsAddfbBasicTests, RunSubTests) { runSubTest(GetParam()); }

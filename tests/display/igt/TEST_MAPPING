@@ -30,5 +30,61 @@
     {
       "name": "IgtKmsSetmodeTestCases"
     }
+  ],
+  "IgtKms_Enabled": [
+    {
+      "name": "IgtKmsBwTestCases"
+    },
+    {
+      "name": "IgtKmsColorTestCases"
+    },
+    {
+      "name": "IgtKmsContentProtectionTestCases"
+    },
+    {
+      "name": "IgtKmsDisplayModesTestCases"
+    },
+    {
+      "name": "IgtKmsHdrTestCases"
+    },
+    {
+      "name": "IgtKmsPipeCrcBasicTestCases"
+    },
+    {
+      "name": "IgtKmsPlaneTestCases"
+    },
+    {
+      "name": "IgtKmsPlaneLowresTestCases"
+    },
+    {
+      "name": "IgtKmsPlaneMultipleTestCases"
+    },
+    {
+      "name": "IgtKmsPlaneScalingTestCases"
+    },
+    {
+      "name": "IgtKmsPropertiesTestCases"
+    },
+    {
+      "name": "IgtKmsTiledDisplayTestCases"
+    },
+    {
+      "name": "IgtKmsVBlankTestCases"
+    },
+    {
+      "name": "IgtKmsVrrTestCases"
+    },
+    {
+      "name": "IgtKmsAddfbBasicTestCases"
+    },
+    {
+      "name": "IgtKmsSysfsEdidTimingTestCases"
+    },
+    {
+      "name": "IgtKmsAtomicTestCases"
+    },
+    {
+      "name": "IgtKmsPlaneCursorTestCases"
+    }
   ]
 }
