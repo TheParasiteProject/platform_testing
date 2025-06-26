@@ -258,7 +258,14 @@ class DesktopMouseTestRule() : TestRule {
         val currentPosition = getCursorPosition(targetDisplayId).roundToInt()
         performSteppedMove(Point(targetXPx, targetYPx) - currentPosition)
 
-        WaitUtils.ensureThat {
+        WaitUtils.ensureThat(
+            errorProvider = {
+                val displayId = getCursorDisplayId()
+                "Failed to move cursor from: display#$targetDisplayId $currentPosition to: " +
+                    "display#$targetDisplayId ${Point(targetXPx, targetYPx)}. " +
+                    "Current pos: display#$displayId ${getCursorPosition(displayId)}"
+            }
+        ) {
             val finalPosition = getCursorPosition(targetDisplayId).roundToInt()
             val delta = finalPosition - Point(targetXPx, targetYPx)
             // As mentioned in the javadoc above, InputManager API doesn't support floating-point
@@ -318,7 +325,17 @@ class DesktopMouseTestRule() : TestRule {
             // Perform a small move to cross the boundary
             performSteppedMove(crossingDeltaPx.roundToInt())
             // Validate cursor crossed display
-            WaitUtils.ensureThat { getCursorDisplayId() == nextDisplayId }
+            WaitUtils.ensureThat(
+                errorProvider = {
+                    val currentDisplayId = getCursorDisplayId()
+                    "Failed to move cursor from " +
+                        "display#$currentCursorDisplayId -> display#$nextDisplayId. " +
+                        "Cursor is still at " +
+                        "display#$currentDisplayId ${getCursorPosition(currentDisplayId)}"
+                }
+            ) {
+                getCursorDisplayId() == nextDisplayId
+            }
             currentCursorDisplayId = nextDisplayId
 
             // InputDevice reconfiguration will happen when cursor changed display, and might jam
