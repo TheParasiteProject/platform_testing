@@ -18,8 +18,7 @@ package platform.test.desktop
 
 import android.graphics.PointF
 import android.graphics.RectF
-import android.hardware.display.DisplayTopology.TreeNode
-import android.hardware.display.DisplayTopologyGraph
+import android.hardware.display.DisplayTopology
 import com.google.common.truth.Truth.assertThat
 import org.junit.Assert.assertThrows
 import org.junit.Test
@@ -88,69 +87,31 @@ class DesktopMouseTestRuleTest {
         // [4] - [2] - [3]
         //        |
         //       [1]
-        val node1 =
-            DisplayTopologyGraph.DisplayNode(
-                1,
-                DEFAULT_DENSITY,
-                RectF(), // unused
-                arrayOf(
-                    DisplayTopologyGraph.AdjacentDisplay(
-                        2,
-                        TreeNode.POSITION_TOP,
-                        DEFAULT_DISPLAY_OFFSET_DP,
+        val graph =
+            DisplayTopology()
+                .apply {
+                    addDisplay(1, DEFAULT_SIZE_DP, DEFAULT_SIZE_DP, DEFAULT_DENSITY)
+                    addDisplay(2, DEFAULT_SIZE_DP, DEFAULT_SIZE_DP, DEFAULT_DENSITY)
+                    addDisplay(3, DEFAULT_SIZE_DP, DEFAULT_SIZE_DP, DEFAULT_DENSITY)
+                    addDisplay(4, DEFAULT_SIZE_DP, DEFAULT_SIZE_DP, DEFAULT_DENSITY)
+                    rearrange(
+                        mapOf(
+                            1 to PointF(0f, 0f),
+                            2 to PointF(0f, -DEFAULT_SIZE_DP.toFloat()),
+                            3 to
+                                PointF(
+                                    DEFAULT_SIZE_DP.toFloat(),
+                                    -DEFAULT_SIZE_DP.toFloat() - OFFSET_TO_NOT_SHARE_CORNER_DP,
+                                ),
+                            4 to
+                                PointF(
+                                    -DEFAULT_SIZE_DP.toFloat(),
+                                    -DEFAULT_SIZE_DP.toFloat() - OFFSET_TO_NOT_SHARE_CORNER_DP,
+                                ),
+                        )
                     )
-                ),
-            )
-        val node2 =
-            DisplayTopologyGraph.DisplayNode(
-                2,
-                DEFAULT_DENSITY,
-                RectF(), // unused
-                arrayOf(
-                    DisplayTopologyGraph.AdjacentDisplay(
-                        1,
-                        TreeNode.POSITION_BOTTOM,
-                        DEFAULT_DISPLAY_OFFSET_DP,
-                    ),
-                    DisplayTopologyGraph.AdjacentDisplay(
-                        3,
-                        TreeNode.POSITION_RIGHT,
-                        DEFAULT_DISPLAY_OFFSET_DP,
-                    ),
-                    DisplayTopologyGraph.AdjacentDisplay(
-                        4,
-                        TreeNode.POSITION_LEFT,
-                        DEFAULT_DISPLAY_OFFSET_DP,
-                    ),
-                ),
-            )
-        val node3 =
-            DisplayTopologyGraph.DisplayNode(
-                3,
-                DEFAULT_DENSITY,
-                RectF(), // unused
-                arrayOf(
-                    DisplayTopologyGraph.AdjacentDisplay(
-                        2,
-                        TreeNode.POSITION_LEFT,
-                        DEFAULT_DISPLAY_OFFSET_DP,
-                    )
-                ),
-            )
-        val node4 =
-            DisplayTopologyGraph.DisplayNode(
-                4,
-                DEFAULT_DENSITY,
-                RectF(), // unused
-                arrayOf(
-                    DisplayTopologyGraph.AdjacentDisplay(
-                        2,
-                        TreeNode.POSITION_RIGHT,
-                        DEFAULT_DISPLAY_OFFSET_DP,
-                    )
-                ),
-            )
-        val graph = DisplayTopologyGraph(1, arrayOf(node1, node2, node3, node4))
+                }
+                .graph
 
         // Path from node 1
         assertThat(DesktopMouseTestRule.findPath(1, 1, graph)).isEmpty()
@@ -206,7 +167,8 @@ class DesktopMouseTestRuleTest {
     }
 
     private companion object {
+        val DEFAULT_SIZE_DP = 100
         val DEFAULT_DENSITY = 160
-        val DEFAULT_DISPLAY_OFFSET_DP = 0f
+        val OFFSET_TO_NOT_SHARE_CORNER_DP = 10f
     }
 }
