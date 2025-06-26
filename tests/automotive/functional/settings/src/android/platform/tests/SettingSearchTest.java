@@ -65,6 +65,7 @@ public class SettingSearchTest {
 
     @Test
     public void testSearchApplication() {
+        mSettingHelper.get().settingSearchEmptyDefault();
         String searchApp = SEARCH_DEFAULT_APP;
         if (mSearchApp != null && mSearchApp.get() != null && !mSearchApp.get().isEmpty()) {
             searchApp = mSearchApp.get();

@@ -295,4 +295,11 @@ public interface IAutoSettingHelper extends IAppHelper {
      * <p>This method checks if number of search results count is matched.
      */
     boolean isNumberOfResultsDisplayed(int count);
+
+    /**
+     * Setup expectation: None
+     *
+     * <p>This method verifies setting search is empty upon open first time
+     */
+    void settingSearchEmptyDefault();
 }

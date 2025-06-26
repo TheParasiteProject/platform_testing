@@ -302,6 +302,11 @@ public class SettingHelperImpl extends AbstractStandardAppHelper implements IAut
                         object, String.format("Opened page does not contain searched item"));
     }
 
+    @Override
+    public void settingSearchEmptyDefault() {
+        executeWorkflow(AutomotiveConfigConstants.SETTING_SEARCH_EMPTY_DEFAULT_WORKFLOW);
+    }
+
     /** {@inheritDoc} */
     @Override
     public void searchSettings(String item) {
