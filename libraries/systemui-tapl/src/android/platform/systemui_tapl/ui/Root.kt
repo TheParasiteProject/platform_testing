@@ -51,6 +51,7 @@ import androidx.test.uiautomator.Until
 import com.android.app.tracing.traceSection
 import com.android.launcher3.tapl.LauncherInstrumentation
 import com.android.launcher3.tapl.Workspace
+import com.android.systemui.Flags
 import com.google.common.truth.Truth.assertThat
 import com.google.common.truth.Truth.assertWithMessage
 import java.time.Duration
@@ -72,7 +73,13 @@ class Root private constructor(val displayId: Int = DEFAULT_DISPLAY) {
      * notifications shade if the lockscreen screen is shown.
      */
     fun openNotificationShade(): NotificationShade {
-        return openNotificationShadeViaGlobalAction()
+        if (Flags.sceneContainer()) {
+            uiDevice.executeShellCommand("cmd statusbar expand-notifications-instant")
+            waitForShadeToOpen()
+            return NotificationShade(displayId)
+        } else {
+            return openNotificationShadeViaGlobalAction()
+        }
     }
 
     /** Opens the notification shade via AccessibilityService.GLOBAL_ACTION_NOTIFICATIONS. */
@@ -245,7 +252,11 @@ class Root private constructor(val displayId: Int = DEFAULT_DISPLAY) {
 
     /** Opens quick settings. */
     fun openQuickSettings(): QuickSettings {
-        uiDevice.executeShellCommand("cmd statusbar expand-settings")
+        if (Flags.sceneContainer()) {
+            uiDevice.executeShellCommand("cmd statusbar expand-settings-instant")
+        } else {
+            uiDevice.executeShellCommand("cmd statusbar expand-settings")
+        }
         waitForObj(sysuiResSelector("quick_settings_panel", displayId))
         return QuickSettings(displayId)
     }
