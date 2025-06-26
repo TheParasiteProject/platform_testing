@@ -1284,6 +1284,14 @@
       "TYPE": "TEXT",
       "VALUE": "Delete this profile"
     },
+    "CHOOSE_ADMIN_BUTTON": {
+      "TYPE": "TEXT",
+      "VALUE": "Choose admin"
+    },
+    "MAKE_ADMIN_BUTTON": {
+      "TYPE": "TEXT",
+      "VALUE": "Yes, make admin"
+    },
     "USER_SETTINGS_MAKE_ADMIN": {
       "TYPE": "TEXT",
       "VALUE": "Make Admin"

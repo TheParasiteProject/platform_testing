@@ -486,6 +486,8 @@ public class AutomotiveConfigConstants {
     public static final String USER_SETTINGS_OK = "USER_SETTINGS_OK";
     public static final String USER_SETTINGS_DELETE_SELF = "USER_SETTINGS_DELETE_SELF";
     public static final String USER_SETTINGS_MAKE_ADMIN = "USER_SETTINGS_MAKE_ADMIN";
+    public static final String CHOOSE_ADMIN_BUTTON = "CHOOSE_ADMIN_BUTTON";
+    public static final String MAKE_ADMIN_BUTTON = "MAKE_ADMIN_BUTTON";
     public static final String USER_SETTINGS_MAKE_ADMIN_CONFIRM =
             "USER_SETTINGS_MAKE_ADMIN_CONFIRM";
     public static final String CREATE_NEW_PROFILE_SWITCH = "CREATE_NEW_PROFILE_SWITCH";
