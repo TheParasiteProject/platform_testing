@@ -210,7 +210,11 @@ class NotificationShade internal constructor(val displayId: Int = DEFAULT_DISPLA
 
     /** Closes the shade using "adb shell cmd statusbar collapse". */
     fun closeWithShellCommand() {
-        uiDevice.executeShellCommand("cmd statusbar collapse")
+        if (Flags.sceneContainer()) {
+            uiDevice.executeShellCommand("cmd statusbar collapse-instant")
+        } else {
+            uiDevice.executeShellCommand("cmd statusbar collapse")
+        }
         waitForShadeToClose(displayId)
     }
 
