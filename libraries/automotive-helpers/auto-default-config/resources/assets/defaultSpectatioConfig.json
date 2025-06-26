@@ -1284,6 +1284,14 @@
       "TYPE": "TEXT",
       "VALUE": "Delete this profile"
     },
+    "CHOOSE_ADMIN_BUTTON": {
+      "TYPE": "TEXT",
+      "VALUE": "Choose admin"
+    },
+    "MAKE_ADMIN_BUTTON": {
+      "TYPE": "TEXT",
+      "VALUE": "Yes, make admin"
+    },
     "USER_SETTINGS_MAKE_ADMIN": {
       "TYPE": "TEXT",
       "VALUE": "Make Admin"
@@ -2539,6 +2547,36 @@
         "VALIDATION_CONFIG": {
           "PROPERTY": "TEXT",
           "EXPECTED_COMMAND_LINE_KEY": "search-contact-name"
+        }
+      }
+    ],
+    "SETTING_SEARCH_EMPTY_DEFAULT_WORKFLOW": [
+      {
+        "NAME": "Open search",
+        "TYPE": "CLICK",
+        "CONFIG": {
+          "UI_ELEMENT_REFERENCE": "SEARCH"
+        }
+      },
+      {
+        "NAME": "Enter no text",
+        "TYPE": "SET_TEXT",
+        "CONFIG": {
+          "UI_ELEMENT_REFERENCE": "SEARCH_BOX"
+        },
+        "SET_TEXT_CONFIG": {
+          "TEXT": ""
+        }
+      },
+      {
+        "NAME": "Check for searched is empty",
+        "TYPE": "VALIDATE_VALUE",
+        "CONFIG": {
+          "UI_ELEMENT_REFERENCE": "SEARCH_BOX"
+        },
+        "VALIDATION_CONFIG": {
+          "PROPERTY": "TEXT",
+          "EXPECTED": "Search…"
         }
       }
     ],

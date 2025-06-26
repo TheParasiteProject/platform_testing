@@ -258,7 +258,14 @@ class DesktopMouseTestRule() : TestRule {
         val currentPosition = getCursorPosition(targetDisplayId).roundToInt()
         performSteppedMove(Point(targetXPx, targetYPx) - currentPosition)
 
-        WaitUtils.ensureThat {
+        WaitUtils.ensureThat(
+            errorProvider = {
+                val displayId = getCursorDisplayId()
+                "Failed to move cursor from: display#$targetDisplayId $currentPosition to: " +
+                    "display#$targetDisplayId ${Point(targetXPx, targetYPx)}. " +
+                    "Current pos: display#$displayId ${getCursorPosition(displayId)}"
+            }
+        ) {
             val finalPosition = getCursorPosition(targetDisplayId).roundToInt()
             val delta = finalPosition - Point(targetXPx, targetYPx)
             // As mentioned in the javadoc above, InputManager API doesn't support floating-point
@@ -318,7 +325,17 @@ class DesktopMouseTestRule() : TestRule {
             // Perform a small move to cross the boundary
             performSteppedMove(crossingDeltaPx.roundToInt())
             // Validate cursor crossed display
-            WaitUtils.ensureThat { getCursorDisplayId() == nextDisplayId }
+            WaitUtils.ensureThat(
+                errorProvider = {
+                    val currentDisplayId = getCursorDisplayId()
+                    "Failed to move cursor from " +
+                        "display#$currentCursorDisplayId -> display#$nextDisplayId. " +
+                        "Cursor is still at " +
+                        "display#$currentDisplayId ${getCursorPosition(currentDisplayId)}"
+                }
+            ) {
+                getCursorDisplayId() == nextDisplayId
+            }
             currentCursorDisplayId = nextDisplayId
 
             // InputDevice reconfiguration will happen when cursor changed display, and might jam
@@ -435,12 +452,12 @@ class DesktopMouseTestRule() : TestRule {
             BOTTOM;
 
             companion object {
-                fun from(@DisplayTopology.TreeNode.Position value: Int): Position {
+                fun from(value: Int): Position {
                     return when (value) {
-                        DisplayTopology.TreeNode.POSITION_LEFT -> LEFT
-                        DisplayTopology.TreeNode.POSITION_TOP -> TOP
-                        DisplayTopology.TreeNode.POSITION_RIGHT -> RIGHT
-                        DisplayTopology.TreeNode.POSITION_BOTTOM -> BOTTOM
+                        DisplayTopology.POSITION_LEFT -> LEFT
+                        DisplayTopology.POSITION_TOP -> TOP
+                        DisplayTopology.POSITION_RIGHT -> RIGHT
+                        DisplayTopology.POSITION_BOTTOM -> BOTTOM
                         else ->
                             throw IllegalArgumentException(
                                 "Invalid integer value for Position: $value"
@@ -476,7 +493,7 @@ class DesktopMouseTestRule() : TestRule {
             topologyGraph: DisplayTopologyGraph,
         ): List<AdjacentDisplay> {
             if (startId == endId) return listOf()
-            val adjacencyGraph = topologyGraph.displayNodes.associateBy { it.displayId }
+            val adjacencyGraph = topologyGraph.displayNodes
             val queue = ArrayDeque<Int>().apply { add(startId) }
             val visited = mutableSetOf(startId)
             // Maps display id to its parent in the context of `startId`->`endIf` traversal.
@@ -500,11 +517,11 @@ class DesktopMouseTestRule() : TestRule {
                     return path
                 }
 
-                val currentNode = adjacencyGraph[currentId] ?: continue
+                val currentNode = adjacencyGraph.get(currentId) ?: continue
                 // Check neighbors
-                for (adjacentDisplay in currentNode.adjacentDisplays) {
-                    val neighborId = adjacentDisplay.displayId
-                    val position = adjacentDisplay.position
+                for (adjacentEdge in currentNode.adjacentEdges) {
+                    val neighborId = adjacentEdge.displayNode.displayId
+                    val position = adjacentEdge.position
                     if (neighborId in visited) continue
                     visited.add(neighborId)
                     parentMap[neighborId] =

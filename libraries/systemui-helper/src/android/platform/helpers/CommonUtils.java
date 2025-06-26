@@ -38,15 +38,12 @@ import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
 import android.platform.helpers.features.common.HomeLockscreenPage;
 import android.platform.test.util.HealthTestingUtils;
-import android.provider.Settings;
 import android.util.Log;
 
 import androidx.test.platform.app.InstrumentationRegistry;
 import androidx.test.uiautomator.BySelector;
 import androidx.test.uiautomator.UiObject;
 import androidx.test.uiautomator.UiObjectNotFoundException;
-
-import com.android.systemui.Flags;
 
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -347,10 +344,11 @@ public class CommonUtils {
     }
 
     /**
-     * Returns the main user ID. Main user is the main human user on the device. Returns 0 by
-     * default, if there is no main user. Android Auto is example of HSUM without main user.
-     *
-     * <p>NOTE: For headless system main user it is NOT 0. Therefore Main user should be used in
+     * Returns the main user ID. Main user is the main human user on the device.
+     * Returns 0 by default, if there is no main user. Android Auto is example of HSUM without
+     * main user.
+     * 
+     * NOTE: For headless system main user it is NOT 0. Therefore Main user should be used in 
      * test cases rather than owner or deprecated primary user.
      */
     public static int getMainUserId() {
@@ -362,7 +360,6 @@ public class CommonUtils {
         }
     }
 
-    /** Returns true if split shade is enabled. */
     public static boolean isSplitShade() {
         try {
             Resources sysUiResources =
@@ -379,22 +376,9 @@ public class CommonUtils {
         return isLargeScreen() && (orientation == Configuration.ORIENTATION_LANDSCAPE);
     }
 
-    /** Returns true if the device is a large screen. */
     public static boolean isLargeScreen() {
         Point sizeDp = getUiDevice().getDisplaySizeDp();
         return sizeDp.x >= LARGE_SCREEN_DP_THRESHOLD && sizeDp.y >= LARGE_SCREEN_DP_THRESHOLD;
-    }
-
-    /** Returns true if dual shade is enabled. */
-    public static boolean isDualShade() {
-        if (!Flags.sceneContainer()) {
-            return false;
-        }
-        return Settings.Secure.getInt(
-                        getContext().getContentResolver(),
-                        Settings.Secure.DUAL_SHADE,
-                        /* defaultValue= */ 0)
-                == 1;
     }
 
     /**

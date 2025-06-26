@@ -302,4 +302,20 @@ public class SettingUserHelperImpl extends AbstractStandardAppHelper implements 
         boolean finalStatus = isToggleOn(buttonText);
         return finalStatus != currentStatus;
     }
+
+    @Override
+    public void deleteAdminAndChooseOtherAsAdmin(String userName) {
+        clickbutton(AutomotiveConfigConstants.USER_SETTINGS_DELETE_SELF);
+        clickbutton(AutomotiveConfigConstants.CHOOSE_ADMIN_BUTTON);
+        BySelector userSelector = By.text(userName);
+        UiObject2 userObject = getSpectatioUiUtil().findUiObject(userSelector);
+        getSpectatioUiUtil().clickAndWait(userObject);
+        clickbutton(AutomotiveConfigConstants.MAKE_ADMIN_BUTTON);
+        getSpectatioUiUtil()
+                .waitNSeconds(
+                        WAIT_MS); // WAIT_MS the time to wait (in msec) after user switch complete
+        BySelector homeButtonSelector =
+                getUiElementFromConfig(AutomotiveConfigConstants.HOME_PROFILE_ICON_BUTTON);
+        getSpectatioUiUtil().waitForUiObject(homeButtonSelector, WAIT_MS);
+    }
 }
