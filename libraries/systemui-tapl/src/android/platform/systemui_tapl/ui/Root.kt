@@ -21,9 +21,11 @@ import android.graphics.PointF
 import android.graphics.Rect
 import android.os.RemoteException
 import android.os.SystemClock
+import android.platform.helpers.CommonUtils
 import android.platform.systemui_tapl.controller.LockscreenController
 import android.platform.systemui_tapl.controller.NotificationIdentity
 import android.platform.systemui_tapl.ui.ExpandedBubbleStack.Companion.BUBBLE_EXPANDED_VIEW
+import android.platform.systemui_tapl.ui.NotificationShade.Companion.waitForShadeToClose
 import android.platform.systemui_tapl.utils.DeviceUtils.LONG_WAIT
 import android.platform.systemui_tapl.utils.DeviceUtils.sysuiResSelector
 import android.platform.systemui_tapl.utils.LAUNCHER_PACKAGE
@@ -200,6 +202,9 @@ class Root private constructor(val displayId: Int = DEFAULT_DISPLAY) {
     private val notificationSwipeX: Float
         get() = uiDevice.getDisplayWidth(displayId) / 4f
 
+    private val qsSwipeX: Float
+        get() = 3 * uiDevice.getDisplayWidth(displayId) / 4f
+
     /**
      * Finds a HUN by its identity. Fails if the notification can't be found.
      *
@@ -257,7 +262,22 @@ class Root private constructor(val displayId: Int = DEFAULT_DISPLAY) {
         } else {
             uiDevice.executeShellCommand("cmd statusbar expand-settings")
         }
-        waitForObj(sysuiResSelector("quick_settings_panel", displayId))
+        waitForQuickSettingsToOpen()
+        return QuickSettings(displayId)
+    }
+
+    /** Opens quick settings with a swipe gesture that depends on form factor. */
+    fun openQuickSettingsWithSwipe(): QuickSettings {
+        if (Flags.sceneContainer() && CommonUtils.isDualShade()) {
+            BetterSwipe.swipe(
+                PointF(qsSwipeX, 1f),
+                PointF(qsSwipeX, uiDevice.getDisplayHeight(displayId).toFloat() - 2f),
+                displayId = displayId,
+            )
+        } else {
+            openNotificationShadeViaTwoFingersSwipe()
+        }
+        waitForQuickSettingsToOpen()
         return QuickSettings(displayId)
     }
 
@@ -273,6 +293,16 @@ class Root private constructor(val displayId: Int = DEFAULT_DISPLAY) {
         // that are trying to find the location of the footer will get incorrect coordinates
         device.waitForIdle(LONG_TIMEOUT)
         return QuickSettings(displayId)
+    }
+
+    /** Collapses any open shade, i.e. either Notifications or QS. */
+    fun collapseAnyShade() {
+        if (Flags.sceneContainer()) {
+            uiDevice.executeShellCommand("cmd statusbar collapse-instant")
+        } else {
+            uiDevice.executeShellCommand("cmd statusbar collapse")
+        }
+        waitForShadeToClose(displayId)
     }
 
     /** Gets status bar. */
@@ -507,6 +537,10 @@ class Root private constructor(val displayId: Int = DEFAULT_DISPLAY) {
                 errorProvider = { "Notification shade didn't open on display $displayId" },
             )
         }
+    }
+
+    private fun waitForQuickSettingsToOpen() {
+        waitForObj(sysuiResSelector("quick_settings_panel", displayId))
     }
 
     fun pressBackOnDisplay() {
