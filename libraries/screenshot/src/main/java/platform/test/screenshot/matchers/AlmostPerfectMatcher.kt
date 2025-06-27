@@ -27,7 +27,7 @@ import platform.test.screenshot.proto.ScreenshotResultProto
 class AlmostPerfectMatcher
 private constructor(
     private val acceptableThreshold: Double = 0.0,
-    private val acceptableThresholdCount: Int = -1
+    private val acceptableThresholdCount: Int = -1,
 ) : BitmapMatcher() {
     constructor() : this(0.0, -1)
 
@@ -40,11 +40,12 @@ private constructor(
         given: IntArray,
         width: Int,
         height: Int,
-        regions: List<Rect>
+        regions: List<Rect>,
+        excludedRegions: List<Rect>,
     ): MatchResult {
         check(expected.size == given.size) { "Size of two bitmaps does not match" }
 
-        val filter = getFilter(width, height, regions)
+        val filter = getFilter(width, height, regions, excludedRegions)
         var different = 0
         var same = 0
         var ignored = 0
@@ -88,7 +89,7 @@ private constructor(
         expectedWidth: Int,
         expectedHeight: Int,
         actualWidth: Int,
-        actualHeight: Int
+        actualHeight: Int,
     ): MatchResult {
         val width = if (expectedWidth < actualWidth) expectedWidth else actualWidth
         val height = if (expectedHeight < actualHeight) expectedHeight else actualHeight

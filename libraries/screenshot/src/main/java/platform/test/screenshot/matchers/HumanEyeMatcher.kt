@@ -28,13 +28,14 @@ class HumanEyeMatcher(
         given: IntArray,
         width: Int,
         height: Int,
-        regions: List<Rect>
+        regions: List<Rect>,
+        excludedRegions: List<Rect>,
     ): MatchResult {
         check(expected.size == given.size) {
             "Pixels in expected (${expected.size}) does not match pixels in actual (${given.size})"
         }
 
-        val filter = getFilter(width, height, regions)
+        val filter = getFilter(width, height, regions, excludedRegions)
         var ignored = 0
 
         // Prepare colorDiffArray
@@ -129,12 +130,12 @@ class HumanEyeMatcher(
         val diffWithWhite =
             colorDiffSq(
                 blendWithBackground(referenceColor, Color.WHITE),
-                blendWithBackground(testColor, Color.WHITE)
+                blendWithBackground(testColor, Color.WHITE),
             )
         val diffWithBlack =
             colorDiffSq(
                 blendWithBackground(referenceColor, Color.BLACK),
-                blendWithBackground(testColor, Color.BLACK)
+                blendWithBackground(testColor, Color.BLACK),
             )
 
         return max(diffWithWhite, diffWithBlack)

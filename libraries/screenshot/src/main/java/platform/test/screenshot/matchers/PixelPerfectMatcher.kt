@@ -30,11 +30,12 @@ class PixelPerfectMatcher : BitmapMatcher() {
         given: IntArray,
         width: Int,
         height: Int,
-        regions: List<Rect>
+        regions: List<Rect>,
+        excludedRegions: List<Rect>,
     ): MatchResult {
         check(expected.size == given.size)
 
-        val filter = getFilter(width, height, regions)
+        val filter = getFilter(width, height, regions, excludedRegions)
         var different = 0
         var same = 0
         var ignored = 0

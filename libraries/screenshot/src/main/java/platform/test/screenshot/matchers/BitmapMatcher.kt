@@ -26,6 +26,7 @@ import platform.test.screenshot.proto.ScreenshotResultProto.DiffResult.Compariso
 
 /** The abstract class to implement to provide custom bitmap matchers. */
 abstract class BitmapMatcher {
+
     /**
      * Compares the given bitmaps and returns result of the operation.
      *
@@ -37,12 +38,33 @@ abstract class BitmapMatcher {
      * @param height Height of both of the images.
      * @param regions An optional array of interesting regions for screenshot diff.
      */
+    fun compareBitmaps(
+        expected: IntArray,
+        given: IntArray,
+        width: Int,
+        height: Int,
+        regions: List<Rect> = emptyList(),
+    ) = compareBitmaps(expected, given, width, height, regions, emptyList())
+
+    /**
+     * Compares the given bitmaps and returns result of the operation.
+     *
+     * The images need to have same size.
+     *
+     * @param expected The reference / golden image.
+     * @param given The image taken during the test.
+     * @param width Width of both of the images.
+     * @param height Height of both of the images.
+     * @param regions An optional array of interesting regions for screenshot diff.
+     * @param excludedRegions An optional array of uninteresting regions for screenshot diff.
+     */
     abstract fun compareBitmaps(
         expected: IntArray,
         given: IntArray,
         width: Int,
         height: Int,
-        regions: List<Rect> = emptyList()
+        regions: List<Rect>,
+        excludedRegions: List<Rect>,
     ): MatchResult
 
     /**
@@ -64,7 +86,7 @@ abstract class BitmapMatcher {
         expectedWidth: Int,
         expectedHeight: Int,
         actualWidth: Int,
-        actualHeight: Int
+        actualHeight: Int,
     ): MatchResult {
         val width = if (expectedWidth < actualWidth) expectedWidth else actualWidth
         val height = if (expectedHeight < actualHeight) expectedHeight else actualHeight
@@ -102,25 +124,31 @@ abstract class BitmapMatcher {
     }
 
     @SuppressLint("CheckResult")
-    protected fun getFilter(width: Int, height: Int, regions: List<Rect>): BooleanArray {
-        return if (regions.isEmpty()) {
-            BooleanArray(width * height) { true }
-        } else {
+    protected fun getFilter(
+        width: Int,
+        height: Int,
+        regions: List<Rect>,
+        excludedRegions: List<Rect>,
+    ): BooleanArray {
+        fun setArrayValue(filterArr: BooleanArray, regions: List<Rect>, value: Boolean) {
             val regionsSanitised = regions.map { Rect(it).apply { intersect(0, 0, width, height) } }
-            BooleanArray(width * height).also { filterArr ->
-                regionsSanitised.forEach { region ->
-                    val startX = region.left.coerceIn(0, width - 1)
-                    val endX = region.right.coerceIn(0, width - 1)
-                    val startY = region.top.coerceIn(0, height - 1)
-                    val endY = region.bottom.coerceIn(0, height - 1)
-                    for (x in startX..endX) {
-                        for (y in startY..endY) {
-                            filterArr[y * width + x] = true
-                        }
+            regionsSanitised.forEach { region ->
+                val startX = region.left.coerceIn(0, width - 1)
+                val endX = region.right.coerceIn(0, width - 1)
+                val startY = region.top.coerceIn(0, height - 1)
+                val endY = region.bottom.coerceIn(0, height - 1)
+                for (x in startX..endX) {
+                    for (y in startY..endY) {
+                        filterArr[y * width + x] = value
                     }
                 }
             }
         }
+        val result =
+            if (regions.isEmpty()) BooleanArray(width * height) { true }
+            else BooleanArray(width * height).also { setArrayValue(it, regions, true) }
+        if (excludedRegions.isNotEmpty()) setArrayValue(result, excludedRegions, false)
+        return result
     }
 }
 
@@ -136,5 +164,5 @@ abstract class BitmapMatcher {
 class MatchResult(
     val matches: Boolean,
     val comparisonStatistics: ComparisonStatistics,
-    val diff: Bitmap?
+    val diff: Bitmap?,
 )
