@@ -25,6 +25,10 @@ cc_defaults {
     srcs: [
         "src/igt_test_helper.cpp",
     ],
+    data_bins: [
+        "//platform_testing/tests/display/hcct/atest_wrapper:setup_vkms_connectors_for_atest",
+        "//platform_testing/tests/display/hcct/atest_wrapper:teardown_vkms",
+    ],
     test_suites: [
         "device-tests",
         "general-tests",
