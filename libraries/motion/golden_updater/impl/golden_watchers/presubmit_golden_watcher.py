@@ -21,7 +21,6 @@ import shutil
 import itertools
 from impl.cached_golden import CachedGolden
 from impl.golden_watchers.golden_watcher import GoldenWatcher
-from impl.golden_watchers.golden_watcher_types import GoldenWatcherTypes
 
 
 class PresubmitGoldenWatcher(GoldenWatcher):
@@ -29,7 +28,6 @@ class PresubmitGoldenWatcher(GoldenWatcher):
     def __init__(self, temp_dir, artifacts_download_dir,
                  cached_golden_service=CachedGolden):
         self.temp_dir = temp_dir
-        self.type = GoldenWatcherTypes.PRESUBMIT
         self.artifacts_download_dir = artifacts_download_dir
         self.cached_golden_service = cached_golden_service
 

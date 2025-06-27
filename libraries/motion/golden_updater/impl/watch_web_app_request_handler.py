@@ -34,10 +34,11 @@ from impl.adb_client import AdbClient
 class WatchWebAppRequestHandler(http.server.BaseHTTPRequestHandler):
     secret_token = None
     golden_watcher = None
+    temp_dir = None
     android_build_top = None
     this_server_address = None
     presubmit_fetch_client = None
-    adb_client = None
+    adb_serial_finder = ADBSerialFinder()
     golden_watcher_cache = {}
 
     def __init__(self, *args, **kwargs):
@@ -65,6 +66,9 @@ class WatchWebAppRequestHandler(http.server.BaseHTTPRequestHandler):
 
         if parsed.path == "/service/list":
             self.service_list_goldens()
+            return
+        elif parsed.path == "/service/testModes/list":
+            self.get_available_modes()
             return
         elif parsed.path.startswith("/golden/"):
             requested_file_start_index = parsed.path.find("/", len("/golden/") + 1)
@@ -262,6 +266,21 @@ class WatchWebAppRequestHandler(http.server.BaseHTTPRequestHandler):
         except Exception as exception:
             self.send_error(500, str(exception))
 
+    def get_available_modes(self):
+        '''
+        Collects all adb devices available and send them along with modes like
+        robolectric and atest as available test mode options.
+        '''
+        available_modes = []
+        WatchWebAppRequestHandler.adb_serial_finder.update_model_serial_map()
+        if WatchWebAppRequestHandler.adb_serial_finder.model_serial_map:
+            available_modes = list(WatchWebAppRequestHandler.adb_serial_finder
+                                   .model_serial_map.keys())
+        available_modes.append(GoldenWatcherTypes.ROBOLECTRIC.value)
+        available_modes.append(GoldenWatcherTypes.ATEST.value)
+        print(f"available modes: {available_modes}")
+        self.send_json(available_modes)
+
     def switch_mode(self, mode: GoldenWatcherTypes):
         print(f'Switched to: {mode}')
 
@@ -279,34 +298,42 @@ class WatchWebAppRequestHandler(http.server.BaseHTTPRequestHandler):
                         (WatchWebAppRequestHandler
                         .golden_watcher) = GoldenWatcherFactory.create_watcher(
                                             GoldenWatcherTypes.ROBOLECTRIC,
-                                            WatchWebAppRequestHandler.golden_watcher.temp_dir
+                                            os.path.join(WatchWebAppRequestHandler
+                                                         .temp_dir,mode)
                                         )
 
                     case GoldenWatcherTypes.ATEST.value:
                         (WatchWebAppRequestHandler
                         .golden_watcher) = GoldenWatcherFactory.create_watcher(
                                             GoldenWatcherTypes.ATEST,
-                                            WatchWebAppRequestHandler.golden_watcher.temp_dir
+                                            os.path.join(WatchWebAppRequestHandler
+                                                         .temp_dir,mode)
                                         )
 
-                    case GoldenWatcherTypes.ADB.value:
-                        if not WatchWebAppRequestHandler.adb_client:
-                            serial = ADBSerialFinder.get_serial()
-                            if not serial:
-                                raise Exception("ADB Serial not found.")
+                    case _:
+                        '''
+                            If not matched with above two test modes,
+                            it must be an ADB device connected.
+                            If not raise exception.
 
-                            WatchWebAppRequestHandler.adb_client = AdbClient(serial)
-                            if not WatchWebAppRequestHandler.adb_client.run_as_root():
-                                raise Exception("Cannot run ADB as root.")
+                            Else, create adb client and move on.
+                        '''
+                        if mode not in (WatchWebAppRequestHandler
+                                        .adb_serial_finder.model_serial_map):
+                            raise ValueError("Mode not supported")
+                        serial = (WatchWebAppRequestHandler.adb_serial_finder
+                                  .model_serial_map.get(mode))
+                        adb_client = AdbClient(serial)
+                        if not adb_client.run_as_root():
+                            raise Exception("Cannot run ADB as root.")
 
                         (WatchWebAppRequestHandler
                         .golden_watcher) = GoldenWatcherFactory.create_watcher(
                                             GoldenWatcherTypes.ADB,
-                                            WatchWebAppRequestHandler.golden_watcher.temp_dir,
-                                            WatchWebAppRequestHandler.adb_client
+                                            os.path.join(WatchWebAppRequestHandler
+                                                         .temp_dir,mode),
+                                            adb_client
                                         )
-                    case _:
-                        raise ValueError("Mode not supported")
 
                 (WatchWebAppRequestHandler
                 .golden_watcher_cache[mode]) = WatchWebAppRequestHandler.golden_watcher

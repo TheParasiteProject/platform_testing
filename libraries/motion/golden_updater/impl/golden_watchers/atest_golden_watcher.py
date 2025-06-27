@@ -21,7 +21,6 @@ import shutil
 from impl.cached_golden import CachedGolden
 from impl.golden_watchers.golden_watcher import GoldenWatcher
 import itertools
-from impl.golden_watchers.golden_watcher_types import GoldenWatcherTypes
 
 
 class AtestGoldenWatcher(GoldenWatcher):
@@ -30,7 +29,6 @@ class AtestGoldenWatcher(GoldenWatcher):
         self.temp_dir = temp_dir
         self.atest_latest_dir = atest_latest_dir
         self.cached_golden_service = cached_golden_service
-        self.type = GoldenWatcherTypes.ATEST
         # name -> CachedGolden
         self.cached_goldens = {}
         self.refresh_golden_files()

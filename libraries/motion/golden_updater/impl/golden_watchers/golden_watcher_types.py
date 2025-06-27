@@ -20,4 +20,3 @@ class GoldenWatcherTypes(enum.Enum):
     ADB = "adb"
     ROBOLECTRIC = "robolectric"
     PRESUBMIT = 'presubmit'
-    NONE = "none"
