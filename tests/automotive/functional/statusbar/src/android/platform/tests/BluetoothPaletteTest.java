@@ -17,11 +17,14 @@ package android.platform.tests;
 
 import static junit.framework.Assert.assertTrue;
 
+import android.platform.test.annotations.DisableFlags;
 import android.platform.helpers.HelperAccessor;
 import android.platform.helpers.IAutoStatusBarHelper;
 import android.util.Log;
 
 import androidx.test.runner.AndroidJUnit4;
+
+import com.android.systemui.Flags;
 
 import org.junit.After;
 import org.junit.Before;
@@ -43,6 +46,7 @@ public class BluetoothPaletteTest {
     }
 
     @Test
+    @DisableFlags(Flags.FLAG_SCENE_CONTAINER)
     public void testDefaultStatusOfBlueToothPalette() {
         Log.i(LOG_TAG, "Act: Turn on Bluettooth.");
         mStatusBarHelper.get().turnOnOffBluetooth(true);
@@ -59,6 +63,7 @@ public class BluetoothPaletteTest {
 
 
     @Test
+    @DisableFlags(Flags.FLAG_SCENE_CONTAINER)
     public void testBluetoothDisableMessage() {
         Log.i(LOG_TAG, "Act: Turn off Bluettooth.");
         mStatusBarHelper.get().turnOnOffBluetooth(false);
@@ -71,6 +76,7 @@ public class BluetoothPaletteTest {
     }
 
     @Test
+    @DisableFlags(Flags.FLAG_SCENE_CONTAINER)
     public void testOpenBluetoothSettings() {
         Log.i(LOG_TAG, "Act: Open Bluetooth Settings");
         mStatusBarHelper.get().openBluetoothSettings();

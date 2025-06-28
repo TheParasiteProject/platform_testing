@@ -98,6 +98,10 @@ class MediaProjectionPermissionDialog internal constructor() {
     fun assertSecondaryDisplayVisible() {
         waitForObj(SPINNER_SELECTOR).click()
         ENTIRE_SCREEN_RECORD_SECONDARY_SELECTOR.assertVisible()
+
+        // Dismiss the Spinner again.
+        LauncherInstrumentation().pressBack()
+        ENTIRE_SCREEN_RECORD_SECONDARY_SELECTOR.assertInvisible()
     }
 
     companion object {

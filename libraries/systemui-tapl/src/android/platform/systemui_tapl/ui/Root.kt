@@ -51,6 +51,7 @@ import androidx.test.uiautomator.Until
 import com.android.app.tracing.traceSection
 import com.android.launcher3.tapl.LauncherInstrumentation
 import com.android.launcher3.tapl.Workspace
+import com.android.systemui.Flags
 import com.google.common.truth.Truth.assertThat
 import com.google.common.truth.Truth.assertWithMessage
 import java.time.Duration
@@ -72,7 +73,13 @@ class Root private constructor(val displayId: Int = DEFAULT_DISPLAY) {
      * notifications shade if the lockscreen screen is shown.
      */
     fun openNotificationShade(): NotificationShade {
-        return openNotificationShadeViaGlobalAction()
+        if (Flags.sceneContainer()) {
+            uiDevice.executeShellCommand("cmd statusbar expand-notifications-instant")
+            waitForShadeToOpen()
+            return NotificationShade(displayId)
+        } else {
+            return openNotificationShadeViaGlobalAction()
+        }
     }
 
     /** Opens the notification shade via AccessibilityService.GLOBAL_ACTION_NOTIFICATIONS. */
@@ -87,7 +94,7 @@ class Root private constructor(val displayId: Int = DEFAULT_DISPLAY) {
     /** Opens the notification shade via two fingers wipe. */
     fun openNotificationShadeViaTwoFingersSwipe(): NotificationShade {
         assertWithMessage(
-            "two finger swipe is only supported on the default display, because it relies on " +
+                "two finger swipe is only supported on the default display, because it relies on " +
                     "UiObject#performTwoPointerGesture, and UiObject has no concept of displayId " +
                     "(unlike UiObject2)"
             )
@@ -188,7 +195,7 @@ class Root private constructor(val displayId: Int = DEFAULT_DISPLAY) {
         return NotificationShade(displayId)
     }
 
-    private val footerSelector = sysuiResSelector("qs_footer_actions", displayId)
+    private val qsSelector = sysuiResSelector("quick_settings_panel", displayId)
 
     private val notificationSwipeX: Float
         get() = uiDevice.getDisplayWidth(displayId) / 4f
@@ -231,7 +238,7 @@ class Root private constructor(val displayId: Int = DEFAULT_DISPLAY) {
     ) {
         if (assertIsHunState) {
             assertWithMessage(
-                "HUN state Assertion usage error: Notification: ${identity.title} " +
+                    "HUN state Assertion usage error: Notification: ${identity.title} " +
                         "| You can only assert the HUN State of a notification that has an action " +
                         "button."
                 )
@@ -245,7 +252,11 @@ class Root private constructor(val displayId: Int = DEFAULT_DISPLAY) {
 
     /** Opens quick settings. */
     fun openQuickSettings(): QuickSettings {
-        uiDevice.executeShellCommand("cmd statusbar expand-settings")
+        if (Flags.sceneContainer()) {
+            uiDevice.executeShellCommand("cmd statusbar expand-settings-instant")
+        } else {
+            uiDevice.executeShellCommand("cmd statusbar expand-settings")
+        }
         waitForObj(sysuiResSelector("quick_settings_panel", displayId))
         return QuickSettings(displayId)
     }
@@ -255,9 +266,9 @@ class Root private constructor(val displayId: Int = DEFAULT_DISPLAY) {
         val device = uiDevice
         device.openQuickSettings()
         // Quick Settings isn't always open when this is complete. Explicitly wait for the Quick
-        // Settings footer to make sure that the buttons are accessible when the bar is open and
+        // Settings panel to make sure that the buttons are accessible when the bar is open and
         // this call is complete.
-        footerSelector.assertVisible()
+        qsSelector.assertVisible()
         // Wait an extra bit for the animation to complete. If we return to early, future callers
         // that are trying to find the location of the footer will get incorrect coordinates
         device.waitForIdle(LONG_TIMEOUT)

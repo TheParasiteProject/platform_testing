@@ -14,24 +14,33 @@
      limitations under the License.
 -->
 <configuration description="Config for {MODULE}">
+    <option name="test-suite-tag" value="kernel_tests"/>
     <option name="config-descriptor:metadata" key="parameter" value="not_multi_abi" />
-
     <target_preparer class="com.android.tradefed.targetprep.RootTargetPreparer" />
+
     <target_preparer class="com.android.tradefed.targetprep.RunCommandTargetPreparer">
         <option name="run-command" value="mkdir -p /data/igt_tests" />
-        <option name="run-command" value="stop vendor.hwcomposer-2-4" />
-        <option name="run-command" value="stop vendor.hwcomposer-3" />
-        <option name="run-command" value="stop vendor.qti.hardware.display.composer" />
-        <option name="teardown-command" value="start vendor.hwcomposer-2-4" />
-        <option name="teardown-command" value="start vendor.hwcomposer-3" />
-        <option name="teardown-command" value="start vendor.qti.hardware.display.composer" />
     </target_preparer>
 
     <target_preparer class="com.android.compatibility.common.tradefed.targetprep.FilePusher">
         <option name="cleanup" value="true" />
         <option name="append-bitness" value="false" />
         <option name="push" value="{MODULE}->/data/igt_tests/" />
+        <option name="push-file" key="setup_vkms_connectors_for_atest" value="/data/local/tmp/setup_vkms_connectors_for_atest"/>
+        <option name="push-file" key="teardown_vkms" value="/data/local/tmp/teardown_vkms"/>
     </target_preparer>
+
+    <target_preparer class="com.android.tradefed.targetprep.RunCommandTargetPreparer">
+        <option name="run-command" value="stop"/>
+        <option name="run-command" value="stop vendor.hwcomposer-3" />
+        <!-- If we're running on an AVD (product name includes "cf_"), setup VKMS with an eDP + 1DP + 1HDMI -->
+        <option name="run-command" value="getprop ro.product.name | grep -q 'cf_' &amp;&amp; /data/local/tmp/setup_vkms_connectors_for_atest --config eDP,0,REDRIX DP,1,HP_Spectre32_4K_DP HDMIA,2,ACI_9155_ASUS_VH238_HDMI" />
+        <option name="teardown-command" value="getprop ro.product.name | grep -q 'cf_' &amp;&amp; /data/local/tmp/teardown_vkms"/>
+        <option name="teardown-command" value="start vendor.hwcomposer-3" />
+        <option name="teardown-command" value="start"/>
+    </target_preparer>
+
+
 
     <test class="com.android.tradefed.testtype.GTest">
         <option name="native-test-device-path" value="/data/igt_tests/x86_64" />

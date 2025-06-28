@@ -38,6 +38,7 @@ public class PerfettoListener extends BaseMetricListener {
     public static final String COLLECT_PER_RUN = "per_run";
     public static final String COLLECT_PER_CLASS = "per_class";
     public static final String COLLECT_BEFORE_AFTER = "perfetto_before_after_test";
+    private static final int MAX_SECTION_NAME_LEN = 127;
 
     private List<PerfettoTracingStrategy> mTracingStrategies;
 
@@ -67,7 +68,8 @@ public class PerfettoListener extends BaseMetricListener {
         if (iteration > 0) {
             sectionName += " iteration:" + iteration;
         }
-        Trace.beginSection(sectionName);
+        int lastPos = Math.min(sectionName.length(), MAX_SECTION_NAME_LEN);
+        Trace.beginSection(sectionName.substring(0, lastPos - 1));
         mTracingStrategies.forEach(strategy -> strategy.testStart(testData, description,
                 iteration));
     }

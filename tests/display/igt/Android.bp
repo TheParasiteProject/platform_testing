@@ -1,8 +1,14 @@
+team {
+    name: "trendy_team_desktop_display",
+    trendy_team_id: "5085249219690496",
+}
+
 package {
     // See: http://go/android-license-faq
     default_applicable_licenses: [
         "Android-Apache-2.0",
     ],
+    default_team: "trendy_team_desktop_display",
 }
 
 cc_defaults {
@@ -16,138 +22,336 @@ cc_defaults {
     shared_libs: [
         "libbase",
     ],
+    srcs: [
+        "src/igt_test_helper.cpp",
+    ],
+    data_bins: [
+        "//platform_testing/tests/display/hcct/atest_wrapper:setup_vkms_connectors_for_atest",
+        "//platform_testing/tests/display/hcct/atest_wrapper:teardown_vkms",
+    ],
     test_suites: [
         "device-tests",
         "general-tests",
         "dts",
-    ],}
+    ],
+    test_config_template: "igt_config_template.xml",
+}
 
 cc_test {
     name: "IgtCoreAuthTestCases",
     defaults: ["platform_igt_gpu_tools_default"],
     srcs: [
-        "src/igt_test_helper.cpp",
         "src/core_auth.cpp",
     ],
     data_bins: [
         "//external/igt-gpu-tools:core_auth",
     ],
-    test_config_template: "igt_config_template.xml",
+}
+
+cc_test {
+    name: "IgtDrmMmTestCases",
+    defaults: ["platform_igt_gpu_tools_default"],
+    srcs: [
+        "src/drm_mm.cpp",
+    ],
+    data_bins: [
+        "//external/igt-gpu-tools:drm_mm",
+    ],
 }
 
 cc_test {
     name: "IgtKmsAddfbBasicTestCases",
     defaults: ["platform_igt_gpu_tools_default"],
     srcs: [
-        "src/igt_test_helper.cpp",
         "src/kms_addfb_basic.cpp",
     ],
     data_bins: [
         "//external/igt-gpu-tools:kms_addfb_basic",
     ],
-    test_config_template: "igt_config_template.xml",
 }
 
 cc_test {
     name: "IgtKmsAtomicInterruptibleTestCases",
     defaults: ["platform_igt_gpu_tools_default"],
     srcs: [
-        "src/igt_test_helper.cpp",
         "src/kms_atomic_interruptible.cpp",
     ],
     data_bins: [
         "//external/igt-gpu-tools:kms_atomic_interruptible",
     ],
-    test_config_template: "igt_config_template.xml",
 }
 
 cc_test {
     name: "IgtKmsAtomicTestCases",
     defaults: ["platform_igt_gpu_tools_default"],
     srcs: [
-        "src/igt_test_helper.cpp",
         "src/kms_atomic.cpp",
     ],
     data_bins: [
         "//external/igt-gpu-tools:kms_atomic",
     ],
-    test_config_template: "igt_config_template.xml",
+}
+
+cc_test {
+    name: "IgtKmsBwTestCases",
+    defaults: ["platform_igt_gpu_tools_default"],
+    srcs: [
+        "src/kms_bw.cpp",
+    ],
+    data_bins: [
+        "//external/igt-gpu-tools:kms_bw",
+    ],
+}
+
+cc_test {
+    name: "IgtKmsColorTestCases",
+    defaults: ["platform_igt_gpu_tools_default"],
+    srcs: [
+        "src/kms_color.cpp",
+    ],
+    data_bins: [
+        "//external/igt-gpu-tools:kms_color",
+    ],
+}
+
+cc_test {
+    name: "IgtKmsConcurrentTestCases",
+    defaults: ["platform_igt_gpu_tools_default"],
+    srcs: [
+        "src/kms_concurrent.cpp",
+    ],
+    data_bins: [
+        "//external/igt-gpu-tools:kms_concurrent",
+    ],
+}
+
+cc_test {
+    name: "IgtKmsCursorEdgeWalkTestCases",
+    defaults: ["platform_igt_gpu_tools_default"],
+    srcs: [
+        "src/kms_cursor_edge_walk.cpp",
+    ],
+    data_bins: [
+        "//external/igt-gpu-tools:kms_cursor_edge_walk",
+    ],
+}
+
+cc_test {
+    name: "IgtKmsContentProtectionTestCases",
+    defaults: ["platform_igt_gpu_tools_default"],
+    srcs: [
+        "src/kms_content_protection.cpp",
+    ],
+    data_bins: [
+        "//external/igt-gpu-tools:kms_content_protection",
+    ],
+}
+
+cc_test {
+    name: "IgtKmsDisplayModesTestCases",
+    defaults: ["platform_igt_gpu_tools_default"],
+    srcs: [
+        "src/kms_display_modes.cpp",
+    ],
+    data_bins: [
+        "//external/igt-gpu-tools:kms_display_modes",
+    ],
+}
+
+cc_test {
+    name: "IgtKmsHdmiInjectTestCases",
+    defaults: ["platform_igt_gpu_tools_default"],
+    srcs: [
+        "src/kms_hdmi_inject.cpp",
+    ],
+    data_bins: [
+        "//external/igt-gpu-tools:kms_hdmi_inject",
+    ],
+}
+
+cc_test {
+    name: "IgtKmsHdrTestCases",
+    defaults: ["platform_igt_gpu_tools_default"],
+    srcs: [
+        "src/kms_hdr.cpp",
+    ],
+    data_bins: [
+        "//external/igt-gpu-tools:kms_hdr",
+    ],
+}
+
+cc_test {
+    name: "IgtKmsInvalidModeTestCases",
+    defaults: ["platform_igt_gpu_tools_default"],
+    srcs: [
+        "src/kms_invalid_mode.cpp",
+    ],
+    data_bins: [
+        "//external/igt-gpu-tools:kms_invalid_mode",
+    ],
+}
+
+cc_test {
+    name: "IgtKmsPipeCrcBasicTestCases",
+    defaults: ["platform_igt_gpu_tools_default"],
+    srcs: [
+        "src/kms_pipe_crc_basic.cpp",
+    ],
+    data_bins: [
+        "//external/igt-gpu-tools:kms_pipe_crc_basic",
+    ],
+}
+
+cc_test {
+    name: "IgtKmsPlaneCursorTestCases",
+    defaults: ["platform_igt_gpu_tools_default"],
+    srcs: [
+        "src/kms_plane_cursor.cpp",
+    ],
+    data_bins: [
+        "//external/igt-gpu-tools:kms_plane_cursor",
+    ],
 }
 
 cc_test {
     name: "IgtKmsPlaneLowresTestCases",
     defaults: ["platform_igt_gpu_tools_default"],
     srcs: [
-        "src/igt_test_helper.cpp",
         "src/kms_plane_lowres.cpp",
     ],
     data_bins: [
         "//external/igt-gpu-tools:kms_plane_lowres",
     ],
-    test_config_template: "igt_config_template.xml",
+}
+
+cc_test {
+    name: "IgtKmsPlaneMultipleTestCases",
+    defaults: ["platform_igt_gpu_tools_default"],
+    srcs: [
+        "src/kms_plane_multiple.cpp",
+    ],
+    data_bins: [
+        "//external/igt-gpu-tools:kms_plane_multiple",
+    ],
 }
 
 cc_test {
     name: "IgtKmsPlaneScalingTestCases",
     defaults: ["platform_igt_gpu_tools_default"],
     srcs: [
-        "src/igt_test_helper.cpp",
         "src/kms_plane_scaling.cpp",
     ],
     data_bins: [
         "//external/igt-gpu-tools:kms_plane_scaling",
     ],
-    test_config_template: "igt_config_template.xml",
+}
+
+cc_test {
+    name: "IgtKmsPlaneTestCases",
+    defaults: ["platform_igt_gpu_tools_default"],
+    srcs: [
+        "src/kms_plane.cpp",
+    ],
+    data_bins: [
+        "//external/igt-gpu-tools:kms_plane",
+    ],
 }
 
 cc_test {
     name: "IgtKmsPropBlobTestCases",
     defaults: ["platform_igt_gpu_tools_default"],
     srcs: [
-        "src/igt_test_helper.cpp",
         "src/kms_prop_blob.cpp",
     ],
     data_bins: [
         "//external/igt-gpu-tools:kms_prop_blob",
     ],
-    test_config_template: "igt_config_template.xml",
 }
 
 cc_test {
     name: "IgtKmsPropertiesTestCases",
     defaults: ["platform_igt_gpu_tools_default"],
     srcs: [
-        "src/igt_test_helper.cpp",
         "src/kms_properties.cpp",
     ],
     data_bins: [
         "//external/igt-gpu-tools:kms_properties",
     ],
-    test_config_template: "igt_config_template.xml",
 }
 
 cc_test {
-    name: "IgtKmsVBlankTestCases",
+    name: "IgtKmsRotationCrcTestCases",
     defaults: ["platform_igt_gpu_tools_default"],
     srcs: [
-        "src/igt_test_helper.cpp",
-        "src/kms_vblank.cpp",
+        "src/kms_rotation_crc.cpp",
     ],
     data_bins: [
-        "//external/igt-gpu-tools:kms_vblank",
+        "//external/igt-gpu-tools:kms_rotation_crc",
     ],
-    test_config_template: "igt_config_template.xml",
+}
+
+cc_test {
+    name: "IgtKmsScalingModesTestCases",
+    defaults: ["platform_igt_gpu_tools_default"],
+    srcs: [
+        "src/kms_scaling_modes.cpp",
+    ],
+    data_bins: [
+        "//external/igt-gpu-tools:kms_scaling_modes",
+    ],
 }
 
 cc_test {
     name: "IgtKmsSetmodeTestCases",
     defaults: ["platform_igt_gpu_tools_default"],
     srcs: [
-        "src/igt_test_helper.cpp",
         "src/kms_setmode.cpp",
     ],
     data_bins: [
         "//external/igt-gpu-tools:kms_setmode",
     ],
-    test_config_template: "igt_config_template.xml",
+}
+
+cc_test {
+    name: "IgtKmsSysfsEdidTimingTestCases",
+    defaults: ["platform_igt_gpu_tools_default"],
+    srcs: [
+        "src/kms_sysfs_edid_timing.cpp",
+    ],
+    data_bins: [
+        "//external/igt-gpu-tools:kms_sysfs_edid_timing",
+    ],
+}
+
+cc_test {
+    name: "IgtKmsTiledDisplayTestCases",
+    defaults: ["platform_igt_gpu_tools_default"],
+    srcs: [
+        "src/kms_tiled_display.cpp",
+    ],
+    data_bins: [
+        "//external/igt-gpu-tools:kms_tiled_display",
+    ],
+}
+
+cc_test {
+    name: "IgtKmsVBlankTestCases",
+    defaults: ["platform_igt_gpu_tools_default"],
+    srcs: [
+        "src/kms_vblank.cpp",
+    ],
+    data_bins: [
+        "//external/igt-gpu-tools:kms_vblank",
+    ],
+}
+
+cc_test {
+    name: "IgtKmsVrrTestCases",
+    defaults: ["platform_igt_gpu_tools_default"],
+    srcs: [
+        "src/kms_vrr.cpp",
+    ],
+    data_bins: [
+        "//external/igt-gpu-tools:kms_vrr",
+    ],
 }

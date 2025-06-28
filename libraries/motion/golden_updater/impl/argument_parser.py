@@ -35,25 +35,25 @@ class ArgumentParser:
         parser.add_argument(
             "--atest",
             default=False,
-            help="Watches atest output",
+            help="Deprecated. DO NOT USE",
         )
 
         parser.add_argument(
             "--robolectricTest",
             default=False,
-            help="Watch for artifacs generated when a deviceless test is run via SysUi Studio",
+            help="Deprecated. DO NOT USE",
         )
 
         parser.add_argument(
             "--none",
             action="store_true",
-            help="Empty argument. DO NOT USE"
+            help="Deprecated. DO NOT USE"
         )
 
         parser.add_argument(
             "--serial",
-            default=os.environ.get("ANDROID_SERIAL"),
-            help="The ADB device serial to pull goldens from.",
+            default=None,
+            help="Deprecated. DO NOT USE",
         )
 
         parser.add_argument(

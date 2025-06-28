@@ -21,13 +21,10 @@ import os
 import sys
 import tempfile
 import webbrowser
-from impl.golden_watchers.golden_watcher_factory import GoldenWatcherFactory
-from impl.golden_watchers.golden_watcher_types import GoldenWatcherTypes
-from impl.adb_client import AdbClient
 from impl.watch_web_app_request_handler import WatchWebAppRequestHandler
 from impl.argument_parser import ArgumentParser
 from impl.token_generator import TokenGenerator
-from impl.adb_serial_finder import ADBSerialFinder
+from colors import Colors
 
 def main():
 
@@ -39,49 +36,22 @@ def main():
 
     android_build_top = args.android_build_top
 
+    if args.atest or args.robolectricTest or args.none or args.serial:
+        print(f"{Colors.RED}Warning!! Flags like 'atest', 'robolectricTest',"
+              "'none' and 'serial' are deprecated!! Please DO NOT USE!")
+        print(f"{Colors.YELLOW}Instead select test mode from UI.{Colors.RESET}")
+
     with tempfile.TemporaryDirectory() as tmpdir:
-        adb_client = None
-
-        if args.atest:
-            print("ATEST is running.")
-            golden_watcher = GoldenWatcherFactory.create_watcher(
-                GoldenWatcherTypes.ATEST,tmpdir
-            )
-
-        elif args.robolectricTest:
-            print("Running for devicess sysui studio test")
-            golden_watcher = GoldenWatcherFactory.create_watcher(
-                GoldenWatcherTypes.ROBOLECTRIC, tmpdir
-            )
-        elif args.none:
-            print("Running thin client")
-            golden_watcher = GoldenWatcherFactory.create_watcher(
-                GoldenWatcherTypes.NONE, tmpdir
-            )
-        else:
-            serial = args.serial or ADBSerialFinder.get_serial()
-            if not serial:
-                sys.exit(1)
-            adb_client = AdbClient(serial)
-            if not adb_client.run_as_root():
-                sys.exit(1)
-            golden_watcher = GoldenWatcherFactory.create_watcher(
-                GoldenWatcherTypes.ADB, tmpdir, adb_client
-            )
-
         this_server_address = f"http://localhost:{args.port}"
 
         secret_token = TokenGenerator.get_token()
         WatchWebAppRequestHandler.secret_token = secret_token
         WatchWebAppRequestHandler.android_build_top = android_build_top
-        WatchWebAppRequestHandler.golden_watcher = golden_watcher
+        WatchWebAppRequestHandler.temp_dir = tmpdir
         WatchWebAppRequestHandler.this_server_address = this_server_address
-        WatchWebAppRequestHandler.adb_client = adb_client
-        (WatchWebAppRequestHandler
-         .golden_watcher_cache[golden_watcher.type.value]) = golden_watcher
 
         with socketserver.TCPServer(
-            ("localhost", args.port), WatchWebAppRequestHandler, golden_watcher
+            ("localhost", args.port), WatchWebAppRequestHandler
         ) as httpd:
             uiAddress = f"{args.client_url}?token={secret_token}&port={args.port}"
             print(f"Open UI at {uiAddress}")
