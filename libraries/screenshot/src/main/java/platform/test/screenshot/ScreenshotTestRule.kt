@@ -16,11 +16,14 @@
 
 package platform.test.screenshot
 
-import android.annotation.ColorInt
 import android.annotation.SuppressLint
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import android.graphics.Canvas
 import android.graphics.Color
+import android.graphics.Paint
+import android.graphics.Paint.Style.FILL
+import android.graphics.Paint.Style.STROKE
 import android.graphics.Rect
 import android.platform.uiautomatorhelpers.DeviceHelpers.shell
 import android.provider.Settings.System
@@ -169,6 +172,7 @@ internal constructor(
      * @param goldenIdentifier Name of the golden. Allowed characters: 'A-Za-z0-9_-'
      * @param matcher The algorithm to be used to perform the matching.
      * @param regions An optional array of interesting regions for partial screenshot diff.
+     * @param excludedRegions An optional array to uninteresting regions for partial diff.
      * @throws IllegalArgumentException If the golden identifier contains forbidden characters or is
      *   empty.
      * @see MSSIMMatcher
@@ -181,6 +185,7 @@ internal constructor(
         goldenIdentifier: String,
         matcher: BitmapMatcher,
         regions: List<Rect>,
+        excludedRegions: List<Rect>,
     ) {
         if (!goldenIdentifier.matches("^[A-Za-z0-9_-]+$".toRegex())) {
             throw IllegalArgumentException(
@@ -266,6 +271,7 @@ internal constructor(
                 width = actual.width,
                 height = actual.height,
                 regions = regions,
+                excludedRegions = excludedRegions,
             )
         if (doesCollectScreenshotParityStats) {
             parityStatsCollector.collectTestStats(testIdentifier, comparisonResult)
@@ -280,7 +286,7 @@ internal constructor(
             }
 
         if (!comparisonResult.matches) {
-            val expectedWithHighlight = highlightedBitmap(expected, regions)
+            val expectedWithHighlight = highlightedBitmap(expected, regions, excludedRegions)
             diffEscrowStrategy.reportResult(
                 testIdentifier = testIdentifier,
                 goldenIdentifier = goldenIdentifier,
@@ -313,39 +319,36 @@ internal constructor(
     }
 
     /** This will create a new Bitmap with the output (not modifying the [original] Bitmap */
-    private fun highlightedBitmap(original: Bitmap, regions: List<Rect>): Bitmap {
+    private fun highlightedBitmap(
+        original: Bitmap,
+        regions: List<Rect>,
+        excludedAreas: List<Rect>,
+    ): Bitmap {
         if (regions.isEmpty()) return original
 
         val outputBitmap = original.copy(original.config!!, true)
         val imageRect = Rect(0, 0, original.width, original.height)
-        val regionLineWidth = 2
-        for (region in regions) {
-            val regionToDraw =
-                Rect(region).apply {
-                    inset(-regionLineWidth, -regionLineWidth)
-                    intersect(imageRect)
-                }
+        val canvas = Canvas(outputBitmap)
 
-            repeat(regionLineWidth) {
-                drawRectOnBitmap(outputBitmap, regionToDraw, Color.RED)
-                regionToDraw.inset(1, 1)
-                regionToDraw.intersect(imageRect)
+        val paint =
+            Paint().apply {
+                style = STROKE
+                strokeWidth = 2f
+                color = Color.RED
             }
+        val drawRect = Rect()
+        regions.forEach {
+            if (drawRect.setIntersect(it, imageRect)) canvas.drawRect(drawRect, paint)
+        }
+
+        paint.apply {
+            style = FILL
+            color = 0x66000000 // Semi transparent black
+        }
+        excludedAreas.forEach {
+            if (drawRect.setIntersect(it, imageRect)) canvas.drawRect(drawRect, paint)
         }
         return outputBitmap
-    }
-
-    private fun drawRectOnBitmap(bitmap: Bitmap, rect: Rect, @ColorInt color: Int) {
-        // Draw top and bottom edges
-        for (x in rect.left until rect.right) {
-            bitmap.setPixel(x, rect.top, color)
-            bitmap.setPixel(x, rect.bottom - 1, color)
-        }
-        // Draw left and right edge
-        for (y in rect.top until rect.bottom) {
-            bitmap.setPixel(rect.left, y, color)
-            bitmap.setPixel(rect.right - 1, y, color)
-        }
     }
 }
 
@@ -388,25 +391,12 @@ private constructor(
     private var prevShowTouchesSetting: Int? = null
 
     @Suppress("DEPRECATION")
-    override fun assertGoldenImage(goldenId: String) {
+    override fun assertGoldenImage(goldenId: String, areas: List<Rect>, excludedAreas: List<Rect>) {
         runBeforeScreenshot()
         var actual: Bitmap? = null
         try {
             actual = captureScreenshot(targetDisplayId)
-            rule.assertBitmapAgainstGolden(actual, goldenId, matcher)
-        } finally {
-            actual?.recycle()
-            runAfterScreenshot()
-        }
-    }
-
-    @Suppress("DEPRECATION")
-    override fun assertGoldenImage(goldenId: String, areas: List<Rect>) {
-        runBeforeScreenshot()
-        var actual: Bitmap? = null
-        try {
-            actual = captureScreenshot(targetDisplayId)
-            rule.assertBitmapAgainstGolden(actual, goldenId, matcher, areas)
+            rule.assertBitmapAgainstGolden(actual, goldenId, matcher, areas, excludedAreas)
         } finally {
             actual?.recycle()
             runAfterScreenshot()
