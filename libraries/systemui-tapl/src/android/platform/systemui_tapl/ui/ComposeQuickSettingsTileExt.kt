@@ -36,6 +36,11 @@ fun ComposeQuickSettingsTile.clickModesTileToOpenDialog(): ModesDialog {
     return ModesDialog(displayId)
 }
 
+fun ComposeQuickSettingsTile.clickBatteryTileToOpenDialog(): BatteryDialog {
+    click()
+    return BatteryDialog(displayId)
+}
+
 private fun ComposeQuickSettingsTile.clickToOpenDialogOnDualTarget() {
     if (isSmallTile) {
         longPress()
