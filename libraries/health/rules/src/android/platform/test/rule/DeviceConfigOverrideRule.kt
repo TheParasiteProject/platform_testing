@@ -17,6 +17,8 @@
 package android.platform.test.rule
 
 import android.provider.DeviceConfig
+import org.junit.rules.RuleChain.emptyRuleChain
+import org.junit.rules.TestRule
 import org.junit.runner.Description
 
 /**
@@ -28,10 +30,11 @@ class DeviceConfigOverrideRule(
     private val namespaceName: String,
     private val name: String,
     private val value: String,
-    private val makeDefault: Boolean
+    private val makeDefault: Boolean,
 ) : TestWatcher() {
     // Use strings to store values as all settings stored as strings internally
     private var originalValue: String? = null
+
     override fun starting(description: Description) {
         // This will return null if the setting hasn't been ever set
         originalValue = DeviceConfig.getProperty(namespaceName, name)
@@ -42,5 +45,26 @@ class DeviceConfigOverrideRule(
 
     override fun finished(description: Description) {
         DeviceConfig.setProperty(namespaceName, name, originalValue, makeDefault)
+    }
+
+    companion object {
+        /**
+         * Generates a test rule that sets overrides for multiple entries inside a single namespace.
+         */
+        fun createDeviceConfigOverridesRule(
+            namespaceName: String,
+            overrides: Map<String, String>,
+        ): TestRule {
+            return overrides.entries.fold(emptyRuleChain()) { chain, entry ->
+                val newRule =
+                    DeviceConfigOverrideRule(
+                        namespaceName = namespaceName,
+                        name = entry.key,
+                        value = entry.value,
+                        makeDefault = false,
+                    )
+                chain.around(newRule)
+            }
+        }
     }
 }
