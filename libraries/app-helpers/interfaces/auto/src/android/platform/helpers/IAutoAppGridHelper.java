@@ -112,4 +112,19 @@ public interface IAutoAppGridHelper extends IAppHelper {
      * <p>Validates whether app is present in app grid.
      */
     boolean isAppPresentInAppgrid(String appName);
+
+    /**
+     * Setup expectations: Home screen
+     *
+     * <p>Validates long press on Dynamic app on Dock and click on unpin app
+     */
+    void unpinAppOnDock(String target);
+
+    /**
+     * Setup expectations: Home screen
+     *
+     * <p>Validates app is displayed on the Dock.
+     */
+    boolean verifyAppOnDock(String target);
 }
+
