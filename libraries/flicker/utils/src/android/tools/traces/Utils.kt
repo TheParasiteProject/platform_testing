@@ -122,7 +122,7 @@ fun getCurrentState(
     val reader =
         PerfettoTraceMonitor.newBuilder()
             .also {
-                if (requestedWmDump && android.tracing.Flags.perfettoWmDump()) {
+                if (requestedWmDump) {
                     it.enableWindowManagerDump()
                 }
 
@@ -136,18 +136,7 @@ fun getCurrentState(
 
     reader.artifacts.forEach { it.deleteIfExists() }
 
-    val wmDump =
-        if (android.tracing.Flags.perfettoWmDump()) {
-            if (requestedWmDump) perfettoTrace else ByteArray(0)
-        } else {
-            if (requestedWmDump) {
-                Log.d(LOG_TAG, "Requesting new legacy WM state dump")
-                getCurrentWindowManagerState()
-            } else {
-                ByteArray(0)
-            }
-        }
-
+    val wmDump = if (requestedWmDump) perfettoTrace else ByteArray(0)
     val sfDump = if (requestedSfDump) perfettoTrace else ByteArray(0)
 
     return Pair(wmDump, sfDump)

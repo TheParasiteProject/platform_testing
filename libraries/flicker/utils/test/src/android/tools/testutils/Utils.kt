@@ -32,7 +32,6 @@ import android.tools.traces.parsers.perfetto.LayersTraceParser
 import android.tools.traces.parsers.perfetto.TraceProcessorSession
 import android.tools.traces.parsers.perfetto.WindowManagerTraceParser
 import android.tools.traces.parsers.wm.LegacyWindowManagerTraceParser
-import android.tools.traces.parsers.wm.WindowManagerDumpParser
 import android.tools.traces.wm.ConfigurationContainerImpl
 import android.tools.traces.wm.RootWindowContainer
 import android.tools.traces.wm.WindowContainerImpl
@@ -182,26 +181,10 @@ fun getWmTraceReaderFromAsset(
 }
 
 fun getWmDumpReaderFromAsset(relativePathWithoutExtension: String): Reader {
-    fun parseDump(): WindowManagerTrace {
-        val traceData = readAsset("$relativePathWithoutExtension.perfetto-trace")
-        return TraceProcessorSession.loadPerfettoTrace(traceData) { session ->
-            WindowManagerTraceParser().parse(session)
-        }
-    }
-
-    fun parseLegacyDump(): WindowManagerTrace {
-        val traceData =
-            runCatching { readAsset("$relativePathWithoutExtension.pb") }.getOrNull()
-                ?: runCatching { readAsset("$relativePathWithoutExtension.winscope") }.getOrNull()
-                ?: error("Can't find legacy trace file $relativePathWithoutExtension")
-        return WindowManagerDumpParser().parse(traceData, clearCache = false)
-    }
-
+    val traceData = readAsset("$relativePathWithoutExtension.perfetto-trace")
     val wmTrace =
-        if (android.tracing.Flags.perfettoWmDump()) {
-            parseDump()
-        } else {
-            parseLegacyDump()
+        TraceProcessorSession.loadPerfettoTrace(traceData) { session ->
+            WindowManagerTraceParser().parse(session)
         }
     return ParsedTracesReader(
         artifacts = arrayOf(TestArtifact(relativePathWithoutExtension)),
