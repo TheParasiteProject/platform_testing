@@ -17,7 +17,7 @@
 package android.tools.parsers.wm
 
 import android.tools.Cache
-import android.tools.io.TraceType
+import android.tools.io.DumpType
 import android.tools.testutils.CleanFlickerEnvironmentRule
 import android.tools.testutils.readAsset
 import android.tools.traces.getCurrentState
@@ -44,7 +44,7 @@ class WindowManagerDumpParserTest {
 
     @Test
     fun canParseFromNewDump() {
-        val data = getCurrentState(TraceType.WM_DUMP)
+        val data = getCurrentState(DumpType.WM)
         val trace = WindowManagerDumpParser().parse(data.first)
         Truth.assertWithMessage("Unable to parse dump").that(trace.entries).hasSize(1)
     }

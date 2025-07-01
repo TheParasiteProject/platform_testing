@@ -24,6 +24,7 @@ import android.os.ParcelFileDescriptor
 import android.os.Process
 import android.os.SystemClock
 import android.tools.MILLISECOND_AS_NANOSECONDS
+import android.tools.io.DumpType
 import android.tools.io.TraceType
 import android.tools.traces.io.ResultReader
 import android.tools.traces.monitors.PerfettoTraceMonitor
@@ -107,19 +108,14 @@ private fun getCurrentWindowManagerState() = doBinderDump("window")
  * @param dumpTypes Flags determining which types of traces should be included in the dump
  */
 fun getCurrentState(
-    vararg dumpTypes: TraceType = arrayOf(TraceType.SF_DUMP, TraceType.WM_DUMP)
+    vararg dumpTypes: DumpType = arrayOf(DumpType.SF, DumpType.WM)
 ): Pair<ByteArray, ByteArray> {
     if (dumpTypes.isEmpty()) {
         throw IllegalArgumentException("No dump specified")
     }
 
-    val traceTypes = dumpTypes.filter { it.isTrace }
-    if (traceTypes.isNotEmpty()) {
-        throw IllegalArgumentException("Only dump types are supported. Invalid types: $traceTypes")
-    }
-
-    val requestedWmDump = dumpTypes.contains(TraceType.WM_DUMP)
-    val requestedSfDump = dumpTypes.contains(TraceType.SF_DUMP)
+    val requestedWmDump = dumpTypes.contains(DumpType.WM)
+    val requestedSfDump = dumpTypes.contains(DumpType.SF)
 
     Log.d(LOG_TAG, "Requesting new device state dump")
 
@@ -170,7 +166,7 @@ fun getCurrentState(
  */
 @JvmOverloads
 fun getCurrentStateDumpNullable(
-    vararg dumpTypes: TraceType = arrayOf(TraceType.SF_DUMP, TraceType.WM_DUMP),
+    vararg dumpTypes: DumpType = arrayOf(DumpType.SF, DumpType.WM),
     clearCacheAfterParsing: Boolean = true,
 ): NullableDeviceStateDump {
     val currentStateDump = getCurrentState(*dumpTypes)
@@ -183,7 +179,7 @@ fun getCurrentStateDumpNullable(
 
 @JvmOverloads
 fun getCurrentStateDump(
-    vararg dumpTypes: TraceType = arrayOf(TraceType.SF_DUMP, TraceType.WM_DUMP),
+    vararg dumpTypes: DumpType = arrayOf(DumpType.SF, DumpType.WM),
     clearCacheAfterParsing: Boolean = true,
 ): DeviceStateDump {
     val currentStateDump = getCurrentState(*dumpTypes)

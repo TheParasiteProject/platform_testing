@@ -153,7 +153,7 @@ open class ResultReader(result: IResultData) : Reader {
     @Throws(IOException::class)
     override fun readLayersDump(tag: String): LayersTrace? {
         return withTracing("readLayersDump#$tag") {
-            val descriptor = ResultArtifactDescriptor(TraceType.SF_DUMP, tag)
+            val descriptor = ResultArtifactDescriptor(TraceType.PERFETTO, tag)
             readBytes(descriptor)?.let {
                 TraceProcessorSession.loadPerfettoTrace(it) { session ->
                     LayersTraceParser().parse(session, clearCache = true)
