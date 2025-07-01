@@ -133,5 +133,12 @@ public interface IAutoUserHelper extends IAppHelper {
      * <p>This method is used to skip the set up and initial diaglogs.
      */
     void skipSetupWizard();
+
+    /**
+     * Setup expectation: Delete your profile is clicked in User Infotainment System Data.
+     *
+     * <p>This method is used to choose new user as an admin .
+     */
+    void chooseNewAdmin();
 }
 

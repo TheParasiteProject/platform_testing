@@ -44,6 +44,7 @@ public class SwitchToGuestFromNonAdmin {
     private static final String userName = MultiUserConstants.SECONDARY_USER_NAME;
     private static final String guestUser = MultiUserConstants.GUEST_NAME;
     private static final String GUEST = AutomotiveConfigConstants.HOME_GUEST_BUTTON;
+    private static final String DRIVER = AutomotiveConfigConstants.HOME_DRIVER_BUTTON;
     private static final int WAIT_TIME = 10000;
     private final MultiUserHelper mMultiUserHelper = MultiUserHelper.getInstance();
     private HelperAccessor<IAutoUserHelper> mUsersHelper;
@@ -61,6 +62,8 @@ public class SwitchToGuestFromNonAdmin {
     public void goBackToHomeScreen() {
         Log.i(LOG_TAG, "Act: Go back to settings");
         mSettingHelper.get().goBackToSettingsScreen();
+        mSettingHelper.get().exit();
+        mUsersHelper.get().switchUsingUserIcon(DRIVER);
     }
 
     @Test
