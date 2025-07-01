@@ -125,8 +125,6 @@ class PerfettoTraceMonitorTest : TraceMonitorTest<PerfettoTraceMonitor>() {
 
     @Test
     fun imeTracingTest() {
-        assumeTrue("PerfettoIme flag should be enabled", android.tracing.Flags.perfettoIme())
-
         val traceMonitor = PerfettoTraceMonitor.newBuilder().enableImeTrace().build()
         val reader =
             traceMonitor.withTracing(resultReaderProvider = { buildResultReader(it) }) {
