@@ -31,8 +31,8 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Random;
 import java.util.HashSet;
+import java.util.Random;
 import java.util.Set;
 
 /**
@@ -161,6 +161,8 @@ public class PerfettoHelper {
      */
     @VisibleForTesting
     public boolean startCollectingFromConfig(String textProtoConfig) {
+        Log.i(LOG_TAG, "Start collecting from config.");
+
         mPerfettoPidFile = null;
         String startOutput = null;
         if (textProtoConfig == null || textProtoConfig.isEmpty()) {
@@ -234,6 +236,8 @@ public class PerfettoHelper {
      */
     @VisibleForTesting
     public boolean startCollectingFromConfigFile(String configFileName, boolean isTextProtoConfig) {
+        Log.i(LOG_TAG, "Start collecting from config file.");
+
         mPerfettoPidFile = null;
         String startOutput = null;
         if (configFileName == null || configFileName.isEmpty()) {
@@ -265,12 +269,13 @@ public class PerfettoHelper {
             // Start perfetto tracing.
             Log.i(LOG_TAG, "Starting perfetto tracing.");
             startOutput = mUIDevice.executeShellCommand(perfettoCmd);
+            Log.i(LOG_TAG, String.format("Perfetto start command output - %s", startOutput));
+
             if (mTrackPerfettoPidFlag) {
                 // Persist perfetto pid in a file and use it for cleanup if the instrumentation
                 // crashes.
                 mPerfettoPidFile = writePidToFile(startOutput);
             }
-            Log.i(LOG_TAG, String.format("Perfetto start command output - %s", startOutput));
 
             if (!canUpdateAfterStartCollecting(startOutput)) {
                 return false;
@@ -417,6 +422,8 @@ public class PerfettoHelper {
      */
     private File writePidToFile(String perfettoStartOutput)
             throws IOException, FileNotFoundException {
+        Log.i(LOG_TAG, String.format("Writing Perfetto Process id to file"));
+
         File perfettoPidFile =
                 new File(
                         String.format(
