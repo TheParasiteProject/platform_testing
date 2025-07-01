@@ -69,6 +69,12 @@ object TestTraces {
             get() = readAssetAsFile(ASSET)
     }
 
+    object ScreenRecording {
+        private const val ASSET = "screen_recording.mp4"
+        val FILE
+            get() = readAssetAsFile(ScreenRecording.ASSET)
+    }
+
     object LegacyTransitionTrace {
         private const val WM_ASSET = "wm_transition_trace.winscope"
         private const val SHELL_ASSET = "shell_transition_trace.winscope"

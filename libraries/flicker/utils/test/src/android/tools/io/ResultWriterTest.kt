@@ -173,6 +173,39 @@ class ResultWriterTest {
             .isTrue()
     }
 
+    @Test
+    fun writesScreenRecordingSeparately() {
+        val writer =
+            newTestResultWriter()
+                .addTraceResult(TraceType.SCREEN_RECORDING, TestTraces.ScreenRecording.FILE)
+                .addTraceResult(TraceType.PERFETTO, TestTraces.TransactionTrace.FILE)
+
+        val result = writer.write()
+
+        Truth.assertThat(result.artifacts).hasLength(2)
+
+        val screenRecordingArtifact =
+            result.artifacts.firstOrNull {
+                it.hasTrace(ResultArtifactDescriptor(TraceType.SCREEN_RECORDING))
+            }
+        val otherTraceArtifact =
+            result.artifacts.firstOrNull {
+                it.hasTrace(ResultArtifactDescriptor(TraceType.PERFETTO))
+            }
+
+        Truth.assertWithMessage("Screen recording artifact exists")
+            .that(screenRecordingArtifact)
+            .isNotNull()
+        Truth.assertWithMessage("Other trace artifact exists").that(otherTraceArtifact).isNotNull()
+
+        Truth.assertWithMessage("Screen recording artifact contains only screen recording")
+            .that(screenRecordingArtifact?.traceCount())
+            .isEqualTo(1)
+        Truth.assertWithMessage("Other trace artifact contains only other trace")
+            .that(otherTraceArtifact?.traceCount())
+            .isEqualTo(1)
+    }
+
     companion object {
         private val EXPECTED_FAILURE = IllegalArgumentException("Expected test exception")
 
