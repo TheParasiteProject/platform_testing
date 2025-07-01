@@ -24,9 +24,13 @@ import platform.test.screenshot.matchers.BitmapMatcher
 import platform.test.screenshot.matchers.PixelPerfectMatcher
 
 interface ScreenshotAsserter {
-    fun assertGoldenImage(goldenId: String, areas: List<Rect>)
 
-    fun assertGoldenImage(goldenId: String)
+    fun assertGoldenImage(goldenId: String, areas: List<Rect>, excludedAreas: List<Rect>)
+
+    fun assertGoldenImage(goldenId: String, areas: List<Rect>) =
+        assertGoldenImage(goldenId, areas, emptyList())
+
+    fun assertGoldenImage(goldenId: String) = assertGoldenImage(goldenId, emptyList())
 }
 
 /**

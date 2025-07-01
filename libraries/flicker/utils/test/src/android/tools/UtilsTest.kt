@@ -16,7 +16,7 @@
 
 package android.tools
 
-import android.tools.io.TraceType
+import android.tools.io.DumpType
 import android.tools.testutils.CleanFlickerEnvironmentRule
 import android.tools.traces.NullableDeviceStateDump
 import android.tools.traces.getCurrentState
@@ -31,13 +31,13 @@ import org.junit.runners.MethodSorters
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 class UtilsTest {
     private fun getCurrState(
-        vararg dumpTypes: TraceType = arrayOf(TraceType.SF_DUMP, TraceType.WM_DUMP)
+        vararg dumpTypes: DumpType = arrayOf(DumpType.SF, DumpType.WM)
     ): Pair<ByteArray, ByteArray> {
         return getCurrentState(*dumpTypes)
     }
 
     private fun getCurrStateDump(
-        vararg dumpTypes: TraceType = arrayOf(TraceType.SF_DUMP, TraceType.WM_DUMP)
+        vararg dumpTypes: DumpType = arrayOf(DumpType.SF, DumpType.WM)
     ): NullableDeviceStateDump {
         return getCurrentStateDumpNullable(*dumpTypes, clearCacheAfterParsing = false)
     }
@@ -51,20 +51,20 @@ class UtilsTest {
 
     @Test
     fun canFetchCurrentDeviceStateOnlyWm() {
-        val currStateDump = this.getCurrState(TraceType.WM_DUMP)
+        val currStateDump = this.getCurrState(DumpType.WM)
         Truth.assertThat(currStateDump.first).isNotEmpty()
         Truth.assertThat(currStateDump.second).isEmpty()
-        val currState = this.getCurrStateDump(TraceType.WM_DUMP)
+        val currState = this.getCurrStateDump(DumpType.WM)
         Truth.assertThat(currState.wmState).isNotNull()
         Truth.assertThat(currState.layerState).isNull()
     }
 
     @Test
     fun canFetchCurrentDeviceStateOnlyLayers() {
-        val currStateDump = this.getCurrState(TraceType.SF_DUMP)
+        val currStateDump = this.getCurrState(DumpType.SF)
         Truth.assertThat(currStateDump.first).isEmpty()
         Truth.assertThat(currStateDump.second).isNotEmpty()
-        val currState = this.getCurrStateDump(TraceType.SF_DUMP)
+        val currState = this.getCurrStateDump(DumpType.SF)
         Truth.assertThat(currState.wmState).isNull()
         Truth.assertThat(currState.layerState).isNotNull()
     }

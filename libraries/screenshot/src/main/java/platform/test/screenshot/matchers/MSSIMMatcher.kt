@@ -46,9 +46,10 @@ class MSSIMMatcher(@FloatRange(from = 0.0, to = 1.0) private val threshold: Doub
         given: IntArray,
         width: Int,
         height: Int,
-        regions: List<Rect>
+        regions: List<Rect>,
+        excludedRegions: List<Rect>,
     ): MatchResult {
-        val filter = getFilter(width, height, regions)
+        val filter = getFilter(width, height, regions, excludedRegions)
         val calSSIMResult = calculateSSIM(expected, given, width, height, filter)
 
         val stats =
@@ -68,7 +69,9 @@ class MSSIMMatcher(@FloatRange(from = 0.0, to = 1.0) private val threshold: Doub
         }
 
         // Create diff
-        val result = PixelPerfectMatcher().compareBitmaps(expected, given, width, height, regions)
+        val result =
+            PixelPerfectMatcher()
+                .compareBitmaps(expected, given, width, height, regions, excludedRegions)
         return MatchResult(matches = false, diff = result.diff, comparisonStatistics = stats)
     }
 
@@ -77,7 +80,7 @@ class MSSIMMatcher(@FloatRange(from = 0.0, to = 1.0) private val threshold: Doub
         given: IntArray,
         width: Int,
         height: Int,
-        filter: BooleanArray
+        filter: BooleanArray,
     ): SSIMResult {
         return calculateSSIM(ideal, given, 0, width, width, height, filter)
     }
@@ -89,7 +92,7 @@ class MSSIMMatcher(@FloatRange(from = 0.0, to = 1.0) private val threshold: Doub
         stride: Int,
         width: Int,
         height: Int,
-        filter: BooleanArray
+        filter: BooleanArray,
     ): SSIMResult {
         var SSIMTotal = 0.0
         var totalNumPixelsCompared = 0.0
@@ -123,7 +126,7 @@ class MSSIMMatcher(@FloatRange(from = 0.0, to = 1.0) private val threshold: Doub
                         start,
                         stride,
                         windowWidth,
-                        windowHeight
+                        windowHeight,
                     )
                 val varX = variances[0]
                 val varY = variances[1]
@@ -143,7 +146,7 @@ class MSSIMMatcher(@FloatRange(from = 0.0, to = 1.0) private val threshold: Doub
             SSIM = averageSSIM,
             numPixelsSimilar = (averageSSIM * totalNumPixelsCompared + 0.5).toInt(),
             numPixelsIgnored = ignored,
-            numPixelsCompared = (totalNumPixelsCompared + 0.5).toInt()
+            numPixelsCompared = (totalNumPixelsCompared + 0.5).toInt(),
         )
     }
 
@@ -168,7 +171,7 @@ class MSSIMMatcher(@FloatRange(from = 0.0, to = 1.0) private val threshold: Doub
         y: Int,
         start: Int,
         stride: Int,
-        filter: BooleanArray
+        filter: BooleanArray,
     ): Boolean {
         return !filter[indexFromXAndY(x, y, stride, start)]
     }
@@ -183,7 +186,7 @@ class MSSIMMatcher(@FloatRange(from = 0.0, to = 1.0) private val threshold: Doub
         stride: Int,
         windowWidth: Int,
         windowHeight: Int,
-        filter: BooleanArray
+        filter: BooleanArray,
     ): Boolean {
         for (y in 0 until windowHeight) {
             for (x in 0 until windowWidth) {
@@ -203,7 +206,7 @@ class MSSIMMatcher(@FloatRange(from = 0.0, to = 1.0) private val threshold: Doub
         stride: Int,
         windowWidth: Int,
         windowHeight: Int,
-        filter: BooleanArray
+        filter: BooleanArray,
     ): Int {
         var numPixelsToCompare = 0
         for (y in 0 until windowHeight) {
@@ -242,7 +245,7 @@ class MSSIMMatcher(@FloatRange(from = 0.0, to = 1.0) private val threshold: Doub
         start: Int,
         stride: Int,
         windowWidth: Int,
-        windowHeight: Int
+        windowHeight: Int,
     ): DoubleArray {
         var avg0 = 0.0
         var avg1 = 0.0
@@ -277,7 +280,7 @@ class MSSIMMatcher(@FloatRange(from = 0.0, to = 1.0) private val threshold: Doub
         start: Int,
         stride: Int,
         windowWidth: Int,
-        windowHeight: Int
+        windowHeight: Int,
     ): DoubleArray {
         var var0 = 0.0
         var var1 = 0.0
@@ -337,5 +340,5 @@ class SSIMResult(
     val SSIM: Double,
     val numPixelsSimilar: Int,
     val numPixelsIgnored: Int,
-    val numPixelsCompared: Int
+    val numPixelsCompared: Int,
 )

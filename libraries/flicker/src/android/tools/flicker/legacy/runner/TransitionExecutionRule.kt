@@ -20,6 +20,7 @@ import android.tools.flicker.FlickerTag
 import android.tools.flicker.junit.Utils
 import android.tools.flicker.legacy.FlickerTestData
 import android.tools.io.TraceType
+import android.tools.io.WINSCOPE_EXT
 import android.tools.traces.getCurrentState
 import android.tools.traces.io.ResultWriter
 import android.tools.traces.monitors.NoTraceMonitor
@@ -126,14 +127,14 @@ class TransitionExecutionRule(
             tags.add(tag)
 
             val deviceStateBytes = getCurrentState()
-            val wmDumpFile = File.createTempFile(TraceType.WM_DUMP.fileName, tag)
-            val layersDumpFile = File.createTempFile(TraceType.SF_DUMP.fileName, tag)
+            val wmDumpFile = File.createTempFile("trace.$WINSCOPE_EXT", tag)
+            val layersDumpFile = File.createTempFile(TraceType.PERFETTO.fileName, tag)
 
             wmDumpFile.writeBytes(deviceStateBytes.first)
             layersDumpFile.writeBytes(deviceStateBytes.second)
 
             resultWriter.addTraceResult(TraceType.WM_DUMP, wmDumpFile, tag)
-            resultWriter.addTraceResult(TraceType.SF_DUMP, layersDumpFile, tag)
+            resultWriter.addTraceResult(TraceType.PERFETTO, layersDumpFile, tag)
         }
     }
 }

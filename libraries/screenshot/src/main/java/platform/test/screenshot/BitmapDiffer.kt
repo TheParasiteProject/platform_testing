@@ -48,5 +48,31 @@ interface BitmapDiffer {
         goldenIdentifier: String,
         matcher: BitmapMatcher,
         regions: List<Rect> = emptyList(),
+    ) = assertBitmapAgainstGolden(actual, goldenIdentifier, matcher, regions, emptyList())
+
+    /**
+     * Asserts the given bitmap against the golden identified by the given name.
+     *
+     * Note: The golden identifier should be unique per your test module (unless you want multiple
+     * tests to match the same golden). The name must not contain extension. You should also avoid
+     * adding strings like "golden", "image" and instead describe what is the golder referring to.
+     *
+     * @param actual The bitmap captured during the test.
+     * @param goldenIdentifier Name of the golden. Allowed characters: 'A-Za-z0-9_-'
+     * @param matcher The algorithm to be used to perform the matching.
+     * @param regions An optional array of interesting regions for partial screenshot diff.
+     * @param excludedRegions An optional array to uninteresting regions for partial diff.
+     * @throws IllegalArgumentException If the golden identifier contains forbidden characters or is
+     *   empty.
+     * @see MSSIMMatcher
+     * @see PixelPerfectMatcher
+     * @see Bitmap.assertAgainstGolden
+     */
+    fun assertBitmapAgainstGolden(
+        actual: Bitmap,
+        goldenIdentifier: String,
+        matcher: BitmapMatcher,
+        regions: List<Rect>,
+        excludedRegions: List<Rect>,
     )
 }

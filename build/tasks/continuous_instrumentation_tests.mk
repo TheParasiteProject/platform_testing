@@ -17,10 +17,6 @@
 
 LOCAL_PATH := $(call my-dir)
 
-# TODO: Clean up the tests phony target to replace with 'phony_rule' in soong.
-# Also build this when you run "make tests".
-tests: continuous_instrumentation_tests
-
 # Include test em files in emma metadata
 ifeq ($(EMMA_INSTRUMENT_STATIC),true)
     $(EMMA_META_ZIP) : continuous_instrumentation_tests
