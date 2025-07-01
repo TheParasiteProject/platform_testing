@@ -56,6 +56,14 @@ class ExpandedBubbleStack internal constructor() {
         return BubbleOverflow()
     }
 
+    fun verifyBubbleOverflowIsVisible() {
+        if (CommonUtils.isLargeScreen()) {
+            BUBBLE_BAR_OVERFLOW
+        } else {
+            BUBBLE_OVERFLOW_BUTTON
+        }.assertVisible(timeout = FIND_OBJECT_TIMEOUT)
+    }
+
     /** Closes the stack by swiping up. */
     fun closeBySwiping() {
         val windowBounds = windowMetrics.bounds
