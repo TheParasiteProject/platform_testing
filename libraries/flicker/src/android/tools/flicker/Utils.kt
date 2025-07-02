@@ -48,15 +48,12 @@ object Utils {
                     .enableProtoLog()
                     .enableViewCaptureTrace()
                     .enableTransitionsTrace()
+                    .enableImeTrace()
 
                 if (android.tracing.Flags.perfettoWmTracing()) {
                     perfettoMonitorBuilder.enableWindowManagerTrace()
                 } else {
                     this.add(WindowManagerTraceMonitor())
-                }
-
-                if (android.tracing.Flags.perfettoIme()) {
-                    perfettoMonitorBuilder.enableImeTrace()
                 }
 
                 this.add(perfettoMonitorBuilder.build())
