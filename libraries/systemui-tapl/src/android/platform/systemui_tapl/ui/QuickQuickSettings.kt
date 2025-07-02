@@ -16,7 +16,7 @@
 
 package android.platform.systemui_tapl.ui
 
-import android.platform.helpers.CommonUtils
+import android.platform.helpers.ShadeUtils
 import android.platform.systemui_tapl.ui.ComposeQuickSettingsTile.Companion.assertIsTile
 import android.platform.systemui_tapl.utils.DeviceUtils.LONG_WAIT
 import android.platform.systemui_tapl.utils.DeviceUtils.sysuiResSelector
@@ -27,7 +27,7 @@ import android.platform.uiautomatorhelpers.DeviceHelpers.waitForObj
 import android.view.Display.DEFAULT_DISPLAY
 import androidx.test.uiautomator.UiObject2
 import com.android.systemui.Flags
-import org.junit.Assume.assumeFalse
+import org.junit.Assume.assumeTrue
 
 /**
  * System UI test automation object representing quick quick settings in the notification shade.
@@ -43,10 +43,7 @@ class QuickQuickSettings internal constructor(val displayId: Int = DEFAULT_DISPL
     private val qqsTilesContainer: UiObject2
 
     init {
-        assumeFalse(
-            "QQS replaced by Dual Shade on large screens with the scenes",
-            CommonUtils.isLargeScreen() && Flags.sceneContainer(),
-        )
+        assumeTrue("QQS is only available in SingleShade.", ShadeUtils.isSingleShadeConfig())
 
         qsContainerSelector(displayId).assertVisible(timeout = LONG_WAIT) {
             "Quick quick settings not visible"

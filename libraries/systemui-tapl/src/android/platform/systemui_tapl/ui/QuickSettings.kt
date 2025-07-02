@@ -16,7 +16,7 @@
 package android.platform.systemui_tapl.ui
 
 import android.graphics.PointF
-import android.platform.helpers.CommonUtils
+import android.platform.helpers.ShadeUtils
 import android.platform.systemui_tapl.utils.DeviceUtils
 import android.platform.systemui_tapl.utils.DeviceUtils.sysuiResSelector
 import android.platform.systemui_tapl.utils.SETTINGS_PACKAGE
@@ -44,7 +44,7 @@ class QuickSettings internal constructor(val displayId: Int = DEFAULT_DISPLAY) {
 
     init {
         qsContainer.assertVisible { "Quick settings didn't open" }
-        if (!CommonUtils.isDualShade()) {
+        if (!ShadeUtils.isDualShadeConfig()) {
             footerSelector.assertVisible()
         } else {
             waitForObj(sysuiResSelector(SETTINGS_BUTTON_RES_ID, displayId))
