@@ -25,6 +25,8 @@ import java.util.List;
 
 public class HomeHelperImpl extends AbstractStandardAppHelper implements IAutoHomeHelper {
 
+    private static final int WAIT_MS = 10000;
+
     public HomeHelperImpl(Instrumentation instr) {
         super(instr);
     }
@@ -193,9 +195,9 @@ public class HomeHelperImpl extends AbstractStandardAppHelper implements IAutoHo
     }
 
     private String getDriverIconText() {
-        getSpectatioUiUtil().wait5Seconds();
         BySelector profileDriverIconWidgetSelector =
                 getUiElementFromConfig(AutomotiveConfigConstants.HOME_DRIVER_BUTTON);
+        getSpectatioUiUtil().waitForUiObject(profileDriverIconWidgetSelector, WAIT_MS);
         UiObject2 driverIconButtonLink =
                 getSpectatioUiUtil().findUiObject(profileDriverIconWidgetSelector);
         getSpectatioUiUtil()
@@ -206,9 +208,9 @@ public class HomeHelperImpl extends AbstractStandardAppHelper implements IAutoHo
     }
 
     private String getGuestIconText() {
-        getSpectatioUiUtil().wait5Seconds();
         BySelector profileGuestIconWidgetSelector =
                 getUiElementFromConfig(AutomotiveConfigConstants.HOME_GUEST_BUTTON);
+        getSpectatioUiUtil().waitForUiObject(profileGuestIconWidgetSelector, WAIT_MS);
         UiObject2 guestIconButtonLink =
                 getSpectatioUiUtil().findUiObject(profileGuestIconWidgetSelector);
         getSpectatioUiUtil()
@@ -218,9 +220,9 @@ public class HomeHelperImpl extends AbstractStandardAppHelper implements IAutoHo
     }
 
     private String getSecondaryUserIconText() {
-        getSpectatioUiUtil().wait5Seconds();
         BySelector secondaryUserWidgetSelector =
                 getUiElementFromConfig(AutomotiveConfigConstants.HOME_SECONDARY_USER_BUTTON);
+        getSpectatioUiUtil().waitForUiObject(secondaryUserWidgetSelector, WAIT_MS);
         UiObject2 secondaryUserButtonLink =
                 getSpectatioUiUtil().findUiObject(secondaryUserWidgetSelector);
         getSpectatioUiUtil()
@@ -301,8 +303,7 @@ public class HomeHelperImpl extends AbstractStandardAppHelper implements IAutoHo
         UiObject2 assistantWidget = getSpectatioUiUtil().findUiObject(assistantWidgetSelector);
         getSpectatioUiUtil()
                 .validateUiObject(assistantWidget, AutomotiveConfigConstants.HOME_TOP_CARD);
-        getSpectatioUiUtil().clickAndWait(assistantWidget);
-        getSpectatioUiUtil().wait5Seconds();
+        getSpectatioUiUtil().clickAndWaitUntilNewWindowAppears(assistantWidget);
     }
 
     @Override
