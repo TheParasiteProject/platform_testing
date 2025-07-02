@@ -163,7 +163,6 @@ object RotationUtils {
         device.setOrientationNatural()
         setEnableLauncherRotation(false)
         device.unfreezeRotation()
-        waitForOrientationToSettle()
         log("Rotation override cleared.")
     }
 

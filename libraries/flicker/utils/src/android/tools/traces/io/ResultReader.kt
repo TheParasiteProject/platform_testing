@@ -33,7 +33,6 @@ import android.tools.traces.parsers.perfetto.TransactionsTraceParser
 import android.tools.traces.parsers.perfetto.TransitionsTraceParser
 import android.tools.traces.parsers.perfetto.WindowManagerTraceParser
 import android.tools.traces.parsers.wm.LegacyWindowManagerTraceParser
-import android.tools.traces.parsers.wm.WindowManagerDumpParser
 import android.tools.traces.protolog.ProtoLogTrace
 import android.tools.traces.surfaceflinger.LayersTrace
 import android.tools.traces.surfaceflinger.TransactionsTrace
@@ -94,12 +93,8 @@ open class ResultReader(result: IResultData) : Reader {
             Log.d(FLICKER_IO_TAG, "Reading WM trace descriptor=$descriptor from $result")
             val traceData = readBytes(descriptor)
             traceData?.let {
-                if (android.tracing.Flags.perfettoWmDump()) {
-                    TraceProcessorSession.loadPerfettoTrace(it) { session ->
-                        WindowManagerTraceParser().parse(session)
-                    }
-                } else {
-                    WindowManagerDumpParser().parse(it, clearCache = true)
+                TraceProcessorSession.loadPerfettoTrace(it) { session ->
+                    WindowManagerTraceParser().parse(session)
                 }
             }
         }

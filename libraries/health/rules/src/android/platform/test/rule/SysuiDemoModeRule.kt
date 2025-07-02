@@ -57,4 +57,16 @@ class SysuiDemoModeRule() : TestWatcher() {
         intent.putExtra("command", command)
         context.sendBroadcast(intent)
     }
+
+    /**
+     * Overrides the "plugged in" signal for SysUI. This is useful to test funtionalities that
+     * require the device to not be plugged in, despite it will be during testing (e.g. triggering
+     * battery saver dialog from QS).
+     */
+    fun setPlugged(plugged: Boolean) {
+        val intent = Intent("com.android.systemui.demo")
+        intent.putExtra("command", "battery")
+        intent.putExtra("plugged", plugged.toString())
+        context.sendBroadcast(intent)
+    }
 }
