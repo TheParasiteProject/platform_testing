@@ -82,7 +82,6 @@ public class TestMediaAppHelperImpl extends AbstractStandardAppHelper
                 AutomotiveConfigConstants.TEST_MEDIA_ROOT_NODE_TYPE_BROWSABLE, "Browsable Content");
         // close settings
         clickAndWait(AutomotiveConfigConstants.TEST_MEDIA_APP_CLOSE_SETTING, "Close Settings");
-        selectSongInTestMediaApp();
     }
 
     private void selectSongInTestMediaApp() {

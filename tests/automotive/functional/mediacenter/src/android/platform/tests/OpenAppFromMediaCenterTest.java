@@ -80,6 +80,7 @@ public class OpenAppFromMediaCenterTest {
     }
 
     @Test
+    @ConditionalIgnore(condition = IgnoreOnPortrait.class)
     public void testOpenMediaAppFromMediaAppAppgrid() {
         Log.i(LOG_TAG, "Act: Open Media widget");
         mAutoHomeHelper.get().openMediaWidget();

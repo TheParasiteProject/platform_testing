@@ -28,8 +28,12 @@ import androidx.test.uiautomator.By
 
 /** Wrapper representing the FlashlightDialog that opens when the QS Tile is clicked */
 class FlashlightDialog internal constructor(displayId: Int = DEFAULT_DISPLAY) {
-    private val uiDialogTitle = By.displayId(displayId).res(FLASHLIGHT_TITLE)
-    private val doneBtn = By.displayId(displayId).res(FLASHLIGHT_DONE)
+    private val uiDialogTitle =
+        By.displayId(displayId).res(FLASHLIGHT_TITLE_TAG).text(FLASHLIGHT_TITLE_TEXT)
+    private val doneBtn =
+        By.displayId(displayId).res(FLASHLIGHT_DONE_TAG).text(FLASHLIGHT_DONE_TEXT)
+    private val offButton =
+        By.displayId(displayId).res(FLASHLIGHT_OFF_TAG).text(FLASHLIGHT_OFF_TEXT)
 
     // TODO (b/419868372) use the dialog title since we know what it is, get rid of test tags.
 
@@ -40,7 +44,8 @@ class FlashlightDialog internal constructor(displayId: Int = DEFAULT_DISPLAY) {
 
     fun assertDialogClosed() {
         uiDialogTitle.assertInvisible(errorProvider = { "Flashlight dialog title is visible" })
-        doneBtn.assertInvisible(errorProvider = { "Flashlight tile done button is visible" })
+        doneBtn.assertInvisible(errorProvider = { "Flashlight dialog done button is visible" })
+        offButton.assertInvisible(errorProvider = { "Flashlight dialog off button is visible" })
     }
 
     /** Finds the done button, clicks on it and asserts that the dialog has closed. */
@@ -53,8 +58,22 @@ class FlashlightDialog internal constructor(displayId: Int = DEFAULT_DISPLAY) {
         assertDialogClosed()
     }
 
+    /** Finds the turn off button, clicks on it and asserts that the dialog has closed. */
+    fun clickOnTurnOffAssertClosed() {
+        offButton.click()
+        if (waitToBecomeTrue { !uiDevice.hasObject(offButton) }.result !is WaitResult.WaitSuccess) {
+            Log.d("QuickSettingsTileBase", "Retrying click due to b/339676505")
+            offButton.click()
+        }
+        assertDialogClosed()
+    }
+
     private companion object {
-        const val FLASHLIGHT_TITLE = "flashlight_title"
-        const val FLASHLIGHT_DONE = "flashlight_done"
+        const val FLASHLIGHT_TITLE_TAG = "flashlight_title"
+        const val FLASHLIGHT_TITLE_TEXT = "Flashlight Strength"
+        const val FLASHLIGHT_DONE_TAG = "flashlight_done"
+        const val FLASHLIGHT_DONE_TEXT = "Done"
+        const val FLASHLIGHT_OFF_TAG = "flashlight_off"
+        const val FLASHLIGHT_OFF_TEXT = "Turn off"
     }
 }

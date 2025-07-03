@@ -18,7 +18,7 @@ package android.platform.systemui_tapl.ui
 
 import android.hardware.display.DisplayManager
 import android.os.SystemClock
-import android.platform.helpers.CommonUtils
+import android.platform.helpers.ShadeUtils
 import android.platform.systemui_tapl.utils.DeviceUtils.LONG_WAIT
 import android.platform.systemui_tapl.utils.DeviceUtils.settingsResSelector
 import android.platform.systemui_tapl.utils.DeviceUtils.sysuiResSelector
@@ -53,8 +53,7 @@ import kotlin.math.floor
 /** System UI test automation object representing the notification shade. */
 class NotificationShade internal constructor(val displayId: Int = DEFAULT_DISPLAY) {
     init {
-        // SplitShade is deprecated with SceneContainer, this assertion is not relevant there.
-        if (!Flags.sceneContainer() && CommonUtils.isSplitShade()) {
+        if (ShadeUtils.isSplitShadeConfig()) {
             val qsBounds = quickSettingsContainer.visibleBounds
             val notificationBounds = notificationShadeScrollContainer.visibleBounds
             assertWithMessage(

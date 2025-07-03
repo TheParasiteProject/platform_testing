@@ -1845,6 +1845,11 @@
       "TYPE": "TEXT",
       "VALUE": "Only browse-able content"
     },
+    "TEST_MEDIA_APP_SETTING": {
+      "TYPE": "RESOURCE_ID",
+      "VALUE": "car_ui_toolbar_menu_item_icon",
+      "PACKAGE": "com.chassis.car.ui.plugin"
+    },
     "TEST_MEDIA_APP_CLOSE_SETTING": {
       "TYPE": "RESOURCE_ID",
       "VALUE": "close_target",

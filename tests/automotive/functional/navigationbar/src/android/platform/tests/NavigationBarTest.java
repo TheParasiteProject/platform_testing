@@ -17,6 +17,7 @@
 package android.platform.tests;
 
 import static junit.framework.Assert.assertTrue;
+import static junit.framework.Assert.assertFalse;
 
 import android.app.Instrumentation;
 import android.platform.helpers.HelperAccessor;
@@ -56,7 +57,6 @@ public class NavigationBarTest {
     }
 
     @Test
-    @ConditionalIgnore(condition = IgnoreOnPortrait.class)
     public void testHomeButton() {
         Log.i(LOG_TAG, "Act: Click on Home button");
         mFacetBarHelper.get().clickOnFacetIcon(IAutoFacetBarHelper.FACET_BAR.HOME);
@@ -84,6 +84,36 @@ public class NavigationBarTest {
         Log.i(LOG_TAG, "Assert: App grid is open");
         assertTrue(
                 "App grid did not open",
+                mFacetBarHelper
+                        .get()
+                        .isAppInForeground(IAutoFacetBarHelper.VERIFY_OPEN_APP.APP_GRID));
+    }
+
+    @Test
+    public void testAppGridClose() {
+        Log.i(LOG_TAG, "Act: Click on Home button");
+        mFacetBarHelper.get().clickOnFacetIcon(IAutoFacetBarHelper.FACET_BAR.HOME);
+        Log.i(LOG_TAG, "Assert: Home screen is open");
+        assertTrue(
+                "Home screen did not open",
+                mFacetBarHelper.get().isAppInForeground(IAutoFacetBarHelper.VERIFY_OPEN_APP.HOME));
+        Log.i(LOG_TAG, "Act: Click on Appgrid Button");
+        mFacetBarHelper.get().clickOnFacetIcon(IAutoFacetBarHelper.FACET_BAR.APP_GRID);
+        Log.i(LOG_TAG, "Assert: App grid is open");
+        assertTrue(
+                "App grid did not open",
+                mFacetBarHelper
+                        .get()
+                        .isAppInForeground(IAutoFacetBarHelper.VERIFY_OPEN_APP.APP_GRID));
+        Log.i(LOG_TAG, "Act: Click on Home button");
+        mFacetBarHelper.get().clickOnFacetIcon(IAutoFacetBarHelper.FACET_BAR.HOME);
+        Log.i(LOG_TAG, "Assert: Home screen is open");
+        assertTrue(
+                "Home screen did not open",
+                mFacetBarHelper.get().isAppInForeground(IAutoFacetBarHelper.VERIFY_OPEN_APP.HOME));
+        Log.i(LOG_TAG, "Assert: Appgrid is closed");
+        assertFalse(
+                "App grid did not close",
                 mFacetBarHelper
                         .get()
                         .isAppInForeground(IAutoFacetBarHelper.VERIFY_OPEN_APP.APP_GRID));

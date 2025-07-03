@@ -21,7 +21,7 @@ import android.graphics.PointF
 import android.graphics.Rect
 import android.os.RemoteException
 import android.os.SystemClock
-import android.platform.helpers.CommonUtils
+import android.platform.helpers.ShadeUtils
 import android.platform.systemui_tapl.controller.LockscreenController
 import android.platform.systemui_tapl.controller.NotificationIdentity
 import android.platform.systemui_tapl.ui.ExpandedBubbleStack.Companion.BUBBLE_EXPANDED_VIEW
@@ -56,8 +56,8 @@ import com.android.launcher3.tapl.Workspace
 import com.android.systemui.Flags
 import com.google.common.truth.Truth.assertThat
 import com.google.common.truth.Truth.assertWithMessage
-import java.time.Duration
 import org.junit.Assert.assertThrows
+import java.time.Duration
 
 /**
  * The root class for System UI test automation objects. All System UI test automation objects are
@@ -268,7 +268,7 @@ class Root private constructor(val displayId: Int = DEFAULT_DISPLAY) {
 
     /** Opens quick settings with a swipe gesture that depends on form factor. */
     fun openQuickSettingsWithSwipe(): QuickSettings {
-        if (Flags.sceneContainer() && CommonUtils.isDualShade()) {
+        if (ShadeUtils.isDualShadeConfig()) {
             BetterSwipe.swipe(
                 PointF(qsSwipeX, 1f),
                 PointF(qsSwipeX, uiDevice.getDisplayHeight(displayId).toFloat() - 2f),
