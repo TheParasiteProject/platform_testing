@@ -537,6 +537,16 @@ public class MediaCenterHelperImpl extends AbstractStandardAppHelper implements 
         getSpectatioUiUtil().clickAndWait(menuItemElements.get(settingsItemPosition));
     }
 
+    /** {@inheritDoc} */
+    @Override
+    public void openTestMediaAppSettings() {
+        BySelector menuItemElementSelector =
+                getUiElementFromConfig(AutomotiveConfigConstants.TEST_MEDIA_APP_SETTING);
+        List<UiObject2> menuItemElements =
+                getSpectatioUiUtil().findUiObjects(menuItemElementSelector);
+        getSpectatioUiUtil().clickAndWait(menuItemElements.get(1));
+    }
+
     /**
      * {@inheritDoc}
      */

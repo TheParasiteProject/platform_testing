@@ -170,6 +170,9 @@ public interface IAutoMediaHelper extends IAppHelper, Scrollable {
      */
     void openMediaAppSettingsPage();
 
+    /** Setup expectations: Media app is open. */
+    void openTestMediaAppSettings();
+
     /**
      * Setup expectations: Media app is open. Account not logged in.
      *

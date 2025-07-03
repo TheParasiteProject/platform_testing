@@ -22,6 +22,7 @@ import static junit.framework.Assert.assertTrue;
 import static org.junit.Assert.assertNotEquals;
 
 import android.platform.helpers.HelperAccessor;
+import android.platform.helpers.IAutoAppGridHelper;
 import android.platform.helpers.IAutoHomeHelper;
 import android.platform.helpers.IAutoMediaHelper;
 import android.platform.helpers.IAutoTestMediaAppHelper;
@@ -55,27 +56,29 @@ public class MediaTestAppTest {
             new HelperAccessor<>(IAutoTestMediaAppHelper.class);
     private static HelperAccessor<IAutoHomeHelper> sAutoHomeHelper =
             new HelperAccessor<>(IAutoHomeHelper.class);
+    private static HelperAccessor<IAutoAppGridHelper> sAppGridHelper =
+            new HelperAccessor<>(IAutoAppGridHelper.class);
 
     @BeforeClass
     public static void setup() {
-        // Load songs on Test Media App
-        Log.i(LOG_TAG, "Act: Open Media widget");
-        sAutoHomeHelper.get().openMediaWidget();
-        Log.i(LOG_TAG, "Act: Open Media App Menu Items");
-        sMediaCenterHelper.get().openMediaAppMenuItems();
-        Log.i(LOG_TAG, "Act: Get Test Media App");
-        String mediaAppName = TEST_MEDIA_APP;
-        if (mMediaTestApp != null
-                && mMediaTestApp.get() != null
-                && !mMediaTestApp.get().isEmpty()) {
-            mediaAppName = mMediaTestApp.get();
-        }
+        // Make sure app grid is not open before testing.
+        Log.i(LOG_TAG, "Act: Exit Appgrid");
+        sAppGridHelper.get().exit();
+
+        Log.i(LOG_TAG, "Act: Open Appgrid");
+        sAppGridHelper.get().open();
+
         Log.i(LOG_TAG, "Act: Open Test Media App");
-        sMediaCenterHelper.get().openApp(mediaAppName);
+        sAppGridHelper.get().openApp(TEST_MEDIA_APP);
+
         Log.i(LOG_TAG, "Act: Open Media App settings page");
-        sMediaCenterHelper.get().openMediaAppSettingsPage();
+        sMediaCenterHelper.get().openTestMediaAppSettings();
+
         Log.i(LOG_TAG, "Act: Wait for load Media on Test Media App");
         sTestMediaAppHelper.get().loadMediaInLocalMediaTestApp();
+
+        Log.i(LOG_TAG, "Act: Select Normal 1H track song");
+        sMediaCenterHelper.get().selectMediaTrack(mDefaultSongName);
     }
 
     @After
