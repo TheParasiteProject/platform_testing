@@ -113,8 +113,8 @@ class QuickSettings internal constructor(val displayId: Int = DEFAULT_DISPLAY) {
             return UniversalMediaObject()
         }
 
-    /** Swipes up back to QQS or closes shade in case of split shade. */
-    fun close() {
+    /** Swipes up back to QQS or closes shade in case of split- or dual shade. */
+    fun closeWithSwipe() {
         swipeUp()
         qsContainer.assertInvisible()
     }
