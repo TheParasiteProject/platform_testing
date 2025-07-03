@@ -94,14 +94,14 @@ class AppTestPlugin : Plugin<Project> {
             // TODO: https://github.com/gradle/gradle/issues/16634 - Can't use version catalog
             // because the extension is not registered by subproject or root project
             listOf(
-                    "androidx.appcompat:appcompat:1.6.1",
+                    "androidx.appcompat:appcompat:1.7.1",
                     "androidx.core:core:1.13.1",
                     "com.google.android.material:material:1.12.0",
                     "junit:junit:4.13.2",
-                    "androidx.test.ext:junit:1.1.5",
-                    "androidx.test.espresso:espresso-core:3.5.1",
+                    "androidx.test.ext:junit:1.2.1",
+                    "androidx.test.espresso:espresso-core:3.6.1",
                     "androidx.test.uiautomator:uiautomator:2.3.0",
-                    "org.jetbrains.kotlin:kotlin-stdlib:1.8.22",
+                    "org.jetbrains.kotlin:kotlin-stdlib:2.2.0",
                 )
                 .forEach { dependencyString ->
                     implementationConfiguration.dependencies.add(
