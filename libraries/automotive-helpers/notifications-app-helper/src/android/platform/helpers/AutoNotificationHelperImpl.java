@@ -231,8 +231,6 @@ public class AutoNotificationHelperImpl extends AbstractStandardAppHelper
     @Override
     public void tapClearAllBtn() {
         open();
-        getSpectatioUiUtil().wait5Seconds();
-
         UiObject2 empty_notification = getSpectatioUiUtil().findUiObject(
             getUiElementFromConfig(AutomotiveConfigConstants.NOTIFICATION_LIST_EMPTY)
         );
@@ -252,8 +250,6 @@ public class AutoNotificationHelperImpl extends AbstractStandardAppHelper
     @Override
     public void clickManageBtn() {
         open();
-        getSpectatioUiUtil().wait5Seconds();
-
         UiObject2 empty_notification = getSpectatioUiUtil().findUiObject(
             getUiElementFromConfig(AutomotiveConfigConstants.NOTIFICATION_LIST_EMPTY)
         );
@@ -286,7 +282,6 @@ public class AutoNotificationHelperImpl extends AbstractStandardAppHelper
     /** {@inheritDoc} */
     @Override
     public void removeNotification(String title) {
-        getSpectatioUiUtil().wait5Seconds();
         open();
         UiObject2 postedNotification = getSpectatioUiUtil().findUiObject(By.text(title));
         getSpectatioUiUtil()
@@ -294,7 +289,6 @@ public class AutoNotificationHelperImpl extends AbstractStandardAppHelper
                         postedNotification,
                         String.format("Unable to get the posted notification."));
         getSpectatioUiUtil().swipeRight(postedNotification);
-        getSpectatioUiUtil().wait5Seconds();
     }
 
     /** {@inheritDoc} */
