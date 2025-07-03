@@ -355,7 +355,11 @@ public class SettingsSystemHelperImpl extends AbstractStandardAppHelper
                 .validateUiObject(
                         aboutMenu, String.format("Unable to find UI Element for Storage menu"));
         getSpectatioUiUtil().clickAndWait(aboutMenu);
-        getSpectatioUiUtil().wait5Seconds();
+        getSpectatioUiUtil()
+                .waitForUiObject(
+                        getUiElementFromConfig(
+                                AutomotiveConfigConstants.STORAGE_MUSIC_AUDIO_SETTINGS),
+                        TWENTY_SECONDS_WAIT_TIME);
     }
 
     /** {@inheritDoc} */
