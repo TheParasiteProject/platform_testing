@@ -136,10 +136,14 @@ class WatchWebAppRequestHandler(http.server.BaseHTTPRequestHandler):
             return
 
         parsed = urllib.parse.urlparse(self.path)
-        query_params = urllib.parse.parse_qs(parsed.query)
 
         if parsed.path == "/service/update":
-            self.service_update_golden(query_params["id"][0])
+            query_params = urllib.parse.parse_qs(parsed.query)
+            self.service_update_golden({query_params["id"][0]})
+        elif parsed.path == '/service/updateSelectedGoldensIds':
+            length = int(self.headers.get("Content-Length"))
+            message = json.loads(self.rfile.read(length))
+            self.service_update_golden(set(message["selectedGoldenIds"]))
         else:
             self.send_error(404)
 
@@ -350,30 +354,45 @@ class WatchWebAppRequestHandler(http.server.BaseHTTPRequestHandler):
         WatchWebAppRequestHandler.golden_watcher.refresh_golden_files()
         self.service_list_goldens()
 
-    def service_update_golden(self, id):
+    def service_update_golden(self, update_golden_id_set):
+        '''
+        Find goldens with IDs in update_golden_id_set and updates expected values.
+        '''
+        if len(update_golden_id_set) == 0:
+            self.send_json({}, 400)
+        result = {}
+        success_count = 0
+
         goldens = WatchWebAppRequestHandler.golden_watcher.cached_goldens.values()
         for golden in goldens:
-            if golden.id != id:
+            if golden.id not in update_golden_id_set:
                 print("skip", golden.id)
                 continue
+            try:
+                dst = path.join(WatchWebAppRequestHandler.android_build_top,
+                                golden.golden_repo_path)
+                if not path.exists(path.dirname(dst)):
+                    os.makedirs(path.dirname(dst))
 
-            dst = path.join(WatchWebAppRequestHandler.android_build_top,
-                            golden.golden_repo_path)
-            if not path.exists(path.dirname(dst)):
-                os.makedirs(path.dirname(dst))
+                shutil.copyfile(golden.local_file, dst)
 
-            shutil.copyfile(golden.local_file, dst)
+                golden.updated = True
+                result[golden.id] = "Updated"
+                success_count += 1
+            except Exception as e:
+                result[golden.id] = f"Failed with exception: {e}"
 
-            golden.updated = True
-            self.send_json({"result": "OK"})
-            return
+        if success_count == len(update_golden_id_set):
+            self.send_json(result)
+        elif success_count == 0:
+            self.send_json(result, 400)
+        else:
+            self.send_json(result, 207)
 
-        self.send_error(400)
-
-    def send_json(self, data):
+    def send_json(self, data, status_code=200):
         # Replace this with code that generates your JSON data
         data_encoded = json.dumps(data).encode("utf-8")
-        self.send_response(200)
+        self.send_response(status_code)
         self.send_header("Content-type", "application/json")
         self.add_standard_headers()
         self.end_headers()
