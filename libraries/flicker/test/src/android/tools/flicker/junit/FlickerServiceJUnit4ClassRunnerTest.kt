@@ -18,7 +18,6 @@ package android.tools.flicker.junit
 
 import android.app.Instrumentation
 import android.os.Bundle
-import android.platform.test.annotations.FlakyTest
 import android.tools.Scenario
 import android.tools.Timestamps
 import android.tools.device.apphelpers.BrowserAppHelper
@@ -40,6 +39,7 @@ import androidx.test.platform.app.InstrumentationRegistry
 import com.google.common.truth.Truth
 import java.time.Instant
 import org.junit.Assert
+import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.TestRule
@@ -50,6 +50,14 @@ import org.mockito.ArgumentMatchers
 import org.mockito.Mockito
 
 class FlickerServiceJUnit4ClassRunnerTest {
+    @Before
+    fun setup() {
+        onTestRuleStart = null
+        onTestStart = null
+        onTestRuleEnd = null
+        testRuleRunCount = 0
+    }
+
     @Test
     fun runsTheTestRules() {
         testRuleRunCount = 0
@@ -88,7 +96,6 @@ class FlickerServiceJUnit4ClassRunnerTest {
     }
 
     @Test
-    @FlakyTest(bugId = 417746314)
     fun skipsNonBlockingTestsIfRequested() {
         val arguments = Bundle()
         arguments.putString(Scenario.FAAS_BLOCKING, "true")
