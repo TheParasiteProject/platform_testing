@@ -29,6 +29,9 @@
     <!-- Screen must be on for the test to be able to capture screenshots. -->
     <target_preparer class="com.android.tradefed.targetprep.DeviceSetup">
         <option name="screen-always-on" value="on" />
+        <option name="set-global-setting" key="animator_duration_scale" value="1.0" />
+        <option name="set-global-setting" key="transition_animation_scale" value="1.0" />
+        <option name="set-global-setting" key="window_animation_scale" value="1.0" />
     </target_preparer>
     <target_preparer class="com.android.tradefed.targetprep.RunCommandTargetPreparer">
         <option name="run-command" value="input keyevent KEYCODE_WAKEUP" />
