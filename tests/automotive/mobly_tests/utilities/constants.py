@@ -168,6 +168,20 @@ DIALER_CONTACTS_LABEL = "Contacts"
 DIALER_FAVORITES_LABEL = "Favorites"
 DIALER_DIALPAD_LABEL = "Dialpad"
 START_DIALER_SHELL = 'am start -a android.intent.action.DIAL'
+DIALER_SIMULATOR_OUTGOING_CALL_COMMAND = (
+    "am broadcast -n"
+    " com.google.android.dialer/com.android.dialer.simulator.impl.SimulatorBroadcastReceiver_Receiver"
+    " --es command OutgoingCall --es number {phone_number} --ei presentation 1"
+    " --es cnap {name}"
+)
+DIALER_SIMULATOR_INCOMING_CALL_COMMAND = (
+    "am broadcast -n"
+    " com.google.android.dialer/com.android.dialer.simulator.impl.SimulatorBroadcastReceiver_Receiver"
+    " --es command IncomingCall --es number {phone_number} --ei presentation 1"
+    " --es cnap {name}"
+)
+GET_PRODUCT_NAME = "getprop ro.product.name"
+CF_X86_64_PHONE = "cf_x86_64_phone"
 
 # Bluetooth Logs
 BLUETOOTH_TAG="setprop persist.log.tag.bluetooth verbose"
