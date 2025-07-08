@@ -62,6 +62,8 @@ public class ShutdownPerfTest extends BaseHostJUnit4Test {
     public void setUp() throws Exception {
         mDevice = getDevice();
         mMilliSecondsShutdownTime = new Long[mIterations];
+        // Reboot to ensure the pstore file exists after image flash
+        mDevice.reboot();
     }
 
     // possible kernel console output paths to check
