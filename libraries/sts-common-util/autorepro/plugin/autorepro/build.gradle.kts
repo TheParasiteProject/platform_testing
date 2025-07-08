@@ -28,7 +28,7 @@ plugins {
 }
 
 dependencies {
-    implementation("com.android.tools.build:gradle:8.5.2")
+    implementation("com.android.tools.build:gradle:8.11.0")
 
     // Use the Kotlin JUnit 5 integration.
     testImplementation("org.jetbrains.kotlin:kotlin-test-junit5")
@@ -36,7 +36,7 @@ dependencies {
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 
     // https://mvnrepository.com/artifact/com.google.code.gson/gson
-    implementation("com.google.code.gson:gson:2.11.0")
+    implementation("com.google.code.gson:gson:2.13.1")
 }
 
 java {
@@ -49,7 +49,7 @@ java {
 // Define the overall plugin
 group = "com.android.security.autorepro"
 
-version = "1.0.0-alpha1"
+version = "1.0.1-alpha1"
 
 // Define the individual sub-plugins
 gradlePlugin {
