@@ -26,7 +26,6 @@ import androidx.test.InstrumentationRegistry;
 import androidx.test.uiautomator.UiDevice;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.nio.file.Path;
@@ -201,21 +200,24 @@ public class PerfettoHelper {
                 // Persist perfetto pid in a file and use it for cleanup if the instrumentation
                 // crashes.
                 if (mTrackPerfettoPidFlag) {
-                    mPerfettoPidFile = writePidToFile(startOutput);
+                    try {
+                        mPerfettoPidFile = writePidToFile(startOutput);
+                    } catch (IOException ioe) {
+                        Log.e(
+                                LOG_TAG,
+                                "Unable to write perfetto process id to a file."
+                                        + ioe.getMessage());
+                        Log.i(
+                                LOG_TAG,
+                                "Stopping perfetto tracing because perfetto id is not tracked.");
+                        stopPerfetto(Integer.parseInt(startOutput.trim()));
+                        return false;
+                    }
                 }
                 if (!canUpdateAfterStartCollecting(startOutput)) {
                     return false;
                 }
             }
-        } catch (FileNotFoundException fnf) {
-            Log.e(LOG_TAG, "Unable to write perfetto process id to a file :" + fnf.getMessage());
-            Log.i(LOG_TAG, "Stopping perfetto tracing because perfetto id is not tracked.");
-            try {
-                stopPerfetto(Integer.parseInt(startOutput.trim()));
-            } catch (IOException ie) {
-                Log.e(LOG_TAG, "Unable to stop perfetto process output file." + ie.getMessage());
-            }
-            return false;
         } catch (IOException ioe) {
             Log.e(LOG_TAG, "Unable to start the perfetto tracing due to :" + ioe.getMessage());
             return false;
@@ -271,24 +273,24 @@ public class PerfettoHelper {
             startOutput = mUIDevice.executeShellCommand(perfettoCmd);
             Log.i(LOG_TAG, String.format("Perfetto start command output - %s", startOutput));
 
+            // Persist perfetto pid in a file and use it for cleanup if the instrumentation
+            // crashes.
             if (mTrackPerfettoPidFlag) {
-                // Persist perfetto pid in a file and use it for cleanup if the instrumentation
-                // crashes.
-                mPerfettoPidFile = writePidToFile(startOutput);
+                try {
+                    mPerfettoPidFile = writePidToFile(startOutput);
+                } catch (IOException ioe) {
+                    Log.e(
+                            LOG_TAG,
+                            "Unable to write perfetto process id to a file." + ioe.getMessage());
+                    Log.i(LOG_TAG, "Stopping perfetto tracing because perfetto id is not tracked.");
+                    stopPerfetto(Integer.parseInt(startOutput.trim()));
+                    return false;
+                }
             }
 
             if (!canUpdateAfterStartCollecting(startOutput)) {
                 return false;
             }
-        } catch (FileNotFoundException fnf) {
-            Log.e(LOG_TAG, "Unable to write perfetto process id to a file :" + fnf.getMessage());
-            Log.i(LOG_TAG, "Stopping perfetto tracing because perfetto id is not tracked.");
-            try {
-                stopPerfetto(Integer.parseInt(startOutput.trim()));
-            } catch (IOException ie) {
-                Log.e(LOG_TAG, "Unable to stop perfetto process output file." + ie.getMessage());
-            }
-            return false;
         } catch (IOException ioe) {
             Log.e(LOG_TAG, "Unable to start the perfetto tracing due to :" + ioe.getMessage());
             return false;
@@ -355,17 +357,12 @@ public class PerfettoHelper {
 
         // Stop the perfetto and copy the output file.
         Log.i(LOG_TAG, "Stopping perfetto.");
-        try {
-            if (stopPerfetto(mPerfettoProcId)) {
-                if (!copyFileOutput(destinationFile)) {
-                    return false;
-                }
-            } else {
-                Log.e(LOG_TAG, "Perfetto failed to stop.");
+        if (stopPerfetto(mPerfettoProcId)) {
+            if (!copyFileOutput(destinationFile)) {
                 return false;
             }
-        } catch (IOException ioe) {
-            Log.e(LOG_TAG, "Unable to stop the perfetto tracing due to " + ioe.getMessage());
+        } else {
+            Log.e(LOG_TAG, "Perfetto failed to stop.");
             return false;
         }
         // Delete the perfetto process id file if the perfetto tracing successfully ended.
@@ -388,11 +385,17 @@ public class PerfettoHelper {
      * @param perfettoProcId perfetto process id.
      * @return true if perfetto is stopped successfully.
      */
-    public boolean stopPerfetto(int perfettoProcId) throws IOException {
-        Log.i(LOG_TAG, String.format("Killing the process id - %d", perfettoProcId));
-        String stopOutput =
-                mUIDevice.executeShellCommand(String.format(PERFETTO_STOP_CMD, perfettoProcId));
-        Log.i(LOG_TAG, String.format("Perfetto stop command output - %s", stopOutput));
+    public boolean stopPerfetto(int perfettoProcId) {
+        try {
+            Log.i(LOG_TAG, String.format("Killing the process id - %d", perfettoProcId));
+            String stopOutput =
+                    mUIDevice.executeShellCommand(String.format(PERFETTO_STOP_CMD, perfettoProcId));
+            Log.i(LOG_TAG, String.format("Perfetto stop command output - %s", stopOutput));
+        } catch (IOException ioe) {
+            Log.e(LOG_TAG, "Unable to execute kill command due to " + ioe.getMessage());
+            return false;
+        }
+
         int waitCount = 0;
         while (isTestPerfettoRunning(perfettoProcId)) {
             // 60 secs timeout for perfetto shutdown.
@@ -420,8 +423,7 @@ public class PerfettoHelper {
      * @param perfettoStartOutput perfetto process id.
      * @return File with perfetto process id written in it.
      */
-    private File writePidToFile(String perfettoStartOutput)
-            throws IOException, FileNotFoundException {
+    private File writePidToFile(String perfettoStartOutput) throws IOException {
         Log.i(LOG_TAG, String.format("Writing Perfetto Process id to file"));
 
         File perfettoPidFile =

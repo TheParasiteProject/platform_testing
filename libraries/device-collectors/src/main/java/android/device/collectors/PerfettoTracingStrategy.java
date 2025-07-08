@@ -333,14 +333,10 @@ public abstract class PerfettoTracingStrategy {
 
     protected void stopPerfettoTracingWithoutMetric() {
         // Stop the existing perfetto trace collection.
-        try {
-            if (!mPerfettoHelper.stopPerfetto(mPerfettoHelper.getPerfettoPid())) {
-                Log.e(getTag(), "Failed to stop the perfetto process.");
-            }
-            setPerfettoStartSuccess(false);
-        } catch (IOException e) {
-            Log.e(getTag(), "Failed to stop the perfetto.", e);
+        if (!mPerfettoHelper.stopPerfetto(mPerfettoHelper.getPerfettoPid())) {
+            Log.e(getTag(), "Failed to stop the perfetto process.");
         }
+        setPerfettoStartSuccess(false);
     }
 
     protected void setPerfettoStartSuccess(boolean success) {
