@@ -106,7 +106,7 @@ IMPOST_CONTACTS_SHELL_COMAND = (
 )
 
 # Screen recording
-SCREEN_RECORDING_COMMAND = 'screenrecord --time-limit 180'
+SCREEN_RECORDING_COMMAND = 'screenrecord --time-limit 1800'
 RECORDED_VIDEO_FILE_LOCATION = '/sdcard/'
 RECORDED_VIDEO_FILE_OUTPUT_FILE = '_screenrecord_output_mp4_'
 STOP_VIDEO_RECORDING = f'pkill -SIGINT {SCREEN_RECORDING_COMMAND}'

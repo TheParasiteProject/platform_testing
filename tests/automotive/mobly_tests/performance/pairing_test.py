@@ -36,6 +36,10 @@ class BTPerformancePairingTest(bluetooth_base_test.BluetoothBaseTest):
             logging.info(f'{ITERATIONS_PARAM_NAME} is not in testbed config. Using default value')
         logging.info(f'Setup {self.__class__.__name__} with {ITERATIONS_PARAM_NAME} = {self.iterations} and iteration delay = {self.iteration_delay}')
 
+    def setup_test(self):
+        super().setup_test()
+        super().enable_recording()
+
     def test_pairing(self):
         """Test for pairing/unpairing a HU with a bluetooth device"""
         pairing_success_count = 0
