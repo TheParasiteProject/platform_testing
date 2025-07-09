@@ -28,18 +28,24 @@ import androidx.test.uiautomator.By
 
 /** Wrapper representing the FlashlightDialog that opens when the QS Tile is clicked */
 class FlashlightDialog internal constructor(displayId: Int = DEFAULT_DISPLAY) {
+    // https://hsv.googleplex.com/5394301264592896?node=20
     private val uiDialogTitle =
         By.displayId(displayId).res(FLASHLIGHT_TITLE_TAG).text(FLASHLIGHT_TITLE_TEXT)
+    // https://hsv.googleplex.com/5394301264592896?node=44
     private val doneBtn =
-        By.displayId(displayId).res(FLASHLIGHT_DONE_TAG).text(FLASHLIGHT_DONE_TEXT)
+        By.displayId(displayId)
+            .res(FLASHLIGHT_DONE_TAG)
+            .hasDescendant(By.text(FLASHLIGHT_DONE_TEXT))
+    // https://hsv.googleplex.com/5394301264592896?node=53
     private val offButton =
-        By.displayId(displayId).res(FLASHLIGHT_OFF_TAG).text(FLASHLIGHT_OFF_TEXT)
+        By.displayId(displayId).res(FLASHLIGHT_OFF_TAG).hasDescendant(By.text(FLASHLIGHT_OFF_TEXT))
 
     // TODO (b/419868372) use the dialog title since we know what it is, get rid of test tags.
 
     init {
         uiDialogTitle.assertVisible(errorProvider = { "Flashlight dialog title is not visible" })
-        doneBtn.assertVisible(errorProvider = { "Flashlight tile done button is not visible" })
+        doneBtn.assertVisible(errorProvider = { "Flashlight done button is not visible" })
+        offButton.assertVisible(errorProvider = { "Flashlight off button is not visible" })
     }
 
     fun assertDialogClosed() {
