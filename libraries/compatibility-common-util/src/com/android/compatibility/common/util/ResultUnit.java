@@ -41,7 +41,9 @@ public enum ResultUnit {
     /** radian */
     RADIAN,
     /** Audio or Video frames count, dropped, repeated, etc... */
-    FRAMES;
+    FRAMES,
+    /** distance in millimeters */
+    MILLIMETERS;
 
     /**
      * @return a string to be used in the report.
