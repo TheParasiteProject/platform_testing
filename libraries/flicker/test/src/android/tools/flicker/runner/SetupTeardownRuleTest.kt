@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-package android.tools.flicker.legacy.runner
+package android.tools.flicker.runner
 
-import android.tools.flicker.legacy.AbstractFlickerTestData
-import android.tools.flicker.legacy.FlickerTestData
+import android.tools.flicker.AbstractFlickerTestData
+import android.tools.flicker.FlickerTestData
 import android.tools.testutils.CleanFlickerEnvironmentRule
 import android.tools.testutils.TEST_SCENARIO_KEY
 import android.tools.testutils.assertThrows

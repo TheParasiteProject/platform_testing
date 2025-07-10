@@ -26,7 +26,7 @@ import android.tools.flicker.FlickerConfig
 import android.tools.flicker.ScenarioInstance
 import android.tools.flicker.annotation.ExpectedScenarios
 import android.tools.flicker.annotation.FlickerConfigProvider
-import android.tools.flicker.assertions.FlickerTest
+import android.tools.flicker.assertions.FlickerChecker
 import android.tools.flicker.assertors.AssertionTemplate
 import android.tools.flicker.config.FlickerConfig
 import android.tools.flicker.config.FlickerConfigEntry
@@ -132,7 +132,7 @@ class FullServiceRunTest {
                         object : AssertionTemplate("internalWmCheck") {
                             override fun doEvaluate(
                                 scenarioInstance: ScenarioInstance,
-                                flicker: FlickerTest,
+                                flicker: FlickerChecker,
                             ) {
                                 var trace: WindowManagerTraceSubject? = null
                                 var executionCount = 0
@@ -185,7 +185,7 @@ class FullServiceRunTest {
                         object : AssertionTemplate("internalLayersCheck") {
                             override fun doEvaluate(
                                 scenarioInstance: ScenarioInstance,
-                                flicker: FlickerTest,
+                                flicker: FlickerChecker,
                             ) {
                                 var trace: LayersTraceSubject? = null
                                 var executionCount = 0

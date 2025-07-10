@@ -25,9 +25,9 @@ import android.tools.flicker.subject.wm.WindowManagerTraceSubject
 import android.tools.traces.component.IComponentMatcher
 import android.tools.withTracing
 
-abstract class BaseFlickerTest(
+abstract class BaseFlickerChecker(
     private val assertionFactory: AssertionFactory = AssertionFactory()
-) : FlickerTest {
+) : FlickerChecker {
     protected abstract fun doProcess(assertion: AssertionData)
 
     override fun assertWmStart(assertion: WindowManagerStateSubject.() -> Unit) {

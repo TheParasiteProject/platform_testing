@@ -19,8 +19,8 @@ package android.tools.flicker
 import android.tools.flicker.assertions.AssertionData
 import android.tools.flicker.assertions.AssertionResult
 import android.tools.flicker.assertions.SubjectsParser
-import android.tools.flicker.legacy.runner.Consts
 import android.tools.flicker.rules.FlickerServiceRule
+import android.tools.flicker.runner.Consts
 import android.tools.flicker.subject.exceptions.FlickerAssertionError
 import android.tools.flicker.subject.exceptions.SimpleFlickerAssertionError
 import android.tools.testutils.CleanFlickerEnvironmentRule

@@ -18,7 +18,7 @@ package android.tools.flicker.assertors.assertions
 
 import android.graphics.Region
 import android.tools.flicker.ScenarioInstance
-import android.tools.flicker.assertions.FlickerTest
+import android.tools.flicker.assertions.FlickerChecker
 import android.tools.flicker.assertors.AssertionTemplate
 import android.tools.flicker.assertors.ComponentTemplate
 import android.tools.flicker.subject.layers.LayersTraceSubject
@@ -36,7 +36,7 @@ class BackgroundShowsInTransition(val startingChanges: ComponentTemplate) : Asse
     val animationBackgroundMatcher = ComponentNameMatcher("", "animation-background")
 
     /** {@inheritDoc} */
-    override fun doEvaluate(scenarioInstance: ScenarioInstance, flicker: FlickerTest) {
+    override fun doEvaluate(scenarioInstance: ScenarioInstance, flicker: FlickerChecker) {
         val firstTraceEntry = scenarioInstance.reader.readLayersTrace()?.entries?.first()
         val visibleLayers =
             startingChanges

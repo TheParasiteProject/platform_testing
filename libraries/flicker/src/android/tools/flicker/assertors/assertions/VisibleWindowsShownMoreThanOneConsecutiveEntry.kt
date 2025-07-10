@@ -17,7 +17,7 @@
 package android.tools.flicker.assertors.assertions
 
 import android.tools.flicker.ScenarioInstance
-import android.tools.flicker.assertions.FlickerTest
+import android.tools.flicker.assertions.FlickerChecker
 import android.tools.flicker.assertors.AssertionTemplate
 
 /**
@@ -26,7 +26,7 @@ import android.tools.flicker.assertors.AssertionTemplate
  */
 class VisibleWindowsShownMoreThanOneConsecutiveEntry : AssertionTemplate() {
     /** {@inheritDoc} */
-    override fun doEvaluate(scenarioInstance: ScenarioInstance, flicker: FlickerTest) {
+    override fun doEvaluate(scenarioInstance: ScenarioInstance, flicker: FlickerChecker) {
         flicker.assertWm { visibleWindowsShownMoreThanOneConsecutiveEntry() }
     }
 }

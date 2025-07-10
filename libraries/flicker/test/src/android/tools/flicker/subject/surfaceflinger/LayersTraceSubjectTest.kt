@@ -20,8 +20,8 @@ import android.graphics.Region
 import android.tools.Cache
 import android.tools.CleanFlickerEnvironmentRuleWithDataStore
 import android.tools.Timestamps
+import android.tools.flicker.FlickerTest
 import android.tools.flicker.datastore.DataStore
-import android.tools.flicker.legacy.LegacyFlickerTest
 import android.tools.flicker.subject.layers.LayersTraceSubject
 import android.tools.flicker.subject.region.RegionSubject
 import android.tools.io.Reader
@@ -343,7 +343,7 @@ class LayersTraceSubjectTest {
             )
         val component =
             ComponentNameMatcher(FLICKER_APP_PACKAGE, "$FLICKER_APP_PACKAGE.ImeActivity")
-        val flicker = LegacyFlickerTest(resultReaderProvider = { _ -> reader })
+        val flicker = FlickerTest(resultReaderProvider = { _ -> reader })
         val scenario = flicker.initialize(TEST_SCENARIO_KEY)
         val result = Mockito.mock(IResultData::class.java)
         DataStore.addResult(scenario.key, result)

@@ -17,13 +17,13 @@
 package android.tools.flicker.assertors.assertions
 
 import android.tools.flicker.ScenarioInstance
-import android.tools.flicker.assertions.FlickerTest
+import android.tools.flicker.assertions.FlickerChecker
 import android.tools.flicker.assertors.ComponentTemplate
 import kotlin.math.abs
 
 class AppWindowReturnsToStartBoundsAndPosition(private val component: ComponentTemplate) :
     AssertionTemplateWithComponent(component) {
-    override fun doEvaluate(scenarioInstance: ScenarioInstance, flicker: FlickerTest) {
+    override fun doEvaluate(scenarioInstance: ScenarioInstance, flicker: FlickerChecker) {
         val matcher = component.get(scenarioInstance)
         flicker.assertLayers {
             val startRegion = first().visibleRegion(matcher)

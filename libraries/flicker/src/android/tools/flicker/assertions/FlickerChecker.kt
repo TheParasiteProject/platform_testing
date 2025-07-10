@@ -24,7 +24,7 @@ import android.tools.flicker.subject.wm.WindowManagerStateSubject
 import android.tools.flicker.subject.wm.WindowManagerTraceSubject
 import android.tools.traces.component.IComponentMatcher
 
-interface FlickerTest {
+interface FlickerChecker {
     /**
      * Execute [assertion] on the initial state of a WM trace (before transition)
      *

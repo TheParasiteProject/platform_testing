@@ -17,7 +17,7 @@
 package android.tools.flicker.assertors.assertions
 
 import android.tools.flicker.ScenarioInstance
-import android.tools.flicker.assertions.FlickerTest
+import android.tools.flicker.assertions.FlickerChecker
 import android.tools.flicker.assertors.ComponentTemplate
 import android.tools.traces.component.ComponentNameMatcher
 
@@ -28,7 +28,7 @@ import android.tools.traces.component.ComponentNameMatcher
 class AppWindowBecomesVisible(private val component: ComponentTemplate) :
     AssertionTemplateWithComponent(component) {
     /** {@inheritDoc} */
-    override fun doEvaluate(scenarioInstance: ScenarioInstance, flicker: FlickerTest) {
+    override fun doEvaluate(scenarioInstance: ScenarioInstance, flicker: FlickerChecker) {
         // The app launch transition can finish when the splashscreen or SnapshotStartingWindows
         // are shown before the app window and layers are actually shown. (b/284302118)
         val matcher = component.get(scenarioInstance)

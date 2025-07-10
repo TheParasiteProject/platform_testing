@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2024 The Android Open Source Project
+ * Copyright (C) 2023 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,15 +14,6 @@
  * limitations under the License.
  */
 
-package android.tools.flicker.legacy.runner
+package android.tools.flicker
 
-import org.junit.runner.Description
-
-object Consts {
-    internal const val FAILURE = "Expected failure"
-    internal const val SETUP = "Setup"
-    internal const val TEARDOWN = "Teardown"
-    internal const val TRANSITION = "Transition"
-
-    internal fun description(obj: Any) = Description.createTestDescription(obj::class.java, "test")
-}
+@DslMarker annotation class FlickerDslMarker

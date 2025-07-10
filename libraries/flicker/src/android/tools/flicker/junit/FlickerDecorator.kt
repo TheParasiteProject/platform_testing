@@ -17,16 +17,16 @@
 package android.tools.flicker.junit
 
 import android.tools.Scenario
+import android.tools.flicker.FlickerBuilder
+import android.tools.flicker.FlickerTest
 import android.tools.flicker.datastore.DataStore
-import android.tools.flicker.legacy.FlickerBuilder
-import android.tools.flicker.legacy.LegacyFlickerTest
 import java.lang.reflect.Modifier
 import org.junit.runner.Description
 import org.junit.runners.model.FrameworkMethod
 import org.junit.runners.model.Statement
 import org.junit.runners.model.TestClass
 
-class LegacyFlickerDecorator(
+class FlickerDecorator(
     testClass: TestClass,
     val scenario: Scenario?,
     val transitionRunner: ITransitionRunner,
@@ -57,11 +57,11 @@ class LegacyFlickerDecorator(
     override fun doValidateConstructor(): List<Throwable> {
         val errors = super.doValidateConstructor().toMutableList()
         val ctor = testClass.javaClass.constructors.firstOrNull()
-        if (ctor?.parameterTypes?.none { it == LegacyFlickerTest::class.java } != false) {
+        if (ctor?.parameterTypes?.none { it == FlickerTest::class.java } != false) {
             errors.add(
                 IllegalStateException(
                     "Constructor should have a parameter of type " +
-                        LegacyFlickerTest::class.java.simpleName
+                        FlickerTest::class.java.simpleName
                 )
             )
         }

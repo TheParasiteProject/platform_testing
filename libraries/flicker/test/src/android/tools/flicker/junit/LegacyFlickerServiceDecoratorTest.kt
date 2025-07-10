@@ -17,9 +17,9 @@
 package android.tools.flicker.junit
 
 import android.annotation.SuppressLint
+import android.tools.flicker.FlickerTest
 import android.tools.flicker.datastore.DataStore
 import android.tools.flicker.isShellTransitionsEnabled
-import android.tools.flicker.legacy.LegacyFlickerTest
 import android.tools.testutils.CleanFlickerEnvironmentRule
 import android.tools.testutils.TEST_SCENARIO
 import androidx.test.platform.app.InstrumentationRegistry
@@ -69,10 +69,10 @@ class LegacyFlickerServiceDecoratorTest {
         val test =
             TestWithParameters(
                 "test",
-                TestClass(LegacyFlickerJUnit4ClassRunnerTest.SimpleFaasTest::class.java),
+                TestClass(FlickerJUnit4ClassRunnerTest.SimpleFaasTest::class.java),
                 listOf(TestUtils.VALID_ARGS_EMPTY),
             )
-        val transitionRunner = LegacyFlickerJUnit4ClassRunner(test, TEST_SCENARIO).transitionRunner
+        val transitionRunner = FlickerJUnit4ClassRunner(test, TEST_SCENARIO).transitionRunner
         val decorator =
             LegacyFlickerServiceDecorator(
                 test.testClass,
@@ -83,9 +83,7 @@ class LegacyFlickerServiceDecoratorTest {
                 inner = null,
             )
         val methods =
-            decorator.getTestMethods(
-                LegacyFlickerJUnit4ClassRunnerTest.SimpleFaasTest(LegacyFlickerTest())
-            )
+            decorator.getTestMethods(FlickerJUnit4ClassRunnerTest.SimpleFaasTest(FlickerTest()))
         val duplicatedMethods = methods.groupBy { it.name }.filter { it.value.size > 1 }
 
         if (isShellTransitionsEnabled) {

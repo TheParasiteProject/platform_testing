@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package android.tools.flicker.legacy
+package android.tools.flicker
 
 abstract class AbstractFlickerTestData : FlickerTestData {
     private var assertionsCheckedCallback: ((Boolean) -> Unit)? = null

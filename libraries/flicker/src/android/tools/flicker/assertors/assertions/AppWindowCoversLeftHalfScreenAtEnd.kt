@@ -17,7 +17,7 @@
 package android.tools.flicker.assertors.assertions
 
 import android.tools.flicker.ScenarioInstance
-import android.tools.flicker.assertions.FlickerTest
+import android.tools.flicker.assertions.FlickerChecker
 import android.tools.flicker.assertors.ComponentTemplate
 import android.tools.helpers.WindowUtils
 
@@ -26,7 +26,7 @@ class AppWindowCoversLeftHalfScreenAtEnd(
     private val coverageDifferenceThresholdRatio: Double? = null,
 ) : AssertionTemplateWithComponent(component) {
     /** {@inheritDoc} */
-    override fun doEvaluate(scenarioInstance: ScenarioInstance, flicker: FlickerTest) {
+    override fun doEvaluate(scenarioInstance: ScenarioInstance, flicker: FlickerChecker) {
         flicker.assertWmEnd {
             if (coverageDifferenceThresholdRatio == null) {
                 // Build expected bounds of half the display

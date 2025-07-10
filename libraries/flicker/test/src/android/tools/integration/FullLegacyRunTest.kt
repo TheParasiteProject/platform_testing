@@ -22,12 +22,12 @@ import android.platform.test.annotations.Presubmit
 import android.platform.test.annotations.RequiresDevice
 import android.tools.Scenario
 import android.tools.device.apphelpers.MessagingAppHelper
+import android.tools.flicker.FlickerBuilder
+import android.tools.flicker.FlickerTest
+import android.tools.flicker.FlickerTestFactory
 import android.tools.flicker.annotation.FlickerServiceCompatible
 import android.tools.flicker.junit.FlickerBuilderProvider
 import android.tools.flicker.junit.FlickerParametersRunnerFactory
-import android.tools.flicker.legacy.FlickerBuilder
-import android.tools.flicker.legacy.LegacyFlickerTest
-import android.tools.flicker.legacy.LegacyFlickerTestFactory
 import android.tools.flicker.subject.FlickerSubject
 import android.tools.flicker.subject.layers.LayersTraceSubject
 import android.tools.flicker.subject.region.RegionSubject
@@ -51,7 +51,7 @@ import org.junit.runners.Parameterized
 @FlickerServiceCompatible(expectedCujs = ["ENTIRE_TRACE"])
 @RunWith(Parameterized::class)
 @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
-class FullLegacyRunTest(private val flicker: LegacyFlickerTest) {
+class FullLegacyRunTest(private val flicker: FlickerTest) {
     private val instrumentation: Instrumentation = InstrumentationRegistry.getInstrumentation()
     private val testApp = MessagingAppHelper(instrumentation)
     private val tapl: LauncherInstrumentation = LauncherInstrumentation()
@@ -178,14 +178,12 @@ class FullLegacyRunTest(private val flicker: LegacyFlickerTest) {
         /**
          * Creates the test configurations.
          *
-         * See [LegacyFlickerTestFactory.nonRotationTests] for configuring screen orientation and
+         * See [FlickerTestFactory.nonRotationTests] for configuring screen orientation and
          * navigation modes.
          */
         @Parameterized.Parameters(name = "{0}")
         @JvmStatic
         fun getParams() =
-            LegacyFlickerTestFactory.nonRotationTests(
-                extraArgs = mapOf(Scenario.FAAS_BLOCKING to true)
-            )
+            FlickerTestFactory.nonRotationTests(extraArgs = mapOf(Scenario.FAAS_BLOCKING to true))
     }
 }

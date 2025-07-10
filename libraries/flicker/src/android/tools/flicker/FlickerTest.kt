@@ -14,30 +14,29 @@
  * limitations under the License.
  */
 
-package android.tools.flicker.legacy
+package android.tools.flicker
 
 import android.tools.Scenario
 import android.tools.ScenarioBuilder
 import android.tools.ScenarioImpl
 import android.tools.flicker.assertions.AssertionData
 import android.tools.flicker.assertions.AssertionRunner
-import android.tools.flicker.assertions.BaseFlickerTest
+import android.tools.flicker.assertions.BaseFlickerChecker
 import android.tools.flicker.assertions.SubjectsParser
 import android.tools.flicker.datastore.CachedAssertionRunner
+import android.tools.flicker.datastore.CachedResultReader
 import android.tools.io.Reader
 
 /** Specification of a flicker test for JUnit ParameterizedRunner class */
-data class LegacyFlickerTest(
+data class FlickerTest(
     private val scenarioBuilder: ScenarioBuilder = ScenarioBuilder(),
-    private val resultReaderProvider: (String) -> Reader = {
-        android.tools.flicker.datastore.CachedResultReader(it)
-    },
+    private val resultReaderProvider: (String) -> Reader = { CachedResultReader(it) },
     private val subjectsParserProvider: (Reader) -> SubjectsParser = { SubjectsParser(it) },
     private val runnerProvider: (String) -> AssertionRunner = {
         val reader = resultReaderProvider(it)
         CachedAssertionRunner(it, reader)
     },
-) : BaseFlickerTest() {
+) : BaseFlickerChecker() {
     var scenario: ScenarioImpl = ScenarioBuilder().createEmptyScenario() as ScenarioImpl
         private set
 

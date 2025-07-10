@@ -14,6 +14,12 @@
  * limitations under the License.
  */
 
-package android.tools.flicker.legacy
+package android.tools.flicker.assertions
 
-@DslMarker annotation class FlickerDslMarker
+class ServiceFlickerChecker : BaseFlickerChecker() {
+    internal val assertions = mutableListOf<AssertionData>()
+
+    override fun doProcess(assertion: AssertionData) {
+        assertions.add(assertion)
+    }
+}

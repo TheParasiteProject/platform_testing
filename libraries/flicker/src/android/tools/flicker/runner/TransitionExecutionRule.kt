@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-package android.tools.flicker.legacy.runner
+package android.tools.flicker.runner
 
 import android.tools.flicker.FlickerTag
+import android.tools.flicker.FlickerTestData
 import android.tools.flicker.junit.Utils
-import android.tools.flicker.legacy.FlickerTestData
 import android.tools.io.TraceType
 import android.tools.io.WINSCOPE_EXT
 import android.tools.traces.getCurrentState

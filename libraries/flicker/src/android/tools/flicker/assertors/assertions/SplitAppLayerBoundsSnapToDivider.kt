@@ -18,7 +18,7 @@ package android.tools.flicker.assertors.assertions
 
 import android.graphics.Region
 import android.tools.flicker.ScenarioInstance
-import android.tools.flicker.assertions.FlickerTest
+import android.tools.flicker.assertions.FlickerChecker
 import android.tools.flicker.assertors.ComponentTemplate
 import android.tools.flicker.config.splitscreen.Components.SPLIT_SCREEN_DIVIDER
 import android.tools.flicker.subject.layers.LayerTraceEntrySubject
@@ -27,7 +27,7 @@ import android.tools.traces.wm.WindowManagerTrace
 class SplitAppLayerBoundsSnapToDivider(private val component: ComponentTemplate) :
     AssertionTemplateWithComponent(component) {
     /** {@inheritDoc} */
-    override fun doEvaluate(scenarioInstance: ScenarioInstance, flicker: FlickerTest) {
+    override fun doEvaluate(scenarioInstance: ScenarioInstance, flicker: FlickerChecker) {
         val wmTrace = scenarioInstance.reader.readWmTrace() ?: return
 
         val matcher = component.get(scenarioInstance)

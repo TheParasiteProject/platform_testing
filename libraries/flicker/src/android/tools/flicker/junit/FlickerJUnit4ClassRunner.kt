@@ -25,12 +25,12 @@ import android.platform.test.util.TestFilter
 import android.tools.FLICKER_TAG
 import android.tools.Scenario
 import android.tools.device.apphelpers.MessagingAppHelper
+import android.tools.flicker.FlickerBuilder
 import android.tools.flicker.datastore.CachedResultWriter
-import android.tools.flicker.legacy.FlickerBuilder
-import android.tools.flicker.legacy.runner.TransitionRunner
 import android.tools.flicker.rules.ChangeDisplayOrientationRule
 import android.tools.flicker.rules.LaunchAppRule
 import android.tools.flicker.rules.RemoveAllTasksButHomeRule
+import android.tools.flicker.runner.TransitionRunner
 import android.tools.rules.StopAllTracesRule
 import android.tools.withTracing
 import android.util.Log
@@ -81,7 +81,7 @@ import org.junit.runners.parameterized.TestWithParameters
  *     CloseAppBackButtonTest#launcherWindowBecomesVisible[ROTATION_90_GESTURAL_NAV]`
  * ```
  */
-class LegacyFlickerJUnit4ClassRunner(
+class FlickerJUnit4ClassRunner(
     test: TestWithParameters?,
     private val scenario: Scenario?,
     private val arguments: Bundle = InstrumentationRegistry.getArguments(),
@@ -103,7 +103,7 @@ class LegacyFlickerJUnit4ClassRunner(
                 test: Any,
                 description: Description?,
             ) {
-                withTracing("LegacyFlickerJUnit4ClassRunner#runTransition") {
+                withTracing("FlickerJUnit4ClassRunner#runTransition") {
                     val scenario = scenario ?: error("Expected to have a scenario to run")
                     Log.v(FLICKER_TAG, "Creating flicker object for $testIdentifier")
                     val builder = getFlickerBuilder(test)
@@ -142,7 +142,7 @@ class LegacyFlickerJUnit4ClassRunner(
             transitionRunner,
             arguments = arguments,
             skipNonBlocking = onlyBlocking,
-            inner = LegacyFlickerDecorator(this.testClass, scenario, transitionRunner, inner = this),
+            inner = FlickerDecorator(this.testClass, scenario, transitionRunner, inner = this),
         )
 
     init {

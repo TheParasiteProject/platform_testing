@@ -17,7 +17,7 @@
 package android.tools.flicker.assertors.assertions
 
 import android.tools.flicker.ScenarioInstance
-import android.tools.flicker.assertions.FlickerTest
+import android.tools.flicker.assertions.FlickerChecker
 import android.tools.flicker.assertors.ComponentTemplate
 import android.tools.helpers.WindowUtils
 
@@ -25,7 +25,7 @@ import android.tools.helpers.WindowUtils
 class AppWindowAlignsWithOnlyOneDisplayCornerAtEnd(private val component: ComponentTemplate) :
     AssertionTemplateWithComponent(component) {
     /** {@inheritDoc} */
-    override fun doEvaluate(scenarioInstance: ScenarioInstance, flicker: FlickerTest) {
+    override fun doEvaluate(scenarioInstance: ScenarioInstance, flicker: FlickerChecker) {
         flicker.assertWmEnd {
             val displayAppBounds = WindowUtils.getInsetDisplayBounds(scenarioInstance.startRotation)
             val windowBounds = visibleRegion(component.get(scenarioInstance)).region.bounds

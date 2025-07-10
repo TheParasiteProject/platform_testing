@@ -18,8 +18,8 @@ package android.tools.flicker.assertors
 
 import android.tools.flicker.ScenarioInstance
 import android.tools.flicker.assertions.AssertionData
-import android.tools.flicker.assertions.FlickerTest
-import android.tools.flicker.assertions.ServiceFlickerTest
+import android.tools.flicker.assertions.FlickerChecker
+import android.tools.flicker.assertions.ServiceFlickerChecker
 import android.tools.flicker.assertions.SubjectsParser
 
 /** Base class for a FaaS assertion */
@@ -35,10 +35,10 @@ abstract class AssertionTemplate @JvmOverloads constructor(name: String? = null)
         "${scenarioInstance.type}::$name"
 
     /** Evaluates assertions */
-    abstract fun doEvaluate(scenarioInstance: ScenarioInstance, flicker: FlickerTest)
+    abstract fun doEvaluate(scenarioInstance: ScenarioInstance, flicker: FlickerChecker)
 
     fun createAssertions(scenarioInstance: ScenarioInstance): Collection<AssertionData> {
-        val flicker = ServiceFlickerTest()
+        val flicker = ServiceFlickerChecker()
 
         val mainBlockAssertions = mutableListOf<AssertionData>()
         try {
