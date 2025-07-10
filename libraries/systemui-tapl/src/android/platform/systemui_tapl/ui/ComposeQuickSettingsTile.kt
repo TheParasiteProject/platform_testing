@@ -168,7 +168,7 @@ abstract class ComposeQuickSettingsTile private constructor(val displayId: Int =
         /** See https://hsv.googleplex.com/4910828112314368?node=28 */
         fun largeTileSelector(description: String, displayId: Int = DEFAULT_DISPLAY): BySelector {
             return sysuiResSelector(LARGE_TILE_TAG, displayId)
-                .hasChild(By.displayId(displayId).textStartsWith(description))
+                .hasDescendant(By.displayId(displayId).textStartsWith(description))
         }
 
         fun UiObject2.assertIsTile() {
