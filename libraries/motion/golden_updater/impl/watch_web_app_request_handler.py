@@ -280,8 +280,9 @@ class WatchWebAppRequestHandler(http.server.BaseHTTPRequestHandler):
         if WatchWebAppRequestHandler.adb_serial_finder.model_serial_map:
             available_modes = list(WatchWebAppRequestHandler.adb_serial_finder
                                    .model_serial_map.keys())
-        available_modes.append(GoldenWatcherTypes.ROBOLECTRIC.value)
         available_modes.append(GoldenWatcherTypes.ATEST.value)
+        available_modes.append(GoldenWatcherTypes.ROBOLECTRIC.value)
+
         print(f"available modes: {available_modes}")
         self.send_json(available_modes)
 
