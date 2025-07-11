@@ -19,6 +19,7 @@ import base64
 import uuid
 import json
 from enum import Enum
+import datetime
 from impl.enums import DataSource
 
 class GerritDownloader:
@@ -85,7 +86,7 @@ class GerritDownloader:
         golden_data["updated"] = False
         golden_data["testClassName"] = name
         golden_data["testMethodName"] = name
-        golden_data["testTime"] = 0
+        golden_data["testTime"] = datetime.datetime.now().isoformat()
         golden_data["actualData"] = rightJson
         golden_data["expectedData"] = leftJson
         golden_data["dataSource"] = DataSource.GERRIT.value
