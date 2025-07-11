@@ -63,10 +63,11 @@ public class EditNonAdminName {
     public void deleteNonAdminUser() {
         Log.i(LOG_TAG, "Act: Delete non admin user");
         mUsersHelper.get().deleteCurrentUser();
+        mSettingHelper.get().exit();
     }
 
     @Test
-    public void testEditAdminName() {
+    public void testEditNonAdminName() {
         Log.i(LOG_TAG, "Act: Open Profile & Accounts setting");
         mSettingHelper.get().openSetting(SettingsConstants.PROFILE_ACCOUNT_SETTINGS);
 

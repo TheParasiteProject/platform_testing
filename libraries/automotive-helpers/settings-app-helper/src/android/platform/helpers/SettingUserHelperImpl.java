@@ -318,4 +318,18 @@ public class SettingUserHelperImpl extends AbstractStandardAppHelper implements 
                 getUiElementFromConfig(AutomotiveConfigConstants.HOME_PROFILE_ICON_BUTTON);
         getSpectatioUiUtil().waitForUiObject(homeButtonSelector, WAIT_MS);
     }
+
+    @Override
+    public void chooseNewAdmin() {
+        int count = 0;
+        clickbutton(AutomotiveConfigConstants.USER_SETTINGS_CHOOSE_ADMIN);
+        BySelector userTitleSelector =
+                getUiElementFromConfig(AutomotiveConfigConstants.HOME_SECONDARY_USER_BUTTON);
+        UiObject2 userTitle = getSpectatioUiUtil().findUiObject(userTitleSelector);
+        getSpectatioUiUtil().clickAndWait(userTitle);
+        clickbutton(AutomotiveConfigConstants.USER_SETTINGS_MAKE_ADMIN_CONFIRM);
+        BySelector homeBottomCardSelector =
+                getUiElementFromConfig(AutomotiveConfigConstants.HOME_BOTTOM_CARD);
+        getSpectatioUiUtil().waitForUiObject(homeBottomCardSelector, WAIT_MS);
+    }
 }

@@ -95,6 +95,8 @@ public class DeleteAdminWhenNonAdminAvailable {
         mMultiUserHelper.switchAndWaitForStable(
                 mTargetUserId, MultiUserConstants.WAIT_FOR_IDLE_TIME_MS);
 
+        mUsersHelper.get().skipSetupWizard();
+
         Log.i(LOG_TAG, "Act: Open Profile & Accounts setting");
         mSettingHelper.get().openSetting(SettingsConstants.PROFILE_ACCOUNT_SETTINGS);
 
