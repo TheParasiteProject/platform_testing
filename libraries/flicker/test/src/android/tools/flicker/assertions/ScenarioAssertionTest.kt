@@ -62,7 +62,10 @@ class ScenarioAssertionTest {
 
         val assertionTemplate =
             object : AssertionTemplate("MyCustomAssertion") {
-                override fun doEvaluate(scenarioInstance: ScenarioInstance, flicker: FlickerTest) {
+                override fun doEvaluate(
+                    scenarioInstance: ScenarioInstance,
+                    flicker: FlickerChecker,
+                ) {
                     Truth.assertThat("abc").isEqualTo("efg")
                 }
             }
@@ -92,7 +95,10 @@ class ScenarioAssertionTest {
 
         val assertionTemplate =
             object : AssertionTemplate("MyCustomAssertion") {
-                override fun doEvaluate(scenarioInstance: ScenarioInstance, flicker: FlickerTest) {
+                override fun doEvaluate(
+                    scenarioInstance: ScenarioInstance,
+                    flicker: FlickerChecker,
+                ) {
                     Assume.assumeTrue(false)
                 }
             }

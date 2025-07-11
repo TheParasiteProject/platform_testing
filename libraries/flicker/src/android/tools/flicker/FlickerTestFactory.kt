@@ -14,19 +14,19 @@
  * limitations under the License.
  */
 
-package android.tools.flicker.legacy
+package android.tools.flicker
 
 import android.tools.NavBar
 import android.tools.Rotation
 import android.tools.ScenarioBuilder
-import android.tools.flicker.assertions.FlickerTest
+import android.tools.flicker.assertions.FlickerChecker
 
 /**
  * Factory for creating JUnit4 compatible tests based on the flicker DSL
  *
  * This class recreates behavior from JUnit5 TestFactory that is not available on JUnit4
  */
-object LegacyFlickerTestFactory {
+object FlickerTestFactory {
     /**
      * Gets a list of test configurations.
      *
@@ -38,7 +38,7 @@ object LegacyFlickerTestFactory {
         supportedRotations: List<Rotation> = listOf(Rotation.ROTATION_0, Rotation.ROTATION_90),
         supportedNavigationModes: List<NavBar> = listOf(NavBar.MODE_3BUTTON, NavBar.MODE_GESTURAL),
         extraArgs: Map<String, Any> = emptyMap(),
-    ): List<FlickerTest> {
+    ): List<FlickerChecker> {
         return supportedNavigationModes.flatMap { navBarMode ->
             supportedRotations.map { rotation ->
                 createFlickerTest(navBarMode, rotation, rotation, extraArgs)
@@ -57,7 +57,7 @@ object LegacyFlickerTestFactory {
         supportedRotations: List<Rotation> = listOf(Rotation.ROTATION_0, Rotation.ROTATION_90),
         supportedNavigationModes: List<NavBar> = listOf(NavBar.MODE_3BUTTON, NavBar.MODE_GESTURAL),
         extraArgs: Map<String, Any> = emptyMap(),
-    ): List<FlickerTest> {
+    ): List<FlickerChecker> {
         return supportedNavigationModes.flatMap { navBarMode ->
             supportedRotations
                 .flatMap { start -> supportedRotations.map { end -> start to end } }
@@ -72,7 +72,7 @@ object LegacyFlickerTestFactory {
         endRotation: Rotation,
         extraArgs: Map<String, Any>,
     ) =
-        LegacyFlickerTest(
+        FlickerTest(
             ScenarioBuilder()
                 .withStartRotation(startRotation)
                 .withEndRotation(endRotation)

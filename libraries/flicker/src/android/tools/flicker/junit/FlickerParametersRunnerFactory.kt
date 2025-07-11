@@ -17,7 +17,7 @@
 package android.tools.flicker.junit
 
 import android.os.Bundle
-import android.tools.flicker.legacy.LegacyFlickerTest
+import android.tools.flicker.FlickerTest
 import androidx.test.platform.app.InstrumentationRegistry
 import com.android.internal.annotations.VisibleForTesting
 import org.junit.runner.Runner
@@ -33,9 +33,9 @@ class FlickerParametersRunnerFactory : ParametersRunnerFactory {
     fun createRunnerForTestWithParameters(test: TestWithParameters, arguments: Bundle): Runner {
         val simpleClassName = test.testClass.javaClass.simpleName
         val flickerTest =
-            test.parameters.filterIsInstance<LegacyFlickerTest>().firstOrNull()
+            test.parameters.filterIsInstance<FlickerTest>().firstOrNull()
                 ?: error(
-                    "Unable to extract ${LegacyFlickerTest::class.simpleName} " +
+                    "Unable to extract ${FlickerTest::class.simpleName} " +
                         "for class $simpleClassName"
                 )
         val scenario = flickerTest.initialize(simpleClassName)
@@ -45,7 +45,7 @@ class FlickerParametersRunnerFactory : ParametersRunnerFactory {
                 /* testClass */ test.testClass,
                 /* parameters */ test.parameters,
             )
-        return LegacyFlickerJUnit4ClassRunner(newTest, scenario, arguments)
+        return FlickerJUnit4ClassRunner(newTest, scenario, arguments)
     }
 
     override fun createRunnerForTestWithParameters(test: TestWithParameters) =

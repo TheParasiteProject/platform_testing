@@ -18,7 +18,7 @@ package android.tools.flicker.junit
 
 import android.app.Instrumentation
 import android.os.Bundle
-import android.tools.flicker.legacy.runner.FLICKER_RUNNER_TAG
+import android.tools.flicker.runner.FLICKER_RUNNER_TAG
 import android.tools.traces.ConditionList
 import android.tools.traces.ConditionsFactory
 import android.tools.traces.parsers.WindowManagerStateHelper

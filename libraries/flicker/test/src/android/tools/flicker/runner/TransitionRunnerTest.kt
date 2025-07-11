@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-package android.tools.flicker.legacy.runner
+package android.tools.flicker.runner
 
 import android.annotation.SuppressLint
 import android.os.SystemClock
 import android.tools.createMockedFlicker
-import android.tools.flicker.legacy.FlickerTestData
+import android.tools.flicker.FlickerTestData
 import android.tools.io.RunStatus
 import android.tools.testutils.CleanFlickerEnvironmentRule
 import android.tools.testutils.assertExceptionMessage

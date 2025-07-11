@@ -18,9 +18,9 @@ package android.tools.flicker.junit
 
 import android.annotation.SuppressLint
 import android.tools.ScenarioBuilder
+import android.tools.flicker.FlickerBuilder
+import android.tools.flicker.FlickerTest
 import android.tools.flicker.datastore.DataStore
-import android.tools.flicker.legacy.FlickerBuilder
-import android.tools.flicker.legacy.LegacyFlickerTest
 import android.tools.testutils.CleanFlickerEnvironmentRule
 import android.tools.testutils.KotlinMockito
 import com.google.common.truth.Truth
@@ -34,9 +34,9 @@ import org.junit.runners.model.TestClass
 import org.junit.runners.parameterized.TestWithParameters
 import org.mockito.Mockito
 
-/** Tests for [LegacyFlickerDecorator] */
+/** Tests for [FlickerDecorator] */
 @SuppressLint("VisibleForTests")
-class LegacyFlickerDecoratorTest {
+class FlickerDecoratorTest {
     @Before
     fun setup() {
         DataStore.clear()
@@ -54,7 +54,7 @@ class LegacyFlickerDecoratorTest {
             )
         val mockTransitionRunner = Mockito.mock(ITransitionRunner::class.java)
         val inner = Mockito.mock(IFlickerJUnitDecorator::class.java)
-        val helper = LegacyFlickerDecorator(test.testClass, scenario, mockTransitionRunner, inner)
+        val helper = FlickerDecorator(test.testClass, scenario, mockTransitionRunner, inner)
 
         val mockMethod = Mockito.mock(FrameworkMethod::class.java)
         Mockito.`when`(inner.getTestMethods(test)).thenReturn(listOf(mockMethod))
@@ -73,8 +73,7 @@ class LegacyFlickerDecoratorTest {
             )
         val mockTransitionRunner = Mockito.mock(ITransitionRunner::class.java)
         val inner = Mockito.mock(IFlickerJUnitDecorator::class.java)
-        val decorator =
-            LegacyFlickerDecorator(test.testClass, scenario, mockTransitionRunner, inner)
+        val decorator = FlickerDecorator(test.testClass, scenario, mockTransitionRunner, inner)
         TestUtils.executionCount = 0
         val method =
             FrameworkMethod(TestUtils.DummyTestClassValid::class.java.getMethod("dummyExecute"))
@@ -85,7 +84,7 @@ class LegacyFlickerDecoratorTest {
             .thenReturn(Mockito.mock(Description::class.java))
 
         val description = decorator.getChildDescription(method)
-        val invokerTest = TestUtils.DummyTestClassValid(LegacyFlickerTest())
+        val invokerTest = TestUtils.DummyTestClassValid(FlickerTest())
 
         decorator.getMethodInvoker(method, test = invokerTest).evaluate()
 
@@ -102,10 +101,10 @@ class LegacyFlickerDecoratorTest {
                 TestClass(TestUtils.DummyTestClassValid::class.java),
                 listOf(TestUtils.VALID_ARGS_EMPTY),
             )
-        val transitionRunner = LegacyFlickerJUnit4ClassRunner(test, scenario).transitionRunner
+        val transitionRunner = FlickerJUnit4ClassRunner(test, scenario).transitionRunner
 
         val inner = Mockito.mock(IFlickerJUnitDecorator::class.java)
-        val decorator = LegacyFlickerDecorator(test.testClass, scenario, transitionRunner, inner)
+        val decorator = FlickerDecorator(test.testClass, scenario, transitionRunner, inner)
         TestUtils.executionCount = 0
         val method =
             FrameworkMethod(TestUtils.DummyTestClassValid::class.java.getMethod("dummyExecute"))
@@ -117,7 +116,7 @@ class LegacyFlickerDecoratorTest {
 
         repeat(3) {
             decorator
-                .getMethodInvoker(method, test = TestUtils.DummyTestClassValid(LegacyFlickerTest()))
+                .getMethodInvoker(method, test = TestUtils.DummyTestClassValid(FlickerTest()))
                 .evaluate()
         }
 
@@ -181,12 +180,7 @@ class LegacyFlickerDecoratorTest {
             TestWithParameters("test", TestClass(cls.java), listOf(TestUtils.VALID_ARGS_EMPTY))
         val mockTransitionRunner = Mockito.mock(ITransitionRunner::class.java)
         val decorator =
-            LegacyFlickerDecorator(
-                test.testClass,
-                scenario = null,
-                mockTransitionRunner,
-                inner = null,
-            )
+            FlickerDecorator(test.testClass, scenario = null, mockTransitionRunner, inner = null)
         val failures = decorator.doValidateInstanceMethods()
         Truth.assertWithMessage("Failure count").that(failures).hasSize(expectedExceptions.count())
         expectedExceptions.forEachIndexed { idx, expectedException ->
@@ -203,12 +197,7 @@ class LegacyFlickerDecoratorTest {
             TestWithParameters("test", TestClass(TestUtils.DummyTestClassEmpty::class.java), args)
         val mockTransitionRunner = Mockito.mock(ITransitionRunner::class.java)
         val decorator =
-            LegacyFlickerDecorator(
-                test.testClass,
-                scenario = null,
-                mockTransitionRunner,
-                inner = null,
-            )
+            FlickerDecorator(test.testClass, scenario = null, mockTransitionRunner, inner = null)
         val failures = decorator.doValidateConstructor()
 
         Truth.assertWithMessage("Failure count").that(failures).hasSize(1)
@@ -218,7 +207,7 @@ class LegacyFlickerDecoratorTest {
             .that(failure)
             .hasMessageThat()
             .contains(
-                "Constructor should have a parameter of type ${LegacyFlickerTest::class.simpleName}"
+                "Constructor should have a parameter of type ${FlickerTest::class.simpleName}"
             )
     }
 

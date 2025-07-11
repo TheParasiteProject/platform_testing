@@ -20,7 +20,7 @@ import android.tools.flicker.AssertionInvocationGroup
 import android.tools.flicker.FlickerConfig
 import android.tools.flicker.ScenarioInstance
 import android.tools.flicker.ScenarioInstanceImpl
-import android.tools.flicker.assertions.FlickerTest
+import android.tools.flicker.assertions.FlickerChecker
 import android.tools.flicker.assertors.AssertionTemplate
 import android.tools.flicker.extractors.EntireTraceExtractor
 import android.tools.flicker.extractors.ScenarioExtractor
@@ -50,7 +50,10 @@ class FlickerConfigTest {
         var executed = false
         val assertion =
             object : AssertionTemplate("Mock Assertion") {
-                override fun doEvaluate(scenarioInstance: ScenarioInstance, flicker: FlickerTest) {
+                override fun doEvaluate(
+                    scenarioInstance: ScenarioInstance,
+                    flicker: FlickerChecker,
+                ) {
                     flicker.assertLayers { executed = true }
                 }
             }
@@ -101,7 +104,10 @@ class FlickerConfigTest {
 
         val assertion =
             object : AssertionTemplate("Mock Assertion") {
-                override fun doEvaluate(scenarioInstance: ScenarioInstance, flicker: FlickerTest) {
+                override fun doEvaluate(
+                    scenarioInstance: ScenarioInstance,
+                    flicker: FlickerChecker,
+                ) {
                     flicker.assertLayers { error("Should never be called") }
                 }
             }
@@ -133,7 +139,10 @@ class FlickerConfigTest {
 
         val assertion =
             object : AssertionTemplate("Mock Assertion") {
-                override fun doEvaluate(scenarioInstance: ScenarioInstance, flicker: FlickerTest) {
+                override fun doEvaluate(
+                    scenarioInstance: ScenarioInstance,
+                    flicker: FlickerChecker,
+                ) {
                     flicker.assertLayers { error("Should never be called") }
                 }
             }
@@ -172,7 +181,10 @@ class FlickerConfigTest {
         var executed1 = false
         val assertion1 =
             object : AssertionTemplate("Mock Assertion 1") {
-                override fun doEvaluate(scenarioInstance: ScenarioInstance, flicker: FlickerTest) {
+                override fun doEvaluate(
+                    scenarioInstance: ScenarioInstance,
+                    flicker: FlickerChecker,
+                ) {
                     flicker.assertLayers { executed1 = true }
                 }
             }
@@ -180,7 +192,10 @@ class FlickerConfigTest {
         var executed2 = false
         val assertion2 =
             object : AssertionTemplate("Mock Assertion 2") {
-                override fun doEvaluate(scenarioInstance: ScenarioInstance, flicker: FlickerTest) {
+                override fun doEvaluate(
+                    scenarioInstance: ScenarioInstance,
+                    flicker: FlickerChecker,
+                ) {
                     flicker.assertLayers { executed2 = true }
                 }
             }
@@ -224,7 +239,10 @@ class FlickerConfigTest {
 
         val assertion =
             object : AssertionTemplate("Mock Assertion") {
-                override fun doEvaluate(scenarioInstance: ScenarioInstance, flicker: FlickerTest) {
+                override fun doEvaluate(
+                    scenarioInstance: ScenarioInstance,
+                    flicker: FlickerChecker,
+                ) {
                     flicker.assertLayers { error("Should never be called") }
                 }
             }
@@ -242,7 +260,10 @@ class FlickerConfigTest {
 
         val assertion =
             object : AssertionTemplate("Mock Assertion") {
-                override fun doEvaluate(scenarioInstance: ScenarioInstance, flicker: FlickerTest) {
+                override fun doEvaluate(
+                    scenarioInstance: ScenarioInstance,
+                    flicker: FlickerChecker,
+                ) {
                     flicker.assertLayers { error("Should never be called") }
                 }
             }
@@ -272,7 +293,10 @@ class FlickerConfigTest {
 
         val assertion =
             object : AssertionTemplate("Mock Assertion") {
-                override fun doEvaluate(scenarioInstance: ScenarioInstance, flicker: FlickerTest) {
+                override fun doEvaluate(
+                    scenarioInstance: ScenarioInstance,
+                    flicker: FlickerChecker,
+                ) {
                     flicker.assertLayers { error("Should never be called") }
                 }
             }
@@ -320,7 +344,10 @@ class FlickerConfigTest {
 
         val assertion =
             object : AssertionTemplate("Mock Assertion") {
-                override fun doEvaluate(scenarioInstance: ScenarioInstance, flicker: FlickerTest) {
+                override fun doEvaluate(
+                    scenarioInstance: ScenarioInstance,
+                    flicker: FlickerChecker,
+                ) {
                     flicker.assertLayers { error("Should never be called") }
                 }
             }

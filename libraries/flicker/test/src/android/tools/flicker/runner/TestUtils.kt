@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package android.tools.flicker.legacy.runner
+package android.tools.flicker.runner
 
 import android.tools.Timestamp
 import android.tools.Timestamps

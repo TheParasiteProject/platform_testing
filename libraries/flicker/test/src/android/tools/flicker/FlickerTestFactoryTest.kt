@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package android.tools.flicker.legacy
+package android.tools.flicker
 
 import android.tools.Rotation
 import android.tools.testutils.CleanFlickerEnvironmentRule
@@ -25,15 +25,15 @@ import org.junit.Test
 import org.junit.runners.MethodSorters
 
 /**
- * Contains [LegacyFlickerTestFactory] tests.
+ * Contains [FlickerTestFactory] tests.
  *
  * To run this test: `atest FlickerLibTest:FlickerTestFactoryRunnerTest`
  */
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
-class LegacyFlickerTestFactoryTest {
+class FlickerTestFactoryTest {
     @Test
     fun checkBuildTest() {
-        val actual = LegacyFlickerTestFactory.nonRotationTests()
+        val actual = FlickerTestFactory.nonRotationTests()
         Truth.assertWithMessage("Flicker should create tests for 0 and 90 degrees")
             .that(actual)
             .hasSize(4)
@@ -41,7 +41,7 @@ class LegacyFlickerTestFactoryTest {
 
     @Test
     fun checkBuildRotationTest() {
-        val actual = LegacyFlickerTestFactory.rotationTests()
+        val actual = FlickerTestFactory.rotationTests()
         Truth.assertWithMessage("Flicker should create tests for 0 and 90 degrees")
             .that(actual)
             .hasSize(4)
@@ -56,7 +56,7 @@ class LegacyFlickerTestFactoryTest {
                 Rotation.ROTATION_180,
                 Rotation.ROTATION_270,
             )
-        val actual = LegacyFlickerTestFactory.rotationTests(supportedRotations = rotations)
+        val actual = FlickerTestFactory.rotationTests(supportedRotations = rotations)
         // Should have config for each rotation pair
         Truth.assertWithMessage("Flicker should create tests for 0/90/180/270 degrees")
             .that(actual)

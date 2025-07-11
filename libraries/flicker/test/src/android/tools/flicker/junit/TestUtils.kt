@@ -18,18 +18,18 @@ package android.tools.flicker.junit
 
 import android.app.Instrumentation
 import android.tools.ScenarioBuilder
-import android.tools.flicker.legacy.FlickerBuilder
-import android.tools.flicker.legacy.LegacyFlickerTest
+import android.tools.flicker.FlickerBuilder
+import android.tools.flicker.FlickerTest
 import androidx.test.platform.app.InstrumentationRegistry
 import org.junit.Test
 
 object TestUtils {
     private val instrumentation: Instrumentation = InstrumentationRegistry.getInstrumentation()
-    val VALID_ARGS_EMPTY = LegacyFlickerTest()
+    val VALID_ARGS_EMPTY = FlickerTest()
 
     var executionCount = 0
 
-    class DummyTestClassValid(test: LegacyFlickerTest) {
+    class DummyTestClassValid(test: FlickerTest) {
         @FlickerBuilderProvider
         fun myMethod(): FlickerBuilder =
             FlickerBuilder(instrumentation).apply { transitions { executionCount++ } }

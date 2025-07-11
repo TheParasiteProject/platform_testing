@@ -19,7 +19,7 @@ package android.tools.flicker
 import android.tools.Rotation
 import android.tools.Timestamps
 import android.tools.flicker.assertions.AssertionResult
-import android.tools.flicker.assertions.FlickerTest
+import android.tools.flicker.assertions.FlickerChecker
 import android.tools.flicker.assertors.AssertionTemplate
 import android.tools.flicker.config.FlickerConfigEntry
 import android.tools.flicker.config.ScenarioId
@@ -51,7 +51,7 @@ class ScenarioInstanceTest {
                                 object : AssertionTemplate("myAssertionSingle") {
                                     override fun doEvaluate(
                                         scenarioInstance: ScenarioInstance,
-                                        flicker: FlickerTest,
+                                        flicker: FlickerChecker,
                                     ) {
                                         flicker.assertLayers {
                                             throw SimpleFlickerAssertionError(errorMessage)
@@ -61,7 +61,7 @@ class ScenarioInstanceTest {
                                 object : AssertionTemplate("myAssertionMultiple") {
                                     override fun doEvaluate(
                                         scenarioInstance: ScenarioInstance,
-                                        flicker: FlickerTest,
+                                        flicker: FlickerChecker,
                                     ) {
                                         flicker.assertLayers {
                                             // No errors
@@ -135,7 +135,7 @@ class ScenarioInstanceTest {
                                 object : AssertionTemplate("myAssertion1") {
                                     override fun doEvaluate(
                                         scenarioInstance: ScenarioInstance,
-                                        flicker: FlickerTest,
+                                        flicker: FlickerChecker,
                                     ) {
                                         throw SimpleFlickerAssertionError(errorMessage)
                                     }
@@ -143,7 +143,7 @@ class ScenarioInstanceTest {
                                 object : AssertionTemplate("myAssertion2") {
                                     override fun doEvaluate(
                                         scenarioInstance: ScenarioInstance,
-                                        flicker: FlickerTest,
+                                        flicker: FlickerChecker,
                                     ) {
                                         flicker.assertLayers {
                                             throw SimpleFlickerAssertionError("Some flicker error")

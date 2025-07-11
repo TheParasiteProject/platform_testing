@@ -17,7 +17,7 @@
 package android.tools.flicker.assertors.assertions
 
 import android.tools.flicker.ScenarioInstance
-import android.tools.flicker.assertions.FlickerTest
+import android.tools.flicker.assertions.FlickerChecker
 import android.tools.flicker.assertors.ComponentTemplate
 import android.tools.traces.component.ComponentNameMatcher
 import android.tools.traces.component.IComponentNameMatcher
@@ -30,7 +30,7 @@ class FocusChanges(
 ) : AssertionTemplateWithComponent(fromComponent, toComponent) {
 
     // TODO: Make parent call this when appropriate
-    override fun doEvaluate(scenarioInstance: ScenarioInstance, flicker: FlickerTest) {
+    override fun doEvaluate(scenarioInstance: ScenarioInstance, flicker: FlickerChecker) {
         val layersTrace = scenarioInstance.reader.readLayersTrace()
         val fromComponent = fromComponent.get(scenarioInstance)
         val toComponent = toComponent.get(scenarioInstance)

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package android.tools.flicker.legacy
+package android.tools.flicker
 
 import android.app.Instrumentation
 import android.tools.traces.monitors.ITransitionMonitor

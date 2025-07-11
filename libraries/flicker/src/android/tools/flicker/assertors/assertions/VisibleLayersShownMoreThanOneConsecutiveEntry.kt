@@ -17,7 +17,7 @@
 package android.tools.flicker.assertors.assertions
 
 import android.tools.flicker.ScenarioInstance
-import android.tools.flicker.assertions.FlickerTest
+import android.tools.flicker.assertions.FlickerChecker
 import android.tools.flicker.assertors.AssertionTemplate
 import android.tools.flicker.subject.layers.LayersTraceSubject.Companion.VISIBLE_FOR_MORE_THAN_ONE_ENTRY_IGNORE_LAYERS
 import android.tools.traces.component.IComponentMatcher
@@ -30,7 +30,7 @@ class VisibleLayersShownMoreThanOneConsecutiveEntry(
     private val ignore: List<IComponentMatcher> = listOf()
 ) : AssertionTemplate() {
     /** {@inheritDoc} */
-    override fun doEvaluate(scenarioInstance: ScenarioInstance, flicker: FlickerTest) {
+    override fun doEvaluate(scenarioInstance: ScenarioInstance, flicker: FlickerChecker) {
         flicker.assertLayers {
             visibleLayersShownMoreThanOneConsecutiveEntry(
                 ignoreLayers = VISIBLE_FOR_MORE_THAN_ONE_ENTRY_IGNORE_LAYERS + ignore

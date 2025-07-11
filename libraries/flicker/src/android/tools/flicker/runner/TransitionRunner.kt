@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-package android.tools.flicker.legacy.runner
+package android.tools.flicker.runner
 
-import android.tools.flicker.legacy.FlickerTestData
+import android.tools.flicker.FlickerTestData
 import android.tools.flicker.rules.ArtifactSaverRule
 import android.tools.traces.io.IResultData
 import android.tools.traces.io.ResultWriter

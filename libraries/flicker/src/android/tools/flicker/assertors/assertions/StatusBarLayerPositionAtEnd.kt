@@ -19,7 +19,7 @@ package android.tools.flicker.assertors.assertions
 import android.graphics.Region
 import android.tools.PlatformConsts
 import android.tools.flicker.ScenarioInstance
-import android.tools.flicker.assertions.FlickerTest
+import android.tools.flicker.assertions.FlickerChecker
 import android.tools.flicker.assertors.AssertionTemplate
 import android.tools.traces.component.ComponentNameMatcher
 
@@ -29,7 +29,7 @@ import android.tools.traces.component.ComponentNameMatcher
  */
 class StatusBarLayerPositionAtEnd : AssertionTemplate() {
     /** {@inheritDoc} */
-    override fun doEvaluate(scenarioInstance: ScenarioInstance, flicker: FlickerTest) {
+    override fun doEvaluate(scenarioInstance: ScenarioInstance, flicker: FlickerChecker) {
         flicker.assertLayersEnd {
             visibleRegion(ComponentNameMatcher.STATUS_BAR)
                 .coversExactly(getExpectedStatusBarPosition(scenarioInstance))
