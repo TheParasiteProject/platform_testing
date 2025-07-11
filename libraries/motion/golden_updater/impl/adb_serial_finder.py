@@ -22,6 +22,7 @@ class ADBSerialFinder:
         self.update_model_serial_map()
 
     def update_model_serial_map(self):
+        self.model_serial_map = {}
         devices_response = subprocess.run(
             ["adb", "devices", "-l"], check=True, capture_output=True
         ).stdout.decode("utf-8")
@@ -34,16 +35,13 @@ class ADBSerialFinder:
         127.0.0.1:42093        device product:cf_x86_64_phone model:Cuttlefish_GMS_x86_64 device:vsoc_x86_64 transport_id:5
         localhost:35725        device product:panther model:Pixel_7 device:panther transport_id:4
         '''
-
         if len(lines) == 1:
             print("no adb devices found")
             return None
+        self.__update_model_serial_map_with_device_info(lines[1:])
 
-        self.model_serial_map = self.__create_model_serial_map(lines[1:])
+    def __update_model_serial_map_with_device_info(self, devices):
 
-    def __create_model_serial_map(self, devices):
-        model_serial_map = {}
         for device in devices:
             device_info = [info for info in device.split(" ") if info != ""]
-            model_serial_map[device_info[3].split(":")[1]]=device_info[0]
-        return model_serial_map
+            self.model_serial_map[device_info[3].split(":")[1]]=device_info[0]
