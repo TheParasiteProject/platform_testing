@@ -135,14 +135,14 @@ constructor(
     }
 
     private fun shouldRun(description: Description): Boolean {
-        // Only run FaaS if test rule is enabled and on tests with FlickerTest annotation if it's
+        // Only run FaaS if test rule is enabled and on tests with FlickerChecker annotation if it's
         // used within the class, otherwise run on all tests
         if (!enabled) {
             return false
         }
 
         if (description.annotations.none { it is FlickerTest }) {
-            // FlickerTest annotation is not used within the test class, so run on all tests
+            // FlickerChecker annotation is not used within the test class, so run on all tests
             return true
         }
 

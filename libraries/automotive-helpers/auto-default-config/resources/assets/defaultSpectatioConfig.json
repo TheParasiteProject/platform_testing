@@ -1300,6 +1300,10 @@
       "TYPE": "TEXT",
       "VALUE": "Yes, make admin"
     },
+    "USER_SETTINGS_CHOOSE_ADMIN": {
+      "TYPE": "TEXT",
+      "VALUE": "Choose admin"
+    },
     "USER_SETTINGS_TOGGLE_BUTTON": {
       "TYPE": "RESOURCE_ID",
       "VALUE": "android:id/switch_widget",

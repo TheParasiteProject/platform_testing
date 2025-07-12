@@ -18,7 +18,7 @@ package android.tools.flicker.assertors.assertions
 
 import android.graphics.Rect
 import android.tools.flicker.ScenarioInstance
-import android.tools.flicker.assertions.FlickerTest
+import android.tools.flicker.assertions.FlickerChecker
 import android.tools.flicker.assertors.ComponentTemplate
 
 /**
@@ -28,7 +28,7 @@ import android.tools.flicker.assertors.ComponentTemplate
 class WindowRemainInsideVisibleBounds(private val component: ComponentTemplate) :
     AssertionTemplateWithComponent(component) {
     /** {@inheritDoc} */
-    override fun doEvaluate(scenarioInstance: ScenarioInstance, flicker: FlickerTest) {
+    override fun doEvaluate(scenarioInstance: ScenarioInstance, flicker: FlickerChecker) {
         val displayBounds = Rect() // TODO: Get display bounds from wmSubject
         val matcher = component.get(scenarioInstance)
         flicker.assertWm { visibleRegion(matcher).coversAtMost(displayBounds) }

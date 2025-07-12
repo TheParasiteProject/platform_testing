@@ -17,10 +17,10 @@
 package android.tools
 
 import android.app.Instrumentation
+import android.tools.flicker.AbstractFlickerTestData
+import android.tools.flicker.FlickerBuilder
+import android.tools.flicker.FlickerTestData
 import android.tools.flicker.datastore.CachedResultWriter
-import android.tools.flicker.legacy.AbstractFlickerTestData
-import android.tools.flicker.legacy.FlickerBuilder
-import android.tools.flicker.legacy.FlickerTestData
 import android.tools.io.PERFETTO_EXT
 import android.tools.io.Reader
 import android.tools.io.WINSCOPE_EXT

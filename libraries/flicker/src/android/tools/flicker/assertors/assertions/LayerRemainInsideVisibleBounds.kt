@@ -17,7 +17,7 @@
 package android.tools.flicker.assertors.assertions
 
 import android.tools.flicker.ScenarioInstance
-import android.tools.flicker.assertions.FlickerTest
+import android.tools.flicker.assertions.FlickerChecker
 import android.tools.flicker.assertors.ComponentTemplate
 
 /**
@@ -27,7 +27,7 @@ import android.tools.flicker.assertors.ComponentTemplate
 class LayerRemainInsideVisibleBounds(private val component: ComponentTemplate) :
     AssertionTemplateWithComponent(component) {
     /** {@inheritDoc} */
-    override fun doEvaluate(scenarioInstance: ScenarioInstance, flicker: FlickerTest) {
+    override fun doEvaluate(scenarioInstance: ScenarioInstance, flicker: FlickerChecker) {
         val matcher = component.get(scenarioInstance)
         flicker.assertLayers {
             subjects.forEach {

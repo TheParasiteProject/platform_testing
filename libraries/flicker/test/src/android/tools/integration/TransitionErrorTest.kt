@@ -17,8 +17,8 @@
 package android.tools.integration
 
 import android.tools.Scenario
+import android.tools.flicker.FlickerTest
 import android.tools.flicker.datastore.CachedResultReader
-import android.tools.flicker.legacy.LegacyFlickerTest
 import android.tools.io.RunStatus
 import android.tools.testutils.CleanFlickerEnvironmentRule
 import android.tools.testutils.TEST_SCENARIO_KEY
@@ -37,7 +37,7 @@ import org.junit.Test
 class TransitionErrorTest {
     private var assertionExecuted = false
     private val scenario: Scenario
-    private val testParam = LegacyFlickerTest().also { scenario = it.initialize(TEST_SCENARIO_KEY) }
+    private val testParam = FlickerTest().also { scenario = it.initialize(TEST_SCENARIO_KEY) }
 
     @Before
     fun setup() {

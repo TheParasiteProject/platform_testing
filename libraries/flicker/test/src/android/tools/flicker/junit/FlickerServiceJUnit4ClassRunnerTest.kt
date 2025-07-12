@@ -27,7 +27,7 @@ import android.tools.flicker.ScenarioInstance
 import android.tools.flicker.annotation.Debug
 import android.tools.flicker.annotation.ExpectedScenarios
 import android.tools.flicker.annotation.FlickerConfigProvider
-import android.tools.flicker.assertions.FlickerTest
+import android.tools.flicker.assertions.FlickerChecker
 import android.tools.flicker.assertors.AssertionTemplate
 import android.tools.flicker.config.FlickerConfig
 import android.tools.flicker.config.FlickerConfigEntry
@@ -224,7 +224,7 @@ class FlickerServiceJUnit4ClassRunnerTest {
                                     object : AssertionTemplate("myBlockingAssertion") {
                                         override fun doEvaluate(
                                             scenarioInstance: ScenarioInstance,
-                                            flicker: FlickerTest,
+                                            flicker: FlickerChecker,
                                         ) {
                                             flicker.assertWm {
                                                 // Random test
@@ -235,7 +235,7 @@ class FlickerServiceJUnit4ClassRunnerTest {
                                     object : AssertionTemplate("myNonBlockingAssertion") {
                                         override fun doEvaluate(
                                             scenarioInstance: ScenarioInstance,
-                                            flicker: FlickerTest,
+                                            flicker: FlickerChecker,
                                         ) {
                                             flicker.assertWm {
                                                 // Random test
@@ -286,7 +286,7 @@ class FlickerServiceJUnit4ClassRunnerTest {
                                     object : AssertionTemplate("myBlockingAssertion") {
                                         override fun doEvaluate(
                                             scenarioInstance: ScenarioInstance,
-                                            flicker: FlickerTest,
+                                            flicker: FlickerChecker,
                                         ) {
                                             // Check to make sure we are running this assertion on
                                             // the debug trace

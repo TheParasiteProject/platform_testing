@@ -1,0 +1,163 @@
+/*
+ * Copyright (C) 2025 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package android.platform.tests;
+
+import static junit.framework.Assert.assertFalse;
+import static junit.framework.Assert.assertTrue;
+
+import android.content.pm.UserInfo;
+import android.os.SystemClock;
+import android.platform.helpers.HelperAccessor;
+import android.platform.helpers.IAutoSettingHelper;
+import android.platform.helpers.IAutoUserHelper;
+import android.platform.helpers.MultiUserHelper;
+import android.platform.helpers.SettingsConstants;
+import android.platform.scenario.multiuser.MultiUserConstants;
+import android.platform.test.rules.ConditionalIgnore;
+import android.platform.test.rules.ConditionalIgnoreRule;
+import android.platform.test.rules.IgnoreOnPortrait;
+import android.util.Log;
+
+import androidx.test.runner.AndroidJUnit4;
+
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+
+/**
+ * This test will create user through API and delete the same user from UI
+ *
+ * <p>Set system property to run MU test: adb shell setprop fw.stop_bg_users_on_switch 0
+ */
+@RunWith(AndroidJUnit4.class)
+public class AddUserFromNonAdmin {
+    @Rule public ConditionalIgnoreRule rule = new ConditionalIgnoreRule();
+
+    private final MultiUserHelper mMultiUserHelper = MultiUserHelper.getInstance();
+    private static final String USER_NAME = MultiUserConstants.SECONDARY_USER_NAME;
+    private HelperAccessor<IAutoUserHelper> mUsersHelper;
+    private HelperAccessor<IAutoSettingHelper> mSettingHelper;
+
+    private int mTargetUserId;
+
+    public UserInfo driver;
+
+    public UserInfo initialUser;
+    private static final int WAIT_TIME = 10000;
+
+    private static final String LOG_TAG = AddUserFromNonAdmin.class.getSimpleName();
+
+    public AddUserFromNonAdmin() {
+        mUsersHelper = new HelperAccessor<>(IAutoUserHelper.class);
+        mSettingHelper = new HelperAccessor<>(IAutoSettingHelper.class);
+    }
+
+    @Before
+    public void createNonAdminUser() throws Exception {
+
+        Log.i(LOG_TAG, "Act: Get Admin user");
+        driver = mMultiUserHelper.getCurrentForegroundUserInfo();
+
+        // create new non admin user
+        Log.i(LOG_TAG, "Act: Create a non-admin user");
+        mTargetUserId = mMultiUserHelper.createUser(USER_NAME, false);
+        SystemClock.sleep(WAIT_TIME);
+
+        Log.i(LOG_TAG, "Act: Switch to new user");
+        mMultiUserHelper.switchAndWaitForStable(
+                mTargetUserId, MultiUserConstants.WAIT_FOR_IDLE_TIME_MS);
+        mUsersHelper.get().skipSetupWizard();
+    }
+
+    @After
+    public void goBackToHomeScreen() {
+        Log.i(LOG_TAG, "Act: Remove non admin user");
+        mMultiUserHelper.removeUser(mTargetUserId);
+        Log.i(LOG_TAG, "Act: Go back to Home Screen");
+        mSettingHelper.get().exit();
+    }
+
+    @Test
+    @ConditionalIgnore(condition = IgnoreOnPortrait.class)
+    public void testAddNonAdminUser1QuickSettings() throws Exception {
+        // create new user quick settings
+        Log.i(LOG_TAG, "Act: Create new user");
+        initialUser = mMultiUserHelper.getCurrentForegroundUserInfo();
+        mUsersHelper.get().addUserQuickSettings(initialUser.name);
+        mUsersHelper.get().skipSetupWizard();
+
+        // switched to new user
+        Log.i(LOG_TAG, "Act: Switch to new user");
+        UserInfo newUser = mMultiUserHelper.getCurrentForegroundUserInfo();
+
+        // verify new user is seen in list of users
+        Log.i(LOG_TAG, "Assert: New user is listed in users list");
+        assertTrue(mMultiUserHelper.getUserByName(newUser.name) != null);
+
+        // switch from new user to initial user
+        Log.i(LOG_TAG, "Act: Switch back to initial user");
+        mMultiUserHelper.switchAndWaitForStable(
+                driver.id, MultiUserConstants.WAIT_FOR_IDLE_TIME_MS);
+
+        // Verify new user is non-admin Profile
+        Log.i(LOG_TAG, "Act: Open Profile & Accounts setting");
+        mSettingHelper.get().openSetting(SettingsConstants.PROFILE_ACCOUNT_SETTINGS);
+
+        Log.i(LOG_TAG, "Assert: New user does not have Admin Access");
+        assertFalse("New user has Admin Access", mUsersHelper.get().isNewUserAnAdmin(newUser.name));
+        // remove new user
+        Log.i(LOG_TAG, "Act: Remove created new user");
+        mMultiUserHelper.removeUser(newUser);
+    }
+
+    @Test
+    @ConditionalIgnore(condition = IgnoreOnPortrait.class)
+    public void testAddNonAdminUser2Settings() throws Exception {
+        // create new user
+        Log.i(LOG_TAG, "Act: Get current userinfo");
+        initialUser = mMultiUserHelper.getCurrentForegroundUserInfo();
+        mSettingHelper.get().openSetting(SettingsConstants.PROFILE_ACCOUNT_SETTINGS);
+        Log.i(LOG_TAG, "Act: Create a non-admin user");
+        mUsersHelper.get().addUser();
+        mUsersHelper.get().skipSetupWizard();
+
+        // switched to new user
+        Log.i(LOG_TAG, "Act: Get current userinfo");
+        UserInfo newUser = mMultiUserHelper.getCurrentForegroundUserInfo();
+
+        // verify new user is seen in list of users
+        Log.i(LOG_TAG, "Assert: Newly created user in user ist");
+        assertTrue(mMultiUserHelper.getUserByName(newUser.name) != null);
+
+        // switch from new user to initial user
+        Log.i(LOG_TAG, "Act: Switch to Initial user");
+        mMultiUserHelper.switchAndWaitForStable(
+                driver.id, MultiUserConstants.WAIT_FOR_IDLE_TIME_MS);
+
+        // Verify new user is non-Admin
+        Log.i(LOG_TAG, "Act: Open Profile & Accounts setting");
+        mSettingHelper.get().openSetting(SettingsConstants.PROFILE_ACCOUNT_SETTINGS);
+        Log.i(LOG_TAG, "Assert: Newly  created user does not have admin access");
+        assertFalse("New user has Admin Access", mUsersHelper.get().isNewUserAnAdmin(newUser.name));
+
+        // remove new user
+        Log.i(LOG_TAG, "Act: New user is deleted");
+        mMultiUserHelper.removeUser(newUser);
+    }
+}

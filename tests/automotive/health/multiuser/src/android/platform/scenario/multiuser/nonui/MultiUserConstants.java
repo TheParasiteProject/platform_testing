@@ -17,6 +17,7 @@
 package android.platform.scenario.multiuser;
 
 import android.platform.helpers.MultiUserHelper;
+
 import androidx.test.InstrumentationRegistry;
 
 public final class MultiUserConstants {
@@ -31,6 +32,7 @@ public final class MultiUserConstants {
         Boolean.valueOf(
             InstrumentationRegistry.getArguments().getString(INCLUDE_CREATION_TIME_KEY, "false"));
     public static final String GUEST_NAME = "Guest";
+    public static final String DRIVER_NAME = "Driver";
     public static final String SECONDARY_USER_NAME = "SecondaryUser";
 
     private MultiUserConstants() {
