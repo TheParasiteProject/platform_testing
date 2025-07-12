@@ -80,7 +80,7 @@ public class AppGridHelperImpl extends AbstractStandardAppHelper implements IAut
             getSpectatioUiUtil()
                     .executeShellCommand(
                             getCommandFromConfig(AutomotiveConfigConstants.OPEN_APP_GRID_COMMAND));
-            getSpectatioUiUtil().wait5Seconds();
+            getSpectatioUiUtil().wait1Second();
         }
     }
 
@@ -123,8 +123,7 @@ public class AppGridHelperImpl extends AbstractStandardAppHelper implements IAut
                         String.format("Scroll on app grid to find %s", appName));
 
         getSpectatioUiUtil().validateUiObject(app, String.format("Given app %s", appName));
-        getSpectatioUiUtil().clickAndWait(app);
-        getSpectatioUiUtil().wait5Seconds();
+        getSpectatioUiUtil().clickAndWaitUntilNewWindowAppears(app);
     }
 
     /** {@inherticDoc} */
