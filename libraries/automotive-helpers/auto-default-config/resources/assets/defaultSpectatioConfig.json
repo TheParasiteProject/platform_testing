@@ -2311,6 +2311,10 @@
       "TYPE": "TEXT",
       "VALUE": "Unpin app"
     },
+    "PIN_APP_BUTTON": {
+      "TYPE": "TEXT",
+      "VALUE": "Pin app"
+    },
     "SETTINGS_APP_ON_DOCK": {
       "TYPE": "DESCRIPTION",
       "VALUE": "Settings"
@@ -2318,6 +2322,18 @@
     "PLAY_STORE_APP_ON_DOCK": {
       "TYPE": "DESCRIPTION",
       "VALUE": "Play Store"
+    },
+    "GOOGLE_PLAY_STORE_APP_ON_DOCK": {
+      "TYPE": "DESCRIPTION",
+      "VALUE": "Google Play Store"
+    },
+    "MAPS_APP_ON_DOCK": {
+      "TYPE": "DESCRIPTION",
+      "VALUE": "Google Maps"
+    },
+    "BLUETOOTH_APP_ON_DOCK": {
+      "TYPE": "DESCRIPTION",
+      "VALUE": "Bluetooth"
     },
     "NETWORK_PALETTE_WIFI": {
       "TYPE": "MULTIPLE",

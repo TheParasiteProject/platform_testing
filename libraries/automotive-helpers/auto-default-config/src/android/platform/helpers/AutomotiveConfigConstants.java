@@ -137,8 +137,12 @@ public class AutomotiveConfigConstants {
     public static final String APPS_INITIAL_DIALOGS = "DISMISS_APPS_INITIAL_DIALOGS";
     public static final String CONTACTS_DIALOG_BOX = "CONTACTS_DIALOG_BOX";
     public static final String UNPIN_APP_BUTTON = "UNPIN_APP_BUTTON";
+    public static final String PIN_APP_BUTTON = "PIN_APP_BUTTON";
     public static final String SETTINGS_APP_ON_DOCK = "SETTINGS_APP_ON_DOCK";
     public static final String PLAY_STORE_APP_ON_DOCK = "PLAY_STORE_APP_ON_DOCK";
+    public static final String GOOGLE_PLAY_STORE_APP_ON_DOCK = "GOOGLE_PLAY_STORE_APP_ON_DOCK";
+    public static final String MAPS_APP_ON_DOCK = "MAPS_APP_ON_DOCK";
+    public static final String BLUETOOTH_APP_ON_DOCK = "BLUETOOTH_APP_ON_DOCK";
 
     // Security Settings  Constants
     public static final String SECURITY_SETTINGS_SCROLL_ELEMENT =
