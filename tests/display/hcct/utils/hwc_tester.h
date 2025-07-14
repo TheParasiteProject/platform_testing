@@ -17,12 +17,15 @@
 #pragma once
 
 #include <ComposerClientWrapper.h>
-
 #include <aidl/android/hardware/graphics/common/DisplayHotplugEvent.h>
-#include <memory>
 #include <unistd.h>
+
+#include <memory>
 #include <unordered_map>
 #include <vector>
+
+#include "Readback.h"
+#include "RenderEngine.h"
 
 namespace hcct {
 
@@ -47,7 +50,22 @@ public:
   getAndClearLatestHotplugs();
   bool DrawSolidColorToScreen(int64_t display_id, Color color);
 
-private:
+  std::pair<int, int> GetActiveDisplaySize(int64_t displayId);
+
+  libhwc_aidl_test::ComposerClientWrapper& GetClientWrapper() {
+    return *mComposerClient;
+  }
+
+  std::unique_ptr<libhwc_aidl_test::TestBufferLayer> CreateBufferLayer(
+      int64_t displayId, uint64_t width, uint64_t height);
+
+  std::optional<ComposerClientReader> Validate(
+      int64_t displayId,
+      const std::vector<libhwc_aidl_test::TestLayer*>& layers);
+
+  std::optional<ComposerClientReader> Present(int64_t displayId);
+
+ private:
   std::vector<DisplayConfiguration> GetDisplayConfigs(int64_t display_id);
   DisplayConfiguration GetDisplayActiveConfigs(int64_t display_id);
   ComposerClientWriter &GetWriter(int64_t display_id);
@@ -55,6 +73,7 @@ private:
   std::unique_ptr<libhwc_aidl_test::ComposerClientWrapper> mComposerClient;
   std::unordered_map<int64_t, libhwc_aidl_test::DisplayWrapper> mDisplays;
   std::unordered_map<int64_t, ComposerClientWriter> mWriters;
+  std::unique_ptr<libhwc_aidl_test::TestRenderEngine> mRenderEngine;
 };
 
 } // namespace hcct
