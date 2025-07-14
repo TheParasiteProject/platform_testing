@@ -86,8 +86,11 @@ class Bubble internal constructor(private val bubbleView: UiObject2) {
         get() = BubbleFlyout()
 
     /** Is Welcome education visible and stopped bubbles expand */
-    private val isEducationVisible: Boolean
+    val isEducationVisible: Boolean
         get() = hasObject(BUBBLE_STACK_EDUCATION)
+
+    val visibleCenter: Point
+        get() = bubbleView.visibleCenter
 
     /** Drag bubble to Dismiss target */
     private fun dragBubbleToDismiss() {
@@ -96,8 +99,8 @@ class Bubble internal constructor(private val bubbleView: UiObject2) {
         val insets =
             windowMetrics.windowInsets.getInsetsIgnoringVisibility(
                 WindowInsets.Type.mandatorySystemGestures() or
-                        WindowInsets.Type.navigationBars() or
-                        WindowInsets.Type.displayCutout()
+                    WindowInsets.Type.navigationBars() or
+                    WindowInsets.Type.displayCutout()
             )
         val destination =
             Point(windowMetrics.bounds.width() / 2, (windowMetrics.bounds.height() - insets.bottom))
