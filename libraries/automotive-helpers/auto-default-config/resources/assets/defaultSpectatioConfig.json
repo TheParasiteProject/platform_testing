@@ -2307,6 +2307,18 @@
       "TYPE": "TEXT",
       "VALUE": "Forget"
     },
+    "UNPIN_APP_BUTTON": {
+      "TYPE": "TEXT",
+      "VALUE": "Unpin app"
+    },
+    "SETTINGS_APP_ON_DOCK": {
+      "TYPE": "DESCRIPTION",
+      "VALUE": "Settings"
+    },
+    "PLAY_STORE_APP_ON_DOCK": {
+      "TYPE": "DESCRIPTION",
+      "VALUE": "Play Store"
+    },
     "NETWORK_PALETTE_WIFI": {
       "TYPE": "MULTIPLE",
       "SPECIFIERS": [
