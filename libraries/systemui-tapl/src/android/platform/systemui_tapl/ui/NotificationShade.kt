@@ -312,8 +312,8 @@ class NotificationShade internal constructor(val displayId: Int = DEFAULT_DISPLA
     /** Opens quick settings via swipe. */
     fun openQuickSettingsWithSwipe(): QuickSettings {
         val device = uiDevice
-        // Swipe in first quarter to avoid desktop windowing app handle interactions.
-        val swipeXCoordinate = device.getDisplayWidth(displayId) / 4
+        // Swipe in the third quarter to avoid desktop windowing app handle interactions.
+        val swipeXCoordinate = device.getDisplayWidth(displayId) * 3 / 4
         betterSwipe(
             startX = swipeXCoordinate,
             startY = 0,

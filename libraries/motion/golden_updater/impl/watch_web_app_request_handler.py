@@ -218,10 +218,11 @@ class WatchWebAppRequestHandler(http.server.BaseHTTPRequestHandler):
                 f"{WatchWebAppRequestHandler.this_server_address}/expected/{golden.id}"
             )
 
-        golden_data["videoUrl"] = (
-            f"{WatchWebAppRequestHandler.this_server_address}/golden/"
-            f"{golden.checksum}/{golden.video_location}"
-        )
+        if golden.video_location:
+            golden_data["videoUrl"] = (
+                f"{WatchWebAppRequestHandler.this_server_address}/golden/"
+                f"{golden.checksum}/{golden.video_location}"
+            )
 
         return golden_data
 
