@@ -308,4 +308,26 @@ public class AppGridHelperImpl extends AbstractStandardAppHelper implements IAut
 
         return app != null;
     }
+
+    @Override
+    public void unpinAppOnDock(String target) {
+        BySelector appNameOnDockerSelector = getUiElementFromConfig(target);
+        UiObject2 appNameOnDockerObject =
+                getSpectatioUiUtil().waitForUiObject(appNameOnDockerSelector);
+  getSpectatioUiUtil()
+                .validateUiObject(
+                        appNameOnDockerObject,
+                        String.format("App is not static, do not have unpin buton"));
+        getSpectatioUiUtil().longPress(appNameOnDockerObject);
+        BySelector unpinAppSelector =
+                getUiElementFromConfig(AutomotiveConfigConstants.UNPIN_APP_BUTTON);
+        UiObject2 unpinAppObject = getSpectatioUiUtil().waitForUiObject(unpinAppSelector);
+        getSpectatioUiUtil().clickAndWait(unpinAppObject);
+    }
+
+    @Override
+    public boolean verifyAppOnDock(String target) {
+        BySelector appNameOnDockerSelector = getUiElementFromConfig(target);
+        return getSpectatioUiUtil().hasUiElement(appNameOnDockerSelector);
+    }
 }
