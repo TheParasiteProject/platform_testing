@@ -163,14 +163,14 @@ constructor(
      */
     fun closePopupsIfNeeded(device: UiDevice): Boolean {
         if (device.hasObject(By.text(NOTIFICATION_PERMISSION_TEXT))) {
-            val negativeButton = device.findObject(By.text(NEGATIVE_BUTTON_TEXT))
+            val negativeButton = device.findObject(By.res(packageName, NEGATIVE_BUTTON_ID))
             negativeButton.click()
             Log.d(TAG, "Dismiss grant notification pop-up")
             return true
         }
 
         if (device.hasObject(By.text(AD_PRIVACY_TITLE_TEXT))) {
-            val negativeButton = device.findObject(By.text(NEGATIVE_BUTTON_TEXT))
+            val negativeButton = device.findObject(By.res(packageName, NEGATIVE_BUTTON_ID))
             negativeButton.click()
             Log.d(TAG, "Dismiss ad privacy pop-up")
 
@@ -210,7 +210,7 @@ constructor(
         private const val NOTIFICATION_PERMISSION_TEXT = "Chrome notifications make things easier"
         private const val AD_PRIVACY_TITLE_TEXT = "Turn on an ad privacy feature"
         private const val OTHER_AD_PRIVACY_TITLE_TEXT = "Other ad privacy features now available"
-        private const val NEGATIVE_BUTTON_TEXT = "No thanks"
+        private const val NEGATIVE_BUTTON_ID = "negative_button"
         private const val MORE_BUTTON_ID = "more_button"
         private const val ACKNOWLEDGED_BUTTON_TEXT = "Got it"
 
