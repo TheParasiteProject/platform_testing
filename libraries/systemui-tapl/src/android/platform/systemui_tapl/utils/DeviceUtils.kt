@@ -53,8 +53,8 @@ object DeviceUtils {
 
     /** Returns a [BySelector] of a resource in launcher package. */
     @JvmStatic
-    fun launcherResSelector(resourceId: String): BySelector =
-        By.pkg(LAUNCHER_PACKAGE).res(LAUNCHER_PACKAGE, resourceId)
+    fun launcherResSelector(resourceId: String, displayId: Int = DEFAULT_DISPLAY): BySelector =
+        By.displayId(displayId).pkg(LAUNCHER_PACKAGE).res(LAUNCHER_PACKAGE, resourceId)
 
     /** Returns a [BySelector] of a resource with the given content description in sysui package. */
     @JvmStatic
