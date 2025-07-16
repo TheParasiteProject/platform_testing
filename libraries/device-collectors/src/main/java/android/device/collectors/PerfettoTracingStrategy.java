@@ -144,7 +144,6 @@ public abstract class PerfettoTracingStrategy {
     private String mOutputFilePrefix;
     private String mTrackPerfettoProcIdRootDir;
     private final Set<Integer> mAllowedIterations = new HashSet<>();
-
     /**
      * @param instr Android instrumentation object
      * @param identifier Unique strategy identifier, used for strategy specific configuration
@@ -385,8 +384,8 @@ public abstract class PerfettoTracingStrategy {
     protected boolean skipMetric(Integer iteration) {
         if (iteration != null && !mAllowedIterations.isEmpty()) {
             if (iteration.equals(0)) {
-                throw new IllegalStateException("Skip metric check was executed before "
-                        + "the test has started");
+                throw new IllegalStateException(
+                        "Skip metric check was executed before " + "the test has started");
             }
 
             if (!mAllowedIterations.contains(iteration)) {
@@ -536,9 +535,15 @@ public abstract class PerfettoTracingStrategy {
                 DEFAULT_FILE_PATH_KEY_PREFIX);
 
         final String iterations = getArgumentValue(args, ARGUMENT_ALLOW_ITERATIONS, "");
-        for (String iteration : iterations.split(",")) {
-            if (!iteration.isEmpty()) {
-                mAllowedIterations.add(Integer.parseInt(iteration));
+        if (!iterations.isEmpty() && !iterations.equals("all")) {
+            for (String iteration : iterations.split(",")) {
+                if (iteration.matches("\\d+")) {
+                    mAllowedIterations.add(Integer.parseInt(iteration));
+                } else {
+                    throw new IllegalArgumentException(
+                            "Invalid value for allow_iterations. Expected all or comma-separated"
+                                    + " list of integers.");
+                }
             }
         }
     }

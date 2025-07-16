@@ -31,20 +31,16 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.function.Supplier;
 
-/**
- * A strategy that allows capturing one-shot traces before and after each test
- */
-public class PerfettoTracingBeforeAfterTestStrategy extends PerfettoTracingStrategy {
-    private static final String STRATEGY_IDENTIFIER = "before_after";
+/** A strategy that allows capturing trace before each test run */
+public class PerfettoTracingBeforeTestStrategy extends PerfettoTracingStrategy {
+    private static final String STRATEGY_IDENTIFIER = "before_test_run";
 
-    PerfettoTracingBeforeAfterTestStrategy(Instrumentation instr) {
+    PerfettoTracingBeforeTestStrategy(Instrumentation instr) {
         super(instr, STRATEGY_IDENTIFIER);
     }
 
     @VisibleForTesting
-    public PerfettoTracingBeforeAfterTestStrategy(
-            PerfettoHelper helper,
-            Instrumentation instr) {
+    public PerfettoTracingBeforeTestStrategy(PerfettoHelper helper, Instrumentation instr) {
         super(helper, instr, STRATEGY_IDENTIFIER);
     }
 
@@ -53,15 +49,21 @@ public class PerfettoTracingBeforeAfterTestStrategy extends PerfettoTracingStrat
      * for testing.
      */
     @VisibleForTesting
-    PerfettoTracingBeforeAfterTestStrategy(
+    PerfettoTracingBeforeTestStrategy(
             PerfettoHelper helper,
             Instrumentation instr,
             WakeLockContext wakeLockContext,
             Supplier<PowerManager.WakeLock> wakelockSupplier,
             WakeLockAcquirer wakeLockAcquirer,
             WakeLockReleaser wakeLockReleaser) {
-        super(helper, instr, STRATEGY_IDENTIFIER, wakeLockContext, wakelockSupplier,
-                wakeLockAcquirer, wakeLockReleaser);
+        super(
+                helper,
+                instr,
+                STRATEGY_IDENTIFIER,
+                wakeLockContext,
+                wakelockSupplier,
+                wakeLockAcquirer,
+                wakeLockReleaser);
     }
 
     @Override
@@ -70,22 +72,15 @@ public class PerfettoTracingBeforeAfterTestStrategy extends PerfettoTracingStrat
         captureTrace("before", testData, description, iteration);
     }
 
-    @Override
-    void testEnd(DataRecord testData, Description description, int iteration) {
-        super.testEnd(testData, description, iteration);
-        captureTrace("after", testData, description, iteration);
-    }
-
-    private void captureTrace(String tag, DataRecord testData, Description description,
-            int iteration) {
+    private void captureTrace(
+            String tag, DataRecord testData, Description description, int iteration) {
         if (skipMetric(iteration)) {
             return;
         }
 
         final String metricName = getFilePathKeyPrefix() + "_" + tag;
 
-        Log.i(getTag(), "Capturing trace '" + tag + "', for " +
-                getTestFileName(description));
+        Log.i(getTag(), "Capturing trace '" + tag + "', for " + getTestFileName(description));
 
         Runnable task =
                 () -> {
@@ -112,9 +107,6 @@ public class PerfettoTracingBeforeAfterTestStrategy extends PerfettoTracingStrat
                 this.getClass().getSimpleName(),
                 String.format(
                         "%s%s-%s-%d.perfetto-trace",
-                        getOutputFilePrefix(),
-                        getTestFileName(description),
-                        tag,
-                        iteration));
+                        getOutputFilePrefix(), getTestFileName(description), tag, iteration));
     }
 }
