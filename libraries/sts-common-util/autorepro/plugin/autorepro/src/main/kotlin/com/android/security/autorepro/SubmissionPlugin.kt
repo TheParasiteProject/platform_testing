@@ -68,7 +68,7 @@ class SubmissionPlugin : Plugin<Project> {
         project.afterEvaluate {
             configuration.dependencies.forEach { dependency ->
                 if (dependency is ProjectDependency) {
-                    val dependencyProject = dependency.dependencyProject
+                    val dependencyProject = project.project(dependency.path)
                     val dependencyConfiguration =
                         dependencyProject.configurations.getByName(configuration.name)
                     action.execute(Pair(dependencyProject, dependencyConfiguration))
@@ -282,7 +282,7 @@ class SubmissionPlugin : Plugin<Project> {
         project.afterEvaluate {
             testResourceConfiguration!!.dependencies.forEach { dependency ->
                 if (dependency is ProjectDependency) {
-                    val dependencyProject = dependency.dependencyProject
+                    val dependencyProject = project.project(dependency.path)
                     val configuration =
                         dependencyProject.configurations.getByName(testResourceConfiguration!!.name)
                     val projectName = dependencyProject.name
