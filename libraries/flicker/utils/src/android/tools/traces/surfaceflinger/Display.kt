@@ -50,7 +50,11 @@ private constructor(
             // display off
             isOff -> Position.INVALID
             // nav bar is at the bottom of the screen
-            !requestedRotation.isRotated() || isGesturalNavigation -> Position.BOTTOM
+            !requestedRotation.isRotated() ||
+                isGesturalNavigation
+                // The task bar is always at bottom even if it's in 3-button mode.
+                ||
+                isLargeScreen -> Position.BOTTOM
             // nav bar is on the right side
             requestedRotation == Rotation.ROTATION_90 -> Position.RIGHT
             // nav bar is on the left side
