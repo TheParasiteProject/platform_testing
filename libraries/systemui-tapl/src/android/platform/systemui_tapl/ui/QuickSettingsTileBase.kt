@@ -95,6 +95,13 @@ sealed class QuickSettingsTileBase(val displayId: Int = DEFAULT_DISPLAY) {
         internetDialog.clickOnDoneAndClose()
     }
 
+    /** Clicks the Internet tile and presses dismisses it. */
+    fun openHearingDevicesTile(): HearingDevicesDialog {
+        clickWithoutAssertions()
+
+        return  HearingDevicesDialog(displayId)
+    }
+
     /** Clicks the Bluetooth tile and opens dialog. */
     fun openBluetoothDialog(): BluetoothDialog {
         clickWithoutAssertions()
