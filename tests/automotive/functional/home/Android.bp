@@ -26,6 +26,7 @@ android_test {
         "platform-test-junit-rules",
         "platform-test-options",
         "automotive-facet-bar-helper",
+        "automotive-app-grid-helper",
     ],
     srcs: ["src/**/*.java"],
     test_suites: [
