@@ -27,6 +27,7 @@ import androidx.test.uiautomator.UiObject2;
 
 /** Helper class for functional test for App Grid test */
 public class AppGridHelperImpl extends AbstractStandardAppHelper implements IAutoAppGridHelper {
+    private static final int APP_GRID_WAIT_TIME = 30000;
     private ScrollUtility mScrollUtility;
     private ScrollActions mScrollAction;
     private BySelector mBackwardButtonSelector;
@@ -289,6 +290,8 @@ public class AppGridHelperImpl extends AbstractStandardAppHelper implements IAut
     public boolean isRecentsScreenLaunched() {
         BySelector recentAppsThumbnailSelector =
                 getUiElementFromConfig(AutomotiveConfigConstants.RECENT_APPS_THUMBNAIL);
+        getSpectatioUiUtil()
+                .waitForUiObjectToBeGone(recentAppsThumbnailSelector, APP_GRID_WAIT_TIME);
         return getSpectatioUiUtil().hasUiElement(recentAppsThumbnailSelector);
     }
 
