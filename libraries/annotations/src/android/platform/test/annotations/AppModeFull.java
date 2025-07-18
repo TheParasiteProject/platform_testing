@@ -16,16 +16,20 @@
 package android.platform.test.annotations;
 
 import java.lang.annotation.ElementType;
+import java.lang.annotation.Inherited;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Marks that the test is valid only in full mode. That is
- * the APK containing the test is installed as a full app.
+ * Marks that the test is valid only in full mode. That is the APK containing the test is installed
+ * as a full app.
+ *
+ * <p>{@link Inherited} so that subclasses will inherit superclass value.
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.METHOD, ElementType.TYPE})
+@Inherited
 public @interface AppModeFull {
     /**
      * The reason why the test has to be run in full mode
