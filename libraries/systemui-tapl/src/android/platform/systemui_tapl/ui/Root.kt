@@ -86,7 +86,7 @@ class Root private constructor(val displayId: Int = DEFAULT_DISPLAY) {
 
     /** Opens the notification shade via AccessibilityService.GLOBAL_ACTION_NOTIFICATIONS. */
     fun openNotificationShadeViaGlobalAction(): NotificationShade {
-        traceSection("Opening notification shade via global action") {
+        traceSection("Opening shade via global action") {
             uiDevice.openNotification()
             waitForShadeToOpen()
             return NotificationShade(displayId)
@@ -123,7 +123,7 @@ class Root private constructor(val displayId: Int = DEFAULT_DISPLAY) {
         swipeDuration: Duration = Duration.ofMillis(500),
         heightFraction: Float = 0.1F,
     ): NotificationShade {
-        traceSection("Opening notification shade via swipe") {
+        traceSection("Opening shade via swipe") {
             val device = uiDevice
             val height = device.getDisplayHeight(displayId).toFloat()
             BetterSwipe.swipe(
@@ -519,7 +519,7 @@ class Root private constructor(val displayId: Int = DEFAULT_DISPLAY) {
     }
 
     fun assertShadeNotVisible() {
-        qsHeaderSelector.assertInvisible { "Notification shade should not be visible" }
+        qsHeaderSelector.assertInvisible { "Shade should not be visible" }
     }
 
     private val qsHeaderSelector =
@@ -534,7 +534,7 @@ class Root private constructor(val displayId: Int = DEFAULT_DISPLAY) {
         traceSection("waitForShadeToOpen") {
             qsHeaderSelector.assertVisible(
                 timeout = NOTIFICATION_SHADE_OPEN_TIMEOUT,
-                errorProvider = { "Notification shade didn't open on display $displayId" },
+                errorProvider = { "Shade didn't open on display $displayId" },
             )
         }
     }
