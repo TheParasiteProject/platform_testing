@@ -29,6 +29,9 @@ public class SettingUserHelperImpl extends AbstractStandardAppHelper implements 
     private static final String TAG = "SettingUserHelperImpl";
     private static final int MAX_WAIT_COUNT = 4;
     private static final int WAIT_MS = 40000;
+
+    private static final int TEN_SECONDS_WAIT = 10000;
+
     private ScrollUtility mScrollUtility;
     private ScrollActions mScrollAction;
     private BySelector mBackwardButtonSelector;
@@ -105,7 +108,11 @@ public class SettingUserHelperImpl extends AbstractStandardAppHelper implements 
             getSpectatioUiUtil().clickAndWait(userObject);
             clickbutton(AutomotiveConfigConstants.USER_SETTINGS_DELETE);
             clickbutton(AutomotiveConfigConstants.USER_SETTINGS_DELETE);
-            getSpectatioUiUtil().wait5Seconds();
+            getSpectatioUiUtil()
+                    .waitForUiObject(
+                            getUiElementFromConfig(
+                                    AutomotiveConfigConstants.USER_SETTINGS_ADD_PROFILE),
+                            TEN_SECONDS_WAIT);
         }
     }
     // delete self User
@@ -137,7 +144,6 @@ public class SettingUserHelperImpl extends AbstractStandardAppHelper implements 
         //             AutomotiveConfigConstants.USER_SETTINGS_ADD_PROFILE, addUserButton));
         if (addUserButton == null) {
             clickbutton(AutomotiveConfigConstants.USER_SETTINGS_MANAGE_OTHER_PROFILES);
-            getSpectatioUiUtil().wait5Seconds();
             UiObject2 UserObject =
                     mScrollUtility.scrollAndFindUiObject(
                             mScrollAction,
@@ -243,7 +249,6 @@ public class SettingUserHelperImpl extends AbstractStandardAppHelper implements 
     public boolean isNewUserAnAdmin(String user) {
         boolean isUserAdmin = true;
         clickbutton(AutomotiveConfigConstants.USER_SETTINGS_MANAGE_OTHER_PROFILES);
-        getSpectatioUiUtil().wait5Seconds();
         UiObject2 UserObject =
                 mScrollUtility.scrollAndFindUiObject(
                         mScrollAction,
