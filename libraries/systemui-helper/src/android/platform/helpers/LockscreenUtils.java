@@ -57,6 +57,8 @@ public class LockscreenUtils {
     private static final String SET_PIN_COMMAND = "locksettings set-pin";
     private static final String SET_PATTERN_COMMAND = "locksettings set-pattern";
     private static final String SET_SWIPE_COMMAND = "locksettings set-disabled false";
+    private static final String CHECK_SET_SWIPE_COMMAND = "locksettings get-disabled";
+    private static final String SET_SWIPE_COMMAND_SUCCEED = "false";
     private static final String SET_LOCK_AS_NONE_COMMAND = "locksettings set-disabled true";
     // The SysUI/WM goingAway timeout is 10s. Give that time to process before timing out.
     private static final int MAX_LOCKSCREEN_TIMEOUT_IN_SEC = 15;
@@ -82,11 +84,14 @@ public class LockscreenUtils {
      * @param lockscreenType it enum with list of supported lockscreen type
      * @param lockscreenCode code[PIN or PATTERN or PASSWORD] which needs to be set.
      * @param expectedResult expected result after setting the lockscreen because for lock type
-     *                       Swipe and None Keygaurd#isKeyguardSecure remain unlocked i.e. false.
+     *     Swipe and None Keyguard#isKeyguardSecure remain unlocked i.e. false.
+     * @return whether the given {@code lockscreenType} is supported by this device. For now, it's
+     *     only checked for {@code SWIPE} (and always return {@code true} for the other types
      */
-    public static void setLockscreen(LockscreenType lockscreenType, String lockscreenCode,
-            boolean expectedResult) {
+    public static boolean setLockscreen(
+            LockscreenType lockscreenType, String lockscreenCode, boolean expectedResult) {
         Log.d(TAG, format("Setting Lockscreen [%s(%s)]", lockscreenType, lockscreenCode));
+        boolean supported = true;
         switch (lockscreenType) {
             case PIN:
                 executeShellCommand(format("%s %s", SET_PIN_COMMAND, lockscreenCode));
@@ -99,6 +104,18 @@ public class LockscreenUtils {
                 break;
             case SWIPE:
                 executeShellCommand(SET_SWIPE_COMMAND);
+                // TODO(b/432837014): ideally we should infer if it succeed by parsing the result
+                // of SET_SWIPE_COMMAND, but it looks like it's always returning false, so we need
+                // to call its "getter" (more specifically, CHECK_SET_SWIPE_COMMAND) to be sure...
+                String result = executeShellCommand(CHECK_SET_SWIPE_COMMAND).trim();
+                if (!result.equals(SET_SWIPE_COMMAND_SUCCEED)) {
+                    Log.d(
+                            TAG,
+                            format(
+                                    "SWIPE not supported, command %s returned %s (instead of %s)",
+                                    CHECK_SET_SWIPE_COMMAND, result, SET_SWIPE_COMMAND_SUCCEED));
+                    supported = false;
+                }
                 break;
             case NONE:
                 executeShellCommand(SET_LOCK_AS_NONE_COMMAND);
@@ -107,6 +124,7 @@ public class LockscreenUtils {
                 throw new AssertionError("Non-supported Lockscreen Type: " + lockscreenType);
         }
         assertKeyguardSecure(expectedResult);
+        return supported;
     }
 
     private static void assertKeyguardSecure(boolean expectedSecure) {

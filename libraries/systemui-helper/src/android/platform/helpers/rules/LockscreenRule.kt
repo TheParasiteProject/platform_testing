@@ -18,7 +18,11 @@ package android.platform.helpers.rules
 
 import android.platform.helpers.LockscreenUtils
 import android.platform.helpers.LockscreenUtils.LockscreenType
-import android.platform.helpers.LockscreenUtils.LockscreenType.*
+import android.platform.helpers.LockscreenUtils.LockscreenType.NONE
+import android.platform.helpers.LockscreenUtils.LockscreenType.PASSWORD
+import android.platform.helpers.LockscreenUtils.LockscreenType.PATTERN
+import android.platform.helpers.LockscreenUtils.LockscreenType.PIN
+import android.platform.helpers.LockscreenUtils.LockscreenType.SWIPE
 import org.junit.rules.TestWatcher
 import org.junit.runner.Description
 
@@ -56,5 +60,7 @@ private const val VALID_PIN = "1234"
 private fun setLockscreen(
     type: LockscreenType,
     code: String? = null,
-    expectedLocked: Boolean = code != null
-): Unit = LockscreenUtils.setLockscreen(type, code, expectedLocked)
+    expectedLocked: Boolean = code != null,
+) {
+    LockscreenUtils.setLockscreen(type, code, expectedLocked)
+}
