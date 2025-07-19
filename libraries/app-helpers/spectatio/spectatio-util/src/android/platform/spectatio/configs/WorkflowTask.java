@@ -223,6 +223,9 @@ public class WorkflowTask {
                         /* isLongClick= */ false,
                         /* isOptional= */ true);
                 break;
+            case SCROLL_TO_FIND:
+                validateUiElement(workflowName, spectatioUiUtil, fullConfig, FindType.SCROLL);
+                break;
             case SET_TEXT:
                 validateAndSetTextOfUiElement(workflowName, spectatioUiUtil, fullConfig);
                 break;
@@ -246,6 +249,9 @@ public class WorkflowTask {
                         FindType.SWIPE,
                         /* isLongClick= */ false,
                         /* isOptional= */ true);
+                break;
+            case SWIPE_TO_FIND:
+                validateUiElement(workflowName, spectatioUiUtil, fullConfig, FindType.SWIPE);
                 break;
             case VALIDATE_VALUE:
                 validateElementHasProperty(workflowName, spectatioUiUtil, fullConfig);
@@ -343,13 +349,11 @@ public class WorkflowTask {
         spectatioUiUtil.swipe(direction, swipeConfig.getNumberOfSteps(), fraction);
     }
 
-    private void validateAndClickUiElement(
+    private UiObject2 findUiElement(
             String workflowName,
             SpectatioUiUtil spectatioUiUtil,
             SpectatioConfig fullConfig,
-            FindType howToFind,
-            boolean isLongClick,
-            boolean isOptional) {
+            FindType howToFind) {
         UiElement uiElement = validateAndGetTaskConfigUiElement(workflowName, fullConfig);
         BySelector selector = uiElement.getBySelectorForUiElement();
         UiObject2 uiObject = spectatioUiUtil.findUiObject(selector);
@@ -427,6 +431,26 @@ public class WorkflowTask {
                             swipeFraction,
                             selector);
         }
+        return uiObject;
+    }
+
+    private void validateUiElement(
+            String workflowName,
+            SpectatioUiUtil spectatioUiUtil,
+            SpectatioConfig fullConfig,
+            FindType howToFind) {
+        UiObject2 uiObject = findUiElement(workflowName, spectatioUiUtil, fullConfig, howToFind);
+        validateUiObject(uiObject, workflowName);
+    }
+
+    private void validateAndClickUiElement(
+            String workflowName,
+            SpectatioUiUtil spectatioUiUtil,
+            SpectatioConfig fullConfig,
+            FindType howToFind,
+            boolean isLongClick,
+            boolean isOptional) {
+        UiObject2 uiObject = findUiElement(workflowName, spectatioUiUtil, fullConfig, howToFind);
         if (isOptional && !isValidUiObject(uiObject)) {
             return;
         }

@@ -123,6 +123,20 @@ public interface IAutoAppGridHelper extends IAppHelper {
     /**
      * Setup expectations: Home screen
      *
+     * <p>Validates long press on Dynamic app on Dock and check unpin
+     */
+    boolean verifyUnpinOptionForStaticAppOnDock(String target);
+
+    /**
+     * Setup expectations: Home screen
+     *
+     * <p>Validates long press on Dynamic app on Dock and check pin
+     */
+    boolean verifyPinOptionForDynamicAppOnDock(String target);
+
+    /**
+     * Setup expectations: Home screen
+     *
      * <p>Validates app is displayed on the Dock.
      */
     boolean verifyAppOnDock(String target);

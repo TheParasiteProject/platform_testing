@@ -86,6 +86,8 @@ public class JsonConfigConstants {
         // Finds the given UI Element by Scrolling and Click on it if found ( i.e. No Exception
         // even if UI Element is missing )
         SCROLL_TO_FIND_AND_CLICK_IF_EXIST,
+        // Finds the given UI Element by Scrolling ( Throws an exception if UI Element not found )
+        SCROLL_TO_FIND,
         // Sets the text of an element (used for quickly filling search boxes)
         SET_TEXT,
         // Swipes once
@@ -96,6 +98,8 @@ public class JsonConfigConstants {
         // Finds the given UI Element by Swiping and Click on it if found ( i.e. No Exception
         // even if UI Element is missing )
         SWIPE_TO_FIND_AND_CLICK_IF_EXIST,
+        // Finds the given UI Element by Swiping ( Throws an exception if UI Element not found )
+        SWIPE_TO_FIND,
         // Confirm that the given value is what's expected, and fail the test by throwing an
         // exception if it's not
         VALIDATE_VALUE,
