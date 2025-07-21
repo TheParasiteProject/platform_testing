@@ -275,7 +275,7 @@ class Root private constructor(val displayId: Int = DEFAULT_DISPLAY) {
                 displayId = displayId,
             )
         } else {
-            openNotificationShadeViaTwoFingersSwipe()
+            openNotificationShadeViaSwipeFromTop().openQuickSettingsWithSwipe()
         }
         waitForQuickSettingsToOpen()
         return QuickSettings(displayId)

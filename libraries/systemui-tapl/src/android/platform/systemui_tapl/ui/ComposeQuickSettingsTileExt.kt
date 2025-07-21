@@ -41,6 +41,11 @@ fun ComposeQuickSettingsTile.clickBatteryTileToOpenDialog(): BatteryDialog {
     return BatteryDialog(displayId)
 }
 
+fun ComposeQuickSettingsTile.clickHearingDevicesToOpenDialog(): HearingDevicesDialog {
+    click()
+    return HearingDevicesDialog(displayId)
+}
+
 private fun ComposeQuickSettingsTile.clickToOpenDialogOnDualTarget() {
     if (isSmallTile) {
         longPress()
