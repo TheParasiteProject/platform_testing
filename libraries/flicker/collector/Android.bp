@@ -23,11 +23,9 @@ android_library {
     srcs: [
         "src/**/*.java",
     ],
-    asset_dirs: [
-        "trace_config",
-    ],
     static_libs: [
         "collector-device-lib",
+        "perfetto_config-lite",
     ],
     sdk_version: "test_current",
 }
