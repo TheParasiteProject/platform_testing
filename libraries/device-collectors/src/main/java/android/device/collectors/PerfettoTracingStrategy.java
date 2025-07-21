@@ -63,7 +63,7 @@ public abstract class PerfettoTracingStrategy {
     // Default perfetto config file name when text proto config is used.
     private static final String DEFAULT_TEXT_CONFIG_FILE = "trace_config.textproto";
     // Argument to get custom config file name for collecting the trace.
-    private static final String PERFETTO_CONFIG_FILE_ARG = "perfetto_config_file";
+    public static final String PERFETTO_CONFIG_FILE_ARG = "perfetto_config_file";
     // Skip failure metrics collection if this flag is set to true.
     public static final String SKIP_TEST_FAILURE_METRICS = "skip_test_failure_metrics";
     // Skip success metrics collection if this flag is set to true (i.e. collect only failures).
@@ -80,7 +80,7 @@ public abstract class PerfettoTracingStrategy {
     // Argument to get custom time in millisecs to wait before dumping the trace.
     // This has to be at least the dump interval time set in the trace config file
     // or greater than that. Otherwise, we will miss trace information from the test.
-    private static final String PERFETTO_WAIT_TIME_ARG = "perfetto_wait_time_ms";
+    public static final String PERFETTO_WAIT_TIME_ARG = "perfetto_wait_time_ms";
     // Argument to indicate the perfetto config file is text proto file.
     public static final String PERFETTO_CONFIG_TEXT_PROTO = "perfetto_config_text_proto";
     // Argument to indicate the perfetto config content in a textual format
