@@ -62,6 +62,10 @@ class BubbleBar {
     val bubbles: List<BubbleBarItem>
         get() = waitForObj(BUBBLE_BAR_VIEW).children.map { BubbleBarItem(it) }
 
+    /** Returns the current position of the bubble bar. */
+    val visibleCenter: Point
+        get() = waitForObj(BUBBLE_BAR_VIEW).visibleCenter
+
     /** Expands the bubble bar by clicking on it and returns [ExpandedBubbleBar]. */
     fun expand(): ExpandedBubbleBar {
         BUBBLE_BAR_VIEW.click()
@@ -98,6 +102,30 @@ class BubbleBar {
 
         BUBBLE_BAR_VIEW.assertInvisible {
             "Failed while waiting for bubble bar to become invisible"
+        }
+    }
+
+    /**
+     * If the bubble bar is at the right, drag to the left. Otherwise, drag to the right.
+     *
+     * The caller must guarantee the bubble bar is in collapsed state.
+     */
+    fun dragToTheOtherSide() {
+        val currentCenter = waitForObj(BUBBLE_BAR_VIEW).visibleCenter
+        val theOtherSide =
+            Point(
+                // If the bubble bar is shown on the right, drag to the left Otherwise, drag to the
+                // right.
+                if (currentCenter.x > uiDevice.displayWidth / 2) {
+                    10
+                } else {
+                    uiDevice.displayWidth - 10
+                },
+                currentCenter.y,
+            )
+        BetterSwipe.swipe(currentCenter) {
+            pause()
+            to(theOtherSide, Duration.of(500, ChronoUnit.MILLIS), PRECISE_GESTURE_INTERPOLATOR)
         }
     }
 
