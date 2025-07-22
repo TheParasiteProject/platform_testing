@@ -15,8 +15,10 @@
  */
 package android.platform.systemui_tapl.ui
 
+import android.platform.systemui_tapl.utils.DeviceUtils
 import android.platform.uiautomatorhelpers.DeviceHelpers.assertInvisible
 import android.platform.uiautomatorhelpers.DeviceHelpers.assertVisible
+import android.platform.uiautomatorhelpers.scrollUntilFound
 import android.platform.uiautomatorhelpers.DeviceHelpers.waitForObj
 import android.view.Display.DEFAULT_DISPLAY
 import androidx.test.uiautomator.By
@@ -42,7 +44,12 @@ class ModesDialog internal constructor(val displayId: Int = DEFAULT_DISPLAY) {
     }
 
     private fun getModeTile(modeName: String): UiObject2 {
-        return waitForObj(By.text(modeName)).parent
+        val scrollView: UiObject2 =
+            waitForObj(
+                DeviceUtils.sysuiResSelector("scroll_view", displayId)
+            )
+        val tile = scrollView.scrollUntilFound(By.text(modeName)) ?: error("Mode tile $modeName not found")
+        return tile.parent
     }
 
     fun tapMode(modeName: String) {
