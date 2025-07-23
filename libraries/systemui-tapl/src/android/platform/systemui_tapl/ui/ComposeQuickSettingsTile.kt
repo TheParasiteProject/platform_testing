@@ -162,8 +162,7 @@ abstract class ComposeQuickSettingsTile private constructor(val displayId: Int =
 
         /** See https://hsv.googleplex.com/4910828112314368?node=37 */
         fun smallTileSelector(description: String, displayId: Int = DEFAULT_DISPLAY): BySelector {
-            val tileContentDesc = By.descStartsWith(description)
-            return sysuiResSelector(SMALL_TILE_TAG, displayId).hasDescendant(tileContentDesc)
+            return sysuiResSelector(SMALL_TILE_TAG, displayId).descStartsWith(description)
         }
 
         /** See https://hsv.googleplex.com/4910828112314368?node=28 */

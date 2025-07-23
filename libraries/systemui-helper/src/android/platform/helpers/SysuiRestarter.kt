@@ -22,6 +22,7 @@ import android.platform.helpers.features.common.HomeLockscreenPage
 import android.platform.uiautomatorhelpers.DeviceHelpers.assertVisibility
 import android.platform.uiautomatorhelpers.DeviceHelpers.uiDevice
 import android.platform.uiautomatorhelpers.DurationUtils.platformAdjust
+import android.util.Log
 import androidx.test.uiautomator.By
 import com.android.app.tracing.traceSection
 import com.android.systemui.Flags
@@ -29,6 +30,8 @@ import java.time.Duration
 
 /** Restarts system ui. */
 object SysuiRestarter {
+
+    private val TAG = "SysuiRestarter"
 
     private val sysuiProcessUtils = ProcessUtil(UI_PACKAGE_NAME_SYSUI)
 
@@ -47,24 +50,32 @@ object SysuiRestarter {
      * visible, then it will optionally dismiss the home screen via swipe.
      *
      * @param swipeUp whether to call [HomeLockscreenPage.swipeUp] after restarting System UI
+     * @return whether the lockscreen is available after restart
      */
     @JvmStatic
-    fun restartSystemUI(swipeUp: Boolean) {
+    fun restartSystemUI(swipeUp: Boolean): Boolean {
         traceSection("restartSystemUI") {
             // This method assumes the screen is on.
             assertScreenOn("restartSystemUI needs the screen to be on.")
-            // make sure the lock screen is enable.
-            LockscreenUtils.setLockscreen(
-                LockscreenType.SWIPE,
-                /* lockscreenCode= */ null,
-                /* expectedResult= */ false,
-            )
+            // Make sure the lock screen is enabled.
+            val isSwipeSupported: Boolean =
+                LockscreenUtils.setLockscreen(
+                    LockscreenType.SWIPE,
+                    /* lockscreenCode= */ null,
+                    /* expectedResult= */ false,
+                )
             sysuiProcessUtils.restart()
+            if (!isSwipeSupported) {
+                Log.d(TAG, "restartSystemUI(): device doesn't support LockscreenType.SWIPE")
+                return false
+            }
+
             assertLockscreenVisibility(true) { "Lockscreen not visible after restart" }
             if (swipeUp) {
                 HomeLockscreenPage().swipeUp()
                 assertLockscreenVisibility(false) { "Lockscreen still visible after swiping up." }
             }
+            return true
         }
     }
 
