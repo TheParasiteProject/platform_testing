@@ -325,6 +325,29 @@ public class SpectatioUiUtil {
     }
 
     /**
+     * Click until given object to be gone, wait for the specified time. Usecases * Clicking a
+     * object that opens a new window * Navigating between screens *
+     */
+    public void clickUntilObjectToBegone(BySelector selector) {
+        int count = 0;
+        boolean isObjectPresent = true;
+        validateSelector(selector, /* action= */ "Find UI Object");
+        UiObject2 object;
+        while (isObjectPresent) {
+            object = findUiObject(selector);
+            if (object == null) {
+                isObjectPresent = false;
+            } else if (count > 5) {
+                validateUiObject(object, "Click");
+            } else {
+                clickAndWait(object);
+                waitForUiObjectToBeGone(selector, LONG_UI_RESPONSE_WAIT_MS);
+                count++;
+            }
+        }
+    }
+
+    /**
      * Click at a specific location in the UI, and wait one second
      *
      * @param location Where to click
