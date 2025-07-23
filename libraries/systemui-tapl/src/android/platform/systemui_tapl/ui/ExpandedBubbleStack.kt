@@ -64,13 +64,13 @@ class ExpandedBubbleStack internal constructor() {
         return BubbleOverflow()
     }
 
+    /** Verifies if the overflow icon is visible. */
     fun verifyBubbleOverflowIsVisible() {
         if (CommonUtils.isLargeScreen()) {
-            BUBBLE_BAR_OVERFLOW
+            BUBBLE_BAR_OVERFLOW.assertVisible(timeout = FIND_OBJECT_TIMEOUT)
         } else {
-            BUBBLE_OVERFLOW_BUTTON
+            BUBBLE_OVERFLOW_BUTTON.assertVisible(timeout = FIND_OBJECT_TIMEOUT)
         }
-        .assertVisible(timeout = FIND_OBJECT_TIMEOUT)
     }
 
     /** Closes the stack by swiping up. */

@@ -19,6 +19,7 @@ package android.platform.systemui_tapl.ui
 import android.platform.systemui_tapl.utils.DeviceUtils.sysuiResSelector
 import android.platform.uiautomatorhelpers.DeviceHelpers.assertVisible
 import android.platform.uiautomatorhelpers.DeviceHelpers.waitForObj
+import androidx.test.uiautomator.UiObject2
 import com.google.common.truth.Truth.assertThat
 import java.time.Duration
 
@@ -28,6 +29,12 @@ class BubbleOverflow internal constructor() {
         BUBBLE_OVERFLOW_CONTAINER.assertVisible(timeout = FIND_OBJECT_TIMEOUT)
     }
 
+    private val overflowBubbleViews: List<UiObject2>
+        get() {
+            val recycler = waitForObj(BUBBLE_OVERFLOW_RECYCLER_ID, timeout = FIND_OBJECT_TIMEOUT)
+            return recycler.findObjects(BUBBLE_OVERFLOW_VIEW)
+        }
+
     /** Asserts that the panel is empty. */
     fun verifyIsEmpty() {
         BUBBLE_OVERFLOW_EMPTY_STATE_ID.assertVisible(timeout = FIND_OBJECT_TIMEOUT)
@@ -35,9 +42,12 @@ class BubbleOverflow internal constructor() {
 
     /** Asserts that the panel has at least one bubble. */
     fun verifyHasBubbles() {
-        val recycler = waitForObj(BUBBLE_OVERFLOW_RECYCLER_ID, timeout = FIND_OBJECT_TIMEOUT)
-        val overflowBubbleViews = recycler.findObjects(BUBBLE_OVERFLOW_VIEW)
         assertThat(overflowBubbleViews.size).isAtLeast(1)
+    }
+
+    /** Open the bubble with [index]. */
+    fun openBubble(index: Int = 0) {
+        overflowBubbleViews[index].click()
     }
 
     private companion object {
