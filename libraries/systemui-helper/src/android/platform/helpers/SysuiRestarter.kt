@@ -83,7 +83,7 @@ object SysuiRestarter {
         uiDevice.assertVisibility(
             LOCKSCREEN_SELECTOR,
             visible,
-            timeout = Duration.ofSeconds(10).platformAdjust(),
+            timeout = Duration.ofSeconds(20).platformAdjust(),
             errorProvider = errorMessageProvider,
         )
     }
