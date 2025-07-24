@@ -46,7 +46,7 @@ import java.util.function.Supplier;
  */
 public abstract class PerfettoTracingStrategy {
     // Option to pass the folder name which contains the perfetto trace config file.
-    private static final String PERFETTO_CONFIG_ROOT_DIR_ARG = "perfetto_config_root_dir";
+    public static final String PERFETTO_CONFIG_ROOT_DIR_ARG = "perfetto_config_root_dir";
     // Default folder name to look for the perfetto config file.
     // Argument to indicate the perfetto output file prefix
     public static final String PERFETTO_CONFIG_OUTPUT_FILE_PREFIX =
