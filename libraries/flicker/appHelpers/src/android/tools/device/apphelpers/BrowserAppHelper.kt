@@ -119,25 +119,31 @@ constructor(
             "Window width is to small to drag one of its tabs"
         }
         // Define the drag start point. Since the tab is rendered directly on a surface, we cannot
-        // easily query its exact bounds. Instead, we use hardcoded offsets (300px right, 40px down)
-        // from the window's top-left corner, hoping to reliably land the starting point somewhere
-        // on the draggable tab area.
+        // easily query its exact bounds. Instead, we use hardcoded offsets from the window's
+        // top-left corner, hoping to reliably land the starting point somewhere on the draggable
+        // tab area.
         val startDraggingPoint =
-            Point(/* x= */ windowBounds.left + 300, /* y= */ windowBounds.top + 40)
+            Point(
+                /* x= */ windowBounds.left + TAB_DRAG_START_POINT_OFFSET_X,
+                /* y= */ windowBounds.top + TAB_DRAG_START_POINT_OFFSET_Y,
+            )
         // Define the drag end point. This point is intentionally outside the original window bounds
-        // (100px left, 100px up from the window's top-left corner) to simulate dragging the tab
+        // (hardcoded offset from the window's top-left corner) to simulate dragging the tab
         // clear of the window, triggering the "tear" action.
         val endDraggingPoint =
             when (direction) {
                 TabDraggingDirection.TOP_LEFT ->
-                    Point(/* x= */ windowBounds.left - 100, /* y= */ windowBounds.top - 100)
+                    Point(
+                        /* x= */ windowBounds.left - TAB_DRAG_END_POINT_OFFSET_X,
+                        /* y= */ windowBounds.top - TAB_DRAG_END_POINT_OFFSET_Y,
+                    )
             }
         device.drag(
             startDraggingPoint.x,
             startDraggingPoint.y,
             endDraggingPoint.x,
             endDraggingPoint.y,
-            /* steps= */ 100,
+            /* steps= */ TAB_DRAG_STEPS,
         )
     }
 
@@ -213,6 +219,12 @@ constructor(
         private const val NEGATIVE_BUTTON_ID = "negative_button"
         private const val MORE_BUTTON_ID = "more_button"
         private const val ACKNOWLEDGED_BUTTON_TEXT = "Got it"
+
+        private const val TAB_DRAG_START_POINT_OFFSET_X = 200
+        private const val TAB_DRAG_START_POINT_OFFSET_Y = 140
+        private const val TAB_DRAG_END_POINT_OFFSET_X = 100
+        private const val TAB_DRAG_END_POINT_OFFSET_Y = 100
+        private const val TAB_DRAG_STEPS = 100
 
         private val WAIT_TIME_IN_MILLISECONDS = Duration.ofSeconds(3).toMillis()
         private const val MIN_WINDOW_WIDTH_FOR_TAB_TEARING_DP = 600
