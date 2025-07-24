@@ -9,15 +9,10 @@ package platform.test.screenshot
 val DeviceEmulationSpec.Companion.PhoneAndTabletFull
     get() = PhoneAndTabletFullSpec
 
-/**
- * The configuration to verify features on desktop.
- */
+/** The configuration to verify features on desktop. */
 val DeviceEmulationSpec.Companion.DesktopMinimal
-    get() = DeviceEmulationSpec.forDisplays(
-        Displays.Desktop,
-        isDarkTheme = true,
-        isLandscape = true,
-    )
+    get() =
+        DeviceEmulationSpec.forDisplays(Displays.Desktop, isDarkTheme = true, isLandscape = true)
 
 private val PhoneAndTabletFullSpec =
     DeviceEmulationSpec.forDisplays(Displays.Phone, Displays.Tablet)
@@ -48,95 +43,40 @@ private val externalDisplaysMinimalSpec: List<DeviceEmulationSpec> =
         Displays.External1080p,
         Displays.External4k,
         isDarkTheme = false,
-        isLandscape = true
+        isLandscape = true,
     )
 
 object Displays {
-    val Phone =
-        DisplaySpec(
-            "phone",
-            width = 1440,
-            height = 3120,
-            densityDpi = 560,
-        )
+    val Phone = DisplaySpec("phone", width = 1440, height = 3120, densityDpi = 560)
 
-    val Tablet =
-        DisplaySpec(
-            "tablet",
-            width = 2560,
-            height = 1600,
-            densityDpi = 320,
-        )
+    val Tablet = DisplaySpec("tablet", width = 2560, height = 1600, densityDpi = 320)
 
-    val FoldableOuter =
-        DisplaySpec(
-            "foldable_outer",
-            width = 1080,
-            height = 2092,
-            densityDpi = 420,
-        )
+    val FoldableOuter = DisplaySpec("foldable_outer", width = 1080, height = 2092, densityDpi = 420)
 
-    val FoldableInner =
-        DisplaySpec(
-            "foldable_inner",
-            width = 2208,
-            height = 1840,
-            densityDpi = 420,
-        )
+    val FoldableInner = DisplaySpec("foldable_inner", width = 2208, height = 1840, densityDpi = 420)
 
     val TallerFoldableOuter =
-        DisplaySpec(
-            "taller_foldable_outer",
-            width = 1080,
-            height = 2424,
-            densityDpi = 395,
-        )
+        DisplaySpec("taller_foldable_outer", width = 1080, height = 2424, densityDpi = 395)
 
     val TallerFoldableInner =
-        DisplaySpec(
-            "taller_foldable_inner",
-            width = 2076,
-            height = 2152,
-            densityDpi = 360,
-        )
+        DisplaySpec("taller_foldable_inner", width = 2076, height = 2152, densityDpi = 360)
 
-    val External480p =
-        DisplaySpec(
-            "external480p",
-            width = 720,
-            height = 480,
-            densityDpi = 142,
-        )
+    val External480p = DisplaySpec("external480p", width = 720, height = 480, densityDpi = 142)
 
-    val External720p =
-        DisplaySpec(
-            "external720p",
-            width = 1280,
-            height = 720,
-            densityDpi = 213,
-        )
+    val External720p = DisplaySpec("external720p", width = 1280, height = 720, densityDpi = 213)
 
-    val External1080p =
-        DisplaySpec(
-            "external1080p",
-            width = 1920,
-            height = 1080,
-            densityDpi = 320,
-        )
+    val External1080p = DisplaySpec("external1080p", width = 1920, height = 1080, densityDpi = 320)
 
-    val External4k =
-        DisplaySpec(
-            "external4k",
-            width = 3840,
-            height = 2160,
-            densityDpi = 320,
-        )
+    val External1080p88dpi =
+        DisplaySpec("external1080p88dpi", width = 1920, height = 1080, densityDpi = 88)
 
-    val Desktop =
-        DisplaySpec(
-            "desktop",
-            width=1920,
-            height=1080,
-            densityDpi = 320,
-        )
+    val External1080p111dpi =
+        DisplaySpec("external1080p111dpi", width = 1920, height = 1080, densityDpi = 111)
+
+    val External1080p120dpi =
+        DisplaySpec("external1080p120dpi", width = 1920, height = 1080, densityDpi = 120)
+
+    val External4k = DisplaySpec("external4k", width = 3840, height = 2160, densityDpi = 320)
+
+    val Desktop = DisplaySpec("desktop", width = 1920, height = 1080, densityDpi = 320)
 }
