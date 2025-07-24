@@ -437,6 +437,7 @@ public class SettingHelperImpl extends AbstractStandardAppHelper implements IAut
     public void openMenuWith(String... menuOptions) {
         // Scroll and Find Subsettings
         for (String menu : menuOptions) {
+            getSpectatioUiUtil().waitForText(menu, WAIT_MS, SpectatioUiUtil.TextMatchType.EXACT);
             Pattern menuPattern = Pattern.compile(menu, Pattern.CASE_INSENSITIVE);
             BySelector selector = By.text(menuPattern);
 
