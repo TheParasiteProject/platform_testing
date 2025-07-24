@@ -106,32 +106,32 @@ public class AppInfoVerifyUIElementsTest {
                 "Permission manager Option is not displayed",
                 mSettingsUIHelper
                         .get()
-                        .hasUIElement(AutomotiveConfigConstants.PERMISSION_MANAGER_UI_ELEMENT));
+                        .hasSettingsMenu(AutomotiveConfigConstants.PERMISSION_MANAGER_UI_ELEMENT));
         Log.i(LOG_TAG, "Assert: Default apps option is displayed");
         assertTrue(
                 "Default apps Option is not displayed",
                 mSettingsUIHelper
                         .get()
-                        .hasUIElement(AutomotiveConfigConstants.DEFAULT_APPS_UI_ELEMENT));
+                        .hasSettingsMenu(AutomotiveConfigConstants.DEFAULT_APPS_UI_ELEMENT));
         Log.i(LOG_TAG, "Assert: Unused apps option is displayed");
         assertTrue(
                 "Unused apps Option is not displayed",
                 mSettingsUIHelper
                         .get()
-                        .hasUIElement(AutomotiveConfigConstants.UNUSED_APPS_UI_ELEMENT));
+                        .hasSettingsMenu(AutomotiveConfigConstants.UNUSED_APPS_UI_ELEMENT));
         Log.i(LOG_TAG, "Assert: Performance-impacting apps option is displayed");
         assertTrue(
                 "Performance-impacting apps Option is not displayed",
                 mSettingsUIHelper
                         .get()
-                        .hasUIElement(
+                        .hasSettingsMenu(
                                 AutomotiveConfigConstants.PERFORMANCE_IMPACTING_APPS_UI_ELEMENT));
         Log.i(LOG_TAG, "Assert: Special apps access option is displayed");
         assertTrue(
                 "Special app access Option is not displayed",
                 mSettingsUIHelper
                         .get()
-                        .hasUIElement(AutomotiveConfigConstants.SPECIAL_APPS_UI_ELEMENT));
+                        .hasSettingsMenu(AutomotiveConfigConstants.SPECIAL_APPS_UI_ELEMENT));
     }
 }
 
