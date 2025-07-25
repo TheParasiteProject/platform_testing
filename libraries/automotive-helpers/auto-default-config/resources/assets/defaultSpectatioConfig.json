@@ -1569,13 +1569,11 @@
     },
     "MEDIA_APP_TITLE": {
       "TYPE": "RESOURCE_ID",
-      "VALUE": "car_ui_toolbar_title",
-      "PACKAGE": "com.chassis.car.ui.plugin"
+      "VALUE": "car_ui_toolbar_title"
     },
     "RADIO_APP_TITLE": {
       "TYPE": "RESOURCE_ID",
-      "VALUE": "car_ui_toolbar_logo",
-      "PACKAGE": "com.chassis.car.ui.plugin"
+      "VALUE": "car_ui_toolbar_logo"
     },
     "MOW_PLAYING_LABEL": {
       "TYPE": "TEXT",
@@ -1583,8 +1581,11 @@
     },
     "MEDIA_APP_DROP_DOWN_MENU": {
       "TYPE": "RESOURCE_ID",
-      "VALUE": "car_ui_toolbar_menu_item_icon",
-      "PACKAGE": "com.chassis.car.ui.plugin"
+      "VALUE": "car_ui_toolbar_menu_item_icon"
+    },
+    "MEDIA_APP_SETTINGS": {
+      "TYPE": "RESOURCE_ID",
+      "VALUE": "menu_item_setting"
     },
     "MEDIA_APP_NO_LOGIN_MSG": {
       "TYPE": "RESOURCE_ID",
