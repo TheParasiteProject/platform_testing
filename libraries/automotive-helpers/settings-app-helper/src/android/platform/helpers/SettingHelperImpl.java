@@ -277,10 +277,10 @@ public class SettingHelperImpl extends AbstractStandardAppHelper implements IAut
         UiObject2 searchBox = getSpectatioUiUtil().findUiObject(searchBoxSelector);
         getSpectatioUiUtil().validateUiObject(searchBox, AutomotiveConfigConstants.SEARCH_BOX);
         searchBox.setText(item);
-        getSpectatioUiUtil().wait5Seconds();
 
         BySelector searchResultsSelector =
                 getUiElementFromConfig(AutomotiveConfigConstants.SEARCH_RESULTS);
+        getSpectatioUiUtil().waitForUiObject(searchResultsSelector, WAIT_MS);
         UiObject2 searchResults = getSpectatioUiUtil().findUiObject(searchResultsSelector);
 
         getSpectatioUiUtil()
@@ -292,9 +292,9 @@ public class SettingHelperImpl extends AbstractStandardAppHelper implements IAut
         getSpectatioUiUtil()
                 .clickAndWait(searchResults.getChildren().get(0).getChildren().get(selectedIndex));
         getSpectatioUiUtil().waitForIdle();
-        getSpectatioUiUtil().wait5Seconds();
 
         BySelector objectSelector = By.textContains(item);
+        getSpectatioUiUtil().waitForUiObject(objectSelector, WAIT_MS);
         UiObject2 object = getSpectatioUiUtil().findUiObject(objectSelector);
         getSpectatioUiUtil().validateUiObject(object, AutomotiveConfigConstants.SEARCH_RESULTS);
         getSpectatioUiUtil()
