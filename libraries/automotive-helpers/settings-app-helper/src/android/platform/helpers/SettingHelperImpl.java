@@ -44,6 +44,8 @@ public class SettingHelperImpl extends AbstractStandardAppHelper implements IAut
     private static final String SCREEN_BRIGHTNESS = "screen_brightness";
     private static final int WAIT_MS = 20000;
 
+    private static final int SWITCH_TOGGLE_WAIT = 5000;
+
     private ScrollUtility mScrollUtility;
 
     private HelperAccessor<IAutoUISettingsHelper> mSettingUIHelper =
@@ -165,7 +167,7 @@ public class SettingHelperImpl extends AbstractStandardAppHelper implements IAut
             UiObject2 enableOption = getSpectatioUiUtil().findUiObject(enableOptionSelector);
             getSpectatioUiUtil()
                     .validateUiObject(enableOption, AutomotiveConfigConstants.TOGGLE_WIFI);
-            getSpectatioUiUtil().clickAndWait(enableOption);
+            getSpectatioUiUtil().clickAndWait(enableOption, SWITCH_TOGGLE_WAIT);
         } else {
             throw new RuntimeException("Wi-Fi enabled state is already " + (onOff ? "on" : "off"));
         }
@@ -188,7 +190,7 @@ public class SettingHelperImpl extends AbstractStandardAppHelper implements IAut
             UiObject2 enableOption = getSpectatioUiUtil().findUiObject(enableOptionSelector);
             getSpectatioUiUtil()
                     .validateUiObject(enableOption, AutomotiveConfigConstants.TOGGLE_HOTSPOT);
-            getSpectatioUiUtil().clickAndWait(enableOption);
+            getSpectatioUiUtil().clickAndWait(enableOption, SWITCH_TOGGLE_WAIT);
         } else {
             throw new RuntimeException(
                     "Hotspot enabled state is already " + (onOff ? "on" : "off"));
@@ -203,7 +205,7 @@ public class SettingHelperImpl extends AbstractStandardAppHelper implements IAut
         UiObject2 enableOption = getSpectatioUiUtil().findUiObject(enableOptionSelector);
         getSpectatioUiUtil()
                 .validateUiObject(enableOption, AutomotiveConfigConstants.TOGGLE_HOTSPOT);
-        getSpectatioUiUtil().clickAndWait(enableOption);
+        getSpectatioUiUtil().clickAndWait(enableOption, SWITCH_TOGGLE_WAIT);
     }
 
     /** {@inheritDoc} */
@@ -222,7 +224,7 @@ public class SettingHelperImpl extends AbstractStandardAppHelper implements IAut
             UiObject2 enableOption = getSpectatioUiUtil().findUiObject(enableOptionSelector);
             getSpectatioUiUtil()
                     .validateUiObject(enableOption, AutomotiveConfigConstants.TOGGLE_BLUETOOTH);
-            getSpectatioUiUtil().clickAndWait(enableOption);
+            getSpectatioUiUtil().clickAndWait(enableOption, SWITCH_TOGGLE_WAIT);
         } else {
             throw new RuntimeException(
                     "Bluetooth enabled state is already " + (onOff ? "on" : "off"));
