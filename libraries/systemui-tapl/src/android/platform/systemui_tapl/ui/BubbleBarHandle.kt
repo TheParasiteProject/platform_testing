@@ -36,6 +36,10 @@ class BubbleBarHandle internal constructor() {
         }
     }
 
+    /** The position of this handle. */
+    val visibleCenter: Point
+        get() = bubbleBarHandleView.visibleCenter
+
     /** Opens the bubble bar handle menu. */
     fun openBubbleBarHandleMenu(): BubbleBarHandleMenu {
         bubbleBarHandleView.click()
@@ -48,11 +52,10 @@ class BubbleBarHandle internal constructor() {
      * If the bubble is at the right of the screen, drag to the left. Otherwise, drag to the right.
      */
     fun dragToTheOtherSide() {
-        val currentPosition = bubbleBarHandleView.visibleCenter
         val displayWidth = DeviceHelpers.uiDevice.displayWidth
-        BetterSwipe.swipe(currentPosition) {
+        BetterSwipe.swipe(visibleCenter) {
             to(
-                Point(displayWidth - currentPosition.x, currentPosition.y),
+                Point(displayWidth - visibleCenter.x, visibleCenter.y),
                 Duration.of(500, ChronoUnit.MILLIS),
                 PRECISE_GESTURE_INTERPOLATOR,
             )
@@ -61,7 +64,7 @@ class BubbleBarHandle internal constructor() {
 
     /** Drags the bubble bar handle to dismiss view to dismiss the bubble. */
     fun dragToDismiss() {
-        dragBubbleToDismiss(bubbleBarHandleView.visibleCenter)
+        dragBubbleToDismiss(visibleCenter)
     }
 
     companion object {
