@@ -321,4 +321,13 @@ public interface IAutoMapsHelper extends IAppHelper {
      * <p>
      */
     void clickSpeechToText();
+
+    /**
+     * SetUp expectation : Maps widget is open
+     *
+     * <p>Click on search bar for destinations
+     *
+     * <p>
+     */
+    void clickSearchbarForDestinations();
 }
