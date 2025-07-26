@@ -47,8 +47,9 @@ public class PerfettoHelper {
     //   perfetto --background-wait -c /data/misc/perfetto-traces/trace_config.pb -o
     //   /data/misc/perfetto-traces/trace_output.perfetto-trace
     private static final String PERFETTO_START_BG_WAIT_CMD =
-            "perfetto --background-wait -c %s%s -o %s";
-    private static final String PERFETTO_START_CMD = "perfetto --background -c %s%s -o %s";
+            "perfetto --background-wait --config %s --out %s %s";
+    private static final String PERFETTO_START_CMD =
+            "perfetto --background --config %s --out %s %s";
     // Additional arg to indicate that the perfetto config file is text format.
     private static final String PERFETTO_TXT_PROTO_ARG = " --txt";
     // Command to stop (i.e kill) the perfetto tracing.
@@ -177,9 +178,9 @@ public class PerfettoHelper {
             String perfettoCmd =
                     String.format(
                             mPerfettoStartBgWait ? PERFETTO_START_BG_WAIT_CMD : PERFETTO_START_CMD,
-                            "- ",
-                            "--txt",
-                            mTmpOutputFilePath);
+                            "-", // from stdin
+                            mTmpOutputFilePath,
+                            PERFETTO_TXT_PROTO_ARG);
 
             // Start perfetto tracing.
             Log.i(LOG_TAG, "Starting perfetto tracing.");
@@ -257,16 +258,13 @@ public class PerfettoHelper {
                 return false;
             }
 
+            String additionalArgs = isTextProtoConfig ? PERFETTO_TXT_PROTO_ARG : "";
             String perfettoCmd =
                     String.format(
                             mPerfettoStartBgWait ? PERFETTO_START_BG_WAIT_CMD : PERFETTO_START_CMD,
-                            mConfigRootDir,
-                            configFileName,
-                            mTmpOutputFilePath);
-
-            if (isTextProtoConfig) {
-                perfettoCmd = perfettoCmd + PERFETTO_TXT_PROTO_ARG;
-            }
+                            mConfigRootDir + configFileName,
+                            mTmpOutputFilePath,
+                            additionalArgs);
 
             // Start perfetto tracing.
             Log.i(LOG_TAG, "Starting perfetto tracing.");

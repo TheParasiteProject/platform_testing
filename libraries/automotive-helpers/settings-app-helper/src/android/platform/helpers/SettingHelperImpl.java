@@ -44,6 +44,8 @@ public class SettingHelperImpl extends AbstractStandardAppHelper implements IAut
     private static final String SCREEN_BRIGHTNESS = "screen_brightness";
     private static final int WAIT_MS = 20000;
 
+    private static final int SWITCH_TOGGLE_WAIT = 5000;
+
     private ScrollUtility mScrollUtility;
 
     private HelperAccessor<IAutoUISettingsHelper> mSettingUIHelper =
@@ -165,7 +167,7 @@ public class SettingHelperImpl extends AbstractStandardAppHelper implements IAut
             UiObject2 enableOption = getSpectatioUiUtil().findUiObject(enableOptionSelector);
             getSpectatioUiUtil()
                     .validateUiObject(enableOption, AutomotiveConfigConstants.TOGGLE_WIFI);
-            getSpectatioUiUtil().clickAndWait(enableOption);
+            getSpectatioUiUtil().clickAndWait(enableOption, SWITCH_TOGGLE_WAIT);
         } else {
             throw new RuntimeException("Wi-Fi enabled state is already " + (onOff ? "on" : "off"));
         }
@@ -188,7 +190,7 @@ public class SettingHelperImpl extends AbstractStandardAppHelper implements IAut
             UiObject2 enableOption = getSpectatioUiUtil().findUiObject(enableOptionSelector);
             getSpectatioUiUtil()
                     .validateUiObject(enableOption, AutomotiveConfigConstants.TOGGLE_HOTSPOT);
-            getSpectatioUiUtil().clickAndWait(enableOption);
+            getSpectatioUiUtil().clickAndWait(enableOption, SWITCH_TOGGLE_WAIT);
         } else {
             throw new RuntimeException(
                     "Hotspot enabled state is already " + (onOff ? "on" : "off"));
@@ -203,7 +205,7 @@ public class SettingHelperImpl extends AbstractStandardAppHelper implements IAut
         UiObject2 enableOption = getSpectatioUiUtil().findUiObject(enableOptionSelector);
         getSpectatioUiUtil()
                 .validateUiObject(enableOption, AutomotiveConfigConstants.TOGGLE_HOTSPOT);
-        getSpectatioUiUtil().clickAndWait(enableOption);
+        getSpectatioUiUtil().clickAndWait(enableOption, SWITCH_TOGGLE_WAIT);
     }
 
     /** {@inheritDoc} */
@@ -222,7 +224,7 @@ public class SettingHelperImpl extends AbstractStandardAppHelper implements IAut
             UiObject2 enableOption = getSpectatioUiUtil().findUiObject(enableOptionSelector);
             getSpectatioUiUtil()
                     .validateUiObject(enableOption, AutomotiveConfigConstants.TOGGLE_BLUETOOTH);
-            getSpectatioUiUtil().clickAndWait(enableOption);
+            getSpectatioUiUtil().clickAndWait(enableOption, SWITCH_TOGGLE_WAIT);
         } else {
             throw new RuntimeException(
                     "Bluetooth enabled state is already " + (onOff ? "on" : "off"));
@@ -277,10 +279,10 @@ public class SettingHelperImpl extends AbstractStandardAppHelper implements IAut
         UiObject2 searchBox = getSpectatioUiUtil().findUiObject(searchBoxSelector);
         getSpectatioUiUtil().validateUiObject(searchBox, AutomotiveConfigConstants.SEARCH_BOX);
         searchBox.setText(item);
-        getSpectatioUiUtil().wait5Seconds();
 
         BySelector searchResultsSelector =
                 getUiElementFromConfig(AutomotiveConfigConstants.SEARCH_RESULTS);
+        getSpectatioUiUtil().waitForUiObject(searchResultsSelector, WAIT_MS);
         UiObject2 searchResults = getSpectatioUiUtil().findUiObject(searchResultsSelector);
 
         getSpectatioUiUtil()
@@ -292,9 +294,9 @@ public class SettingHelperImpl extends AbstractStandardAppHelper implements IAut
         getSpectatioUiUtil()
                 .clickAndWait(searchResults.getChildren().get(0).getChildren().get(selectedIndex));
         getSpectatioUiUtil().waitForIdle();
-        getSpectatioUiUtil().wait5Seconds();
 
         BySelector objectSelector = By.textContains(item);
+        getSpectatioUiUtil().waitForUiObject(objectSelector, WAIT_MS);
         UiObject2 object = getSpectatioUiUtil().findUiObject(objectSelector);
         getSpectatioUiUtil().validateUiObject(object, AutomotiveConfigConstants.SEARCH_RESULTS);
         getSpectatioUiUtil()
@@ -437,6 +439,7 @@ public class SettingHelperImpl extends AbstractStandardAppHelper implements IAut
     public void openMenuWith(String... menuOptions) {
         // Scroll and Find Subsettings
         for (String menu : menuOptions) {
+            getSpectatioUiUtil().waitForText(menu, WAIT_MS, SpectatioUiUtil.TextMatchType.EXACT);
             Pattern menuPattern = Pattern.compile(menu, Pattern.CASE_INSENSITIVE);
             BySelector selector = By.text(menuPattern);
 
