@@ -103,7 +103,7 @@ class WatchWebAppRequestHandler(http.server.BaseHTTPRequestHandler):
             self.send_json(res)
             return
 
-        self.send_error(404)
+        self.send_error_with_message(404, message=f"Invalid GET API: {parsed.path}")
 
     def do_POST(self):
         if not self.verify_access_token():
@@ -129,7 +129,7 @@ class WatchWebAppRequestHandler(http.server.BaseHTTPRequestHandler):
         elif parsed.path == "/service/mode":
             self.switch_mode(message["mode"])
         else:
-            self.send_error(404)
+            self.send_error_with_message(404, message=f"Invalid POST API: {parsed.path}")
 
     def do_PUT(self):
         if not self.verify_access_token():
@@ -145,7 +145,7 @@ class WatchWebAppRequestHandler(http.server.BaseHTTPRequestHandler):
             message = json.loads(self.rfile.read(length))
             self.service_update_golden(set(message["selectedGoldenIds"]))
         else:
-            self.send_error(404)
+            self.send_error_with_message(404, message=f"Invalid PUT API: {parsed.path}")
 
     def serve_file(self, root_directory, file_relative_to_root, mime_type=None):
         resolved_path = path.abspath(path.join(root_directory, file_relative_to_root))
@@ -153,31 +153,48 @@ class WatchWebAppRequestHandler(http.server.BaseHTTPRequestHandler):
         if path.commonprefix(
             [resolved_path, root_directory]
         ) == root_directory and path.isfile(resolved_path):
-            self.send_response(200)
-            self.send_header(
-                "Content-type", mime_type or mimetypes.guess_type(resolved_path)[0]
-            )
-            self.add_standard_headers()
 
             if resolved_path.endswith("screenshots.zip"):
 
                 if ZipToVideoConverter.process_single_zip(pathlib.Path(resolved_path)):
                     video_path = resolved_path.replace("zip","mp4")
                     if pathlib.Path(video_path).is_file():
+                        self.send_response(200)
+                        self.send_header(
+                            "Content-type", mime_type or mimetypes.guess_type(resolved_path)[0]
+                        )
+                        self.add_standard_headers()
                         self.send_header(
                             "Content-type", "video/mp4"
                         )
                         self.end_headers()
                         with open(video_path, "rb") as f:
                             self.wfile.write(f.read())
+                else:
+                    # when unzip wasn't successful
+                    self.send_error_with_message(
+                        503, message="Zip to Video convertor failed !")
 
             else :
+                self.send_response(200)
+                self.send_header(
+                    "Content-type", mime_type or mimetypes.guess_type(resolved_path)[0]
+                )
+                self.add_standard_headers()
                 self.end_headers()
                 with open(resolved_path, "rb") as f:
                     self.wfile.write(f.read())
 
         else:
-            self.send_error(404)
+            self.send_error_with_message(404, message=f"File not found: {resolved_path}")
+
+    def send_error_with_message(self, code, message):
+        self.send_response(code)
+        self.send_header("Content-Type", "application/json")
+        self.add_standard_headers()
+        self.end_headers()
+        payload = {"message": message}
+        self.wfile.write(json.dumps(payload).encode("utf-8"))
 
     def service_list_goldens(self):
         if not self.verify_access_token():
@@ -245,11 +262,11 @@ class WatchWebAppRequestHandler(http.server.BaseHTTPRequestHandler):
             self.send_json(artifacts_list)
         except requests.exceptions.RequestException as exception:
             if exception.response.status_code == 500:
-                self.send_error(503, str(exception))
+                self.send_error_with_message(503, str(exception))
             else:
-                self.send_error(exception.response.status_code, str(exception))
+                self.send_error_with_message(exception.response.status_code, str(exception))
         except Exception as exception:
-            self.send_error(500, str(exception))
+            self.send_error_with_message(500, str(exception))
 
     def service_fetch_artifacts(self, test_name):
         try:
@@ -265,11 +282,11 @@ class WatchWebAppRequestHandler(http.server.BaseHTTPRequestHandler):
                     break
         except requests.exceptions.RequestException as exception:
             if exception.response.status_code == 500:
-                self.send_error(503, str(exception))
+                self.send_error_with_message(503, str(exception))
             else:
-                self.send_error(exception.response.status_code, str(exception))
+                self.send_error_with_message(exception.response.status_code, str(exception))
         except Exception as exception:
-            self.send_error(500, str(exception))
+            self.send_error_with_message(500, str(exception))
 
     def get_available_modes(self):
         '''
@@ -345,12 +362,17 @@ class WatchWebAppRequestHandler(http.server.BaseHTTPRequestHandler):
                 .golden_watcher_cache[mode]) = WatchWebAppRequestHandler.golden_watcher
             except Exception as ex:
                 print(f"Failure occurred: {ex}")
-                self.send_error(503)
+                self.send_error_with_message(503, f"Failure occurred: {ex}")
                 return
 
         self.service_list_goldens()
 
     def service_refresh_goldens(self, clear):
+        if not WatchWebAppRequestHandler.golden_watcher:
+            # no test mode selected
+            self.send_error_with_message(400, "No test mode selected !")
+            return None
+
         if clear:
             WatchWebAppRequestHandler.golden_watcher.clean()
         WatchWebAppRequestHandler.golden_watcher.refresh_golden_files()
