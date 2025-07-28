@@ -73,6 +73,22 @@ public final class UnameVersion {
                 new DateTimeFormatter[] {
                     DateTimeFormatter.ofPattern("u-M-d H:m:s"),
                 });
+
+        // matches:
+        // #1 SMP PREEMPT 2021-08-28T09:42:03Z
+        PATTERN_TO_FORMATTER.put(
+                Pattern.compile(
+                        "\\d{4,}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}Z") // YYYY-MM-DDTHH:MM:SSZ
+                ,
+                new DateTimeFormatter[] {DateTimeFormatter.ISO_OFFSET_DATE_TIME});
+
+        // matches:
+        // #1 SMP PREEMPT 2021-08-28T09:42:03+01:30 (or -09:00)
+        PATTERN_TO_FORMATTER.put(
+                Pattern.compile(
+                        "\\d{4,}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}[+-]\\d{2}:\\d{2}") // YYYY-MM-DDTHH:MM:SS+HH:MM
+                ,
+                new DateTimeFormatter[] {DateTimeFormatter.ISO_OFFSET_DATE_TIME});
     }
 
     /**
