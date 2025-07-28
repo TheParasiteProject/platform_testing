@@ -78,9 +78,7 @@ public class MediaController {
         runToNextState(
                 () -> {
                     mInstrumentation.getUiAutomation().clearCache();
-                    Gestures.click(
-                            mUiObject.wait(Until.findObject(PAUSE_BTN_SELECTOR), WAIT_TIME_MILLIS),
-                            "Pause button");
+                    mUiObject.wait(Until.findObject(PAUSE_BTN_SELECTOR), WAIT_TIME_MILLIS).click();
                 },
                 PlaybackState.STATE_PAUSED);
     }
