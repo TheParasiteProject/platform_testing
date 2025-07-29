@@ -103,12 +103,14 @@ class ComposeScreenshotTestRule(
     /**
      * Compare [content] with the golden image identified by [goldenIdentifier] in the context of
      * [testSpec]. If [content] is `null`, we will take a screenshot of the current [composeRule]
-     * content.
+     * content. [setupActivity] runs before setting [content], [beforeActivity] runs between setting
+     * [content] and taking the screenshot.
      */
     fun screenshotTest(
         goldenIdentifier: String,
         clearFocus: Boolean = false,
         beforeScreenshot: () -> Unit = {},
+        setupActivity: () -> Unit = {},
         viewFinder: () -> SemanticsNodeInteraction = { composeRule.onRoot() },
         content: (@Composable () -> Unit)? = null,
     ) {
@@ -116,6 +118,8 @@ class ComposeScreenshotTestRule(
         // system bars.
         val activity = composeRule.activity
         activity.mainExecutor.execute { activity.window.setDecorFitsSystemWindows(false) }
+
+        setupActivity()
 
         emulationSpec.locale?.let { Locale.setDefault(it) }
 
