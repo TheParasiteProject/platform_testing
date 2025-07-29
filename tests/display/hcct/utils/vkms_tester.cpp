@@ -305,7 +305,7 @@ bool VkmsTester::SetConnectorEdid(int index, edid::MonitorName monitorName) {
 
   if (success) {
     ALOGI("Successfully wrote EDID data with size %" PRIu64 " to connector %i",
-        edidData.size(), index);
+          static_cast<uint64_t>(edidData.size()), index);
   } else {
     ALOGE("Failed to write complete EDID data: %s", strerror(errno));
   }
