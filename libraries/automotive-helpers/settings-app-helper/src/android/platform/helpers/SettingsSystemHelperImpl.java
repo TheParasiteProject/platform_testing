@@ -368,14 +368,14 @@ public class SettingsSystemHelperImpl extends AbstractStandardAppHelper
         boolean isUsageinGB = false;
         BySelector scrollSelector =
                 getUiElementFromConfig(
-                        AutomotiveConfigConstants.SETTINGS_UI_SUB_SETTING_SCROLL_ELEMENT);
+                        AutomotiveConfigConstants.SETTINGS_UI_SUB_SETTING_STORAGE_SCROLL_ELEMENT);
         getSpectatioUiUtil().waitForUiObject(scrollSelector, TWENTY_SECONDS_WAIT_TIME);
         List<UiObject2> scrollElements =
                 getSpectatioUiUtil()
                         .findUiObjects(
                                 getUiElementFromConfig(
                                         AutomotiveConfigConstants
-                                                .SETTINGS_UI_SUB_SETTING_SCROLL_ELEMENT));
+                                                .SETTINGS_UI_SUB_SETTING_STORAGE_SCROLL_ELEMENT));
         for (UiObject2 element : scrollElements) {
             UiObject2 foundObject =
                     getSpectatioUiUtil()
