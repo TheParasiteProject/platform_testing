@@ -50,6 +50,10 @@ class BTSMSUtilityTest(bluetooth_sms_base_test.BluetoothSMSBaseTest):
     asserts.assert_false(self.phone_notpaired.mbs.btIsEnabled(),
                         '<Bluetooth> should be OFF')
 
+  def teardown_test(self):
+      # Go to home screen
+      self.call_utils.press_home()
+      super().teardown_no_video_recording()
 
 if __name__ == '__main__':
   common_main()
