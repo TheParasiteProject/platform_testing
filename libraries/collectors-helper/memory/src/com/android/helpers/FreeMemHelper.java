@@ -53,21 +53,19 @@ public class FreeMemHelper implements ICollectorHelper<Long> {
     private static final String DUMPSYS_MEMIFNO = "dumpsys meminfo";
     private static final String PROC_MEMINFO = "cat /proc/meminfo";
     private static final String LINE_SEPARATOR = "\\n";
-    private static final String MEM_AVAILABLE_PATTERN = "^MemAvailable.*";
-    private static final String MEM_FREE_PATTERN = "^MemFree.*";
     private static final Pattern CACHE_PROC_START_PATTERN = Pattern.compile(".*: Cached\\s*$");
     private static final Pattern PID_PATTERN = Pattern.compile("^.*pid(?<processid> [0-9]*).*$");
     private static final String DUMPSYS_PROCESS = "dumpsys meminfo %s";
     private static final String MEM_TOTAL = "^\\s+TOTAL\\s+.*";
     private static final String PROCESS_ID = "processid";
     public static final String MEM_AVAILABLE_CACHE_PROC_DIRTY = "MemAvailable_CacheProcDirty_bytes";
-    public static final String PROC_MEMINFO_MEM_AVAILABLE= "proc_meminfo_memavailable_bytes";
-    public static final String PROC_MEMINFO_MEM_FREE= "proc_meminfo_memfree_bytes";
+    public static final String PROC_MEMINFO_KEY_FORMAT = "proc_meminfo_%s_bytes";
     public static final String DUMPSYS_CACHED_PROC_MEMORY= "dumpsys_cached_procs_memory_bytes";
     public static final int DROPCACHE_WAIT_MSECS= 10000; // Wait for 10 secs after dropping cache
 
     private UiDevice mUiDevice;
     private boolean mDropCache = false;
+    private String[] memInfoToCollect = null;
 
     @Override
     public boolean startCollecting() {
@@ -86,39 +84,10 @@ public class FreeMemHelper implements ICollectorHelper<Long> {
         if (mDropCache) {
             executeDropCachesImpl();
         }
-        String memInfo;
-        try {
-            memInfo = mUiDevice.executeShellCommand(PROC_MEMINFO);
-            Log.i(TAG, "cat proc/meminfo :" + memInfo);
-        } catch (IOException ioe) {
-            Log.e(TAG, "Failed to read " + PROC_MEMINFO + ".", ioe);
-            return null;
-        }
+        Map<String, Long> results = getMemInfo(memInfoToCollect);
 
-        Pattern memAvailablePattern = Pattern.compile(MEM_AVAILABLE_PATTERN, Pattern.MULTILINE);
-        Pattern memFreePattern = Pattern.compile(MEM_FREE_PATTERN, Pattern.MULTILINE);
-        Matcher memAvailableMatcher = memAvailablePattern.matcher(memInfo);
-        Matcher memFreeMatcher = memFreePattern.matcher(memInfo);
-
-        String[] memAvailable = null;
-        String[] memFree = null;
-        if (memAvailableMatcher.find() && memFreeMatcher.find()) {
-            memAvailable = memAvailableMatcher.group(0).split(SEPARATOR);
-            memFree = memFreeMatcher.group(0).split(SEPARATOR);
-        }
-
-        if (memAvailable == null || memFree == null) {
-            Log.e(TAG, "MemAvailable or MemFree is null.");
-            return null;
-        }
-        Map<String, Long> results = new HashMap<>();
-        long memAvailableProc = Long.parseLong(memAvailable[1]);
-        results.put(PROC_MEMINFO_MEM_AVAILABLE, (memAvailableProc * 1024));
-
-        long memFreeProc = Long.parseLong(memFree[1]);
-        results.put(PROC_MEMINFO_MEM_FREE, (memFreeProc * 1024));
-
-        long cacheProcDirty = memAvailableProc;
+        long cacheProcDirty =
+                results.getOrDefault(String.format(PROC_MEMINFO_KEY_FORMAT, "memavailable"), 0L);
         byte[] dumpsysMemInfoBytes = MetricUtility.executeCommandBlocking(DUMPSYS_MEMIFNO,
                 InstrumentationRegistry.getInstrumentation());
         List<String> cachedProcList = getCachedProcesses(dumpsysMemInfoBytes);
@@ -167,6 +136,46 @@ public class FreeMemHelper implements ICollectorHelper<Long> {
     }
 
     /**
+     * Collects the memory information from /proc/meminfo based on a list of patterns.
+     *
+     * @param patternList An array of regular expression strings to search for in /proc/meminfo.
+     * @return A map where keys are formatted metric names (e.g., "proc_meminfo_MemTotal_bytes") and
+     *     values are the corresponding memory values in bytes.
+     */
+    private Map<String, Long> getMemInfo(String[] patternList) {
+        Map<String, Long> results = new HashMap<>();
+
+        String memInfoOutput;
+        try {
+            memInfoOutput = mUiDevice.executeShellCommand(PROC_MEMINFO);
+            Log.i(TAG, "cat proc/meminfo :" + memInfoOutput);
+        } catch (IOException ioe) {
+            Log.e(TAG, "Failed to read " + PROC_MEMINFO + ".", ioe);
+            // Return an empty map on error to avoid NullPointerException in calling methods.
+            return results;
+        }
+
+        for (String memInfoPattern : patternList) {
+            Pattern pattern = Pattern.compile(memInfoPattern, Pattern.MULTILINE);
+            Matcher matcher = pattern.matcher(memInfoOutput);
+            if (matcher.find()) {
+                String[] memInfo = matcher.group(0).split(SEPARATOR);
+                Log.i(TAG, "MemInfo: " + memInfoPattern + ": " + memInfo[1]);
+                // Remove special characters (like ':', '.') and trim spaces for the key.
+                String metricKey =
+                        memInfoPattern.trim().replaceAll("[^a-zA-Z0-9]", "").toLowerCase();
+                results.put(
+                        String.format(PROC_MEMINFO_KEY_FORMAT, metricKey),
+                        (Long.parseLong(memInfo[1]) * 1024));
+            } else {
+                Log.e(TAG, "MemInfo: " + memInfoPattern + " not found.");
+                // Continue processing other patterns even if one is not found.
+            }
+        }
+        return results;
+    }
+
+    /**
      * Checks whether {@code line} matches the given {@link Pattern}.
      *
      * @return The resulting {@link Matcher} obtained by matching the {@code line} against {@code
@@ -194,7 +203,7 @@ public class FreeMemHelper implements ICollectorHelper<Long> {
                 Matcher match;
                 if (!isCacheProcSection
                         && (match = matches(CACHE_PROC_START_PATTERN, currLine)) == null) {
-                    // Continue untill the start of cache proc section.
+                    // Continue until the start of cache proc section.
                     continue;
                 } else {
                     if (isCacheProcSection) {
@@ -245,10 +254,13 @@ public class FreeMemHelper implements ICollectorHelper<Long> {
         }
     }
 
-    /**
-     * Enables the drop cache before taking the memory measurement.
-     */
+    /** Enables the drop cache before taking the memory measurement. */
     public void setDropCache() {
         mDropCache = true;
+    }
+
+    /** Sets the meminfo to be collected. */
+    public void setMemInfoToCollect(String[] list) {
+        memInfoToCollect = list;
     }
 }
