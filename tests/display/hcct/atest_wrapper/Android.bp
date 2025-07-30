@@ -68,4 +68,7 @@ cc_defaults {
             suffix: "",
         },
     },
+    test_suites: [
+        "general-tests",
+    ],
 }
