@@ -369,4 +369,12 @@ public class AppGridHelperImpl extends AbstractStandardAppHelper implements IAut
         BySelector appNameOnDockerSelector = getUiElementFromConfig(target);
         return getSpectatioUiUtil().hasUiElement(appNameOnDockerSelector);
     }
+
+    @Override
+    public boolean isAppGridIconPresent() {
+        BySelector appGridFacetSelector =
+                getUiElementFromConfig(AutomotiveConfigConstants.APP_GRID_FACET_BUTTON);
+        getSpectatioUiUtil().waitForUiObject(appGridFacetSelector);
+        return getSpectatioUiUtil().hasUiElement(appGridFacetSelector);
+    }
 }

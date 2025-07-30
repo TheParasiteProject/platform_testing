@@ -35,6 +35,8 @@ android_test {
         "platform-test-rules",
         "platform-test-options",
         "multi-user-helper",
+        "automotive-home-helper",
+        "automotive-app-grid-helper",
         "microbenchmark-device-lib",
         "longevity-device-lib",
     ],
