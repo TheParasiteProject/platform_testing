@@ -85,6 +85,9 @@ public abstract class PerfettoTracingStrategy {
     public static final String PERFETTO_CONFIG_TEXT_PROTO = "perfetto_config_text_proto";
     // Argument to indicate the perfetto config content in a textual format
     public static final String PERFETTO_CONFIG_TEXT_CONTENT = "perfetto_config_text_content";
+    // Argument to indicate that the config file should be read and streamed to perfetto.
+    public static final String PERFETTO_STREAM_CONFIG_FROM_FILE =
+            "perfetto_stream_config_from_file";
     // Destination directory to save the trace results.
     private static final String TEST_OUTPUT_ROOT = "test_output_root";
     // Default output folder to store the perfetto output traces.
@@ -451,6 +454,12 @@ public abstract class PerfettoTracingStrategy {
         boolean perfettoStartBgWait = Boolean.parseBoolean(getArgumentValue(args,
                 PERFETTO_START_BG_WAIT, String.valueOf(true)));
         mPerfettoHelper.setPerfettoStartBgWait(perfettoStartBgWait);
+
+        boolean streamConfigFromFile =
+                Boolean.parseBoolean(
+                        getArgumentValue(
+                                args, PERFETTO_STREAM_CONFIG_FROM_FILE, String.valueOf(false)));
+        mPerfettoHelper.setStreamConfigFromFile(streamConfigFromFile);
 
         // Root directory path containing the perfetto config file.
         String configRootDir =

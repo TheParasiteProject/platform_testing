@@ -648,6 +648,8 @@ public class AutomotiveConfigConstants {
     public static final String SETTINGS_BACK_BUTTON = "SETTINGS_BACK_BUTTON";
     public static final String SETTINGS_UI_SUB_SETTING_SCROLL_ELEMENT =
             "SETTINGS_UI_SUB_SETTING_SCROLL_ELEMENT";
+    public static final String SETTINGS_UI_SUB_SETTING_STORAGE_SCROLL_ELEMENT =
+            "SETTINGS_UI_SUB_SETTING_STORAGE_SCROLL_ELEMENT";
     public static final String SETTINGS_UI_SCROLL_ELEMENT = "SETTINGS_UI_SCROLL_ELEMENT";
     public static final String SETTINGS_PERMISSIONS_BACK_BUTTON =
             "SETTINGS_PERMISSIONS_BACK_BUTTON";

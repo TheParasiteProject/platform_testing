@@ -40,11 +40,10 @@
         <option name="teardown-command" value="start"/>
     </target_preparer>
 
-
-
     <test class="com.android.tradefed.testtype.GTest">
         <option name="native-test-device-path" value="/data/igt_tests/x86_64" />
         <option name="module-name" value="{MODULE}" />
+        <option name="native-test-timeout" value="1800000"/>
     </test>
 
 </configuration>
