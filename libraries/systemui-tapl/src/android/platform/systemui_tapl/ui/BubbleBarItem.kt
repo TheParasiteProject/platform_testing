@@ -16,7 +16,14 @@
 
 package android.platform.systemui_tapl.ui
 
+import android.platform.systemui_tapl.ui.BubbleHelper.dragToDismissFromBubbleBar
 import androidx.test.uiautomator.UiObject2
 
 /** A UI test automation type representing bubbles in the bubble bar. */
-data class BubbleBarItem(val item: UiObject2)
+data class BubbleBarItem(val item: UiObject2) {
+
+    /** Drags the bubble bar item to dismiss view. */
+    fun dragToDismiss() {
+        dragToDismissFromBubbleBar(item.visibleCenter)
+    }
+}

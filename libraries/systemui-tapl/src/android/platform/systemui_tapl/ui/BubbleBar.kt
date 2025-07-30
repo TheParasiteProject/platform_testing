@@ -17,6 +17,7 @@
 package android.platform.systemui_tapl.ui
 
 import android.graphics.Point
+import android.platform.systemui_tapl.ui.BubbleHelper.dragToDismissFromBubbleBar
 import android.platform.systemui_tapl.utils.DeviceUtils.launcherResSelector
 import android.platform.uiautomatorhelpers.BetterSwipe
 import android.platform.uiautomatorhelpers.DeviceHelpers.assertInvisible
@@ -91,14 +92,7 @@ class BubbleBar {
      * gone.
      */
     fun dragToDismiss() {
-        BetterSwipe.swipe(waitForObj(BUBBLE_BAR_VIEW).visibleCenter) {
-            pause()
-            to(
-                waitForObj(DISMISS_VIEW).visibleCenter,
-                Duration.of(500, ChronoUnit.MILLIS),
-                PRECISE_GESTURE_INTERPOLATOR,
-            )
-        }
+        dragToDismissFromBubbleBar(waitForObj(BUBBLE_BAR_VIEW).visibleCenter)
 
         BUBBLE_BAR_VIEW.assertInvisible {
             "Failed while waiting for bubble bar to become invisible"
@@ -131,6 +125,6 @@ class BubbleBar {
 
     companion object {
         internal val BUBBLE_BAR_VIEW = launcherResSelector("taskbar_bubbles")
-        private val DISMISS_VIEW = launcherResSelector("dismiss_view")
+        internal val DISMISS_VIEW = launcherResSelector("dismiss_view")
     }
 }
