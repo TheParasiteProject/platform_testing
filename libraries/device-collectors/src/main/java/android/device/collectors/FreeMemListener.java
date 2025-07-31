@@ -29,6 +29,7 @@ import com.android.helpers.FreeMemHelper;
 @OptionClass(alias = "freemem-listener")
 public class FreeMemListener extends BaseCollectionListener<Long> {
     private static final String DROP_CACHE_ARG = "drop-cache";
+    private static final String MEM_INFO_TO_COLLECT_ARG = "meminfo-collect-list";
 
     private FreeMemHelper mFreeMemHelper = new FreeMemHelper();
 
@@ -49,10 +50,17 @@ public class FreeMemListener extends BaseCollectionListener<Long> {
         Bundle args = getArgsBundle();
         // By default set to false
         boolean isDropCache = Boolean.parseBoolean(args.getString(DROP_CACHE_ARG));
-
         // Set the flag to drop the cache before taking the memory measurement.
         if (isDropCache) {
             mFreeMemHelper.setDropCache();
         }
+
+        String memInfoToCollect =
+                args.getString(MEM_INFO_TO_COLLECT_ARG, "^MemAvailable.*,^MemFree.*,^Shmem:.*");
+        String[] list = null;
+        if (memInfoToCollect != null && !memInfoToCollect.isEmpty()) {
+            list = memInfoToCollect.split(",");
+        }
+        mFreeMemHelper.setMemInfoToCollect(list);
     }
 }
