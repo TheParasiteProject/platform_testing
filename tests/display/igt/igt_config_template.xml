@@ -31,6 +31,8 @@
     </target_preparer>
 
     <target_preparer class="com.android.tradefed.targetprep.RunCommandTargetPreparer">
+        <!-- Create symlinks to flatten the directory structure, removing the architecture subdir-->
+        <option name="run-command" value="find /data/igt_tests -mindepth 2 -type f -exec ln -sf {} /data/igt_tests/ \;" />
         <option name="run-command" value="stop"/>
         <option name="run-command" value="stop vendor.hwcomposer-3" />
         <!-- If we're running on an AVD (product name includes "cf_"), setup VKMS with an eDP + 1DP + 1HDMI -->
@@ -41,7 +43,7 @@
     </target_preparer>
 
     <test class="com.android.tradefed.testtype.GTest">
-        <option name="native-test-device-path" value="/data/igt_tests/x86_64" />
+        <option name="native-test-device-path" value="/data/igt_tests" />
         <option name="module-name" value="{MODULE}" />
         <option name="native-test-timeout" value="1800000"/>
     </test>
