@@ -1,0 +1,15 @@
+{
+  "desktop-postsubmit": [
+    {
+      "name": "hcct_hotplugs"
+    },
+    {
+      "name": "hcct_composition"
+    }
+  ],
+  "DtsDisplayPerformance": [
+    {
+      "name": "hcct_composition"
+    }
+  ]
+}
