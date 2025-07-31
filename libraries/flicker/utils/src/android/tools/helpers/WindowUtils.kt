@@ -67,6 +67,14 @@ object WindowUtils {
                 .getDefaultDisplay()
                 ?.displayId ?: error("Missing physical display")
 
+    /** Gets the default display DPI. */
+    val defaultDisplayDpi: Int
+        get() =
+            getCurrentStateDump(clearCacheAfterParsing = false)
+                .wmState
+                .getDefaultDisplay()
+                ?.dpi ?: error("Missing physical display")
+
     /**
      * Get the display bounds when the device is at a specific rotation
      *
