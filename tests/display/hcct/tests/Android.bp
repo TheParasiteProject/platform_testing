@@ -17,34 +17,8 @@ package {
     default_team: "trendy_team_desktop_display",
 }
 
-cc_test {
-    name: "test_hotplugs",
-    srcs: [
-        "hotplugs.cpp",
-    ],
-    defaults: ["hwc_deps"],
-    shared_libs: [
-        "libcutils",
-        "liblog",
-    ],
-    static_libs: [
-        "libgtest",
-        "libgtest_main",
-        "hwc_tester",
-        "vkms_tester",
-    ],
-    cflags: [
-        "-Wall",
-        "-Werror",
-    ],
-    test_config_template: "hcct_config_template.xml",
-}
-
-cc_test {
-    name: "test_hwc_composition",
-    srcs: [
-        "composition_tests.cpp",
-    ],
+cc_defaults {
+    name: "hcct_test_defaults",
     defaults: [
         "hwc_deps",
     ],
@@ -62,4 +36,29 @@ cc_test {
         "-Werror",
     ],
     test_config_template: "hcct_config_template.xml",
+    test_suites: [
+        "device-tests",
+        "general-tests",
+        "dts",
+    ],
+}
+
+
+cc_test {
+    name: "hcct_hotplugs",
+    srcs: [
+        "hotplugs.cpp",
+    ],
+    defaults: ["hcct_test_defaults"],
+    static_libs: [
+        "vkms_tester",
+    ],
+}
+
+cc_test {
+    name: "hcct_composition",
+    srcs: [
+        "composition_tests.cpp",
+    ],
+    defaults: ["hcct_test_defaults"],
 }
