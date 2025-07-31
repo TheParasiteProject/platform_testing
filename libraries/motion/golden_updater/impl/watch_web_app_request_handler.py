@@ -64,10 +64,7 @@ class WatchWebAppRequestHandler(http.server.BaseHTTPRequestHandler):
 
         parsed = urllib.parse.urlparse(self.path)
 
-        if parsed.path == "/service/list":
-            self.service_list_goldens()
-            return
-        elif parsed.path == "/service/testModes/list":
+        if parsed.path == "/service/testModes/list":
             self.get_available_modes()
             return
         elif parsed.path.startswith("/golden/"):
