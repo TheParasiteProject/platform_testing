@@ -14,11 +14,14 @@
 
 package {
     default_applicable_licenses: ["Android-Apache-2.0"],
+    default_team: "trendy_team_desktop_display",
 }
 
 cc_test {
     name: "test_hotplugs",
-    srcs: ["hotplugs.cpp"],
+    srcs: [
+        "hotplugs.cpp",
+    ],
     defaults: ["hwc_deps"],
     shared_libs: [
         "libcutils",
@@ -29,6 +32,30 @@ cc_test {
         "libgtest_main",
         "hwc_tester",
         "vkms_tester",
+    ],
+    cflags: [
+        "-Wall",
+        "-Werror",
+    ],
+    test_config_template: "hcct_config_template.xml",
+}
+
+cc_test {
+    name: "test_hwc_composition",
+    srcs: [
+        "composition_tests.cpp",
+    ],
+    defaults: [
+        "hwc_deps",
+    ],
+    shared_libs: [
+        "libcutils",
+        "liblog",
+    ],
+    static_libs: [
+        "libgtest",
+        "libgtest_main",
+        "hwc_tester",
     ],
     cflags: [
         "-Wall",

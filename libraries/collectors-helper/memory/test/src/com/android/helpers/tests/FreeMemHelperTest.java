@@ -48,18 +48,29 @@ public class FreeMemHelperTest {
     public void testGetMetrics() {
         assertTrue(mFreeMemHelper.startCollecting());
         Map<String, Long> freeMemMetrics = mFreeMemHelper.getMetrics();
+      String memAvailableKey =
+                String.format(FreeMemHelper.PROC_MEMINFO_KEY_FORMAT, "memavailable");
+      String memFreeKey =
+                String.format(FreeMemHelper.PROC_MEMINFO_KEY_FORMAT, "memfree");
+      String shmemKey =
+                String.format(FreeMemHelper.PROC_MEMINFO_KEY_FORMAT, "shmem");
+
         assertFalse(freeMemMetrics.isEmpty());
-        assertTrue(freeMemMetrics.containsKey(FreeMemHelper.MEM_AVAILABLE_CACHE_PROC_DIRTY));
-        assertTrue(freeMemMetrics.containsKey(FreeMemHelper.PROC_MEMINFO_MEM_AVAILABLE));
         assertTrue(freeMemMetrics.containsKey(FreeMemHelper.DUMPSYS_CACHED_PROC_MEMORY));
+        assertTrue(freeMemMetrics.containsKey(FreeMemHelper.MEM_AVAILABLE_CACHE_PROC_DIRTY));
+        assertTrue(freeMemMetrics.containsKey(memAvailableKey));
+        assertTrue(freeMemMetrics.containsKey(memFreeKey));
+        assertTrue(freeMemMetrics.containsKey(shmemKey));
+
         assertTrue(freeMemMetrics.get(FreeMemHelper.MEM_AVAILABLE_CACHE_PROC_DIRTY) > 0);
-        assertTrue(freeMemMetrics.get(FreeMemHelper.PROC_MEMINFO_MEM_AVAILABLE) > 0);
-        assertTrue(freeMemMetrics.get(FreeMemHelper.PROC_MEMINFO_MEM_FREE) > 0);
         assertTrue(freeMemMetrics.get(FreeMemHelper.DUMPSYS_CACHED_PROC_MEMORY) > 0);
+        assertTrue(freeMemMetrics.get(memAvailableKey) > 0);
+        assertTrue(freeMemMetrics.get(memFreeKey) > 0);
+        assertTrue(freeMemMetrics.get(shmemKey) > 0);
         // Mem available should be less than cache proc dirty, because cache proc dirty includes
         // mem available plus cached processes' memory usage.
         assertTrue(
-                freeMemMetrics.get(FreeMemHelper.PROC_MEMINFO_MEM_AVAILABLE)
+                freeMemMetrics.get(memAvailableKey)
                         < freeMemMetrics.get(FreeMemHelper.MEM_AVAILABLE_CACHE_PROC_DIRTY));
     }
 }

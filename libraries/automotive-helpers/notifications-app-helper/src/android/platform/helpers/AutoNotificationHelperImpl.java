@@ -19,6 +19,7 @@ package android.platform.helpers;
 import android.app.Instrumentation;
 import android.platform.helpers.ScrollUtility.ScrollActions;
 import android.platform.helpers.ScrollUtility.ScrollDirection;
+import android.platform.spectatio.utils.SpectatioUiUtil;
 import android.util.Log;
 
 import androidx.test.uiautomator.By;
@@ -41,6 +42,7 @@ public class AutoNotificationHelperImpl extends AbstractStandardAppHelper
     private BySelector mForwardButtonSelector;
     private BySelector mScrollableElementSelector;
     private ScrollDirection mScrollDirection;
+    private static final int WAIT_MS = 30000;
 
     public AutoNotificationHelperImpl(Instrumentation instr) {
         super(instr);
@@ -131,7 +133,9 @@ public class AutoNotificationHelperImpl extends AbstractStandardAppHelper
      */
     @Override
     public UiObject2 findNotificationInCenterWithTitle(String title) {
-        Log.i(LOG_TAG, "Searching for notification in the notification center with title: " + title);
+        Log.i(
+                LOG_TAG,
+                "Searching for notification in the notification center with title: " + title);
 
         List<UiObject2> notifications = getNotifications();
         for (UiObject2 notification : notifications) {
@@ -151,7 +155,11 @@ public class AutoNotificationHelperImpl extends AbstractStandardAppHelper
     /** {@inheritDoc} */
     @Override
     public boolean isNotificationDisplayedInCenterWithTitle(String title) {
-        Log.i(LOG_TAG, "Checking if notification in the notification center with title: " + title + " is displayed.");
+        Log.i(
+                LOG_TAG,
+                "Checking if notification in the notification center with title: "
+                        + title
+                        + " is displayed.");
         UiObject2 notification = findNotificationInCenterWithTitle(title);
         return notification != null;
     }
@@ -159,7 +167,11 @@ public class AutoNotificationHelperImpl extends AbstractStandardAppHelper
     /** {@inheritDoc} */
     @Override
     public boolean isNotificationDisplayedInCenterWithContent(String content) {
-        Log.i(LOG_TAG, "Checking if notification in the notification center with content: " + content + " is displayed.");
+        Log.i(
+                LOG_TAG,
+                "Checking if notification in the notification center with content: "
+                        + content
+                        + " is displayed.");
 
         List<UiObject2> notifications = getNotifications();
         for (UiObject2 notification : notifications) {
@@ -178,14 +190,20 @@ public class AutoNotificationHelperImpl extends AbstractStandardAppHelper
     /** {@inheritDoc} */
     @Override
     public String getNotificationContent(String title) {
-        Log.i(LOG_TAG, String.format("Getting the content of notification in the notification center with title %s.", title));
+        Log.i(
+                LOG_TAG,
+                String.format(
+                        "Getting the content of notification in the notification center with title"
+                                + " %s.",
+                        title));
 
         UiObject2 notification = findNotificationInCenterWithTitle(title);
         UiObject2 content = notification.findObject(
             getUiElementFromConfig(AutomotiveConfigConstants.NOTIFICATION_CONTENT)
         );
         if (content == null) {
-            throw new RuntimeException(String.format("Cannot find content for notification with title '%s'.", title));
+            throw new RuntimeException(
+                    String.format("Cannot find content for notification with title '%s'.", title));
         }
 
         return content.getText();
@@ -194,14 +212,21 @@ public class AutoNotificationHelperImpl extends AbstractStandardAppHelper
     /** {@inheritDoc} */
     @Override
     public int getSmsNotificationCount(String title) {
-        Log.i(LOG_TAG, String.format("Getting the count of SMS notification in the notification center with title %s.", title));
+        Log.i(
+                LOG_TAG,
+                String.format(
+                        "Getting the count of SMS notification in the notification center with"
+                                + " title %s.",
+                        title));
 
         UiObject2 notification = findNotificationInCenterWithTitle(title);
         UiObject2 smsCount = notification.findObject(
             getUiElementFromConfig(AutomotiveConfigConstants.NOTIFICATION_SMS_COUNT)
         );
         if (smsCount == null) {
-            throw new RuntimeException(String.format("Cannot find SMS count for notification with title '%s'.", title));
+            throw new RuntimeException(
+                    String.format(
+                            "Cannot find SMS count for notification with title '%s'.", title));
         }
 
         String smsCountText = smsCount.getText();
@@ -214,7 +239,12 @@ public class AutoNotificationHelperImpl extends AbstractStandardAppHelper
     /** {@inheritDoc} */
     @Override
     public String getSmsNotificationContent(String title) {
-        Log.i(LOG_TAG, String.format("Getting the content of SMS notification in the notification center with title %s.", title));
+        Log.i(
+                LOG_TAG,
+                String.format(
+                        "Getting the content of SMS notification in the notification center with"
+                                + " title %s.",
+                        title));
 
         // Click on SMS count to expand the notification and get the content. If present.
         UiObject2 notification = findNotificationInCenterWithTitle(title);
@@ -259,12 +289,13 @@ public class AutoNotificationHelperImpl extends AbstractStandardAppHelper
         BySelector manageButtonSelector =
                 getUiElementFromConfig(AutomotiveConfigConstants.MANAGE_BUTTON);
         if (checkIfManageButtonExist(manageButtonSelector)) {
-            UiObject2 manage_btn = getSpectatioUiUtil().findUiObject(manageButtonSelector);
-            getSpectatioUiUtil().clickAndWaitUntilNewWindowAppears(manage_btn);
+            getSpectatioUiUtil().clickUntilObjectToBegone(manageButtonSelector);
             Log.i(LOG_TAG, String.format("Clicked the manage button"));
         } else {
             throw new RuntimeException("Cannot find Manage button");
         }
+        getSpectatioUiUtil()
+                .waitForText("Notifications", WAIT_MS, SpectatioUiUtil.TextMatchType.EXACT);
     }
 
     @Override

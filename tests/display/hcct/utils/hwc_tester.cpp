@@ -48,6 +48,16 @@ HwcTester::HwcTester() {
   for (const auto &display : displays) {
     mDisplays.emplace(display.getDisplayId(), std::move(display));
   }
+
+  mRenderEngine = std::unique_ptr<libhwc_aidl_test::TestRenderEngine>(
+      new libhwc_aidl_test::TestRenderEngine(
+          ::android::renderengine::RenderEngineCreationArgs::Builder()
+              .setPixelFormat(static_cast<int>(PixelFormat::RGBA_8888))
+              .setImageCacheSize(libhwc_aidl_test::TestRenderEngine::
+                                     sMaxFrameBufferAcquireBuffers)
+              .setContextPriority(
+                  ::android::renderengine::RenderEngine::ContextPriority::High)
+              .build()));
 }
 
 HwcTester::~HwcTester() {
@@ -139,9 +149,61 @@ bool HwcTester::DrawSolidColorToScreen(int64_t displayId, Color color) {
   return executeRes.first.isOk();
 }
 
+std::pair<int, int> HwcTester::GetActiveDisplaySize(int64_t display_id) {
+  DisplayConfiguration displayConfig = GetDisplayActiveConfigs(display_id);
+  return {displayConfig.width, displayConfig.height};
+}
+
 ComposerClientWriter &HwcTester::GetWriter(int64_t display) {
   auto [it, _] = mWriters.try_emplace(display, display);
   return it->second;
+}
+
+std::unique_ptr<libhwc_aidl_test::TestBufferLayer> HwcTester::CreateBufferLayer(
+    int64_t displayId, uint64_t width, uint64_t height) {
+  return std::make_unique<hcct::libhwc_aidl_test::TestBufferLayer>(
+      *mComposerClient, *mRenderEngine, displayId, width, height,
+      hcct::common::PixelFormat::RGBA_8888, GetWriter(displayId),
+      Composition::DEVICE);
+}
+
+std::optional<ComposerClientReader> HwcTester::Validate(
+    int64_t displayId,
+    const std::vector<libhwc_aidl_test::TestLayer *> &layers) {
+  auto &writer = GetWriter(displayId);
+  for (auto &layer : layers) {
+    layer->write(writer);
+  }
+  writer.validateDisplay(displayId, ComposerClientWriter::kNoTimestamp, 0);
+
+  // Execute the commands.
+  auto commands = writer.takePendingCommands();
+  std::pair<ScopedAStatus, std::vector<CommandResultPayload>> executeRes =
+      mComposerClient->executeCommands(commands);
+  if (!executeRes.first.isOk()) {
+    return std::nullopt;
+  }
+
+  ComposerClientReader reader(displayId);
+  reader.parse(std::move(executeRes.second));
+  return reader;
+}
+
+std::optional<ComposerClientReader> HwcTester::Present(int64_t displayId) {
+  auto &writer = GetWriter(displayId);
+  writer.presentDisplay(displayId);
+
+  // Execute the commands
+  auto commands = writer.takePendingCommands();
+  std::pair<ScopedAStatus, std::vector<CommandResultPayload>> executeRes =
+      mComposerClient->executeCommands(commands);
+  if (!executeRes.first.isOk()) {
+    return std::nullopt;
+  }
+
+  ComposerClientReader reader(displayId);
+  reader.parse(std::move(executeRes.second));
+  return reader;
 }
 
 } // namespace hcct
