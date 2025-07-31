@@ -126,15 +126,18 @@ The `GTest` test runner executes the original test binary.
 The `setup_vkms_connectors_for_atest` binary provides a flexible way to
 configure the virtual displays.
 
-**Simple mode:** Create N generic connectors. ```sh
-
+**Simple mode:** Create N generic connectors.
+```sh
 # Creates 3 generic virtual connectors
-
-/data/local/tmp/setup_vkms_connectors_for_atest 3 ```
+/data/local/tmp/setup_vkms_connectors_for_atest 3
+```
 
 **Advanced mode:** Create connectors with specific types, plane counts, and EDID
-profiles. `sh /data/local/tmp/setup_vkms_connectors_for_atest --config
+profiles.
+
+`/data/local/tmp/setup_vkms_connectors_for_atest --config
 TYPE,NUM_PLANES[,EDID_NAME] ...`
-* `TYPE`: Connector type (e.g., `DP`, `HDMIA`, `eDP`).
+* `TYPE`: Connector type (e.g., `DP`, `HDMIA`,
+`eDP`).
 * `NUM_PLANES`: Number of additional overlay planes (integer).
 * `EDID_NAME`: (Optional) An EDID profile name from `edid_helper.h`.
