@@ -21,6 +21,8 @@ import static junit.framework.Assert.assertTrue;
 import android.content.pm.UserInfo;
 import android.platform.helpers.AutomotiveConfigConstants;
 import android.platform.helpers.HelperAccessor;
+import android.platform.helpers.IAutoAppGridHelper;
+import android.platform.helpers.IAutoHomeHelper;
 import android.platform.helpers.IAutoSettingHelper;
 import android.platform.helpers.IAutoUserHelper;
 import android.platform.helpers.MultiUserHelper;
@@ -44,14 +46,20 @@ public class SwitchUserQuickSettings {
     private static final String GUEST = AutomotiveConfigConstants.HOME_GUEST_BUTTON;
     private static final String DRIVER = AutomotiveConfigConstants.HOME_DRIVER_BUTTON;
     private final MultiUserHelper mMultiUserHelper = MultiUserHelper.getInstance();
+
     private HelperAccessor<IAutoUserHelper> mUsersHelper;
     private HelperAccessor<IAutoSettingHelper> mSettingHelper;
+    private HelperAccessor<IAutoHomeHelper> mHomeHelper;
+
+    private HelperAccessor<IAutoAppGridHelper> mAppGridHelper;
 
     private static final String LOG_TAG = SwitchUserQuickSettings.class.getSimpleName();
 
     public SwitchUserQuickSettings() {
+        mHomeHelper = new HelperAccessor<>(IAutoHomeHelper.class);
         mUsersHelper = new HelperAccessor<>(IAutoUserHelper.class);
         mSettingHelper = new HelperAccessor<>(IAutoSettingHelper.class);
+        mAppGridHelper = new HelperAccessor<>(IAutoAppGridHelper.class);
     }
 
     @After
@@ -73,6 +81,22 @@ public class SwitchUserQuickSettings {
         // verify the user switch
         Log.i(LOG_TAG, "Assert: Current userinfo matches guest userinfo");
         assertTrue(currentUser.name.equals(guestUser));
+
+        // Verify profile name
+        Log.i(LOG_TAG, "Assert:  Check Guest name showing near Human icon");
+        assertTrue(mHomeHelper.get().getUserProfileName().equals(guestUser));
+
+        // After switch verify all the things loaded
+
+        Log.i(LOG_TAG, "Assert: Maps widget is displayed");
+        assertTrue("Maps widget is not displayed", mAppGridHelper.get().isAppGridIconPresent());
+
+        Log.i(LOG_TAG, "Assert: Media widget is visible");
+        assertTrue(mHomeHelper.get().hasMediaWidget());
+
+        Log.i(LOG_TAG, "Assert: Maps widget is displayed");
+        assertTrue("Maps widget is not displayed", mHomeHelper.get().hasMapsWidget());
+
         // switch to initial user before terminating the test
         Log.i(LOG_TAG, "Act: Switch to initial user");
         mUsersHelper.get().switchUsingUserIcon(DRIVER);
