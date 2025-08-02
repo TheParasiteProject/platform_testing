@@ -140,5 +140,12 @@ public interface IAutoAppGridHelper extends IAppHelper {
      * <p>Validates app is displayed on the Dock.
      */
     boolean verifyAppOnDock(String target);
+
+    /**
+     * Setup expectations: Home screen
+     *
+     * <p>Validates app grid is displayed on the Dock.
+     */
+    boolean isAppGridIconPresent();
 }
 

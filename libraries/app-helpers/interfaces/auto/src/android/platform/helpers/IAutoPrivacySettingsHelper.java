@@ -287,4 +287,11 @@ public interface IAutoPrivacySettingsHelper extends IAppHelper {
      * <p>This method will click on unblock button
      */
     void unblockButton();
+
+    /**
+     * Setup expectation: MicroPhone settings is open.
+     *
+     * <p>This method turns on and Off the MicroPhone.
+     */
+    void turnOnMicroPhone(boolean onOff);
 }

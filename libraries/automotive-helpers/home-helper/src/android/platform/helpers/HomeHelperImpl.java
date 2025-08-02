@@ -25,7 +25,7 @@ import java.util.List;
 
 public class HomeHelperImpl extends AbstractStandardAppHelper implements IAutoHomeHelper {
 
-    private static final int WAIT_MS = 10000;
+    private static final int WAIT_MS = 20000;
 
     public HomeHelperImpl(Instrumentation instr) {
         super(instr);
@@ -292,6 +292,7 @@ public class HomeHelperImpl extends AbstractStandardAppHelper implements IAutoHo
     public boolean hasMapsWidget() {
         BySelector mapsWidgetSelector =
                 getUiElementFromConfig(AutomotiveConfigConstants.HOME_MAPS_WIDGET);
+        getSpectatioUiUtil().waitForUiObject(mapsWidgetSelector, WAIT_MS);
         return (getSpectatioUiUtil().hasUiElement(mapsWidgetSelector));
     }
 
