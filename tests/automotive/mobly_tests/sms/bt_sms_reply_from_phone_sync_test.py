@@ -39,6 +39,7 @@ class SMSReplyFromPhoneSync(bluetooth_sms_base_test.BluetoothSMSBaseTest):
 
         logging.info("Pairing phone to car head unit.")
         self.bt_utils.pair_primary_to_secondary()
+        super().enable_recording()
 
         logging.info("wait for user permissions popup & give contacts and sms permissions")
         self.call_utils.wait_with_log(20)
@@ -85,7 +86,7 @@ class SMSReplyFromPhoneSync(bluetooth_sms_base_test.BluetoothSMSBaseTest):
     def teardown_test(self):
          # Go to home screen
          self.call_utils.press_home()
-         super().teardown_no_video_recording()
+         super().teardown_test()
 
 if __name__ == '__main__':
   common_main()
