@@ -24,6 +24,8 @@ python_test_host {
         "mobly",
         "utilities",
         "bluetooth_test",
+        "statsd_collector",
+        "libprotobuf-python",
     ],
     test_suites: [
         "catbox",
