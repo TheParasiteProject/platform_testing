@@ -87,7 +87,8 @@ public class FreeMemHelper implements ICollectorHelper<Long> {
         Map<String, Long> results = getMemInfo(memInfoToCollect);
 
         long cacheProcDirty =
-                results.getOrDefault(String.format(PROC_MEMINFO_KEY_FORMAT, "memavailable"), 0L);
+                results.getOrDefault(
+                        String.format(PROC_MEMINFO_KEY_FORMAT, "memavailable"), 0L) / 1024;
         byte[] dumpsysMemInfoBytes = MetricUtility.executeCommandBlocking(DUMPSYS_MEMIFNO,
                 InstrumentationRegistry.getInstrumentation());
         List<String> cachedProcList = getCachedProcesses(dumpsysMemInfoBytes);

@@ -41,7 +41,7 @@ public:
 
 protected:
   IgtTestHelper(const std::string test_name)
-      : test_name_("/data/igt_tests/x86_64/" + test_name + "64") {
+      : test_name_("/data/igt_tests/" + test_name + "64") {
     DCHECK(test_name.length());
   }
 
