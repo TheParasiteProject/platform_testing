@@ -171,6 +171,12 @@ public interface IPhotosHelper extends IAppHelper {
     public UiObject2 getPhotoScrollView();
 
     /**
+     * Setup expectation: Click on the parent of the 'more_image' button.
+     * <p>Get the UiObject2 of 'more_image' button's parent.
+     */
+    void clickMoreImage();
+
+    /**
      * Setup expectation: Photos is open.
      *
      * <p>Check if device is now in Photos main screen.
