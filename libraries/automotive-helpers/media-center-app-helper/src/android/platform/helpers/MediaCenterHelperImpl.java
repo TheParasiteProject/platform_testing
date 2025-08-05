@@ -541,11 +541,11 @@ public class MediaCenterHelperImpl extends AbstractStandardAppHelper implements 
     /** {@inheritDoc} */
     @Override
     public void openTestMediaAppSettings() {
-        BySelector menuItemElementSelector =
-                getUiElementFromConfig(AutomotiveConfigConstants.TEST_MEDIA_APP_SETTING);
-        List<UiObject2> menuItemElements =
-                getSpectatioUiUtil().findUiObjects(menuItemElementSelector);
-        getSpectatioUiUtil().clickAndWait(menuItemElements.get(1));
+        BySelector testMediaAppSettingsSelector =
+                getUiElementFromConfig(AutomotiveConfigConstants.MEDIA_APP_SETTINGS);
+        UiObject2 testMediaAppSettings =
+                getSpectatioUiUtil().findUiObject(testMediaAppSettingsSelector);
+        getSpectatioUiUtil().clickAndWait(testMediaAppSettings);
     }
 
     /**
