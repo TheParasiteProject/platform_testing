@@ -17,7 +17,6 @@
 package com.google.android.libraries.automotive.val.api;
 
 import android.util.Log;
-import androidx.annotation.Nullable;
 import com.google.common.collect.ImmutableBiMap;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
@@ -37,6 +36,7 @@ import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import org.jspecify.annotations.Nullable;
 
 /** Static utility class for Vehicle Agent operations. */
 final class VehicleAgents {
@@ -262,8 +262,7 @@ final class VehicleAgents {
   }
 
   /** Returns the overlapping range of a collection of {@link ValueRange} instances. */
-  @Nullable
-  static <N extends Number & Comparable<N>> ValueRange<Float> findOverlappingRange(
+  static <N extends Number & Comparable<N>> @Nullable ValueRange<Float> findOverlappingRange(
       Collection<ValueRange<N>> ranges) {
     if (ranges == null || ranges.isEmpty()) {
       Log.w(TAG, "findOverlappingRange() - null or empty collection of `ValueRange` provided.");

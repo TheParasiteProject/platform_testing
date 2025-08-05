@@ -19,7 +19,6 @@ package com.google.android.libraries.automotive.val.api;
 import static java.lang.Math.max;
 
 import android.util.Log;
-import androidx.annotation.Nullable;
 import com.google.android.libraries.automotive.val.actions.Action;
 import com.google.android.libraries.automotive.val.actions.ActionCategory;
 import com.google.android.libraries.automotive.val.api.Temperature.TemperatureUnit;
@@ -39,6 +38,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.function.BiFunction;
+import org.jspecify.annotations.Nullable;
 
 /**
  * An abstract class that contains the common API specific code for the vehicle actions categories.
@@ -651,9 +651,8 @@ abstract class ApiActionCategory extends ActionCategory {
    * <p>This set is currently static, so a client should only call this once. However, this may
    * change in the future.
    */
-  @Nullable
-  private <N extends Number & Comparable<N>> ValueRange<Float> getSupportedOverlappingMinMax(
-      String actionName) {
+  private <N extends Number & Comparable<N>>
+      @Nullable ValueRange<Float> getSupportedOverlappingMinMax(String actionName) {
     // Populate the action declaration if the action is supported.
 
     if (actionMap.isEmpty()) {
