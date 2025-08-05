@@ -98,8 +98,6 @@ public class UiTraceListener extends PerfettoListener {
         args.putString(PerfettoTracingStrategy.PERFETTO_CONFIG_FILE_ARG, mTempConfigFile.getName());
         args.putString(PerfettoTracingStrategy.PERFETTO_CONFIG_TEXT_PROTO, "false");
         args.putString(PerfettoTracingStrategy.PERFETTO_STREAM_CONFIG_FROM_FILE, "true");
-
-        super.setupAdditionalArgs();
     }
 
     @Override
