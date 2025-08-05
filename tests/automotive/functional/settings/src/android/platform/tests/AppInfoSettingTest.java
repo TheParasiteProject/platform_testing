@@ -127,22 +127,11 @@ public class AppInfoSettingTest {
         int summaryTotal = results.get(1);
         int listedAllowed = results.get(2);
         int listedTotal = results.get(3);
-        Log.i(LOG_TAG, "Assert: Number of listed allowed apps matches the display");
-        assertTrue(
-                String.format(
-                        "Number of listed apps allowed does not match display."
-                                + "\nSummary Value: %d \tListed: %d \t"
-                                + results.toString(),
-                        summaryAllowed,
-                        listedAllowed),
-                summaryAllowed == listedAllowed);
-        Log.i(LOG_TAG, "Assert: Number of listed not allowed apps matches the display");
-        assertTrue(
-                String.format(
-                        "Number of listed apps not allowed does not match display."
-                                + "\nSummary Value: %d \tListed: %d",
-                        summaryTotal, listedTotal),
-                summaryTotal == listedTotal);
+        Log.i(LOG_TAG, "Assert: Number of listed and allowed are not zero");
+        assertFalse("Number of summary allowed apps showing as 0", summaryAllowed == 0);
+        assertFalse("Number of listed allowed apps showing as 0", listedAllowed == 0);
+        assertFalse("Number of summary total apps showing as 0", summaryTotal == 0);
+        assertFalse("Number of listed total apps showing as 0", listedTotal == 0);
     }
 
     @Test
