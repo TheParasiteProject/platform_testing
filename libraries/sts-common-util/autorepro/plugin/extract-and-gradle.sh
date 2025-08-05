@@ -17,8 +17,8 @@
 # Exit on error
 set -e
 
-if [ -z "${ANDROID_HOST_OUT}" ]; then
-  echo "ANDROID_HOST_OUT is not set. Did you source and lunch?"
+if [ -z "${ANDROID_BUILD_TOP}" ]; then
+  echo "ANDROID_BUILD_TOP is not set. Did you source and lunch?"
   exit 1
 fi
 
@@ -31,7 +31,7 @@ rm -rf $AUTOREPRO_OUT
 # -q quiet
 # -o overwrite without prompting
 # -d output directory
-unzip -q -o $ANDROID_HOST_OUT/autorepro/autorepro.zip -d $AUTOREPRO_OUT
+unzip -q -o $ANDROID_BUILD_TOP/out/soong/.intermediates/test/sts/autorepro/gen/autorepro.zip -d $AUTOREPRO_OUT
 
 cd $AUTOREPRO_OUT
 ./gradlew $@
