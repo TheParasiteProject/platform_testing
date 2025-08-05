@@ -35,7 +35,8 @@ import java.util.List;
 @RunListener.ThreadSafe
 public class DefaultUITraceListener extends UiTraceListener {
 
-    DefaultUITraceListener() {
+    @SuppressWarnings("unused")
+    public DefaultUITraceListener() {
         super();
     }
 
