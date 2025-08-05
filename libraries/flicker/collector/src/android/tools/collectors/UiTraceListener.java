@@ -212,7 +212,7 @@ public class UiTraceListener extends PerfettoListener {
             PerfettoConfig.ProtoLogConfig.Builder protologConfig =
                     PerfettoConfig.ProtoLogConfig.newBuilder();
 
-            for (String group : protologGroups.split(",\\s+")) {
+            for (String group : protologGroups.split(",\\s*")) {
                 String trimmedGroup = group.trim();
                 if (!trimmedGroup.isEmpty()) {
                     protologConfig.addGroupOverrides(
