@@ -137,7 +137,6 @@ public abstract class PerfettoTracingStrategy {
     private String mConfigContent;
     protected boolean mSkipTestFailureMetrics;
     private boolean mSkipTestSuccessMetrics;
-    private boolean mSkipEmptyMetrics;
     protected boolean mIsTestFailed = false;
     // Store the method name and invocation count to create unique file name for each trace.
     private boolean mPerfettoStartSuccess = false;
@@ -516,10 +515,8 @@ public abstract class PerfettoTracingStrategy {
                         getArgumentValue(args, SKIP_TEST_FAILURE_METRICS, String.valueOf(false)));
         mSkipTestSuccessMetrics = Boolean.parseBoolean(getArgumentValue(args,
                 SKIP_TEST_SUCCESS_METRICS, String.valueOf(false)));
-        mSkipEmptyMetrics =
-                Boolean.parseBoolean(
-                        getArgumentValue(args, SKIP_EMPTY_METRICS, String.valueOf(false)));
-        mPerfettoHelper.setCheckEmptyMetrics(mSkipEmptyMetrics);
+        mPerfettoHelper.setCheckEmptyMetrics(Boolean.parseBoolean(
+                getArgumentValue(args, SKIP_EMPTY_METRICS, String.valueOf(false))));
 
         mFilePathKeyPrefix = getArgumentValue(args, ARGUMENT_FILE_PATH_KEY_PREFIX,
                 DEFAULT_FILE_PATH_KEY_PREFIX);
