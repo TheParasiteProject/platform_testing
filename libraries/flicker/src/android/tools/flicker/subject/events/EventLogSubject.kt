@@ -39,34 +39,44 @@ class EventLogSubject(val eventLog: EventLog, override val reader: Reader) : Fli
         get() = ExceptionMessageBuilder().forSubject(this)
 
     fun focusChanges(vararg windows: String) = apply {
-        if (windows.isNotEmpty()) {
-            val focusChanges =
-                _focusChanges.dropWhile { !it.window.contains(windows.first()) }.take(windows.size)
+        val builder =
+            exceptionMessageBuilder
+                .setExpected(windows.joinToString(" -> "))
+                .setActual(_focusChanges.map { Fact("Focus change", it) })
 
-            val builder =
-                exceptionMessageBuilder
-                    .setExpected(windows.joinToString(", "))
-                    .setActual(focusChanges)
+        if (windows.isEmpty()) {
+            val errorMsgBuilder =
+                builder.setMessage("No windows specified for focus change assertion")
+            throw IncorrectFocusException(errorMsgBuilder)
+        }
 
-            if (focusChanges.isEmpty()) {
-                val errorMsgBuilder = builder.setMessage("Focus did not change")
-                throw IncorrectFocusException(errorMsgBuilder)
+        if (_focusChanges.isEmpty()) {
+            val errorMsgBuilder = builder.setMessage("Focus did not change")
+            throw IncorrectFocusException(errorMsgBuilder)
+        }
+
+        if (windows.size > _focusChanges.size) {
+            val errorMsgBuilder = builder.setMessage("More windows specified than focus changes")
+            throw IncorrectFocusException(errorMsgBuilder)
+        }
+
+        for ((index, focusChange) in _focusChanges.withIndex()) {
+            if (index + windows.size > _focusChanges.size) {
+                break
             }
 
-            val actual = focusChanges.map { Fact("Focus change", it) }
-            builder.setActual(actual)
+            if (!focusChange.window.contains(windows.first())) {
+                continue
+            }
 
-            val success =
-                windows.size <= focusChanges.size &&
-                    focusChanges.zip(windows).all { (focus, search) ->
-                        focus.window.contains(search)
-                    }
-
-            if (!success) {
-                val errorMsgBuilder = builder.setMessage("Incorrect focus change")
-                throw IncorrectFocusException(errorMsgBuilder)
+            val subsequence = _focusChanges.subList(index, index + windows.size)
+            if (subsequence.zip(windows).all { (focus, window) -> focus.window.contains(window) }) {
+                return@apply
             }
         }
+
+        val errorMsgBuilder = builder.setMessage("Incorrect focus change")
+        throw IncorrectFocusException(errorMsgBuilder)
     }
 
     fun focusDoesNotChange() = apply {

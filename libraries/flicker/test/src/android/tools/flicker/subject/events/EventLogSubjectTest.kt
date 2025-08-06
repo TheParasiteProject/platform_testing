@@ -101,6 +101,64 @@ class EventLogSubjectTest {
         subject.focusDoesNotChange()
     }
 
+    @Test
+    fun canDetectFocusChangesSubsequence() {
+        val reader =
+            ParsedTracesReader(
+                artifacts = arrayOf(TestArtifact.EMPTY),
+                eventLog =
+                    EventLog(
+                        listOf(
+                            // A
+                            FocusEvent(
+                                Timestamps.from(unixNanos = 0),
+                                "WinA",
+                                FocusEvent.Type.GAINED,
+                                "test",
+                                0,
+                                "0",
+                                0
+                            ),
+                            // B
+                            FocusEvent(
+                                Timestamps.from(unixNanos = 1),
+                                "WinB",
+                                FocusEvent.Type.GAINED,
+                                "test",
+                                0,
+                                "0",
+                                0
+                            ),
+                            // A
+                            FocusEvent(
+                                Timestamps.from(unixNanos = 2),
+                                "WinA",
+                                FocusEvent.Type.GAINED,
+                                "test",
+                                0,
+                                "0",
+                                0
+                            ),
+                            // C
+                            FocusEvent(
+                                Timestamps.from(unixNanos = 3),
+                                "WinC",
+                                FocusEvent.Type.GAINED,
+                                "test",
+                                0,
+                                "0",
+                                0
+                            )
+                        )
+                    )
+            )
+        val subjectsParser = SubjectsParser(reader)
+        val subject = subjectsParser.eventLogSubject ?: error("Event log subject not built")
+        subject.focusChanges("WinA", "WinC")
+        subject.focusChanges("WinA", "WinB", "WinA", "WinC")
+        subject.focusChanges("WinB", "WinA", "WinC")
+    }
+
     companion object {
         @ClassRule @JvmField val ENV_CLEANUP = CleanFlickerEnvironmentRule()
     }
