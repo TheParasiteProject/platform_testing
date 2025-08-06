@@ -18,11 +18,13 @@ package android.tools.flicker.subject.events
 
 import android.tools.Timestamps
 import android.tools.flicker.assertions.SubjectsParser
+import android.tools.flicker.subject.exceptions.IncorrectFocusException
 import android.tools.testutils.CleanFlickerEnvironmentRule
 import android.tools.testutils.ParsedTracesReader
 import android.tools.testutils.TestArtifact
 import android.tools.traces.events.EventLog
 import android.tools.traces.events.FocusEvent
+import org.junit.Assert.assertThrows
 import org.junit.ClassRule
 import org.junit.Test
 
@@ -101,7 +103,127 @@ class EventLogSubjectTest {
         subject.focusDoesNotChange()
     }
 
+    @Test
+    fun canDetectFocusChangesSubsequence() {
+        val reader =
+            ParsedTracesReader(
+                artifacts = arrayOf(TestArtifact.EMPTY),
+                eventLog =
+                    EventLog(
+                        listOf(
+                            // A
+                            FocusEvent(
+                                Timestamps.from(unixNanos = 0),
+                                "WinA",
+                                FocusEvent.Type.GAINED,
+                                "test",
+                                0,
+                                "0",
+                                0,
+                            ),
+                            // B
+                            FocusEvent(
+                                Timestamps.from(unixNanos = 1),
+                                "WinB",
+                                FocusEvent.Type.GAINED,
+                                "test",
+                                0,
+                                "0",
+                                0,
+                            ),
+                            // A
+                            FocusEvent(
+                                Timestamps.from(unixNanos = 2),
+                                "WinA",
+                                FocusEvent.Type.GAINED,
+                                "test",
+                                0,
+                                "0",
+                                0,
+                            ),
+                            // C
+                            FocusEvent(
+                                Timestamps.from(unixNanos = 3),
+                                "WinC",
+                                FocusEvent.Type.GAINED,
+                                "test",
+                                0,
+                                "0",
+                                0,
+                            ),
+                        )
+                    ),
+            )
+        val subjectsParser = SubjectsParser(reader)
+        val subject = subjectsParser.eventLogSubject ?: error("Event log subject not built")
+        subject.focusChanges("WinA", "WinC")
+        subject.focusChanges("WinA", "WinB", "WinA", "WinC")
+        subject.focusChanges("WinB", "WinA", "WinC")
+    }
+
+    @Test
+    fun focusChanges_failsForNonContiguousSubsequence() {
+        val subject = getSubjectFor(FOCUS_EVENTS_A_B_C)
+        assertThrows(IncorrectFocusException::class.java) { subject.focusChanges("WinA", "WinC") }
+    }
+
+    @Test
+    fun focusChanges_failsIfWindowNotFound() {
+        val subject = getSubjectFor(FOCUS_EVENTS_A_B_C)
+        assertThrows(IncorrectFocusException::class.java) { subject.focusChanges("WinA", "WinD") }
+    }
+
+    @Test
+    fun focusChanges_failsIfWindowsInWrongOrder() {
+        val subject = getSubjectFor(FOCUS_EVENTS_A_B_C)
+        assertThrows(IncorrectFocusException::class.java) { subject.focusChanges("WinC", "WinA") }
+    }
+
+    @Test
+    fun focusChanges_failsOnEmptyLog() {
+        val subject = getSubjectFor(emptyList())
+        assertThrows(IncorrectFocusException::class.java) { subject.focusChanges("WinA") }
+    }
+
+    private fun getSubjectFor(events: List<FocusEvent>): EventLogSubject {
+        val reader =
+            ParsedTracesReader(artifacts = arrayOf(TestArtifact.EMPTY), eventLog = EventLog(events))
+        val subjectsParser = SubjectsParser(reader)
+        return subjectsParser.eventLogSubject ?: error("Event log subject not built")
+    }
+
     companion object {
         @ClassRule @JvmField val ENV_CLEANUP = CleanFlickerEnvironmentRule()
+
+        private val FOCUS_EVENTS_A_B_C =
+            listOf(
+                FocusEvent(
+                    Timestamps.from(unixNanos = 0),
+                    "WinA",
+                    FocusEvent.Type.GAINED,
+                    "test",
+                    0,
+                    "0",
+                    0,
+                ),
+                FocusEvent(
+                    Timestamps.from(unixNanos = 1),
+                    "WinB",
+                    FocusEvent.Type.GAINED,
+                    "test",
+                    0,
+                    "0",
+                    0,
+                ),
+                FocusEvent(
+                    Timestamps.from(unixNanos = 2),
+                    "WinC",
+                    FocusEvent.Type.GAINED,
+                    "test",
+                    0,
+                    "0",
+                    0,
+                ),
+            )
     }
 }
