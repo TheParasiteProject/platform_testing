@@ -235,9 +235,22 @@ public abstract class PerfettoTracingStrategy {
 
     private void cleanupPerfettoSessionsFromPreviousRuns() {
         File rootFolder = new File(mPerfettoHelper.getTrackPerfettoRootDir());
+
+        if (!rootFolder.exists()) {
+            Log.i(getTag(), "Perfetto pid files folder does not exist. Skipping cleanup...");
+            return;
+        }
+
         File[] perfettoPidFiles =
                 rootFolder.listFiles(
                         (d, name) -> name.startsWith(mPerfettoHelper.getPerfettoFilePrefix()));
+
+        if (perfettoPidFiles == null) {
+            // An I/O error occurred.
+            Log.e(getTag(), "Failed to list the perfetto pid files.");
+            return;
+        }
+
         Set<Integer> pids = new HashSet<>();
         for (File perfettoPidFile : perfettoPidFiles) {
             try {
