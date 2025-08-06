@@ -24,6 +24,9 @@ android_test {
     srcs: [
         "src/**/*.java",
     ],
+    test_suites: [
+        "device-tests",
+    ],
     static_libs: [
         "androidx.test.runner",
         "mockito-target-minus-junit4",
