@@ -137,10 +137,19 @@
       "PACKAGE": "com.android.car.dialer"
     },
     "DIAL_IN_NUMBER": {
-      "TYPE": "RESOURCE_ID",
-      "VALUE": "title",
-      "PACKAGE": "com.android.car.dialer"
-    },
+        "TYPE": "MULTIPLE",
+        "SPECIFIERS": [
+          {
+            "TYPE": "CLASS",
+            "VALUE": "android.widget.TextView"
+          },
+          {
+            "TYPE": "RESOURCE_ID",
+            "VALUE": "title",
+            "PACKAGE": "com.android.car.dialer"
+          }
+        ]
+      },
     "DIALED_CONTACT_TITLE": {
       "TYPE": "RESOURCE_ID",
       "VALUE": "user_profile_title",
