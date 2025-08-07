@@ -174,8 +174,9 @@ public class DefaultUITraceListenerTest {
                 .stopCollecting(
                         anyLong(),
                         eq(
-                                "/sdcard/test_results/run_test1/PerfettoTracingPerTestStrategy/"
-                                        + "uiTrace_run_test1-1.perfetto-trace"));
+                                "/data/local/tmp/perfetto-traces/run_test1/"
+                                        + "PerfettoTracingPerTestStrategy/"
+                                        + "perfetto_run_test1-1.perfetto-trace"));
     }
 
     /*

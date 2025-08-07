@@ -55,7 +55,7 @@ public abstract class PerfettoTracingStrategy {
     // Enable to persist the pid of perfetto process during test execution and use it
     // for cleanup during instrumentation crash instances.
     private static final String PERFETTO_PERSIST_PID_TRACK = "perfetto_persist_pid_track";
-    private static final String DEFAULT_PERFETTO_PID_TRACK_ROOT = "sdcard/";
+    private static final String DEFAULT_PERFETTO_PID_TRACK_ROOT = "/data/local/tmp/perfetto-pids/";
     private static final String DEFAULT_PERFETTO_CONFIG_ROOT_DIR = "/data/misc/perfetto-traces/";
     // Collect per run if it is set to true otherwise collect per test.
     // Default perfetto config file name.
@@ -137,7 +137,6 @@ public abstract class PerfettoTracingStrategy {
     private String mConfigContent;
     protected boolean mSkipTestFailureMetrics;
     private boolean mSkipTestSuccessMetrics;
-    private boolean mSkipEmptyMetrics;
     protected boolean mIsTestFailed = false;
     // Store the method name and invocation count to create unique file name for each trace.
     private boolean mPerfettoStartSuccess = false;
@@ -236,9 +235,22 @@ public abstract class PerfettoTracingStrategy {
 
     private void cleanupPerfettoSessionsFromPreviousRuns() {
         File rootFolder = new File(mPerfettoHelper.getTrackPerfettoRootDir());
+
+        if (!rootFolder.exists()) {
+            Log.i(getTag(), "Perfetto pid files folder does not exist. Skipping cleanup...");
+            return;
+        }
+
         File[] perfettoPidFiles =
                 rootFolder.listFiles(
                         (d, name) -> name.startsWith(mPerfettoHelper.getPerfettoFilePrefix()));
+
+        if (perfettoPidFiles == null) {
+            // An I/O error occurred.
+            Log.e(getTag(), "Failed to list the perfetto pid files.");
+            return;
+        }
+
         Set<Integer> pids = new HashSet<>();
         for (File perfettoPidFile : perfettoPidFiles) {
             try {
@@ -516,10 +528,8 @@ public abstract class PerfettoTracingStrategy {
                         getArgumentValue(args, SKIP_TEST_FAILURE_METRICS, String.valueOf(false)));
         mSkipTestSuccessMetrics = Boolean.parseBoolean(getArgumentValue(args,
                 SKIP_TEST_SUCCESS_METRICS, String.valueOf(false)));
-        mSkipEmptyMetrics =
-                Boolean.parseBoolean(
-                        getArgumentValue(args, SKIP_EMPTY_METRICS, String.valueOf(false)));
-        mPerfettoHelper.setCheckEmptyMetrics(mSkipEmptyMetrics);
+        mPerfettoHelper.setCheckEmptyMetrics(Boolean.parseBoolean(
+                getArgumentValue(args, SKIP_EMPTY_METRICS, String.valueOf(false))));
 
         mFilePathKeyPrefix = getArgumentValue(args, ARGUMENT_FILE_PATH_KEY_PREFIX,
                 DEFAULT_FILE_PATH_KEY_PREFIX);
