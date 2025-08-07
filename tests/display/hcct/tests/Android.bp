@@ -45,7 +45,7 @@ cc_defaults {
 
 
 cc_test {
-    name: "hcct_hotplugs",
+    name: "VkmsTestHwcHotplugs",
     srcs: [
         "hotplugs.cpp",
     ],
@@ -56,7 +56,7 @@ cc_test {
 }
 
 cc_test {
-    name: "hcct_composition",
+    name: "TestHwcComposition",
     srcs: [
         "composition_tests.cpp",
     ],
