@@ -32,9 +32,9 @@ namespace android::test::flag {
 std::vector<std::pair<bool, std::string>> GetFlagsNotMetRequirements(
   const std::vector<std::pair<bool, std::vector<p_flag>>> flag_conditions) {
   std::vector<std::pair<bool, std::string>> unsatisfied_flags;
-  for (const std::pair<bool, std::vector<p_flag>> flag_condition : flag_conditions) {
+  for (const std::pair<bool, std::vector<p_flag>>& flag_condition : flag_conditions) {
     bool expected_condition = flag_condition.first;
-    for (const p_flag feature_flag : flag_condition.second) {
+    for (const p_flag& feature_flag : flag_condition.second) {
       if (!CheckFlagCondition(expected_condition, feature_flag)) {
         // Records the feature flag if it doesn't meet the expected condition.
         unsatisfied_flags.push_back({expected_condition, feature_flag.second});
