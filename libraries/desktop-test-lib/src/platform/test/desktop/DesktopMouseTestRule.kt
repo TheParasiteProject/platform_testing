@@ -123,6 +123,7 @@ class DesktopMouseTestRule() : TestRule {
                 )
             virtualDevice = createdVirtualDevice
 
+            val primaryDisplayId = getPrimaryDisplayId()
             val inputDeviceFlow = callbackFlow {
                 val inputDeviceListener =
                     object : InputManager.InputDeviceListener {
@@ -143,16 +144,13 @@ class DesktopMouseTestRule() : TestRule {
                     }
                 inputManager.registerInputDeviceListener(inputDeviceListener, handler)
 
-                // Note: AssociatedDisplayId is not actually used in connected displays, since
-                // cursor will be able to cross displays and no longer gets "associated" anymore,
-                // with an exception if display is excluded from the current DisplayTopology.
                 virtualMouse =
                     createdVirtualDevice.createVirtualMouse(
                         VirtualMouseConfig.Builder()
                             .setVendorId(VIRTUAL_MOUSE_VENDOR_ID)
                             .setProductId(VIRTUAL_MOUSE_PRODUCT_ID)
                             .setInputDeviceName("VirtualMouse_ConnectedDisplaysTest")
-                            .setAssociatedDisplayId(DEFAULT_DISPLAY)
+                            .setAssociatedDisplayId(primaryDisplayId)
                             .build()
                     )
                 awaitClose { inputManager.unregisterInputDeviceListener(inputDeviceListener) }
@@ -165,7 +163,7 @@ class DesktopMouseTestRule() : TestRule {
                 disableMouseScaling(display.displayId)
             }
             displayManager.registerDisplayListener(displayListener, handler)
-            ensureCursorStartsOnDefaultDisplay()
+            ensureCursorStartsOnDisplayCenter(primaryDisplayId)
         }
 
         private fun disableMouseScaling(displayId: Int) {
@@ -173,10 +171,14 @@ class DesktopMouseTestRule() : TestRule {
             inputManager.setMouseScalingEnabled(false, displayId)
         }
 
-        private fun ensureCursorStartsOnDefaultDisplay() {
-            val display = displayManager.getDisplay(DEFAULT_DISPLAY)
-            move(DEFAULT_DISPLAY, display.width / 2, display.height / 2)
+        private fun ensureCursorStartsOnDisplayCenter(displayId: Int) {
+            val display = displayManager.getDisplay(displayId)
+            Log.i(TAG, "Ensuring cursor starts on center of display#$displayId")
+            move(display.displayId, display.width / 2, display.height / 2)
         }
+
+        private fun getPrimaryDisplayId() =
+            displayManager.displayTopology?.primaryDisplayId ?: DEFAULT_DISPLAY
 
         override fun after() {
             displayManager.unregisterDisplayListener(displayListener)
