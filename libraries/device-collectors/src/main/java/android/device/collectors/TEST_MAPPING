@@ -1,0 +1,8 @@
+{
+  "wm": [
+    {
+      "name": "ui-trace-collector-test",
+      "file_patterns": ["^.*Perfetto.*\\.java$"]
+    }
+  ]
+}
