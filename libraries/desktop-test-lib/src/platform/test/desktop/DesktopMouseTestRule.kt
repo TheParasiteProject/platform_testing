@@ -251,10 +251,17 @@ class DesktopMouseTestRule() : TestRule {
      * @param targetY The target Y (PX) coordinate relative to the target display.
      */
     fun move(targetDisplayId: Int, targetXPx: Int, targetYPx: Int) {
+        Log.i(TAG, "Try moving to display#$targetDisplayId ($targetXPx, $targetYPx)")
         val currentCursorDisplayId = getCursorDisplayId()
 
         if (targetDisplayId != currentCursorDisplayId) {
+            Log.i(
+                TAG,
+                "Start moving from display#$currentCursorDisplayId -> display#$targetDisplayId",
+            )
             moveToDisplay(currentCursorDisplayId, targetDisplayId)
+        } else {
+            Log.i(TAG, "Cursor is already on the same display with $targetDisplayId")
         }
 
         val currentPosition = getCursorPosition(targetDisplayId).roundToInt()
@@ -275,6 +282,7 @@ class DesktopMouseTestRule() : TestRule {
             // slight difference (within `FLOATING_ROUND_CORRECTION`) in the final cursor position.
             delta.dx <= FLOATING_ROUNDING_CORRECTION && delta.dy <= FLOATING_ROUNDING_CORRECTION
         }
+        Log.i(TAG, "Successfully moved to display#$targetDisplayId ($targetXPx, $targetYPx)")
     }
 
     /**
@@ -296,6 +304,7 @@ class DesktopMouseTestRule() : TestRule {
         val displayAbsoluteBounds = topology.absoluteBounds
         val topologyGraph = topology.graph
         val path = findPath(currentCursorDisplayId, targetDisplayId, topologyGraph)
+        Log.i(TAG, "Computed display paths ${path.stream().map{it.displayId}.toList()}")
 
         path.forEach { (nextDisplayId, position) ->
             val dpi = getDpiForDisplay(currentCursorDisplayId)
@@ -338,6 +347,10 @@ class DesktopMouseTestRule() : TestRule {
             ) {
                 getCursorDisplayId() == nextDisplayId
             }
+            Log.i(
+                TAG,
+                "Cursor moved from display#$currentCursorDisplayId -> display#$nextDisplayId",
+            )
             currentCursorDisplayId = nextDisplayId
 
             // InputDevice reconfiguration will happen when cursor changed display, and might jam
