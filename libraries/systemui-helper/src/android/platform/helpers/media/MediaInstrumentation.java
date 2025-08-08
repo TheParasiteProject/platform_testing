@@ -137,7 +137,7 @@ public final class MediaInstrumentation {
             UiObject2 qsScrollView = mDevice.wait(Until.findObject(qsScrollViewSelector),
                     WAIT_TIME_MILLIS);
             assertNotNull("Unable to scroll the QS container.", qsScrollView);
-            qsScrollView.scroll(Direction.DOWN, 1.0f, 100);
+            qsScrollView.scroll(Direction.DOWN, .75f, 100);
             InstrumentationRegistry.getInstrumentation().getUiAutomation().clearCache();
             notification = mDevice.wait(Until.findObject(umoSelector), WAIT_TIME_MILLIS);
         }
