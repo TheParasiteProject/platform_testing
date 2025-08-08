@@ -270,6 +270,34 @@ class PerfettoTraceMonitorTest : TraceMonitorTest<PerfettoTraceMonitor>() {
             .isEqualTo(1L)
     }
 
+    @Test
+    fun collectsCujsByDefault() {
+        val reader =
+            PerfettoTraceMonitor.newBuilder().build().withTracing(
+                resultReaderProvider = { buildResultReader(it) }
+            ) {
+                BrowserAppHelper().launchViaIntent()
+                device.pressHome()
+                device.pressRecentApps()
+            }
+
+        val debugFile = getDebugFile("uiTrace-PerfettoTraceMonitorTest-cujTracingTest")
+        Truth.assertThat(reader.artifacts).hasLength(1)
+        debugFile.writeBytes(reader.artifacts.first().readBytes())
+        val traceData = reader.readBytes(TraceType.PERFETTO) ?: ByteArray(0)
+        assertTrace(traceData)
+
+        TraceProcessorSession.loadPerfettoTrace(traceData) { session ->
+            val sql =
+                "SELECT RUN_METRIC('android/android_jank_cuj.sql');\n" +
+                    "SELECT * FROM android_jank_cuj;"
+            session.query(sql) { rows ->
+                require(rows.isNotEmpty()) { "Trace should have at least 1 CUJ" }
+                Truth.assertThat(rows.map { it["cuj_name"] }).contains("LAUNCHER_APP_CLOSE_TO_HOME")
+            }
+        }
+    }
+
     private fun getDebugFile(testName: String): File =
         InstrumentationRegistry.getInstrumentation()
             .targetContext
