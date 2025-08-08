@@ -167,7 +167,8 @@ public class SettingsAppInfoHelperImpl extends AbstractStandardAppHelper
         BySelector permissionObjectSelector =
                 permissionSummarySelector.hasChild(By.text(permissionName));
 
-        getSpectatioUiUtil().scrollToBeginning(mAppInfoPermissionsScrollableElementSelector, true);
+        getSpectatioUiUtil()
+                .scrollToBoundary(mAppInfoPermissionsScrollableElementSelector, true, true);
         UiObject2 permissionSummary =
                 mScrollUtility.scrollAndFindUiObject(
                         mScrollAction,

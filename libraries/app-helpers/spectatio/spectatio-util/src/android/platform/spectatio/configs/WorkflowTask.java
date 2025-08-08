@@ -205,6 +205,22 @@ public class WorkflowTask {
             case LONG_PRESS:
                 validateAndPressKey(workflowName, spectatioUiUtil, /* isLongPress= */ true);
                 break;
+            case SCROLL_TO_BEGINNING:
+                scrollToBoundary(
+                        workflowName,
+                        spectatioUiUtil,
+                        validateAndGetTaskScrollConfig(workflowName),
+                        true
+                );
+                break;
+            case SCROLL_TO_END:
+                scrollToBoundary(
+                        workflowName,
+                        spectatioUiUtil,
+                        validateAndGetTaskScrollConfig(workflowName),
+                        false
+                );
+                break;
             case SCROLL_TO_FIND_AND_CLICK:
                 validateAndClickUiElement(
                         workflowName,
@@ -347,6 +363,43 @@ public class WorkflowTask {
                         SwipeFraction.class,
                         swipeConfig.getSwipeFraction());
         spectatioUiUtil.swipe(direction, swipeConfig.getNumberOfSteps(), fraction);
+    }
+
+    private void scrollToBoundary(
+            String workflowName,
+            SpectatioUiUtil spectatioUiUtil,
+            ScrollConfig config,
+            boolean backward) {
+        ScrollActions action =
+                validateAndGetEnumValue(
+                        workflowName,
+                        "Scroll Action",
+                        ScrollActions.class,
+                        config.getScrollAction()
+                );
+        switch (action) {
+            case USE_BUTTON:
+                UiElement scrollButton =
+                        backward
+                                ? config.getScrollBackwardButton()
+                                : config.getScrollForwardButton();
+                spectatioUiUtil.scrollToBoundary(scrollButton.getBySelectorForUiElement());
+                break;
+            case USE_GESTURE:
+                ScrollDirection direction =
+                        validateAndGetEnumValue(
+                                workflowName,
+                                "Scroll Direction",
+                                ScrollDirection.class,
+                                config.getScrollDirection()
+                        );
+                spectatioUiUtil.scrollToBoundary(
+                        config.getScrollElement().getBySelectorForUiElement(),
+                        direction == ScrollDirection.VERTICAL,
+                        backward
+                );
+                break;
+        }
     }
 
     private UiObject2 findUiElement(
