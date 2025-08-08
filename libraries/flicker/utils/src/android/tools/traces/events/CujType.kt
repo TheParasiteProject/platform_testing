@@ -151,6 +151,12 @@ enum class CujType(override val id: Int) : ICujType {
 
     companion object {
         fun from(eventId: Int): ICujType =
-            values().firstOrNull { it.id == eventId } ?: UnknownCuj(eventId)
+            entries.firstOrNull { it.id == eventId } ?: UnknownCuj(eventId)
+
+        fun from(name: String): ICujType =
+            entries.firstOrNull { it.name == name || it.name.substringAfter("CUJ_") == name }
+                ?: throw IllegalArgumentException(
+                    "Unknown CUJ name: $name. Please add it to the enum if it's a valid CUJ."
+                )
     }
 }
