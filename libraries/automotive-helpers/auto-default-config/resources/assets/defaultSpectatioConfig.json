@@ -1784,8 +1784,7 @@
     },
     "SETTINGS_BACK_NAV_ICON": {
       "TYPE": "RESOURCE_ID",
-      "VALUE": "car_ui_toolbar_nav_icon",
-      "PACKAGE": "com.chassis.car.ui.plugin"
+      "VALUE": "car_ui_toolbar_nav_icon"
     },
     "SETTINGS_SCROLL_FORWARD_BUTTON": {
       "TYPE": "RESOURCE_ID",
