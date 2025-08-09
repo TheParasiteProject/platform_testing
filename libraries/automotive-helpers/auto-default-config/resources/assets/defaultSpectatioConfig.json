@@ -15,11 +15,11 @@
     "SMS_PACKAGE":"com.android.car.messenger"
   },
   "ACTIONS": {
-    "CONTACT_LIST_SCROLL_ACTION": "USE_BUTTON",
+    "CONTACT_LIST_SCROLL_ACTION": "USE_GESTURE",
     "CONTACT_LIST_SCROLL_DIRECTION": "VERTICAL",
-    "CONTACT_SETTING_SCROLL_ACTION": "USE_BUTTON",
+    "CONTACT_SETTING_SCROLL_ACTION": "USE_GESTURE",
     "CONTACT_SETTING_SCROLL_DIRECTION": "VERTICAL",
-    "CONTACT_DETAILS_SCROLL_ACTION": "USE_BUTTON",
+    "CONTACT_DETAILS_SCROLL_ACTION": "USE_GESTURE",
     "CONTACT_DETAILS_SCROLL_DIRECTION": "VERTICAL",
     "APP_LIST_SCROLL_ACTION": "USE_GESTURE",
     "APP_LIST_SCROLL_DIRECTION": "HORIZONTAL",
@@ -170,8 +170,7 @@
     },
     "CONTACT_LIST_SCROLL_ELEMENT": {
       "TYPE": "RESOURCE_ID",
-      "VALUE": "car_ui_internal_recycler_view",
-      "PACKAGE": "com.android.car.dialer"
+      "VALUE": "car_ui_internal_recycler_view"
     },
     "CHANGE_VOICE_CHANNEL": {
       "TYPE": "RESOURCE_ID",
@@ -230,8 +229,7 @@
     },
     "CONTACT_SETTING_SCROLL_ELEMENT": {
       "TYPE": "RESOURCE_ID",
-      "VALUE": "car_ui_internal_recycler_view",
-      "PACKAGE": "com.android.car.dialer"
+      "VALUE": "car_ui_internal_recycler_view"
     },
     "CONTACT_ORDER": {
       "TYPE": "TEXT",
@@ -446,8 +444,7 @@
     },
     "CONTACT_DETAILS_SCROLL_ELEMENT": {
       "TYPE": "RESOURCE_ID",
-      "VALUE": "car_ui_internal_recycler_view",
-      "PACKAGE": "com.android.car.dialer"
+      "VALUE": "car_ui_internal_recycler_view"
     },
     "DIAL_PAD_MENU": {
       "TYPE": "TEXT",

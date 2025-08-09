@@ -336,13 +336,22 @@ open class PerfettoTraceMonitor(val config: TraceConfig) : TraceMonitor() {
         private fun createFtraceDataSourceConfig(): DataSourceConfig {
             val ftraceEvents = listOf("ftrace/print", "task/task_newtask", "task/task_rename")
             val atraceCategories = listOf("ss", "wm")
+            val atraceApps =
+                listOf(
+                    "com.android.systemui",
+                    "com.google.android.apps.nexuslauncher",
+                    "com.android.launcher3",
+                    "system_server",
+                )
+
             return DataSourceConfig.newBuilder()
                 .setName(FTRACE_DATA_SOURCE)
                 .setTargetBuffer(0)
                 .setFtraceConfig(
                     FtraceConfig.newBuilder()
-                        .apply { ftraceEvents.forEach { addFtraceEvents(it) } }
-                        .apply { atraceCategories.forEach { addAtraceCategories(it) } }
+                        .addAllFtraceEvents(ftraceEvents)
+                        .addAllAtraceCategories(atraceCategories)
+                        .addAllAtraceApps(atraceApps)
                         .build()
                 )
                 .build()
