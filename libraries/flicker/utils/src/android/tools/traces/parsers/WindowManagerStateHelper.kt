@@ -16,9 +16,12 @@
 
 package android.tools.traces.parsers
 
-import android.app.ActivityTaskManager
+import android.app.ActivityTaskManager.INVALID_STACK_ID
 import android.app.Instrumentation
 import android.app.WindowConfiguration
+import android.app.WindowConfiguration.ACTIVITY_TYPE_UNDEFINED
+import android.app.WindowConfiguration.activityTypeToString
+import android.app.WindowConfiguration.windowingModeToString
 import android.graphics.Region
 import android.os.SystemClock
 import android.os.Trace
@@ -28,7 +31,6 @@ import android.tools.traces.ConditionsFactory
 import android.tools.traces.DeviceStateDump
 import android.tools.traces.LOG_TAG
 import android.tools.traces.WaitCondition
-import android.tools.traces.component.ComponentNameMatcher
 import android.tools.traces.component.ComponentNameMatcher.Companion.BUBBLE
 import android.tools.traces.component.ComponentNameMatcher.Companion.IME
 import android.tools.traces.component.ComponentNameMatcher.Companion.LAUNCHER
@@ -588,55 +590,60 @@ constructor(
             if (waitForActivitiesVisible.isEmpty()) {
                 return false
             }
-            // If the caller is interested in waiting for some particular activity windows to be
-            // visible before compute the state. Check for the visibility of those activity windows
-            // and for placing them in correct stacks (if requested).
-            var allActivityWindowsVisible = true
-            var tasksInCorrectStacks = true
-            for (activityState in waitForActivitiesVisible) {
-                val matchingWindowStates =
-                    state.wmState.getMatchingVisibleWindowState(
-                        activityState.activityMatcher
-                            ?: error("Activity name missing in $activityState")
-                    )
-                val activityWindowVisible = matchingWindowStates.isNotEmpty()
+            return waitForActivitiesVisible
+                .map { it.shouldWaitForActivity(state.wmState) }
+                .reduce { accumulator, element -> accumulator or element }
+        }
 
-                if (!activityWindowVisible) {
-                    Log.i(LOG_TAG, "Activity window not visible: ${activityState.windowIdentifier}")
-                    allActivityWindowsVisible = false
-                } else if (!state.wmState.isActivityVisible(activityState.activityMatcher)) {
-                    Log.i(LOG_TAG, "Activity not visible: ${activityState.activityMatcher}")
-                    allActivityWindowsVisible = false
-                } else {
-                    // Check if window is already the correct state requested by test.
-                    var windowInCorrectState = false
-                    for (ws in matchingWindowStates) {
-                        if (
-                            activityState.stackId != ActivityTaskManager.INVALID_STACK_ID &&
-                                ws.stackId != activityState.stackId
-                        ) {
-                            continue
-                        }
-                        if (!ws.isWindowingModeCompatible(activityState.windowingMode)) {
-                            continue
-                        }
-                        if (
-                            activityState.activityType !=
-                                WindowConfiguration.ACTIVITY_TYPE_UNDEFINED &&
-                                ws.activityType != activityState.activityType
-                        ) {
-                            continue
-                        }
-                        windowInCorrectState = true
-                        break
+        /** @return true if we should wait for this activity to be in the correct state. */
+        private fun WaitForValidActivityState.shouldWaitForActivity(
+            wmState: WindowManagerState
+        ): Boolean {
+            val matcher = activityMatcher ?: error("Activity name missing in $this")
+            val matchedWindowStates = wmState.getMatchingVisibleWindowState(matcher)
+
+            if (matchedWindowStates.isEmpty()) {
+                Log.i(LOG_TAG, "Activity window not visible: $windowIdentifier")
+                return true
+            }
+            if (!wmState.isActivityVisible(matcher)) {
+                Log.i(LOG_TAG, "Activity not visible: $matcher")
+                return true
+            }
+
+            val shouldCheckStackId = stackId != INVALID_STACK_ID
+            val shouldCheckActivityType = activityType != ACTIVITY_TYPE_UNDEFINED
+            val details = buildString {
+                fun Int.toModeName() = windowingModeToString(this)
+                fun Int.toTypeName() = activityTypeToString(this)
+
+                // Check if window is already the correct state requested by test.
+                for ((index, ws) in matchedWindowStates.withIndex()) {
+                    if (index != 0) append("\n")
+                    append(" matched window #$index id=$windowIdentifier\n")
+
+                    if (shouldCheckStackId && ws.stackId != stackId) {
+                        append("  expected stackId=$stackId\n")
+                        append("  actual stackId=${ws.stackId}")
+                        continue
                     }
-                    if (!windowInCorrectState) {
-                        Log.i(LOG_TAG, "Window in incorrect stack: $activityState")
-                        tasksInCorrectStacks = false
+                    if (!ws.isWindowingModeCompatible(windowingMode)) {
+                        append("  expected windowing mode=${windowingMode.toModeName()}\n")
+                        append("  actual windowing mode=${ws.windowingMode.toModeName()}")
+                        continue
                     }
+                    if (shouldCheckActivityType && ws.activityType != activityType) {
+                        append("  expected activity type=${activityType.toTypeName()}\n")
+                        append("  actual activity type=${ws.activityType.toTypeName()}")
+                        continue
+                    }
+                    // Found a window in correct state.
+                    return false
                 }
             }
-            return !allActivityWindowsVisible || !tasksInCorrectStacks
+
+            Log.i(LOG_TAG, "Window in incorrect state: $this\n$details")
+            return true
         }
     }
 }
