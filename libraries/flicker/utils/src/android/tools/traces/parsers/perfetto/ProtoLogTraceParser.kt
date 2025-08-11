@@ -25,7 +25,7 @@ import com.android.internal.protolog.common.LogLevel
 class ProtoLogTraceParser :
     AbstractTraceParser<TraceProcessorSession, ProtoLogMessage, ProtoLogMessage, ProtoLogTrace>() {
 
-    override val traceName = "Transitions Trace"
+    override val traceName = "ProtoLog Trace"
 
     override fun createTrace(entries: Collection<ProtoLogMessage>): ProtoLogTrace {
         return ProtoLogTrace(entries)
