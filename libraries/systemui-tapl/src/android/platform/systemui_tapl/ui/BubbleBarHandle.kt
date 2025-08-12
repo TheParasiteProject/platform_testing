@@ -17,19 +17,13 @@
 package android.platform.systemui_tapl.ui
 
 import android.graphics.Point
-import android.platform.systemui_tapl.ui.BubbleHelper.dragBubbleToDismiss
 import android.platform.systemui_tapl.ui.ExpandedBubbleStack.Companion.FIND_OBJECT_TIMEOUT
 import android.platform.systemui_tapl.utils.DeviceUtils.sysuiResSelector
-import android.platform.uiautomatorhelpers.BetterSwipe
-import android.platform.uiautomatorhelpers.DeviceHelpers
 import android.platform.uiautomatorhelpers.DeviceHelpers.assertVisible
 import android.platform.uiautomatorhelpers.DeviceHelpers.waitForObj
-import android.platform.uiautomatorhelpers.PRECISE_GESTURE_INTERPOLATOR
-import java.time.Duration
-import java.time.temporal.ChronoUnit
 
 /** System UI test automation object representing the bubble bar handle */
-class BubbleBarHandle internal constructor() {
+class BubbleBarHandle internal constructor() : BubbleDragTarget {
     init {
         BUBBLE_BAR_HANDLE.assertVisible(timeout = FIND_OBJECT_TIMEOUT) {
             "Bubble bar handle must be visible."
@@ -37,34 +31,13 @@ class BubbleBarHandle internal constructor() {
     }
 
     /** The position of this handle. */
-    val visibleCenter: Point
+    override val visibleCenter: Point
         get() = bubbleBarHandleView.visibleCenter
 
     /** Opens the bubble bar handle menu. */
     fun openBubbleBarHandleMenu(): BubbleBarHandleMenu {
         bubbleBarHandleView.click()
         return BubbleBarHandleMenu()
-    }
-
-    /**
-     * Drags the bubble handle to the other side.
-     *
-     * If the bubble is at the right of the screen, drag to the left. Otherwise, drag to the right.
-     */
-    fun dragToTheOtherSide() {
-        val displayWidth = DeviceHelpers.uiDevice.displayWidth
-        BetterSwipe.swipe(visibleCenter) {
-            to(
-                Point(displayWidth - visibleCenter.x, visibleCenter.y),
-                Duration.of(500, ChronoUnit.MILLIS),
-                PRECISE_GESTURE_INTERPOLATOR,
-            )
-        }
-    }
-
-    /** Drags the bubble bar handle to dismiss view to dismiss the bubble. */
-    fun dragToDismiss() {
-        dragBubbleToDismiss(visibleCenter)
     }
 
     companion object {

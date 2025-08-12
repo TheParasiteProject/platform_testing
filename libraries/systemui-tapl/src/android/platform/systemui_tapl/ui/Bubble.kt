@@ -19,7 +19,6 @@ package android.platform.systemui_tapl.ui
 import android.graphics.Point
 import android.os.SystemClock
 import android.platform.helpers.CommonUtils
-import android.platform.systemui_tapl.ui.BubbleHelper.dragBubbleToDismiss
 import android.platform.systemui_tapl.utils.DeviceUtils.launcherResSelector
 import android.platform.systemui_tapl.utils.DeviceUtils.sysuiResSelector
 import android.platform.uiautomatorhelpers.DeviceHelpers.hasObject
@@ -34,7 +33,8 @@ import java.time.Duration
  * System UI test automation object representing a notification bubble, specifically the view
  * representing the bubble, shown when the stack is collapsed or expanded.
  */
-class Bubble internal constructor(private val bubbleView: UiObject2) {
+class Bubble internal constructor(private val bubbleView: UiObject2) : BubbleDragTarget {
+
     /** Expands the bubble into the stack. */
     fun expand(): ExpandedBubbleStack {
         bubbleView.click()
@@ -65,14 +65,14 @@ class Bubble internal constructor(private val bubbleView: UiObject2) {
 
     /** Dismisses the bubble by dragging it to the Dismiss target. */
     fun dismiss() {
-        dragBubbleToDismiss(bubbleView.visibleCenter)
+        dragToDismiss()
         // check if bubble stack education is visible and blocked interaction
         // education visibility can be checked only after interacting with the bubble (swipe)
         // it might be invoked by user interaction, if it wasn't presented yet
         if (isEducationVisible) {
             // retry drag interaction
             // if education is visible, the previous interaction was blocked and didn't drag bubble
-            dragBubbleToDismiss(bubbleView.visibleCenter)
+            dragToDismiss()
         }
     }
 
@@ -84,7 +84,7 @@ class Bubble internal constructor(private val bubbleView: UiObject2) {
     val isEducationVisible: Boolean
         get() = hasObject(BUBBLE_STACK_EDUCATION)
 
-    val visibleCenter: Point
+    override val visibleCenter: Point
         get() = bubbleView.visibleCenter
 
     override fun equals(other: Any?): Boolean {
