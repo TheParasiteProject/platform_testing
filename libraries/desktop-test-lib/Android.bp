@@ -21,6 +21,7 @@ package {
 java_library {
     name: "desktop-test-lib",
     static_libs: [
+        "androidx.core_core-ktx",
         "androidx.test.runner",
         "androidx.test.rules",
         "kotlin-stdlib",
