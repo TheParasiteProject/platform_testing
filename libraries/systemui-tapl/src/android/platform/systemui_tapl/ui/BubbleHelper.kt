@@ -21,17 +21,20 @@ import android.platform.systemui_tapl.ui.Bubble.Companion.DISMISS_VIEW
 import android.platform.uiautomatorhelpers.BetterSwipe
 import android.platform.uiautomatorhelpers.DeviceHelpers.context
 import android.platform.uiautomatorhelpers.DeviceHelpers.waitForNullableObj
+import android.platform.uiautomatorhelpers.DeviceHelpers.waitForObj
 import android.platform.uiautomatorhelpers.PRECISE_GESTURE_INTERPOLATOR
 import android.view.WindowInsets
 import android.view.WindowManager
+import java.time.Duration
+import java.time.temporal.ChronoUnit
 
 /** A helper to consolidate bubble operations among several UI bubble components. */
-object BubbleHelper {
+internal object BubbleHelper {
 
     /**
      * Drag the bubble to dismiss view.
      *
-     * @param currentPosition the start position to drag.
+     * @param currentPosition the start position to drag
      */
     fun dragBubbleToDismiss(currentPosition: Point) {
         val windowMetrics =
@@ -53,6 +56,22 @@ object BubbleHelper {
             if (dismissView != null) {
                 to(dismissView.visibleCenter, interpolator = PRECISE_GESTURE_INTERPOLATOR)
             }
+        }
+    }
+
+    /**
+     * Drags a UI instance from bubble bar to dismiss view.
+     *
+     * @param currentPosition the start position to drag
+     */
+    fun dragToDismissFromBubbleBar(currentPosition: Point) {
+        BetterSwipe.swipe(currentPosition) {
+            pause()
+            to(
+                waitForObj(BubbleBar.DISMISS_VIEW).visibleCenter,
+                Duration.of(500, ChronoUnit.MILLIS),
+                PRECISE_GESTURE_INTERPOLATOR,
+            )
         }
     }
 }
