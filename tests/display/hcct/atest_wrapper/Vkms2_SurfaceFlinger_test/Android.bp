@@ -18,7 +18,7 @@ package {
 }
 
 cc_test {
-    name: "Vkms2SurfaceFlingerTest",
+    name: "Vkms2_SurfaceFlingerTest",
     defaults: ["atester_wrapper_defaults"],
     data_bins: [
         "//frameworks/native/services/surfaceflinger/tests:SurfaceFlinger_test",

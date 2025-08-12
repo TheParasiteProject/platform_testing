@@ -20,20 +20,36 @@ import android.graphics.Point
 import android.platform.systemui_tapl.ui.Bubble.Companion.DISMISS_VIEW
 import android.platform.uiautomatorhelpers.BetterSwipe
 import android.platform.uiautomatorhelpers.DeviceHelpers.context
+import android.platform.uiautomatorhelpers.DeviceHelpers.uiDevice
 import android.platform.uiautomatorhelpers.DeviceHelpers.waitForNullableObj
 import android.platform.uiautomatorhelpers.PRECISE_GESTURE_INTERPOLATOR
 import android.view.WindowInsets
 import android.view.WindowManager
+import java.time.Duration
+import java.time.temporal.ChronoUnit
 
-/** A helper to consolidate bubble operations among several UI bubble components. */
-object BubbleHelper {
+/**
+ * The interface to centralize the logic to drag a bubble component.
+ *
+ * @see Bubble
+ * @see BubbleBarHandle
+ */
+internal interface BubbleDragTarget {
+
+    /** The current position of this bubble component. */
+    val visibleCenter: Point
 
     /**
-     * Drag the bubble to dismiss view.
+     * Drags the bubble handle to the other side.
      *
-     * @param currentPosition the start position to drag.
+     * If the bubble is at the right of the screen, drag to the left. Otherwise, drag to the right.
      */
-    fun dragBubbleToDismiss(currentPosition: Point) {
+    fun dragToTheOtherSide() {
+        dragTo(Point(uiDevice.displayWidth - visibleCenter.x, visibleCenter.y))
+    }
+
+    /** Dismisses the bubble by dragging it to the Dismiss target. */
+    fun dragToDismiss() {
         val windowMetrics =
             context.getSystemService(WindowManager::class.java)!!.currentWindowMetrics
         val insets =
@@ -45,7 +61,7 @@ object BubbleHelper {
         val destination =
             Point(windowMetrics.bounds.width() / 2, (windowMetrics.bounds.height() - insets.bottom))
         // drag to bottom of the screen, wait for dismiss view to appear, drag to dismiss view
-        BetterSwipe.swipe(currentPosition) {
+        BetterSwipe.swipe(visibleCenter) {
             to(destination, interpolator = PRECISE_GESTURE_INTERPOLATOR)
             // Make dismiss view optional in case the EDU view was shown and first swipe hid that.
             // We will do a second swipe to actually dismiss.
@@ -53,6 +69,13 @@ object BubbleHelper {
             if (dismissView != null) {
                 to(dismissView.visibleCenter, interpolator = PRECISE_GESTURE_INTERPOLATOR)
             }
+        }
+    }
+
+    /** Drags the target to [position]. */
+    fun dragTo(position: Point) {
+        BetterSwipe.swipe(visibleCenter) {
+            to(position, Duration.of(500, ChronoUnit.MILLIS), PRECISE_GESTURE_INTERPOLATOR)
         }
     }
 }

@@ -25,6 +25,7 @@ system_app_crash Unable\sto\sget\sprovider\sandroidx.core.content.FileProvider[\
 system_app_crash com.google.android.apps.youtube.music[\S\s]+NullPointerException[\S\s]+com.google.android.apps.youtube.music.mediabrowser.MusicBrowserService.d 211914566
 system_app_crash Unable\sto\sstart\sreceiver\scom.android.euicc.receiver.NotificationCallbackReceiver 319672380
 system_app_native_crash HwBinder*.*com.android.bluetooth 155074413
+system_app_native_crash com.google.android.bluetooth 434856355
 system_app_native_crash ReferenceQueueD*.*com.google.android.apps.safetyhub 162103095
 system_app_native_crash Binder*.*com.google.android.apps.safetyhub 162104694
 system_app_native_crash Lite\sThread*.*com.google.android.apps.safetyhub 162379378

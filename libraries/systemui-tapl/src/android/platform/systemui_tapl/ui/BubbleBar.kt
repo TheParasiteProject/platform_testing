@@ -24,10 +24,7 @@ import android.platform.uiautomatorhelpers.DeviceHelpers.assertVisible
 import android.platform.uiautomatorhelpers.DeviceHelpers.click
 import android.platform.uiautomatorhelpers.DeviceHelpers.uiDevice
 import android.platform.uiautomatorhelpers.DeviceHelpers.waitForObj
-import android.platform.uiautomatorhelpers.PRECISE_GESTURE_INTERPOLATOR
 import com.google.common.truth.Truth.assertThat
-import java.time.Duration
-import java.time.temporal.ChronoUnit
 
 /**
  * Provides an API for interacting with the collapsed bubble bar within launcher in UI automation
@@ -37,7 +34,7 @@ import java.time.temporal.ChronoUnit
  *
  * @see [ExpandedBubbleBar]
  */
-class BubbleBar {
+class BubbleBar : BubbleDragTarget {
 
     init {
         BUBBLE_BAR_VIEW.assertVisible { "Failed while waiting for bubble bar to become visible" }
@@ -63,7 +60,7 @@ class BubbleBar {
         get() = waitForObj(BUBBLE_BAR_VIEW).children.map { BubbleBarItem(it) }
 
     /** Returns the current position of the bubble bar. */
-    val visibleCenter: Point
+    override val visibleCenter: Point
         get() = waitForObj(BUBBLE_BAR_VIEW).visibleCenter
 
     /** Expands the bubble bar by clicking on it and returns [ExpandedBubbleBar]. */
@@ -90,47 +87,16 @@ class BubbleBar {
      * Drags the bubble bar to the dismiss target. At the end of the gesture the bubble bar will be
      * gone.
      */
-    fun dragToDismiss() {
-        BetterSwipe.swipe(waitForObj(BUBBLE_BAR_VIEW).visibleCenter) {
-            pause()
-            to(
-                waitForObj(DISMISS_VIEW).visibleCenter,
-                Duration.of(500, ChronoUnit.MILLIS),
-                PRECISE_GESTURE_INTERPOLATOR,
-            )
-        }
+    override fun dragToDismiss() {
+        super.dragToDismiss()
 
         BUBBLE_BAR_VIEW.assertInvisible {
             "Failed while waiting for bubble bar to become invisible"
         }
     }
 
-    /**
-     * If the bubble bar is at the right, drag to the left. Otherwise, drag to the right.
-     *
-     * The caller must guarantee the bubble bar is in collapsed state.
-     */
-    fun dragToTheOtherSide() {
-        val currentCenter = waitForObj(BUBBLE_BAR_VIEW).visibleCenter
-        val theOtherSide =
-            Point(
-                // If the bubble bar is shown on the right, drag to the left Otherwise, drag to the
-                // right.
-                if (currentCenter.x > uiDevice.displayWidth / 2) {
-                    10
-                } else {
-                    uiDevice.displayWidth - 10
-                },
-                currentCenter.y,
-            )
-        BetterSwipe.swipe(currentCenter) {
-            pause()
-            to(theOtherSide, Duration.of(500, ChronoUnit.MILLIS), PRECISE_GESTURE_INTERPOLATOR)
-        }
-    }
-
     companion object {
         internal val BUBBLE_BAR_VIEW = launcherResSelector("taskbar_bubbles")
-        private val DISMISS_VIEW = launcherResSelector("dismiss_view")
+        internal val DISMISS_VIEW = launcherResSelector("dismiss_view")
     }
 }

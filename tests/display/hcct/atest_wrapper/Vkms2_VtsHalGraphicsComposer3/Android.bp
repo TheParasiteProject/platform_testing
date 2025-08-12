@@ -14,10 +14,11 @@
 
 package {
     default_applicable_licenses: ["Android-Apache-2.0"],
+    default_team: "trendy_team_desktop_display",
 }
 
 cc_test {
-    name: "Vkms2VtsHalGraphicsComposer3",
+    name: "Vkms2_VtsHalGraphicsComposer3",
     defaults: ["atester_wrapper_defaults"],
     data_bins: [
         "//hardware/interfaces/graphics/composer/aidl/vts:VtsHalGraphicsComposer3_TargetTest",

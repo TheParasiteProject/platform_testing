@@ -21,9 +21,11 @@ import android.hardware.display.DisplayManager
 import android.hardware.display.DisplayManager.DisplayListener
 import android.os.Handler
 import android.os.Looper
+import android.platform.uiautomatorhelpers.WaitUtils
 import android.provider.Settings
 import android.util.Log
 import android.view.Display.TYPE_OVERLAY
+import androidx.core.util.keyIterator
 import androidx.test.platform.app.InstrumentationRegistry
 import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.channels.awaitClose
@@ -124,6 +126,8 @@ class SimulatedConnectedDisplayTestRule(val initDisplayCount: Int = 0) : TestRul
                 }
             } ?: error("Timed out waiting for displays to be added.")
         }
+
+        waitForTopologyUpdate(addedDisplays, /* expectPresent= */ true)
         addedDisplays
     }
 
@@ -188,7 +192,36 @@ class SimulatedConnectedDisplayTestRule(val initDisplayCount: Int = 0) : TestRul
                 }
             } ?: error("Timed out waiting for displays to be removed: $existingDisplays")
         }
+
+        waitForTopologyUpdate(removedDisplays, /* expectPresent= */ false)
         addedDisplays = existingDisplays - removedDisplays
+    }
+
+    private fun waitForTopologyUpdate(displayIds: List<Int>, expectPresent: Boolean) {
+        var mismatchedDisplays: List<Int> = displayIds
+        WaitUtils.ensureThat(
+            errorProvider = {
+                if (expectPresent) {
+                    "Displays $displayIds were added to DisplayManager, but " +
+                        "$mismatchedDisplays are not in DisplayTopology"
+                } else {
+                    "Displays $displayIds were removed from DisplayManager, but " +
+                        "$mismatchedDisplays are in DisplayTopology"
+                }
+            }
+        ) {
+            val topologyDisplayIds =
+                displayManager.displayTopology?.absoluteBounds?.keyIterator()?.asSequence()?.toSet()
+            mismatchedDisplays =
+                topologyDisplayIds?.let { currentIds ->
+                    if (expectPresent) {
+                        displayIds.filterNot { it in currentIds }
+                    } else {
+                        displayIds.filter { it in currentIds }
+                    }
+                } ?: displayIds
+            mismatchedDisplays.isEmpty()
+        }
     }
 
     private companion object {

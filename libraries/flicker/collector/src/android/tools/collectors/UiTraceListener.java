@@ -69,8 +69,6 @@ public class UiTraceListener extends PerfettoListener {
 
     @Override
     public void setupAdditionalArgs() {
-        super.setupAdditionalArgs();
-
         Bundle args = getArgsBundle();
         PerfettoConfig.TraceConfig protoConfig = buildConfig(args);
 
@@ -98,6 +96,10 @@ public class UiTraceListener extends PerfettoListener {
         args.putString(PerfettoTracingStrategy.PERFETTO_CONFIG_FILE_ARG, mTempConfigFile.getName());
         args.putString(PerfettoTracingStrategy.PERFETTO_CONFIG_TEXT_PROTO, "false");
         args.putString(PerfettoTracingStrategy.PERFETTO_STREAM_CONFIG_FROM_FILE, "true");
+
+        // The super call must be at the end to ensure the tracing strategies are
+        // initialized with the custom perfetto config arguments added in this method.
+        super.setupAdditionalArgs();
     }
 
     @Override

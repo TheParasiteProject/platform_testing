@@ -16,7 +16,11 @@
 
 package android.platform.systemui_tapl.ui
 
+import android.graphics.Point
 import androidx.test.uiautomator.UiObject2
 
 /** A UI test automation type representing bubbles in the bubble bar. */
-data class BubbleBarItem(val item: UiObject2)
+data class BubbleBarItem(val item: UiObject2) : BubbleBarDragTarget {
+    override val visibleCenter: Point
+        get() = item.visibleCenter
+}
