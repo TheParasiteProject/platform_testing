@@ -55,7 +55,7 @@ public abstract class PerfettoTracingStrategy {
     // Enable to persist the pid of perfetto process during test execution and use it
     // for cleanup during instrumentation crash instances.
     private static final String PERFETTO_PERSIST_PID_TRACK = "perfetto_persist_pid_track";
-    private static final String DEFAULT_PERFETTO_PID_TRACK_ROOT = "/data/local/tmp/perfetto-pids/";
+    private static final String DEFAULT_PERFETTO_PID_TRACK_ROOT = "sdcard/";
     private static final String DEFAULT_PERFETTO_CONFIG_ROOT_DIR = "/data/misc/perfetto-traces/";
     // Collect per run if it is set to true otherwise collect per test.
     // Default perfetto config file name.
