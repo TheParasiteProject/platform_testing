@@ -1819,6 +1819,11 @@
       "TYPE": "RESOURCE_ID",
       "VALUE": "car_ui_internal_recycler_view"
     },
+    "SETTINGS_SUB_PRIVACY_SETTING_SCROLL_ELEMENT": {
+      "TYPE": "RESOURCE_ID",
+      "VALUE": "recycler_view",
+      "PACKAGE": "com.android.permissioncontroller"
+    },
     "SETTINGS_UI_SUB_SETTING_SCROLL_ELEMENT": {
       "TYPE": "RESOURCE_ID",
       "VALUE": "car_ui_internal_recycler_view",
