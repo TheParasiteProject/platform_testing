@@ -1813,7 +1813,8 @@
     },
     "SETTINGS_UI_SUB_SETTING_SCROLL_ELEMENT": {
       "TYPE": "RESOURCE_ID",
-      "VALUE": "car_ui_internal_recycler_view"
+      "VALUE": "car_ui_internal_recycler_view",
+      "PACKAGE":"com.android.car.settings"
     },
     "SETTINGS_UI_SUB_SETTING_STORAGE_SCROLL_ELEMENT": {
       "TYPE": "RESOURCE_ID",
@@ -1822,7 +1823,7 @@
     "SETTINGS_UI_SCROLL_ELEMENT": {
       "TYPE": "RESOURCE_ID",
       "VALUE": "car_ui_recycler_view",
-      "PACKAGE": "com.chassis.car.ui.plugin"
+      "PACKAGE": "com.android.car.settings"
     },
     "BLOCKING_MESSAGE": {
       "TYPE": "RESOURCE_ID",
