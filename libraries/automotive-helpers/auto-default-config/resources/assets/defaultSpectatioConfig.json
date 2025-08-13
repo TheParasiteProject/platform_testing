@@ -1809,8 +1809,7 @@
     },
     "SETTINGS_SUB_SETTING_SCROLL_ELEMENT": {
       "TYPE": "RESOURCE_ID",
-      "VALUE": "car_ui_internal_recycler_view",
-      "PACKAGE": "com.chassis.car.ui.plugin"
+      "VALUE": "car_ui_internal_recycler_view"
     },
     "SETTINGS_UI_SUB_SETTING_SCROLL_ELEMENT": {
       "TYPE": "RESOURCE_ID",
