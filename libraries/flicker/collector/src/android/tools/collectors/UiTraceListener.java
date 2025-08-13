@@ -20,21 +20,16 @@ import static perfetto.protos.PerfettoConfig.SurfaceFlingerLayersConfig.TraceFla
 import static perfetto.protos.PerfettoConfig.SurfaceFlingerLayersConfig.TraceFlag.TRACE_FLAG_INPUT;
 import static perfetto.protos.PerfettoConfig.SurfaceFlingerLayersConfig.TraceFlag.TRACE_FLAG_VIRTUAL_DISPLAYS;
 
-import android.device.collectors.DataRecord;
 import android.device.collectors.PerfettoListener;
 import android.device.collectors.PerfettoTracingStrategy;
 import android.os.Bundle;
+import android.util.Base64;
 import android.util.Log;
 
 import androidx.annotation.VisibleForTesting;
 
-import org.junit.runner.Result;
-
 import perfetto.protos.PerfettoConfig;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
 import java.util.List;
 
 /**
@@ -50,8 +45,6 @@ public class UiTraceListener extends PerfettoListener {
     public static final String TRACE_SHELL_TRANSITIONS_KEY = "trace_shell_transitions";
     public static final String TRACE_INPUT_KEY = "trace_input";
     public static final String PROTOLOG_GROUPS_KEY = "protolog_groups";
-
-    private File mTempConfigFile;
 
     public UiTraceListener() {
         super();
@@ -71,45 +64,16 @@ public class UiTraceListener extends PerfettoListener {
     public void setupAdditionalArgs() {
         Bundle args = getArgsBundle();
         PerfettoConfig.TraceConfig protoConfig = buildConfig(args);
+        var protoBinary = protoConfig.toByteArray();
+        String protoBase64 = Base64.encodeToString(protoBinary, Base64.NO_WRAP);
 
-        try {
-            File configDir = getInstrumentation().getContext().getExternalCacheDir();
-            Log.d(LOG_TAG, "Creating temp config file in: " + configDir.getAbsolutePath());
-            mTempConfigFile = File.createTempFile("trace_config", ".pb", configDir);
-
-            // Make readable by Perfetto.
-            var permissionsChanged = mTempConfigFile.setReadable(true, false);
-            if (!permissionsChanged) {
-                throw new RuntimeException("Unable to set permissions for temp config file");
-            }
-            Log.d(LOG_TAG, "Temp config file created: " + mTempConfigFile.getAbsolutePath());
-            try (FileOutputStream out = new FileOutputStream(mTempConfigFile)) {
-                out.write(protoConfig.toByteArray());
-            }
-        } catch (IOException e) {
-            Log.e(LOG_TAG, "Unable to create or write temp config file", e);
-            throw new RuntimeException("Unable to create or write temp config file", e);
-        }
-
-        args.putString(
-                PerfettoTracingStrategy.PERFETTO_CONFIG_ROOT_DIR_ARG, mTempConfigFile.getParent());
-        args.putString(PerfettoTracingStrategy.PERFETTO_CONFIG_FILE_ARG, mTempConfigFile.getName());
         args.putString(PerfettoTracingStrategy.PERFETTO_CONFIG_TEXT_PROTO, "false");
-        args.putString(PerfettoTracingStrategy.PERFETTO_STREAM_CONFIG_FROM_FILE, "true");
+        args.putString(PerfettoTracingStrategy.PERFETTO_CONFIG_CONTENT, protoBase64);
+        args.putString(PerfettoTracingStrategy.PERFETTO_CONFIG_OUTPUT_FILE_PREFIX, "uiTrace_");
 
         // The super call must be at the end to ensure the tracing strategies are
         // initialized with the custom perfetto config arguments added in this method.
         super.setupAdditionalArgs();
-    }
-
-    @Override
-    public void onTestRunEnd(DataRecord runData, Result result) {
-        super.onTestRunEnd(runData, result);
-        // mTempConfigFile is no longer created, so we don't need to delete it.
-        if (mTempConfigFile != null && mTempConfigFile.exists()) {
-            Log.d(LOG_TAG, "Deleting temp config file: " + mTempConfigFile.getAbsolutePath());
-            mTempConfigFile.delete();
-        }
     }
 
     @VisibleForTesting
