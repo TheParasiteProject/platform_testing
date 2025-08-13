@@ -60,6 +60,7 @@ public class UiTraceListenerTest {
         b.putString(UiTraceListener.TRACE_LAYERS_KEY, "false");
         b.putString(UiTraceListener.TRACE_SHELL_TRANSITIONS_KEY, "false");
         b.putString(UiTraceListener.TRACE_INPUT_KEY, "false");
+        b.putString(UiTraceListener.TRACE_WM_KEY, "false");
         b.putString(UiTraceListener.PROTOLOG_GROUPS_KEY, "");
 
         UiTraceListener listener = new UiTraceListener(b, List.of());
@@ -81,6 +82,7 @@ public class UiTraceListenerTest {
         b.putString(UiTraceListener.TRACE_LAYERS_KEY, "true");
         b.putString(UiTraceListener.TRACE_SHELL_TRANSITIONS_KEY, "true");
         b.putString(UiTraceListener.TRACE_INPUT_KEY, "true");
+        b.putString(UiTraceListener.TRACE_WM_KEY, "true");
         b.putString(UiTraceListener.PROTOLOG_GROUPS_KEY, "WM_DEBUG_FOCUS,WM_DEBUG_ADD_REMOVE");
 
         UiTraceListener listener = new UiTraceListener(b, List.of());
@@ -98,6 +100,7 @@ public class UiTraceListenerTest {
         assertTrue(sourceNames.contains("com.android.wm.shell.transition"));
         assertTrue(sourceNames.contains("android.input.inputevent"));
         assertTrue(sourceNames.contains("android.protolog"));
+        assertTrue(sourceNames.contains("android.windowmanager"));
 
         PerfettoConfig.TraceConfig.DataSource protologSource =
                 config.getDataSourcesList().stream()
@@ -119,6 +122,7 @@ public class UiTraceListenerTest {
         b.putString(UiTraceListener.TRACE_LAYERS_KEY, "true");
         b.putString(UiTraceListener.TRACE_SHELL_TRANSITIONS_KEY, "true");
         b.putString(UiTraceListener.TRACE_INPUT_KEY, "true");
+        b.putString(UiTraceListener.TRACE_WM_KEY, "true");
         b.putString(UiTraceListener.PROTOLOG_GROUPS_KEY, "WM_DEBUG_FOCUS,WM_DEBUG_ADD_REMOVE");
 
         var listener = new UiTraceListener(b, List.of());

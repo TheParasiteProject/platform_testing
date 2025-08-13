@@ -44,6 +44,7 @@ public class UiTraceListener extends PerfettoListener {
     public static final String TRACE_LAYERS_KEY = "trace_layers";
     public static final String TRACE_SHELL_TRANSITIONS_KEY = "trace_shell_transitions";
     public static final String TRACE_INPUT_KEY = "trace_input";
+    public static final String TRACE_WM_KEY = "trace_windows";
     public static final String PROTOLOG_GROUPS_KEY = "protolog_groups";
 
     public UiTraceListener() {
@@ -171,6 +172,22 @@ public class UiTraceListener extends PerfettoListener {
                                             .setAndroidInputEventConfig(inputConfig)));
         }
 
+        // Window Manager
+        if (traceWindows(args)) {
+            Log.d(LOG_TAG, "Enabling window manager datasource");
+            var wmConfig =
+                    PerfettoConfig.WindowManagerConfig.newBuilder()
+                            .setLogLevel(PerfettoConfig.WindowManagerConfig.LogLevel.LOG_LEVEL_VERBOSE)
+                            .setLogFrequency(
+                                    PerfettoConfig.WindowManagerConfig.LogFrequency.LOG_FREQUENCY_FRAME);
+            config.addDataSources(
+                    PerfettoConfig.TraceConfig.DataSource.newBuilder()
+                            .setConfig(
+                                    PerfettoConfig.DataSourceConfig.newBuilder()
+                                            .setName("android.windowmanager")
+                                            .setWindowmanagerConfig(wmConfig)));
+        }
+
         // Protolog
         String protologGroups = args.getString(PROTOLOG_GROUPS_KEY);
         if (protologGroups != null && !protologGroups.isEmpty()) {
@@ -213,5 +230,9 @@ public class UiTraceListener extends PerfettoListener {
 
     protected boolean traceInput(Bundle args) {
         return Boolean.parseBoolean(args.getString(TRACE_INPUT_KEY, "false"));
+    }
+
+    protected boolean traceWindows(Bundle args) {
+        return Boolean.parseBoolean(args.getString(TRACE_WM_KEY, "false"));
     }
 }
