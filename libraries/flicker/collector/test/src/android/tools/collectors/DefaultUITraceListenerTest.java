@@ -22,6 +22,7 @@ import static android.tools.collectors.DefaultUITraceListener.TRACE_LAYERS_KEY;
 import static android.tools.collectors.DefaultUITraceListener.TRACE_SHELL_TRANSITIONS_KEY;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -119,11 +120,26 @@ public class DefaultUITraceListenerTest {
     }
 
     @Test
-    public void testBuildConfig() {
+    public void testBuildConfig_enablesAllTracesByDefault() {
         Bundle b = new Bundle();
-        b.putString("protolog_groups", "WM_DEBUG_FOCUS,WM_DEBUG_ADD_REMOVE");
-        // These bundle arguments should be ignored by the DefaultUITraceListener, which forces
-        // all trace categories to be enabled.
+        mListener = initListener(b);
+        var config = mListener.buildConfig(b);
+
+        List<String> sourceNames =
+                config.getDataSourcesList().stream().map(s -> s.getConfig().getName()).toList();
+
+        assertTrue(sourceNames.contains("android.surfaceflinger.layers"));
+        assertTrue(sourceNames.contains("android.surfaceflinger.transactions"));
+        assertTrue(sourceNames.contains("android.input.inputevent"));
+        assertFalse(sourceNames.contains("android.protolog"));
+        assertTrue(sourceNames.contains("linux.ftrace"));
+        assertTrue(sourceNames.contains("com.android.wm.shell.transition"));
+    }
+
+    @Test
+    public void testBuildConfig_canDisableTracesWithArguments() {
+        Bundle b = new Bundle();
+        // These bundle arguments should be respected by the DefaultUITraceListener.
         b.putString(TRACE_FTRACE_KEY, "false");
         b.putString(TRACE_LAYERS_KEY, "false");
         b.putString(TRACE_SHELL_TRANSITIONS_KEY, "false");
@@ -135,20 +151,40 @@ public class DefaultUITraceListenerTest {
         List<String> sourceNames =
                 config.getDataSourcesList().stream().map(s -> s.getConfig().getName()).toList();
 
+        assertFalse(sourceNames.contains("android.surfaceflinger.layers"));
+        assertFalse(sourceNames.contains("android.surfaceflinger.transactions"));
+        assertFalse(sourceNames.contains("android.input.inputevent"));
+        assertFalse(sourceNames.contains("android.protolog"));
+        assertFalse(sourceNames.contains("linux.ftrace"));
+        assertFalse(sourceNames.contains("com.android.wm.shell.transition"));
+    }
+
+    @Test
+    public void testBuildConfig_canEnableProtoLogWithArguments() {
+        Bundle b = new Bundle();
+        b.putString("protolog_groups", "WM_DEBUG_FOCUS,WM_DEBUG_ADD_REMOVE");
+
+        mListener = initListener(b);
+        var config = mListener.buildConfig(b);
+
+        List<String> sourceNames =
+                config.getDataSourcesList().stream().map(s -> s.getConfig().getName()).toList();
+
+        // Check default traces are on
         assertTrue(sourceNames.contains("android.surfaceflinger.layers"));
         assertTrue(sourceNames.contains("android.surfaceflinger.transactions"));
         assertTrue(sourceNames.contains("android.input.inputevent"));
-        assertTrue(sourceNames.contains("android.protolog"));
         assertTrue(sourceNames.contains("linux.ftrace"));
         assertTrue(sourceNames.contains("com.android.wm.shell.transition"));
 
+        // Check protolog is on and configured
+        assertTrue(sourceNames.contains("android.protolog"));
         PerfettoConfig.TraceConfig.DataSource protologSource =
                 config.getDataSourcesList().stream()
                         .filter(s -> s.getConfig().getName().equals("android.protolog"))
                         .findFirst()
                         .get();
-        PerfettoConfig.ProtoLogConfig protologConfig =
-                protologSource.getConfig().getProtologConfig();
+        PerfettoConfig.ProtoLogConfig protologConfig = protologSource.getConfig().getProtologConfig();
         assertEquals(2, protologConfig.getGroupOverridesCount());
         assertEquals("WM_DEBUG_FOCUS", protologConfig.getGroupOverrides(0).getGroupName());
         assertEquals("WM_DEBUG_ADD_REMOVE", protologConfig.getGroupOverrides(1).getGroupName());
