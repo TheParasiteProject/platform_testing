@@ -248,6 +248,14 @@ class WindowManagerState(
                 it.windowingMode == windowingMode
         }
 
+    /**
+     * Gets the task that contains the given activity with [componentMatcher].
+     *
+     * @return the [Task] if it's found, or `null`, otherwise.
+     */
+    fun getTaskForActivity(componentMatcher: IComponentMatcher): Task? =
+        rootTasks.firstOrNull { it.containsActivity(componentMatcher) }
+
     fun getActivitiesForWindowState(
         windowState: WindowState,
         displayId: Int = PlatformConsts.DEFAULT_DISPLAY,
