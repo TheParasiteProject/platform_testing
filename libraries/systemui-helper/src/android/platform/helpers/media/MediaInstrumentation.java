@@ -30,6 +30,7 @@ import android.media.session.MediaSession;
 import android.media.session.PlaybackState;
 import android.os.Handler;
 import android.os.Looper;
+import android.platform.helpers.ShadeUtils;
 import android.platform.test.util.HealthTestingUtils;
 
 import androidx.test.platform.app.InstrumentationRegistry;
@@ -132,18 +133,20 @@ public final class MediaInstrumentation {
         final BySelector umoSelector = By.res(PKG, MEDIA_CONTROLLER_RES_ID)
                 .hasDescendant(mediaTitleSelector);
         UiObject2 notification = mDevice.wait(Until.findObject(umoSelector), WAIT_TIME_MILLIS);
-        if (notification == null) {
-            // Try to scroll down the QS container to make UMO visible.
-            UiObject2 qsScrollView = mDevice.wait(Until.findObject(qsScrollViewSelector),
-                    WAIT_TIME_MILLIS);
-            assertNotNull("Unable to scroll the QS container.", qsScrollView);
-            qsScrollView.scroll(Direction.DOWN, .75f, 100);
-            InstrumentationRegistry.getInstrumentation().getUiAutomation().clearCache();
-            notification = mDevice.wait(Until.findObject(umoSelector), WAIT_TIME_MILLIS);
+        if (!ShadeUtils.isDualShadeConfig()) {
+            if (notification == null) {
+                // Try to scroll down the QS container to make UMO visible.
+                UiObject2 qsScrollView =
+                        mDevice.wait(Until.findObject(qsScrollViewSelector), WAIT_TIME_MILLIS);
+                assertNotNull("Unable to scroll the QS container.", qsScrollView);
+                qsScrollView.scroll(Direction.DOWN, .75f, 100);
+                InstrumentationRegistry.getInstrumentation().getUiAutomation().clearCache();
+                notification = mDevice.wait(Until.findObject(umoSelector), WAIT_TIME_MILLIS);
+            }
+            assertNotNull("Unable to find UMO.", notification);
+            // The UMO may still not be fully visible, double check it's visibility.
+            notification = ensureUMOFullyVisible(notification);
         }
-        assertNotNull("Unable to find UMO.", notification);
-        // The UMO may still not be fully visible, double check it's visibility.
-        notification = ensureUMOFullyVisible(notification);
         assertNotNull("UMO isn't fully visible.", notification);
         mDevice.waitForIdle();
         HealthTestingUtils.waitForValueToSettle(
