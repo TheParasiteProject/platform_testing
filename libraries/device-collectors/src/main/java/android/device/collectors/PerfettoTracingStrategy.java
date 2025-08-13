@@ -35,7 +35,9 @@ import org.junit.runner.notification.Failure;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
+import java.util.Base64;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.function.Supplier;
@@ -83,11 +85,8 @@ public abstract class PerfettoTracingStrategy {
     public static final String PERFETTO_WAIT_TIME_ARG = "perfetto_wait_time_ms";
     // Argument to indicate the perfetto config file is text proto file.
     public static final String PERFETTO_CONFIG_TEXT_PROTO = "perfetto_config_text_proto";
-    // Argument to indicate the perfetto config content in a textual format
-    public static final String PERFETTO_CONFIG_TEXT_CONTENT = "perfetto_config_text_content";
-    // Argument to indicate that the config file should be read and streamed to perfetto.
-    public static final String PERFETTO_STREAM_CONFIG_FROM_FILE =
-            "perfetto_stream_config_from_file";
+    // Argument to provide the perfetto config content directly instead of using a file.
+    public static final String PERFETTO_CONFIG_CONTENT = "perfetto_config_content";
     // Destination directory to save the trace results.
     private static final String TEST_OUTPUT_ROOT = "test_output_root";
     // Default output folder to store the perfetto output traces.
@@ -134,6 +133,7 @@ public abstract class PerfettoTracingStrategy {
     // Perfetto traces collected during the test will be saved under this root folder.
     private String mTestOutputRoot;
     private boolean mIsConfigTextProto = false;
+    // Perfetto TraceConfiguration proto message as a ByteArray encoded to string in base64.
     private String mConfigContent;
     protected boolean mSkipTestFailureMetrics;
     private boolean mSkipTestSuccessMetrics;
@@ -265,9 +265,7 @@ public abstract class PerfettoTracingStrategy {
             if (perfettoPidFile.exists()) {
                 Log.i(
                         getTag(),
-                        String.format(
-                                "Deleting perfetto process id file %s .",
-                                perfettoPidFile.toString()));
+                        String.format("Deleting perfetto process id file %s .", perfettoPidFile));
                 perfettoPidFile.delete();
             }
         }
@@ -298,15 +296,21 @@ public abstract class PerfettoTracingStrategy {
 
     /** Start perfetto tracing using the given config file. */
     protected void startPerfettoTracing() {
-        boolean perfettoStartSuccess;
         SystemClock.sleep(mWaitStartTimeInMs);
 
-        perfettoStartSuccess =
-                mPerfettoHelper
-                        .setTextProtoConfig(mConfigContent)
-                        .setConfigFileName(mConfigFileName)
-                        .setIsTextProtoConfig(mIsConfigTextProto)
-                        .startCollecting();
+        if (mConfigContent != null) {
+            if (mIsConfigTextProto) {
+                mPerfettoHelper.setTraceConfig(mConfigContent.getBytes(StandardCharsets.UTF_8));
+            } else {
+                mPerfettoHelper.setTraceConfig(Base64.getDecoder().decode(mConfigContent));
+            }
+        } else {
+            mPerfettoHelper.setConfigFileName(mConfigFileName);
+        }
+
+        boolean perfettoStartSuccess =
+                mPerfettoHelper.setIsTextProtoConfig(mIsConfigTextProto).startCollecting();
+
         if (!perfettoStartSuccess) {
             Log.e(getTag(), "Perfetto did not start successfully.");
         }
@@ -467,12 +471,6 @@ public abstract class PerfettoTracingStrategy {
                 PERFETTO_START_BG_WAIT, String.valueOf(true)));
         mPerfettoHelper.setPerfettoStartBgWait(perfettoStartBgWait);
 
-        boolean streamConfigFromFile =
-                Boolean.parseBoolean(
-                        getArgumentValue(
-                                args, PERFETTO_STREAM_CONFIG_FROM_FILE, String.valueOf(false)));
-        mPerfettoHelper.setStreamConfigFromFile(streamConfigFromFile);
-
         // Root directory path containing the perfetto config file.
         String configRootDir =
                 args.getString(PERFETTO_CONFIG_ROOT_DIR_ARG, DEFAULT_PERFETTO_CONFIG_ROOT_DIR);
@@ -485,13 +483,16 @@ public abstract class PerfettoTracingStrategy {
         mIsConfigTextProto = Boolean.parseBoolean(getArgumentValue(args, PERFETTO_CONFIG_TEXT_PROTO,
                 String.valueOf(false)));
 
-        // Perfetto config file has to be under /data/misc/perfetto-traces/
-        // defaulted to DEFAULT_TEXT_CONFIG_FILE or DEFAULT_CONFIG_FILE if perfetto_config_file is
-        // not passed.
-        mConfigFileName = getArgumentValue(args, PERFETTO_CONFIG_FILE_ARG,
-                mIsConfigTextProto ? DEFAULT_TEXT_CONFIG_FILE : DEFAULT_CONFIG_FILE);
+        // Perfetto config file has to be under /data/misc/perfetto-traces/ or
+        // /data/misc/perfetto-configs/ defaulted to DEFAULT_TEXT_CONFIG_FILE or DEFAULT_CONFIG_FILE
+        // if perfetto_config_file is not passed.
+        mConfigFileName =
+                getArgumentValue(
+                        args,
+                        PERFETTO_CONFIG_FILE_ARG,
+                        mIsConfigTextProto ? DEFAULT_TEXT_CONFIG_FILE : DEFAULT_CONFIG_FILE);
 
-        mConfigContent = getArgumentValue(args, PERFETTO_CONFIG_TEXT_CONTENT, "");
+        mConfigContent = getArgumentValue(args, PERFETTO_CONFIG_CONTENT, null);
 
         mOutputFilePrefix = getArgumentValue(args, PERFETTO_CONFIG_OUTPUT_FILE_PREFIX,
                 DEFAULT_PERFETTO_PREFIX);
@@ -540,6 +541,21 @@ public abstract class PerfettoTracingStrategy {
                 mAllowedIterations.add(Integer.parseInt(iteration));
             }
         }
+    }
+
+    @VisibleForTesting
+    String getConfigFileName() {
+        return mConfigFileName;
+    }
+
+    @VisibleForTesting
+    boolean isConfigTextProto() {
+        return mIsConfigTextProto;
+    }
+
+    @VisibleForTesting
+    String getConfigContent() {
+        return mConfigContent;
     }
 
     /**

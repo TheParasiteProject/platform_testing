@@ -18,6 +18,8 @@ package android.device.collectors;
 
 import static android.device.collectors.PerfettoTracingStrategy.ARGUMENT_ALLOW_ITERATIONS;
 import static android.device.collectors.PerfettoTracingStrategy.ARGUMENT_FILE_PATH_KEY_PREFIX;
+import static android.device.collectors.PerfettoTracingStrategy.PERFETTO_CONFIG_CONTENT;
+import static android.device.collectors.PerfettoTracingStrategy.PERFETTO_CONFIG_TEXT_PROTO;
 import static android.device.collectors.PerfettoTracingStrategy.STRATEGY_ARGUMENT_NAMESPACE_SEPARATOR;
 
 import static org.junit.Assert.assertEquals;
@@ -26,6 +28,8 @@ import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.verify;
 
 import android.annotation.SuppressLint;
 import android.app.Instrumentation;
@@ -43,6 +47,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.mockito.Spy;
 
+import java.util.Base64;
 import java.util.function.Supplier;
 
 /**
@@ -173,6 +178,66 @@ public class PerfettoTracingStrategyTest {
         TestPerfettoTracingStrategy strategy = initStrategy(b);
 
         assertThrows(IllegalStateException.class, () -> strategy.skipMetric(/* iteration= */ 0));
+    }
+
+    @Test
+    public void testSetup_withBinaryConfigContent() {
+        Bundle b = new Bundle();
+        final byte[] configContent = "binary_config_content".getBytes();
+        b.putString(PERFETTO_CONFIG_CONTENT, Base64.getEncoder().encodeToString(configContent));
+        TestPerfettoTracingStrategy strategy = initStrategy(b);
+        doReturn(true).when(mPerfettoHelper).startCollecting();
+
+        strategy.startPerfettoTracing();
+
+        verify(mPerfettoHelper).setTraceConfig(configContent);
+        verify(mPerfettoHelper).setIsTextProtoConfig(false);
+        verify(mPerfettoHelper).startCollecting();
+    }
+
+    @Test
+    public void testSetup_withTextConfigContent() {
+        Bundle b = new Bundle();
+        final String configContent = "text_config_content";
+        b.putString(PERFETTO_CONFIG_CONTENT, configContent);
+        b.putString(PERFETTO_CONFIG_TEXT_PROTO, "true");
+        TestPerfettoTracingStrategy strategy = initStrategy(b);
+        doReturn(true).when(mPerfettoHelper).startCollecting();
+
+        strategy.startPerfettoTracing();
+
+        verify(mPerfettoHelper).setTraceConfig(configContent.getBytes());
+        verify(mPerfettoHelper).setIsTextProtoConfig(true);
+        verify(mPerfettoHelper).startCollecting();
+    }
+
+    @Test
+    public void testSetup_withBinaryConfigFile() {
+        Bundle b = new Bundle();
+        b.putString(PerfettoTracingStrategy.PERFETTO_CONFIG_FILE_ARG, "my_config.pb");
+        TestPerfettoTracingStrategy strategy = initStrategy(b);
+        doReturn(true).when(mPerfettoHelper).startCollecting();
+
+        strategy.startPerfettoTracing();
+
+        verify(mPerfettoHelper).setConfigFileName("my_config.pb");
+        verify(mPerfettoHelper).setIsTextProtoConfig(false);
+        verify(mPerfettoHelper).startCollecting();
+    }
+
+    @Test
+    public void testSetup_withTextConfigFile() {
+        Bundle b = new Bundle();
+        b.putString(PerfettoTracingStrategy.PERFETTO_CONFIG_FILE_ARG, "my_config.textproto");
+        b.putString(PERFETTO_CONFIG_TEXT_PROTO, "true");
+        TestPerfettoTracingStrategy strategy = initStrategy(b);
+        doReturn(true).when(mPerfettoHelper).startCollecting();
+
+        strategy.startPerfettoTracing();
+
+        verify(mPerfettoHelper).setConfigFileName("my_config.textproto");
+        verify(mPerfettoHelper).setIsTextProtoConfig(true);
+        verify(mPerfettoHelper).startCollecting();
     }
 
     private static class TestPerfettoTracingStrategy extends PerfettoTracingStrategy {

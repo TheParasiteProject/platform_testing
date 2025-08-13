@@ -17,6 +17,7 @@ package com.android.helpers.tests;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doReturn;
@@ -37,6 +38,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 
 /**
  * Android Unit tests for {@link PerfettoHelper}.
@@ -45,6 +47,10 @@ import java.io.IOException;
  * /data/misc/perfetto-traces/trace_config.textproto. Use trace_config_detailed.textproto from
  * prebuilts/tools/linux-x86_64/perfetto/configs. TODO: b/119020380 to keep track of automating the
  * above step. atest CollectorsHelperTest:com.android.helpers.tests.PerfettoHelperTest
+ *
+ * <p>Run: ``` adb push
+ * $ANDROID_BUILD_TOP/prebuilts/tools/linux-x86_64/perfetto/configs/trace_config_detailed.textproto
+ * /data/misc/perfetto-traces/trace_config.textproto ```
  */
 @RunWith(AndroidJUnit4.class)
 public class PerfettoHelperTest {
@@ -107,11 +113,11 @@ public class PerfettoHelperTest {
         PerfettoHelper helper = spy(new PerfettoHelper());
         doReturn(true).when(helper).startCollectingFromConfigFile(anyString(), anyBoolean());
         helper.setIsTextProtoConfig(true);
-        helper.setTextProtoConfig(DEFAULT_CFG);
+        helper.setTraceConfig(DEFAULT_CFG.getBytes(StandardCharsets.UTF_8));
         helper.setConfigFileName("trace_config.textproto");
         helper.startCollecting();
         verify(helper, times(0)).startCollectingFromConfigFile(anyString(), anyBoolean());
-        verify(helper, times(1)).startCollectingFromConfig(anyString());
+        verify(helper, times(1)).startCollectingFromConfig(any(byte[].class));
     }
 
     /**
@@ -133,7 +139,7 @@ public class PerfettoHelperTest {
     /** Test perfetto collection returns false if the config is empty. */
     @Test
     public void testEmptyConfig() throws Exception {
-        assertFalse(mPerfettoHelper.startCollectingFromConfig(""));
+        assertFalse(mPerfettoHelper.startCollectingFromConfig("".getBytes(StandardCharsets.UTF_8)));
     }
 
     @Test
@@ -189,7 +195,10 @@ public class PerfettoHelperTest {
     @Test
     public void testTrackPerfettoProcIdInFileFromConfig() throws Exception {
         mPerfettoHelper.setTrackPerfettoPidFlag(true);
-        assertTrue(mPerfettoHelper.startCollectingFromConfig(DEFAULT_CFG));
+        mPerfettoHelper.setIsTextProtoConfig(true);
+        assertTrue(
+                mPerfettoHelper.startCollectingFromConfig(
+                        DEFAULT_CFG.getBytes(StandardCharsets.UTF_8)));
         isPerfettoStartSuccess = true;
         assertTrue(mPerfettoHelper.getPerfettoPidFile().exists());
         String perfettoProcId =
@@ -201,7 +210,10 @@ public class PerfettoHelperTest {
     @Test
     public void testNoTrackPerfettoProcIdInFileFromConfig() throws Exception {
         mPerfettoHelper.setTrackPerfettoPidFlag(false);
-        assertTrue(mPerfettoHelper.startCollectingFromConfig(DEFAULT_CFG));
+        mPerfettoHelper.setIsTextProtoConfig(true);
+        assertTrue(
+                mPerfettoHelper.startCollectingFromConfig(
+                        DEFAULT_CFG.getBytes(StandardCharsets.UTF_8)));
         isPerfettoStartSuccess = true;
         assertTrue(mPerfettoHelper.getPerfettoPidFile() == null);
     }
@@ -209,7 +221,10 @@ public class PerfettoHelperTest {
     /** Test perfetto collection returns true if the valid perfetto config file. */
     @Test
     public void testPerfettoStartConfigSuccess() throws Exception {
-        assertTrue(mPerfettoHelper.startCollectingFromConfig(DEFAULT_CFG));
+        mPerfettoHelper.setIsTextProtoConfig(true);
+        assertTrue(
+                mPerfettoHelper.startCollectingFromConfig(
+                        DEFAULT_CFG.getBytes(StandardCharsets.UTF_8)));
         isPerfettoStartSuccess = true;
     }
 
@@ -234,6 +249,7 @@ public class PerfettoHelperTest {
     /** Test the invalid output path. */
     @Test
     public void testPerfettoInvalidOutputPath() throws Exception {
+        mPerfettoHelper.setIsTextProtoConfig(true);
         assertTrue(mPerfettoHelper.startCollectingFromConfigFile("trace_config.textproto", true));
         isPerfettoStartSuccess = true;
         // Don't have permission to create new folder under /data
@@ -265,7 +281,10 @@ public class PerfettoHelperTest {
      */
     @Test
     public void testPerfettoConfigSuccess() throws Exception {
-        assertTrue(mPerfettoHelper.startCollectingFromConfig(DEFAULT_CFG));
+        mPerfettoHelper.setIsTextProtoConfig(true);
+        assertTrue(
+                mPerfettoHelper.startCollectingFromConfig(
+                        DEFAULT_CFG.getBytes(StandardCharsets.UTF_8)));
         isPerfettoStartSuccess = true;
         assertTrue(mPerfettoHelper.stopCollecting(1000, "/data/local/tmp/out.perfetto-trace"));
         UiDevice uiDevice = UiDevice.getInstance(InstrumentationRegistry.getInstrumentation());

@@ -18,19 +18,18 @@ package android.tools.collectors;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Mockito.spy;
 
-import android.app.UiAutomation;
+import android.device.collectors.PerfettoTracingStrategy;
 import android.os.Bundle;
-import android.os.ParcelFileDescriptor;
+import android.util.Base64;
 
-import androidx.test.platform.app.InstrumentationRegistry;
 import androidx.test.runner.AndroidJUnit4;
 
-import org.junit.Before;
+import com.google.protobuf.InvalidProtocolBufferException;
+
+import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.MockitoAnnotations;
 
 import perfetto.protos.PerfettoConfig;
 
@@ -39,18 +38,14 @@ import java.util.List;
 @RunWith(AndroidJUnit4.class)
 public class UiTraceListenerTest {
 
-    private UiTraceListener mListener;
-
-    @Before
-    public void setup() {
-        MockitoAnnotations.initMocks(this);
-        mListener = spy(new UiTraceListener(new Bundle(), List.of()));
-    }
-
     @Test
-    public void testBuildDefaultConfig() {
+    public void testBuildDefaultConfig() throws InvalidProtocolBufferException {
         Bundle b = new Bundle();
-        var config = mListener.buildConfig(b);
+        UiTraceListener listener = new UiTraceListener(b, List.of());
+        listener.setupAdditionalArgs();
+
+        var config = getTraceConfig(b);
+        assertCommonConfig(b, config);
 
         List<String> sourceNames =
                 config.getDataSourcesList().stream().map(s -> s.getConfig().getName()).toList();
@@ -59,15 +54,20 @@ public class UiTraceListenerTest {
     }
 
     @Test
-    public void testBuildConfig_allOff() {
+    public void testBuildConfig_allOff() throws InvalidProtocolBufferException {
         Bundle b = new Bundle();
         b.putString(UiTraceListener.TRACE_FTRACE_KEY, "false");
         b.putString(UiTraceListener.TRACE_LAYERS_KEY, "false");
         b.putString(UiTraceListener.TRACE_SHELL_TRANSITIONS_KEY, "false");
         b.putString(UiTraceListener.TRACE_INPUT_KEY, "false");
+        b.putString(UiTraceListener.TRACE_WM_KEY, "false");
         b.putString(UiTraceListener.PROTOLOG_GROUPS_KEY, "");
 
-        var config = mListener.buildConfig(b);
+        UiTraceListener listener = new UiTraceListener(b, List.of());
+        listener.setupAdditionalArgs();
+
+        var config = getTraceConfig(b);
+        assertCommonConfig(b, config);
 
         List<String> sourceNames =
                 config.getDataSourcesList().stream().map(s -> s.getConfig().getName()).toList();
@@ -76,16 +76,20 @@ public class UiTraceListenerTest {
     }
 
     @Test
-    public void testBuildConfig_allOn() {
+    public void testBuildConfig_allOn() throws InvalidProtocolBufferException {
         Bundle b = new Bundle();
         b.putString(UiTraceListener.TRACE_FTRACE_KEY, "true");
         b.putString(UiTraceListener.TRACE_LAYERS_KEY, "true");
         b.putString(UiTraceListener.TRACE_SHELL_TRANSITIONS_KEY, "true");
         b.putString(UiTraceListener.TRACE_INPUT_KEY, "true");
+        b.putString(UiTraceListener.TRACE_WM_KEY, "true");
         b.putString(UiTraceListener.PROTOLOG_GROUPS_KEY, "WM_DEBUG_FOCUS,WM_DEBUG_ADD_REMOVE");
 
-        mListener = new UiTraceListener(b, List.of());
-        var config = mListener.buildConfig(b);
+        UiTraceListener listener = new UiTraceListener(b, List.of());
+        listener.setupAdditionalArgs();
+
+        var config = getTraceConfig(b);
+        assertCommonConfig(b, config);
 
         List<String> sourceNames =
                 config.getDataSourcesList().stream().map(s -> s.getConfig().getName()).toList();
@@ -96,6 +100,7 @@ public class UiTraceListenerTest {
         assertTrue(sourceNames.contains("com.android.wm.shell.transition"));
         assertTrue(sourceNames.contains("android.input.inputevent"));
         assertTrue(sourceNames.contains("android.protolog"));
+        assertTrue(sourceNames.contains("android.windowmanager"));
 
         PerfettoConfig.TraceConfig.DataSource protologSource =
                 config.getDataSourcesList().stream()
@@ -110,16 +115,47 @@ public class UiTraceListenerTest {
     }
 
     @Test
-    public void executeTestPerfettoCommand() {
-        var perfettoCmd =
-                "perfetto --background-wait -c - -o"
-                        + " /data/misc/perfetto-traces/per_test_trace_output_73.perfetto-trace";
+    public void testSetupAdditionalArgs_setsCorrectBinaryProto()
+            throws InvalidProtocolBufferException {
+        Bundle b = new Bundle();
+        b.putString(UiTraceListener.TRACE_FTRACE_KEY, "true");
+        b.putString(UiTraceListener.TRACE_LAYERS_KEY, "true");
+        b.putString(UiTraceListener.TRACE_SHELL_TRANSITIONS_KEY, "true");
+        b.putString(UiTraceListener.TRACE_INPUT_KEY, "true");
+        b.putString(UiTraceListener.TRACE_WM_KEY, "true");
+        b.putString(UiTraceListener.PROTOLOG_GROUPS_KEY, "WM_DEBUG_FOCUS,WM_DEBUG_ADD_REMOVE");
 
-        UiAutomation uiAutomation = InstrumentationRegistry.getInstrumentation().getUiAutomation();
-        ParcelFileDescriptor[] fds = uiAutomation.executeShellCommandRwe(perfettoCmd);
+        var listener = new UiTraceListener(b, List.of());
+        PerfettoConfig.TraceConfig expectedConfig = listener.buildConfig(b);
 
-        assertTrue(fds[0].getFileDescriptor().valid());
-        assertTrue(fds[1].getFileDescriptor().valid());
-        assertTrue(fds[2].getFileDescriptor().valid());
+        listener.setupAdditionalArgs();
+
+        PerfettoConfig.TraceConfig actualConfig = getTraceConfig(b);
+        assertEquals(expectedConfig, actualConfig);
+    }
+
+    private void assertCommonConfig(Bundle b, PerfettoConfig.TraceConfig config) {
+        assertEquals("false", b.getString(PerfettoTracingStrategy.PERFETTO_CONFIG_TEXT_PROTO));
+        assertEquals(
+                "uiTrace_",
+                b.getString(PerfettoTracingStrategy.PERFETTO_CONFIG_OUTPUT_FILE_PREFIX));
+
+        assertTrue(config.getWriteIntoFile());
+        assertEquals(1000, config.getFileWritePeriodMs());
+        assertEquals(30000, config.getFlushPeriodMs());
+        assertEquals(1, config.getBuffersCount());
+        var bufferConfig = config.getBuffers(0);
+        assertEquals(63488, bufferConfig.getSizeKb());
+        assertEquals(
+                PerfettoConfig.TraceConfig.BufferConfig.FillPolicy.RING_BUFFER,
+                bufferConfig.getFillPolicy());
+    }
+
+    private PerfettoConfig.TraceConfig getTraceConfig(Bundle b)
+            throws InvalidProtocolBufferException {
+        String configBase64 = b.getString(PerfettoTracingStrategy.PERFETTO_CONFIG_CONTENT);
+        Assert.assertNotNull(configBase64);
+        byte[] configBinary = Base64.decode(configBase64, Base64.DEFAULT);
+        return PerfettoConfig.TraceConfig.parseFrom(configBinary);
     }
 }

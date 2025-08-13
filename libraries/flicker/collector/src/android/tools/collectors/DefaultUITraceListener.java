@@ -51,21 +51,21 @@ public class DefaultUITraceListener extends UiTraceListener {
 
     @Override
     protected boolean traceFtrace(Bundle args) {
-        return true;
+        return Boolean.parseBoolean(args.getString(TRACE_FTRACE_KEY, "true"));
     }
 
     @Override
     protected boolean traceLayers(Bundle args) {
-        return true;
+        return Boolean.parseBoolean(args.getString(TRACE_LAYERS_KEY, "true"));
     }
 
     @Override
     protected boolean traceShellTransitions(Bundle args) {
-        return true;
+        return Boolean.parseBoolean(args.getString(TRACE_SHELL_TRANSITIONS_KEY, "true"));
     }
 
     @Override
     protected boolean traceInput(Bundle args) {
-        return true;
+        return Boolean.parseBoolean(args.getString(TRACE_INPUT_KEY, "true"));
     }
 }

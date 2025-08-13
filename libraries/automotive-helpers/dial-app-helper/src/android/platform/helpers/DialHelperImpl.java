@@ -175,7 +175,7 @@ public class DialHelperImpl extends AbstractStandardAppHelper implements IAutoDi
 
     /** {@inheritDoc} */
     public void dialANumber(String phoneNumber) {
-        enterNumberOnDialpad(phoneNumber);
+        enterNumber(phoneNumber);
         getSpectatioUiUtil().wait1Second();
     }
 
@@ -791,9 +791,8 @@ public class DialHelperImpl extends AbstractStandardAppHelper implements IAutoDi
             if (shouldLongPressZero) {
                 ch = '0';
             }
-            UiObject2 numberButton =
-                    getSpectatioUiUtil()
-                            .findUiObject(getUiElementFromConfig(Character.toString(ch)));
+            BySelector numberButtonSelector = By.text(Character.toString(ch));
+            UiObject2 numberButton = getSpectatioUiUtil().findUiObject(numberButtonSelector);
             if (numberButton == null) {
                 numberButton = getSpectatioUiUtil().findUiObject(Character.toString(ch));
             }
@@ -830,12 +829,11 @@ public class DialHelperImpl extends AbstractStandardAppHelper implements IAutoDi
         getSpectatioUiUtil().clickAndWait(dialMenuButton);
         getSpectatioUiUtil().wait1Second();
         BySelector dialPadInputSelector =
-                getUiElementFromConfig(AutomotiveConfigConstants.MOBILE_DIALPAD_TITLE_INPUT);
+                getUiElementFromConfig(AutomotiveConfigConstants.DIAL_IN_NUMBER);
         UiObject2 dialPadInput = getSpectatioUiUtil().findUiObject(dialPadInputSelector);
         getSpectatioUiUtil()
-                .validateUiObject(
-                        dialPadInput, AutomotiveConfigConstants.MOBILE_DIALPAD_TITLE_INPUT);
-        dialPadInput.setText(phoneNumber);
+                .validateUiObject(dialPadInput, AutomotiveConfigConstants.DIAL_IN_NUMBER);
+        getSpectatioUiUtil().setTextForUiElement(dialPadInput, phoneNumber);
     }
 
     /** This method is used check if ongoing call is displayed on home. */

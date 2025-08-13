@@ -42,6 +42,7 @@ import android.util.Log
 import android.view.Display.DEFAULT_DISPLAY
 import android.view.DisplayInfo
 import androidx.annotation.VisibleForTesting
+import androidx.core.util.isNotEmpty
 import androidx.test.platform.app.InstrumentationRegistry
 import kotlin.math.abs
 import kotlin.math.max
@@ -109,11 +110,10 @@ class DesktopMouseTestRule() : TestRule {
             get() = checkNotNull(virtualMouse) { "Failed to initialize VirtualMouse" }
 
         /**
-         * Sets up a virtual mouse that will start at [DEFAULT_DISPLAY].
+         * Sets up a virtual mouse that will start on any Display inside [DisplayTopology].
          *
-         * Note: This will move any existing cursor in the same topology as [DEFAULT_DISPLAY], to
-         * [DEFAULT_DISPLAY]. If the mouse needs to start at different display, first call
-         * `DesktopMouseTestRule#move(displayId, x, y)`.
+         * Note: If the mouse needs to start at different display, first call
+         * [DesktopMouseTestRule.move].
          */
         override fun before() = runBlocking {
             val createdVirtualDevice =
@@ -123,7 +123,7 @@ class DesktopMouseTestRule() : TestRule {
                 )
             virtualDevice = createdVirtualDevice
 
-            val primaryDisplayId = getPrimaryDisplayId()
+            val startDisplayId = getDisplayIdIncludedInDisplayTopology()
             val inputDeviceFlow = callbackFlow {
                 val inputDeviceListener =
                     object : InputManager.InputDeviceListener {
@@ -150,7 +150,7 @@ class DesktopMouseTestRule() : TestRule {
                             .setVendorId(VIRTUAL_MOUSE_VENDOR_ID)
                             .setProductId(VIRTUAL_MOUSE_PRODUCT_ID)
                             .setInputDeviceName("VirtualMouse_ConnectedDisplaysTest")
-                            .setAssociatedDisplayId(primaryDisplayId)
+                            .setAssociatedDisplayId(startDisplayId)
                             .build()
                     )
                 awaitClose { inputManager.unregisterInputDeviceListener(inputDeviceListener) }
@@ -163,7 +163,7 @@ class DesktopMouseTestRule() : TestRule {
                 disableMouseScaling(display.displayId)
             }
             displayManager.registerDisplayListener(displayListener, handler)
-            ensureCursorStartsOnDisplayCenter(primaryDisplayId)
+            ensureCursorStartsInDisplayTopology(startDisplayId)
         }
 
         private fun disableMouseScaling(displayId: Int) {
@@ -171,14 +171,21 @@ class DesktopMouseTestRule() : TestRule {
             inputManager.setMouseScalingEnabled(false, displayId)
         }
 
-        private fun ensureCursorStartsOnDisplayCenter(displayId: Int) {
+        private fun ensureCursorStartsInDisplayTopology(displayId: Int) {
             val display = displayManager.getDisplay(displayId)
             Log.i(TAG, "Ensuring cursor starts on center of display#$displayId")
             move(display.displayId, display.width / 2, display.height / 2)
         }
 
-        private fun getPrimaryDisplayId() =
-            displayManager.displayTopology?.primaryDisplayId ?: DEFAULT_DISPLAY
+        private fun getDisplayIdIncludedInDisplayTopology(): Int {
+            val idBoundsMap = displayManager.displayTopology?.absoluteBounds
+            if (
+                idBoundsMap != null && idBoundsMap.isNotEmpty() && DEFAULT_DISPLAY !in idBoundsMap
+            ) {
+                return idBoundsMap.keyAt(0)
+            }
+            return DEFAULT_DISPLAY
+        }
 
         override fun after() {
             displayManager.unregisterDisplayListener(displayListener)
@@ -251,10 +258,17 @@ class DesktopMouseTestRule() : TestRule {
      * @param targetY The target Y (PX) coordinate relative to the target display.
      */
     fun move(targetDisplayId: Int, targetXPx: Int, targetYPx: Int) {
+        Log.i(TAG, "Try moving to display#$targetDisplayId ($targetXPx, $targetYPx)")
         val currentCursorDisplayId = getCursorDisplayId()
 
         if (targetDisplayId != currentCursorDisplayId) {
+            Log.i(
+                TAG,
+                "Start moving from display#$currentCursorDisplayId -> display#$targetDisplayId",
+            )
             moveToDisplay(currentCursorDisplayId, targetDisplayId)
+        } else {
+            Log.i(TAG, "Cursor is already on the same display with $targetDisplayId")
         }
 
         val currentPosition = getCursorPosition(targetDisplayId).roundToInt()
@@ -275,6 +289,7 @@ class DesktopMouseTestRule() : TestRule {
             // slight difference (within `FLOATING_ROUND_CORRECTION`) in the final cursor position.
             delta.dx <= FLOATING_ROUNDING_CORRECTION && delta.dy <= FLOATING_ROUNDING_CORRECTION
         }
+        Log.i(TAG, "Successfully moved to display#$targetDisplayId ($targetXPx, $targetYPx)")
     }
 
     /**
@@ -296,6 +311,7 @@ class DesktopMouseTestRule() : TestRule {
         val displayAbsoluteBounds = topology.absoluteBounds
         val topologyGraph = topology.graph
         val path = findPath(currentCursorDisplayId, targetDisplayId, topologyGraph)
+        Log.i(TAG, "Computed display paths ${path.stream().map{it.displayId}.toList()}")
 
         path.forEach { (nextDisplayId, position) ->
             val dpi = getDpiForDisplay(currentCursorDisplayId)
@@ -338,6 +354,10 @@ class DesktopMouseTestRule() : TestRule {
             ) {
                 getCursorDisplayId() == nextDisplayId
             }
+            Log.i(
+                TAG,
+                "Cursor moved from display#$currentCursorDisplayId -> display#$nextDisplayId",
+            )
             currentCursorDisplayId = nextDisplayId
 
             // InputDevice reconfiguration will happen when cursor changed display, and might jam
