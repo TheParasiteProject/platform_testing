@@ -667,6 +667,25 @@ public class SpectatioUiUtil {
         return scrollAndFindUiObject(scrollableSelector, target, isVertical) != null;
     }
 
+    /**
+     * Scroll by performing backward and forward gestures on device screen and check if the target
+     * UI Element is present.
+     *
+     * <p>Method throws {@link MissingUiElementException} if the given scrollable selector is not
+     * available on the Device UI.
+     *
+     * @param scrollableSelector {@link BySelector} used for scrolling on device UI
+     * @param target {@link BySelector} to search on device UI
+     * @param isVertical For vertical scrolling, use isVertical = true and For Horizontal scrolling,
+     *     use isVertical = false.
+     * @return Returns True if the target is found, else return False.
+     */
+    public boolean scrollToEndAndCheckIfUiElementExist(
+            BySelector scrollableSelector, BySelector target, boolean isVertical
+    ) throws MissingUiElementException {
+        return scrollToEndAndFindUiObject(scrollableSelector, target, isVertical) != null;
+    }
+
     public boolean hasPackageInForeground(String packageName) {
         validateText(packageName, /* type= */ "Package");
         return mDevice.hasObject(By.pkg(packageName).depth(0));
@@ -935,6 +954,36 @@ public class SpectatioUiUtil {
         return scrollForwardAndFindUiObject(forward, target);
     }
 
+    /**
+     * Finds the UI element by scrolling backwards from the end of the view.
+     *
+     * <p>For vertical scrolling, use isVertical = true For Horizontal scrolling, use isVertical =
+     * false.
+     *
+     * <p>Method throws {@link MissingUiElementException} if the given scrollable selector is not
+     * available on the Device UI.
+     *
+     * @param scrollableSelector {@link BySelector} for the scrollable UI Element on device UI.
+     * @param target {@link BySelector} for UI Element to search on device UI.
+     * @param isVertical For vertical scrolling, use isVertical = true and For Horizontal scrolling,
+     *     use isVertical = false.
+     * @return {@link UiObject2} for target UI Element will be returned. It returns NULL if given
+     *     target is not found on the Device UI.
+     */
+    public UiObject2 scrollToEndAndFindUiObject(
+            BySelector scrollableSelector, BySelector target, boolean isVertical
+    ) throws MissingUiElementException {
+        validateSelector(scrollableSelector, /* action= */ "Scroll");
+        validateSelector(target, /* action= */ "Find UI Object");
+        // Find UI element on current page
+        UiObject2 uiObject = findUiObject(target);
+        if (isValidUiObject(uiObject)) {
+            return uiObject;
+        }
+        scrollToEnd(scrollableSelector, isVertical);
+        return scrollBackwardAndFindUiObject(scrollableSelector, target, isVertical);
+    }
+
     private UiObject2 scrollForwardAndFindUiObject(BySelector forward, BySelector target)
             throws MissingUiElementException {
         UiObject2 uiObject = findUiObject(target);
@@ -1115,6 +1164,34 @@ public class SpectatioUiUtil {
             uiObject = findUiObject(target);
         }
         return uiObject;
+    }
+
+    private UiObject2 scrollBackwardAndFindUiObject(
+            BySelector scrollableSelector, BySelector target, boolean isVertical
+    ) throws MissingUiElementException {
+        UiObject2 uiObject = findUiObject(target);
+        if (isValidUiObject(uiObject)) {
+            return uiObject;
+        }
+        int scrollCount = 0;
+        boolean canScroll = true;
+        while (!isValidUiObject(uiObject) && canScroll && scrollCount < MAX_SCROLL_COUNT) {
+            canScroll = scrollBackward(scrollableSelector, isVertical);
+            scrollCount++;
+            uiObject = findUiObject(target);
+        }
+        return uiObject;
+    }
+
+    public void scrollToEnd(
+            BySelector scrollableSelector, boolean isVertical
+    ) throws MissingUiElementException {
+        int scrollCount = 0;
+        boolean canScroll = true;
+        while (canScroll && scrollCount < MAX_SCROLL_COUNT) {
+            canScroll = scrollForward(scrollableSelector, isVertical);
+            scrollCount++;
+        }
     }
 
     public void scrollToBeginning(BySelector scrollableSelector, boolean isVertical)
