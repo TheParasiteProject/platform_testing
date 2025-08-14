@@ -26,6 +26,7 @@ import android.os.Bundle;
 import android.util.Base64;
 import android.util.Log;
 
+import androidx.annotation.Nullable;
 import androidx.annotation.VisibleForTesting;
 
 import perfetto.protos.PerfettoConfig;
@@ -46,6 +47,7 @@ public class UiTraceListener extends PerfettoListener {
     public static final String TRACE_INPUT_KEY = "trace_input";
     public static final String TRACE_WM_KEY = "trace_windows";
     public static final String PROTOLOG_GROUPS_KEY = "protolog_groups";
+    public static final String PROTOLOG_DEFAULT_LOG_FROM_LEVEL_KEY = "protolog_log_from_level";
 
     public UiTraceListener() {
         super();
@@ -177,9 +179,11 @@ public class UiTraceListener extends PerfettoListener {
             Log.d(LOG_TAG, "Enabling window manager datasource");
             var wmConfig =
                     PerfettoConfig.WindowManagerConfig.newBuilder()
-                            .setLogLevel(PerfettoConfig.WindowManagerConfig.LogLevel.LOG_LEVEL_VERBOSE)
+                            .setLogLevel(
+                                    PerfettoConfig.WindowManagerConfig.LogLevel.LOG_LEVEL_VERBOSE)
                             .setLogFrequency(
-                                    PerfettoConfig.WindowManagerConfig.LogFrequency.LOG_FREQUENCY_FRAME);
+                                    PerfettoConfig.WindowManagerConfig.LogFrequency
+                                            .LOG_FREQUENCY_FRAME);
             config.addDataSources(
                     PerfettoConfig.TraceConfig.DataSource.newBuilder()
                             .setConfig(
@@ -189,12 +193,36 @@ public class UiTraceListener extends PerfettoListener {
         }
 
         // Protolog
+        String protologDefaultLogFromLevel = getDefaultProtoLogFromLevel(args);
         String protologGroups = args.getString(PROTOLOG_GROUPS_KEY);
-        if (protologGroups != null && !protologGroups.isEmpty()) {
-            Log.d(LOG_TAG, "Enabling protolog datasource");
-            PerfettoConfig.ProtoLogConfig.Builder protologConfig =
-                    PerfettoConfig.ProtoLogConfig.newBuilder();
 
+        var hasDefaultLogFromLevel =
+                protologDefaultLogFromLevel != null && !protologDefaultLogFromLevel.isBlank();
+        var hasProtoLogGroups = protologGroups != null && !protologGroups.isBlank();
+        var enableProtoLogging = hasDefaultLogFromLevel || hasProtoLogGroups;
+
+        PerfettoConfig.ProtoLogConfig.Builder protologConfig =
+                PerfettoConfig.ProtoLogConfig.newBuilder();
+
+        if (hasDefaultLogFromLevel) {
+            PerfettoConfig.ProtoLogLevel protoLogLevel =
+                    switch (protologDefaultLogFromLevel.toUpperCase()) {
+                        case "VERBOSE" -> PerfettoConfig.ProtoLogLevel.PROTOLOG_LEVEL_VERBOSE;
+                        case "DEBUG" -> PerfettoConfig.ProtoLogLevel.PROTOLOG_LEVEL_DEBUG;
+                        case "INFO" -> PerfettoConfig.ProtoLogLevel.PROTOLOG_LEVEL_INFO;
+                        case "WARN" -> PerfettoConfig.ProtoLogLevel.PROTOLOG_LEVEL_WARN;
+                        case "ERROR" -> PerfettoConfig.ProtoLogLevel.PROTOLOG_LEVEL_ERROR;
+                        case "WTF" -> PerfettoConfig.ProtoLogLevel.PROTOLOG_LEVEL_WTF;
+                        default ->
+                                throw new IllegalArgumentException(
+                                        "Invalid protolog log level argument provided: "
+                                                + protologDefaultLogFromLevel);
+                    };
+
+            protologConfig.setDefaultLogFromLevel(protoLogLevel);
+        }
+
+        if (hasProtoLogGroups) {
             for (String group : protologGroups.split(",\\s*")) {
                 String trimmedGroup = group.trim();
                 if (!trimmedGroup.isEmpty()) {
@@ -205,6 +233,10 @@ public class UiTraceListener extends PerfettoListener {
                                             PerfettoConfig.ProtoLogLevel.PROTOLOG_LEVEL_VERBOSE));
                 }
             }
+        }
+
+        if (enableProtoLogging) {
+            Log.d(LOG_TAG, "Enabling protolog datasource");
             config.addDataSources(
                     PerfettoConfig.TraceConfig.DataSource.newBuilder()
                             .setConfig(
@@ -234,5 +266,10 @@ public class UiTraceListener extends PerfettoListener {
 
     protected boolean traceWindows(Bundle args) {
         return Boolean.parseBoolean(args.getString(TRACE_WM_KEY, "false"));
+    }
+
+    @Nullable
+    protected String getDefaultProtoLogFromLevel(Bundle args) {
+        return args.getString(PROTOLOG_DEFAULT_LOG_FROM_LEVEL_KEY);
     }
 }
