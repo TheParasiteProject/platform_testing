@@ -34,7 +34,6 @@ test_package {
         "AppCompatibilityTest",
         "AppLaunch",
         "AppTransitionTests",
-        "BackgroundDexOptServiceIntegrationTests",
         "BandwidthEnforcementTest",
         "BandwidthTests",
         "benchmarks",
