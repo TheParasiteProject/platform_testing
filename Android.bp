@@ -245,6 +245,11 @@ test_package {
             dest: "platform_tests-symbols-mapping-FILE_NAME_TAG_PLACEHOLDER.textproto",
             tag: ".elf_mapping",
         },
+        {
+            targets: ["platform_tests"],
+            tag: ".jacoco",
+            only_on_java_coverage_builds: true,
+        },
     ],
 }
 
@@ -705,14 +710,21 @@ test_package {
         "MultiuserHostsideIntegrationTests",
     ],
 
-    dist: {
-        targets: [
-            "continuous_instrumentation_tests",
-            "tests",
-        ],
-        prepend_artifact_with_product: true,
-        dest: "continuous_instrumentation_tests-FILE_NAME_TAG_PLACEHOLDER.zip",
-    },
+    dists: [
+        {
+            targets: [
+                "continuous_instrumentation_tests",
+                "tests",
+            ],
+            prepend_artifact_with_product: true,
+            dest: "continuous_instrumentation_tests-FILE_NAME_TAG_PLACEHOLDER.zip",
+        },
+        {
+            targets: ["continuous_instrumentation_tests"],
+            tag: ".jacoco",
+            only_on_java_coverage_builds: true,
+        },
+    ],
 }
 
 test_package {
