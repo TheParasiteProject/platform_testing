@@ -429,6 +429,8 @@ public class AutomotiveConfigConstants {
             "SETTINGS_SUB_SETTING_SCROLL_FORWARD_BUTTON";
     public static final String SETTINGS_SUB_SETTING_SCROLL_ELEMENT =
             "SETTINGS_SUB_SETTING_SCROLL_ELEMENT";
+    public static final String SETTINGS_SUB_PRIVACY_SETTING_SCROLL_ELEMENT =
+            "SETTINGS_SUB_PRIVACY_SETTING_SCROLL_ELEMENT";
     public static final String SETTINGS_TITLE_TEXT = "SETTINGS_TITLE_TEXT";
     public static final String SETTINGS_BACK_NAV_ICON = "SETTINGS_BACK_NAV_ICON";
     public static final String LOCATION_SETTINGS_RECENTLY_ACCESSED_MAPS =

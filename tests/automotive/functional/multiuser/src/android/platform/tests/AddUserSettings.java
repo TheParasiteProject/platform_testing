@@ -20,6 +20,7 @@ import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertTrue;
 
 import android.content.pm.UserInfo;
+import android.platform.helpers.AutomotiveConfigConstants;
 import android.platform.helpers.HelperAccessor;
 import android.platform.helpers.IAutoSettingHelper;
 import android.platform.helpers.IAutoUserHelper;
@@ -45,6 +46,8 @@ import org.junit.runner.RunWith;
 @RunWith(AndroidJUnit4.class)
 public class AddUserSettings {
     @Rule public ConditionalIgnoreRule rule = new ConditionalIgnoreRule();
+
+    private static final String DRIVER = AutomotiveConfigConstants.HOME_DRIVER_BUTTON;
 
     private final MultiUserHelper mMultiUserHelper = MultiUserHelper.getInstance();
     private HelperAccessor<IAutoUserHelper> mUsersHelper;
@@ -81,7 +84,7 @@ public class AddUserSettings {
         // switch from new user to initial user
 
         Log.i(LOG_TAG, "Act: Switch to Initial user");
-        mMultiUserHelper.switchToUserId(initialUser.id);
+        mUsersHelper.get().switchUsingUserIcon(DRIVER);
 
         // verify new user is seen in list of users
         Log.i(LOG_TAG, "Assert: Newly created user in user ist");

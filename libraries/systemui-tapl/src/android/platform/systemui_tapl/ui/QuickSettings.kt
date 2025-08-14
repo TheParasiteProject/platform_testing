@@ -51,6 +51,12 @@ class QuickSettings internal constructor(val displayId: Int = DEFAULT_DISPLAY) {
         }
     }
 
+    /** Presses Edit button to open edit mode. */
+    fun openEditMode(): QSEditMode {
+        waitForObj(sysuiResSelector(EDIT_MODE_BTN_RES_ID)).click()
+        return QSEditMode()
+    }
+
     /** Presses Power button to open the power panel. */
     fun openPowerPanel(): PowerPanel {
         waitForObj(sysuiResSelector(POWER_BTN_RES_ID)).click()
@@ -132,6 +138,9 @@ class QuickSettings internal constructor(val displayId: Int = DEFAULT_DISPLAY) {
     companion object {
         // https://hsv.googleplex.com/5291196806070272?node=109
         private const val POWER_BTN_RES_ID = "pm_lite"
+
+        // https://hsv.googleplex.com/4765631852314624?node=446
+        private const val EDIT_MODE_BTN_RES_ID = "qs_edit_mode_button"
 
         // https://hsv.googleplex.com/5291196806070272?node=108
         private const val SETTINGS_BUTTON_RES_ID = "settings_button_container"

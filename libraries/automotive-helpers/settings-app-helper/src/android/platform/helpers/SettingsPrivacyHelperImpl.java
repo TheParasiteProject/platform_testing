@@ -433,7 +433,7 @@ public class SettingsPrivacyHelperImpl extends AbstractStandardAppHelper
                         .findUiObject(
                                 getUiElementFromConfig(
                                         AutomotiveConfigConstants
-                                                .SETTINGS_SUB_SETTING_SCROLL_ELEMENT));
+                                                .SETTINGS_SUB_PRIVACY_SETTING_SCROLL_ELEMENT));
         UiObject2 locationObject =
                 getSpectatioUiUtil()
                         .findUiObjectInGivenElement(
