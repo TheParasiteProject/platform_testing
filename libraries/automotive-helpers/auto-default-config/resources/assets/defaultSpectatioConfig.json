@@ -1822,8 +1822,7 @@
     },
     "SETTINGS_UI_SUB_SETTING_SCROLL_ELEMENT": {
       "TYPE": "RESOURCE_ID",
-      "VALUE": "car_ui_internal_recycler_view",
-      "PACKAGE":"com.android.car.settings"
+      "VALUE": "car_ui_internal_recycler_view"
     },
     "SETTINGS_UI_SUB_SETTING_STORAGE_SCROLL_ELEMENT": {
       "TYPE": "RESOURCE_ID",
