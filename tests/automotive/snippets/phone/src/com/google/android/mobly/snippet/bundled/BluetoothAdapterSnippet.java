@@ -17,6 +17,7 @@
 package com.google.android.mobly.snippet.bundled;
 
 import android.bluetooth.BluetoothAdapter;
+import android.bluetooth.BluetoothDevice;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Build;
@@ -195,5 +196,15 @@ public class BluetoothAdapterSnippet implements Snippet {
                 throw new BluetoothAdapterSnippetException("Failed to become discoverable.");
             }
         }
+    }
+
+    /** Grant Bluetooth profiles permissions for phone book, call log, message access. */
+    @Rpc(description = "Grant Bluetooth profiles permissions.")
+    public void btGrantPermissions(String deviceAddress) throws Throwable {
+        BluetoothDevice device =
+                com.google.android.mobly.snippet.bundled.bluetooth.BluetoothAdapterSnippet
+                        .getKnownDeviceByAddress(deviceAddress);
+        Utils.invokeByReflection(device, "setPhonebookAccessPermission", 1);
+        Utils.invokeByReflection(device, "setMessageAccessPermission", 1);
     }
 }

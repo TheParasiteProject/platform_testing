@@ -1,0 +1,21 @@
+python_library_host {
+    name: "stats_log_pb2",
+    srcs: ["stats_log_pb2.py"],
+    libs: [
+        "bt_atoms_pb2",
+    ],
+}
+
+python_library_host {
+    name: "bt_atoms_pb2",
+    srcs: ["bt_atoms_pb2.py"],
+}
+
+python_library_host {
+    name: "statsd_collector",
+    srcs: ["statsd_collector.py"],
+    libs: [
+        "mobly",
+        "stats_log_pb2",
+    ],
+}
