@@ -237,7 +237,7 @@ public class DefaultUITraceListenerTest {
                         eq(
                                 "/data/local/tmp/perfetto-traces/run_test1/"
                                         + "PerfettoTracingPerTestStrategy/"
-                                        + "perfetto_run_test1-1.perfetto-trace"));
+                                        + "uiTrace_run_test1-1.perfetto-trace"));
     }
 
     /*
