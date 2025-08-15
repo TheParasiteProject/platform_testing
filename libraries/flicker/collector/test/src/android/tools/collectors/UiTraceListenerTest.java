@@ -134,6 +134,35 @@ public class UiTraceListenerTest {
         assertEquals(expectedConfig, actualConfig);
     }
 
+    @Test
+    public void testBuildConfig_canEnableProtoLogWithLogLevel()
+            throws InvalidProtocolBufferException {
+        Bundle b = new Bundle();
+        b.putString(UiTraceListener.PROTOLOG_DEFAULT_LOG_FROM_LEVEL_KEY, "INFO");
+
+        UiTraceListener listener = new UiTraceListener(b, List.of());
+        listener.setupAdditionalArgs();
+
+        var config = getTraceConfig(b);
+        assertCommonConfig(b, config);
+
+        List<String> sourceNames =
+                config.getDataSourcesList().stream().map(s -> s.getConfig().getName()).toList();
+
+        assertTrue(sourceNames.contains("android.protolog"));
+
+        PerfettoConfig.TraceConfig.DataSource protologSource =
+                config.getDataSourcesList().stream()
+                        .filter(s -> s.getConfig().getName().equals("android.protolog"))
+                        .findFirst()
+                        .get();
+        PerfettoConfig.ProtoLogConfig protologConfig =
+                protologSource.getConfig().getProtologConfig();
+        assertEquals(
+                PerfettoConfig.ProtoLogLevel.PROTOLOG_LEVEL_INFO,
+                protologConfig.getDefaultLogFromLevel());
+    }
+
     private void assertCommonConfig(Bundle b, PerfettoConfig.TraceConfig config) {
         assertEquals("false", b.getString(PerfettoTracingStrategy.PERFETTO_CONFIG_TEXT_PROTO));
         assertEquals(
