@@ -35,6 +35,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.platform.ViewRootForTest
+import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.SemanticsNodeInteraction
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onRoot
@@ -43,6 +44,8 @@ import androidx.core.text.TextUtilsCompat
 import com.android.compose.theme.PlatformTheme
 import java.util.Locale
 import java.util.concurrent.TimeUnit
+import kotlin.coroutines.CoroutineContext
+import kotlin.coroutines.EmptyCoroutineContext
 import org.junit.rules.RuleChain
 import org.junit.rules.TestRule
 import org.junit.runner.Description
@@ -68,12 +71,14 @@ class ComposeScreenshotTestRule(
     pathManager: GoldenPathManager,
     enforcePerfectPixelMatch: Boolean = false,
     private val screenshotRule: ScreenshotTestRule = ScreenshotTestRule(pathManager),
+    effectContext: CoroutineContext = EmptyCoroutineContext,
 ) : TestRule, BitmapDiffer by screenshotRule, ScreenshotAsserterFactory by screenshotRule {
     private val colorsRule = MaterialYouColorsRule()
     private val fontsRule = FontsRule()
     private val hardwareRenderingRule = HardwareRenderingRule()
     private val deviceEmulationRule = DeviceEmulationRule(emulationSpec)
-    val composeRule = createAndroidComposeRule<ScreenshotActivity>()
+    @OptIn(ExperimentalTestApi::class)
+    val composeRule = createAndroidComposeRule<ScreenshotActivity>(effectContext)
 
     private val commonRule =
         RuleChain.outerRule(deviceEmulationRule).around(screenshotRule).around(composeRule)
