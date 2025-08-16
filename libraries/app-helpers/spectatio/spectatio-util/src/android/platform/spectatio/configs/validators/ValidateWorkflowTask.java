@@ -16,6 +16,8 @@
 
 package android.platform.spectatio.configs.validators;
 
+import static android.platform.spectatio.constants.JsonConfigConstants.NO_BASE_CONFIG;
+
 import android.platform.spectatio.configs.ScrollConfig;
 import android.platform.spectatio.configs.SetTextConfig;
 import android.platform.spectatio.configs.SwipeConfig;
@@ -79,7 +81,7 @@ public class ValidateWorkflowTask implements JsonDeserializer<WorkflowTask> {
             throwRuntimeException("Workflow Task Type", type, jsonObject, "Not Supported");
         }
 
-        if (workflowTaskType != SupportedWorkFlowTasks.SWIPE) {
+        if (!NO_BASE_CONFIG.contains(workflowTaskType)) {
             validateNotNull(JsonConfigConstants.CONFIG, jsonObject);
         }
 
@@ -122,8 +124,10 @@ public class ValidateWorkflowTask implements JsonDeserializer<WorkflowTask> {
                             "Missing or Invalid");
                 }
                 break;
+            case SCROLL_TO_BEGINNING:
+            case SCROLL_TO_END:
             case SWIPE:
-                // the SWIPE task type only has type-specific config, handled below
+                // these task types only have type-specific config, handled below
                 break;
             default:
                 throwRuntimeException("Workflow Task Type", type, jsonObject, "Not Supported");
@@ -135,6 +139,8 @@ public class ValidateWorkflowTask implements JsonDeserializer<WorkflowTask> {
         SwipeConfig swipeConfig = null;
         ValidationConfig validationConfig = null;
         switch (workflowTaskType) {
+            case SCROLL_TO_BEGINNING:
+            case SCROLL_TO_END:
             case SCROLL_TO_FIND_AND_CLICK:
             case SCROLL_TO_FIND_AND_CLICK_IF_EXIST:
             case SCROLL_TO_FIND:

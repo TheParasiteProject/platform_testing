@@ -13,6 +13,8 @@
 #  limitations under the License.
 
 import logging
+import statsd_collector
+import statistics
 import time
 
 from bluetooth_test import bluetooth_base_test
@@ -35,6 +37,9 @@ class BTPerformancePairingTest(bluetooth_base_test.BluetoothBaseTest):
         else:
             logging.info(f'{ITERATIONS_PARAM_NAME} is not in testbed config. Using default value')
         logging.info(f'Setup {self.__class__.__name__} with {ITERATIONS_PARAM_NAME} = {self.iterations} and iteration delay = {self.iteration_delay}')
+        self.discoverer.services.register('statsd', statsd_collector.StatsdCollector)
+        self.discoverer.bt_connection_time = self.discoverer.services.statsd.add_config('/data/local/tmp/bt_connection_time.pb')
+        self.discoverer.bluetooth_event_metrics = self.discoverer.services.statsd.add_config('/data/local/tmp/bluetooth_event_metrics.pb')
 
     def setup_test(self):
         super().setup_test()
@@ -43,18 +48,72 @@ class BTPerformancePairingTest(bluetooth_base_test.BluetoothBaseTest):
     def test_pairing(self):
         """Test for pairing/unpairing a HU with a bluetooth device"""
         pairing_success_count = 0
+        metrics = {}
         for i in range(1, self.iterations + 1):
             logging.info(f'Pairing iteration {i}')
             try:
                 self.bt_utils.pair_primary_to_secondary()
                 pairing_success_count += 1
+                self.process_per_iteration_metrics(metrics)
             except:
                 logging.error(f'Failed to pair devices on iteration {i}')
             self.bt_utils.unpair()
             time.sleep(self.iteration_delay)
-        success_rate = pairing_success_count / self.iterations
-        metrics = {'success_rate': success_rate}
+        self.process_per_test_metrics(metrics, pairing_success_count)
         export_to_crystalball(metrics, self.log_path, self.current_test_info.name)
+
+    def process_per_iteration_metrics(self, metrics):
+        self.process_bt_connection_time_metrics(metrics)
+        self.process_bluetooth_event_metrics_metrics(metrics)
+
+    def process_bt_connection_time_metrics(self, metrics):
+        report = self.discoverer.services.statsd.get_metrics(self.discoverer.bt_connection_time, True)
+        try:
+            metrics_for_iteration = self.discoverer.services.statsd.process_bt_connection_time_stats_report(report.data)
+        except Exception as e:
+            logging.error(f'An error occurred: {e} during parsing of {str(report.data)}')
+            raise
+        logging.info(str(metrics_for_iteration))
+        for key in metrics_for_iteration:
+            metrics_key = "{headunit}:" + key + "-median"
+            if metrics_key in metrics:
+                metrics[metrics_key].append(metrics_for_iteration[key])
+            else:
+                metrics[metrics_key] = [metrics_for_iteration[key]]
+
+    def process_bluetooth_event_metrics_metrics(self, metrics):
+        report = self.discoverer.services.statsd.get_metrics(self.discoverer.bluetooth_event_metrics, True)
+        try:
+            metrics_for_iteration = self.discoverer.services.statsd.process_bluetooth_event_metrics_stats_report(report.data)
+        except Exception as e:
+            logging.error(f'An error occurred: {e} during parsing of {str(report.data)}')
+            raise
+        logging.info(str(metrics_for_iteration))
+        for key in metrics_for_iteration:
+            if key in metrics:
+                metrics[key] += metrics_for_iteration[key]
+            else:
+                metrics[key] = metrics_for_iteration[key]
+
+    def process_per_test_metrics(self, metrics, pairing_success_count):
+        profile_success_rate = {}
+        for metrics_key in metrics:
+            if "-median" in metrics_key:
+                metrics[metrics_key] = round(statistics.median(metrics[metrics_key]), 2)
+            elif "connection_state_changed" in metrics_key:
+                num_of_state_connecting = metrics[metrics_key].count(1)
+                num_of_state_connected = metrics[metrics_key].count(2)
+                if num_of_state_connecting == 0:
+                    logging.error(f'Metric {metrics_key} does not have connecting state reported. Skipping calculating success rate')
+                    continue
+                profile_success_rate["{headunit}:" + metrics_key + "-success-rate"] = num_of_state_connected / num_of_state_connecting
+        metrics.update(profile_success_rate)
+        success_rate = pairing_success_count / self.iterations
+        metrics['pairing_success_rate'] = success_rate
+
+    def teardown_class(self):
+        super().teardown_class()
+        self.discoverer.services.unregister_all()
 
 if __name__ == '__main__':
     common_main()

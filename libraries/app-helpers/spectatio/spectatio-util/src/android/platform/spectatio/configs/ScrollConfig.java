@@ -20,32 +20,32 @@ import com.google.gson.annotations.SerializedName;
 
 /** Scroll Config for Workflow Task in Spectatio Config JSON Config */
 public class ScrollConfig {
-    // If task needs scrolling, provide Scroll Action e.g. USE_BUTTON or USE_GESTURE
+    // USE_BUTTON or USE_GESTURE
     @SerializedName("SCROLL_ACTION")
     private String mScrollAction;
 
-    // If task needs scrolling and Scroll Action = USE_GESTURE, provide Scroll Direction
+    // If Scroll Action = USE_GESTURE, provide Scroll Direction
     // e.g. Horizontal or VERTICAL
     @SerializedName("SCROLL_DIRECTION")
     private String mScrollDirection;
 
-    // If task needs scrolling and Scroll Action = USE_BUTTON, provide Scroll Forward Button
+    // If Scroll Action = USE_BUTTON, provide Scroll Forward Button
     @SerializedName("SCROLL_FORWARD")
     private UiElement mScrollForward;
 
-    // If task needs scrolling and Scroll Action = USE_BUTTON, provide Scroll Backward Button
+    // If Scroll Action = USE_BUTTON, provide Scroll Backward Button
     @SerializedName("SCROLL_BACKWARD")
     private UiElement mScrollBackward;
 
-    // If task needs scrolling and Scroll Action = USE_GESTURE, provide Scroll Element
+    // If Scroll Action = USE_GESTURE, provide Scroll Element
     @SerializedName("SCROLL_ELEMENT")
     private UiElement mScrollElement;
 
-    // If task needs scrolling and Scroll Action = USE_GESTURE, provide Scroll Margin
+    // If Scroll Action = USE_GESTURE, provide Scroll Margin
     @SerializedName("SCROLL_MARGIN")
     private String mScrollMargin = "10";
 
-    // If task needs scrolling and Scroll Action = USE_GESTURE, provide Scroll wait time
+    // If Scroll Action = USE_GESTURE, provide Scroll wait time
     @SerializedName("SCROLL_WAIT_TIME")
     private String mScrollWaitTime = "1";
 

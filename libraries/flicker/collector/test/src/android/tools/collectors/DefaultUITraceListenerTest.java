@@ -20,6 +20,7 @@ import static android.tools.collectors.DefaultUITraceListener.TRACE_FTRACE_KEY;
 import static android.tools.collectors.DefaultUITraceListener.TRACE_INPUT_KEY;
 import static android.tools.collectors.DefaultUITraceListener.TRACE_LAYERS_KEY;
 import static android.tools.collectors.DefaultUITraceListener.TRACE_SHELL_TRANSITIONS_KEY;
+import static android.tools.collectors.UiTraceListener.PROTOLOG_DEFAULT_LOG_FROM_LEVEL_KEY;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -131,7 +132,7 @@ public class DefaultUITraceListenerTest {
         assertTrue(sourceNames.contains("android.surfaceflinger.layers"));
         assertTrue(sourceNames.contains("android.surfaceflinger.transactions"));
         assertTrue(sourceNames.contains("android.input.inputevent"));
-        assertFalse(sourceNames.contains("android.protolog"));
+        assertTrue(sourceNames.contains("android.protolog"));
         assertTrue(sourceNames.contains("linux.ftrace"));
         assertTrue(sourceNames.contains("com.android.wm.shell.transition"));
     }
@@ -144,6 +145,7 @@ public class DefaultUITraceListenerTest {
         b.putString(TRACE_LAYERS_KEY, "false");
         b.putString(TRACE_SHELL_TRANSITIONS_KEY, "false");
         b.putString(TRACE_INPUT_KEY, "false");
+        b.putString(PROTOLOG_DEFAULT_LOG_FROM_LEVEL_KEY, "");
 
         mListener = initListener(b);
         var config = mListener.buildConfig(b);
@@ -190,6 +192,29 @@ public class DefaultUITraceListenerTest {
         assertEquals("WM_DEBUG_ADD_REMOVE", protologConfig.getGroupOverrides(1).getGroupName());
     }
 
+    @Test
+    public void testBuildConfig_enablesProtoLogDebugLevelByDefault() {
+        Bundle b = new Bundle();
+        mListener = initListener(b);
+        var config = mListener.buildConfig(b);
+
+        List<String> sourceNames =
+                config.getDataSourcesList().stream().map(s -> s.getConfig().getName()).toList();
+
+        // Check protolog is on and configured
+        assertTrue(sourceNames.contains("android.protolog"));
+        PerfettoConfig.TraceConfig.DataSource protologSource =
+                config.getDataSourcesList().stream()
+                        .filter(s -> s.getConfig().getName().equals("android.protolog"))
+                        .findFirst()
+                        .get();
+        PerfettoConfig.ProtoLogConfig protologConfig =
+                protologSource.getConfig().getProtologConfig();
+        assertEquals(
+                PerfettoConfig.ProtoLogLevel.PROTOLOG_LEVEL_DEBUG,
+                protologConfig.getDefaultLogFromLevel());
+    }
+
     /*
      * Verify perfetto start and stop collection methods called exactly once for single test.
      */
@@ -212,7 +237,7 @@ public class DefaultUITraceListenerTest {
                         eq(
                                 "/data/local/tmp/perfetto-traces/run_test1/"
                                         + "PerfettoTracingPerTestStrategy/"
-                                        + "perfetto_run_test1-1.perfetto-trace"));
+                                        + "uiTrace_run_test1-1.perfetto-trace"));
     }
 
     /*
@@ -376,5 +401,30 @@ public class DefaultUITraceListenerTest {
         verify(mPerfettoHelper, times(2)).startCollecting();
         mListener.testRunFinished(new Result());
         verify(mPerfettoHelper, times(2)).stopCollecting(anyLong(), anyString());
+    }
+
+    @Test
+    public void testBuildConfig_canOverrideDefaultProtologLevel() {
+        Bundle b = new Bundle();
+        b.putString(PROTOLOG_DEFAULT_LOG_FROM_LEVEL_KEY, "INFO");
+
+        mListener = initListener(b);
+        var config = mListener.buildConfig(b);
+
+        List<String> sourceNames =
+                config.getDataSourcesList().stream().map(s -> s.getConfig().getName()).toList();
+
+        assertTrue(sourceNames.contains("android.protolog"));
+        // Check protolog is on and configured to INFO
+        PerfettoConfig.TraceConfig.DataSource protologSource =
+                config.getDataSourcesList().stream()
+                        .filter(s -> s.getConfig().getName().equals("android.protolog"))
+                        .findFirst()
+                        .get();
+        PerfettoConfig.ProtoLogConfig protologConfig =
+                protologSource.getConfig().getProtologConfig();
+        assertEquals(
+                PerfettoConfig.ProtoLogLevel.PROTOLOG_LEVEL_INFO,
+                protologConfig.getDefaultLogFromLevel());
     }
 }

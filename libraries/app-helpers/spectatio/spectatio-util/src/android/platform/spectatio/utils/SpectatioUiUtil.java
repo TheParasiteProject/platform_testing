@@ -950,7 +950,7 @@ public class SpectatioUiUtil {
         if (isValidUiObject(uiObject)) {
             return uiObject;
         }
-        scrollToBeginning(backward);
+        scrollToBoundary(backward);
         return scrollForwardAndFindUiObject(forward, target);
     }
 
@@ -980,7 +980,7 @@ public class SpectatioUiUtil {
         if (isValidUiObject(uiObject)) {
             return uiObject;
         }
-        scrollToEnd(scrollableSelector, isVertical);
+        scrollToBoundary(scrollableSelector, isVertical, false);
         return scrollBackwardAndFindUiObject(scrollableSelector, target, isVertical);
     }
 
@@ -1000,11 +1000,11 @@ public class SpectatioUiUtil {
         return uiObject;
     }
 
-    public void scrollToBeginning(BySelector backward) throws MissingUiElementException {
+    public void scrollToBoundary(BySelector scrollButton) throws MissingUiElementException {
         int scrollCount = 0;
         boolean canScroll = true;
         while (canScroll && scrollCount < MAX_SCROLL_COUNT) {
-            canScroll = scrollUsingButton(backward);
+            canScroll = scrollUsingButton(scrollButton);
             scrollCount++;
         }
     }
@@ -1145,7 +1145,7 @@ public class SpectatioUiUtil {
         if (isValidUiObject(uiObject)) {
             return uiObject;
         }
-        scrollToBeginning(scrollableSelector, isVertical);
+        scrollToBoundary(scrollableSelector, isVertical, true);
         return scrollForwardAndFindUiObject(scrollableSelector, target, isVertical);
     }
 
@@ -1183,23 +1183,17 @@ public class SpectatioUiUtil {
         return uiObject;
     }
 
-    public void scrollToEnd(
-            BySelector scrollableSelector, boolean isVertical
+    public void scrollToBoundary(
+            BySelector scrollableSelector, boolean isVertical, boolean backward
     ) throws MissingUiElementException {
         int scrollCount = 0;
         boolean canScroll = true;
         while (canScroll && scrollCount < MAX_SCROLL_COUNT) {
-            canScroll = scrollForward(scrollableSelector, isVertical);
-            scrollCount++;
-        }
-    }
-
-    public void scrollToBeginning(BySelector scrollableSelector, boolean isVertical)
-            throws MissingUiElementException {
-        int scrollCount = 0;
-        boolean canScroll = true;
-        while (canScroll && scrollCount < MAX_SCROLL_COUNT) {
-            canScroll = scrollBackward(scrollableSelector, isVertical);
+            if (backward) {
+                canScroll = scrollBackward(scrollableSelector, isVertical);
+            } else {
+                canScroll = scrollForward(scrollableSelector, isVertical);
+            }
             scrollCount++;
         }
     }

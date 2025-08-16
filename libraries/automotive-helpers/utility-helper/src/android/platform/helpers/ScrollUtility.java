@@ -168,11 +168,14 @@ public class ScrollUtility {
         try {
             switch (scrollAction) {
                 case USE_BUTTON:
-                    mSpectatioUiUtil.scrollToBeginning(backwardButtonSelector);
+                    mSpectatioUiUtil.scrollToBoundary(backwardButtonSelector);
                     break;
                 case USE_GESTURE:
-                    mSpectatioUiUtil.scrollToBeginning(
-                            scrollElementSelector, (scrollDirection == ScrollDirection.VERTICAL));
+                    mSpectatioUiUtil.scrollToBoundary(
+                            scrollElementSelector,
+                            (scrollDirection == ScrollDirection.VERTICAL),
+                            true
+                    );
                     break;
                 default:
                     throw new IllegalStateException(
