@@ -18,7 +18,7 @@ package {
 }
 
 cc_defaults {
-    name: "hcct_test_defaults",
+    name: "hcct_vkms_test_defaults",
     defaults: [
         "hwc_deps",
     ],
@@ -35,11 +35,9 @@ cc_defaults {
         "-Wall",
         "-Werror",
     ],
-    test_config_template: "hcct_config_template.xml",
+    test_config_template: "config_template.xml",
     test_suites: [
-        "device-tests",
         "general-tests",
-        "dts",
     ],
 }
 
@@ -49,16 +47,8 @@ cc_test {
     srcs: [
         "hotplugs.cpp",
     ],
-    defaults: ["hcct_test_defaults"],
+    defaults: ["hcct_vkms_test_defaults"],
     static_libs: [
         "vkms_tester",
     ],
-}
-
-cc_test {
-    name: "TestHwcComposition",
-    srcs: [
-        "composition_tests.cpp",
-    ],
-    defaults: ["hcct_test_defaults"],
 }
