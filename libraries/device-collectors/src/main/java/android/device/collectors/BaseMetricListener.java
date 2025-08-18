@@ -22,9 +22,9 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.os.ParcelFileDescriptor;
 import android.os.Trace;
-import androidx.annotation.VisibleForTesting;
 import android.util.Log;
 
+import androidx.annotation.VisibleForTesting;
 import androidx.test.InstrumentationRegistry;
 import androidx.test.internal.runner.listener.InstrumentationRunListener;
 
@@ -44,31 +44,38 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Map;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 
 /**
  * Base implementation of a device metric listener that will capture and output metrics for each
- * test run or test cases. Collectors will have access to {@link DataRecord} objects where they
- * can put results and the base class ensure these results will be send to the instrumentation.
+ * test run or test cases. Collectors will have access to {@link DataRecord} objects where they can
+ * put results and the base class ensure these results will be send to the instrumentation.
  *
- * Unless the shell is used to write files, any subclass that uses the directory created with
- * {@link #createAndEmptyDirectory(String)} needs external storage permission. So to use this class
- * at runtime in such subclasses, your test need to
- * <a href="{@docRoot}training/basics/data-storage/files.html#GetWritePermission">have storage
- * permission enabled</a>, and preferably granted at install time (to avoid interrupting the test).
- * For testing at desk, run adb install -r -g testpackage.apk
- * "-g" grants all required permission at install time.
+ * <p>Artifact storage: Unless the shell is used to write files, any subclass that uses the
+ * directory created with {@link #createAndEmptyDirectory(String)} needs permission to write to
+ * external storage: for tests targeting SDKs above 30 (R) that means MANAGE_EXTERNAL_STORAGE,
+ * preferably granted at install time (to avoid interrupting the test). For testing at desk, run:
  *
- * Filtering:
- * You can annotate any test method (@Test) with {@link MetricOption} and specify an arbitrary
- * group name that the test will be part of. It is possible to trigger the collection only against
- * test part of a group using '--include-filter-group [group name]' or to exclude a particular
- * group using '--exclude-filter-group [group name]'.
- * Several group name can be passed using a comma separated argument.
+ * <p>adb install -r -g testpackage.apk
  *
+ * <p>Where "-g" grants all required permissions at install time. As MANAGE_EXTERNAL_STORAGE can be
+ * difficult to grant, if your test uses the shell to write files (eg. via
+ * UiDevice.executeShellCommand()), you can specify the "use-temporary-storage" option to have
+ * {@link #createAndEmptyDirectory(String)} create directories on temporary storage that both the
+ * ADB shell user and FilePullerLogCollector (which accesses the files via adb) can access. This
+ * option can be specified in the test package's AndroidTest.xml file under the AndroidJUnitTest
+ * test class options:
+ *
+ * <p><option name="instrumentation-arg" key="use-temporary-storage" value="true" />
+ *
+ * <p>Filtering: You can annotate any test method (@Test) with {@link MetricOption} and specify an
+ * arbitrary group name that the test will be part of. It is possible to trigger the collection only
+ * against test part of a group using '--include-filter-group [group name]' or to exclude a
+ * particular group using '--exclude-filter-group [group name]'. Several group name can be passed
+ * using a comma separated argument.
  */
 public class BaseMetricListener extends InstrumentationRunListener {
 
@@ -78,6 +85,8 @@ public class BaseMetricListener extends InstrumentationRunListener {
 
     // Default skip metric until iteration count.
     private static final int SKIP_UNTIL_DEFAULT_ITERATION = 0;
+
+    private static final String TEMPORARY_STORAGE_PATH = "/data/local/tmp";
 
     /** Options keys that the collector can receive. */
     // Filter groups, comma separated list of group name to be included or excluded
@@ -89,6 +98,8 @@ public class BaseMetricListener extends InstrumentationRunListener {
     public static final String ARGUMENT_DISABLE_METRIC_COLLECTION = "disable";
     // Collect metric every nth iteration of a test with the same name.
     public static final String COLLECT_ITERATION_INTERVAL = "collect_iteration_interval";
+    // Create output directory in temporary rather than external storage.
+    public static final String ARGUMENT_USE_TEMPORARY_STORAGE = "use-temporary-storage";
 
     // Skip metric collection until given n iteration. Uses 1 indexing here.
     // For example if overall iteration is 10 and skip until iteration is set
@@ -108,6 +119,7 @@ public class BaseMetricListener extends InstrumentationRunListener {
     private Map<String, Integer> mTestIdInvocationCount = new HashMap<>();
     private int mCollectIterationInterval = 1;
     private int mSkipMetricUntilIteration = 0;
+    private boolean mUseTemporaryStorage = false;
 
     // Whether to report the results as instrumentation results. Used by metric collector rules,
     // which do not have the information to invoke InstrumentationRunFinished() to report metrics.
@@ -361,14 +373,22 @@ public class BaseMetricListener extends InstrumentationRunListener {
     }
 
     /**
-     * Create a directory inside external storage, and optionally empty it.
+     * Create a directory inside external storage or the app under test's cache directory, and
+     * optionally empty it.
      *
-     * @param dir full path to the dir to be created.
+     * @param dir relative path to the dir to be created.
      * @param empty whether to empty the new dirctory.
      * @return directory file created
      */
     public File createDirectory(String dir, boolean empty) {
         File rootDir = Environment.getExternalStorageDirectory();
+        if (mUseTemporaryStorage) {
+            rootDir = new File(TEMPORARY_STORAGE_PATH);
+            Log.i(
+                    getTag(),
+                    String.format(
+                            "Using temporary directory to store collector artifacts: %s", rootDir));
+        }
         File destDir = new File(rootDir, dir);
         if (empty) {
             executeCommandBlocking("rm -rf " + destDir.getAbsolutePath());
@@ -481,6 +501,8 @@ public class BaseMetricListener extends InstrumentationRunListener {
         final Boolean disableMetricCollection =
                 getBooleanArg(ARGUMENT_DISABLE_METRIC_COLLECTION, false);
         mDisableMetricCollection = logOnly || disableMetricCollection;
+
+        mUseTemporaryStorage = getBooleanArg(ARGUMENT_USE_TEMPORARY_STORAGE, false);
     }
 
     private Boolean getBooleanArg(String key, Boolean defaultValue) {
