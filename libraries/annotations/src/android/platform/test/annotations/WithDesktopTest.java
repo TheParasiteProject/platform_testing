@@ -22,9 +22,9 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Marks a screenshot test that should run on desktop as well as on other platforms, such as phone.
+ * Marks a test that should run on desktop as well as on other platforms, such as phone.
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.METHOD, ElementType.TYPE})
-public @interface WithDesktopScreenshotTest {
+public @interface WithDesktopTest {
 }
