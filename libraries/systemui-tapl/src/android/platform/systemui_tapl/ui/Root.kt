@@ -113,7 +113,7 @@ class Root private constructor(val displayId: Int = DEFAULT_DISPLAY) {
         }
 
         throw IllegalStateException(
-            "Failed to open notification shade on display $displayId after $MAX_RETRY_ATTEMPTS "+
+            "Failed to open notification shade on display $displayId after $MAX_RETRY_ATTEMPTS " +
                     "attempts."
         )
     }
@@ -558,6 +558,12 @@ class Root private constructor(val displayId: Int = DEFAULT_DISPLAY) {
         By.displayId(displayId).pkg(LAUNCHER_PACKAGE).assertVisible()
     }
 
+    // TODO (b/277105514): Determine whether this is an idiomatic method of determining visibility.
+    /** Asserts that launcher is visible. */
+    fun assertLauncherNotVisible() {
+        By.displayId(displayId).pkg(LAUNCHER_PACKAGE).assertInvisible()
+    }
+
     val keyboardBacklightIndicatorDialog: KeyboardBacklightIndicatorDialog
         get() = KeyboardBacklightIndicatorDialog()
 
@@ -570,11 +576,15 @@ class Root private constructor(val displayId: Int = DEFAULT_DISPLAY) {
     }
 
     private val qsHeaderSelector =
-        if (com.android.systemui.Flags.sceneContainer()) {
+        if (Flags.sceneContainer()) {
             sysuiResSelector("shade_header_root", displayId)
         } else {
             sysuiResSelector("split_shade_status_bar", displayId)
         }
+
+    fun assertQuickSettingsNotVisible() {
+        sysuiResSelector("quick_settings_panel", displayId).assertInvisible()
+    }
 
     /**
      * Verifies that shade is open. The success condition is the visibility of the Quick Settings
@@ -597,6 +607,10 @@ class Root private constructor(val displayId: Int = DEFAULT_DISPLAY) {
 
     private fun waitForQuickSettingsToOpen() {
         waitForObj(sysuiResSelector("quick_settings_panel", displayId))
+    }
+
+    fun assertBouncerNotVisible() {
+        assertThrows(AssertionError::class.java) { primaryBouncer }
     }
 
     fun pressBackOnDisplay() {
