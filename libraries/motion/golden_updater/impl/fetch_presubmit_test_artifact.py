@@ -33,6 +33,7 @@ class FetchPresubmitTestArtifacts:
         self.__refresh_user_token()
         self._artifacts_download_dir = artifacts_download_dir
         self.__create_download_directory()
+        self._artifacts_dict = {}
 
     def __get_oauth_token(self, email, scope, subprocess_run = subprocess.run):
         """
@@ -200,6 +201,7 @@ class FetchPresubmitTestArtifacts:
 
         try:
             file_path = os.path.join(self._artifacts_download_dir, artifact_name)
+            os.makedirs(os.path.dirname(file_path), exist_ok=True)
             response = api_client.get(url_string, stream=True)
             response.raise_for_status()
             block_size = 1024
@@ -257,8 +259,11 @@ class FetchPresubmitTestArtifacts:
             A list of test names for whose artifacts have '.actual' in their names.
 
         '''
+        if len(self._artifacts_dict) > 0:
+            #returns if value is fetched previously.
+            return list(self._artifacts_dict.keys())
+
         artifacts = self.__fetch_artifacts_list()
-        self._artifacts_dict = {}
 
         if not artifacts:
             print("No Artifacts found for this invocation ID.")
