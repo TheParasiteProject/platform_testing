@@ -21,6 +21,7 @@ import android.content.res.Resources;
 import android.platform.helpers.ScrollUtility.ScrollActions;
 import android.platform.helpers.ScrollUtility.ScrollDirection;
 import android.platform.spectatio.exceptions.MissingUiElementException;
+import android.platform.spectatio.utils.SpectatioUiUtil;
 
 import androidx.test.uiautomator.By;
 import androidx.test.uiautomator.BySelector;
@@ -29,7 +30,6 @@ import androidx.test.uiautomator.UiObject2;
 import java.text.SimpleDateFormat;
 import java.time.Month;
 import java.util.Date;
-import java.util.List;
 
 /** Helper class for functional tests of System settings */
 public class SettingsSystemHelperImpl extends AbstractStandardAppHelper
@@ -366,27 +366,14 @@ public class SettingsSystemHelperImpl extends AbstractStandardAppHelper
     @Override
     public boolean verifyUsageinGB(String option) {
         boolean isUsageinGB = false;
-        BySelector scrollSelector =
-                getUiElementFromConfig(
-                        AutomotiveConfigConstants.SETTINGS_UI_SUB_SETTING_STORAGE_SCROLL_ELEMENT);
-        getSpectatioUiUtil().waitForUiObject(scrollSelector, TWENTY_SECONDS_WAIT_TIME);
-        List<UiObject2> scrollElements =
-                getSpectatioUiUtil()
-                        .findUiObjects(
-                                getUiElementFromConfig(
-                                        AutomotiveConfigConstants
-                                                .SETTINGS_UI_SUB_SETTING_STORAGE_SCROLL_ELEMENT));
-        for (UiObject2 element : scrollElements) {
-            UiObject2 foundObject =
-                    getSpectatioUiUtil()
-                            .findUiObjectInGivenElement(element, getUiElementFromConfig(option));
-            if (foundObject != null) {
-                // there may be multiple matches the 'option' config on screen, such as 'System'
-                String targetText = getSummeryText(foundObject);
-                if (targetText != null && targetText.contains("GB")) {
-                    isUsageinGB = true;
-                }
-            }
+        getSpectatioUiUtil()
+                .waitForText(
+                        "GB", TWENTY_SECONDS_WAIT_TIME, SpectatioUiUtil.TextMatchType.CONTAINS);
+        BySelector elementSelector = getUiElementFromConfig(option);
+        UiObject2 element = getSpectatioUiUtil().findUiObject(elementSelector);
+        String targetText = getSummeryText(element);
+        if (targetText != null && targetText.contains("GB")) {
+            isUsageinGB = true;
         }
         return isUsageinGB;
     }
