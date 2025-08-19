@@ -93,7 +93,7 @@ void VkmsTester::ForceDeleteVkmsDir() { ShutdownAndCleanUpVkms(); }
 
 VkmsTester::VkmsTester(size_t displaysCount,
                        const std::vector<VkmsConnectorBuilder> &builders) {
-  mInitialized = ToggleHwc3(false) && SetVkmsAsDisplayDriver() &&
+  mInitialized = ToggleHwc3(false) && ToggleVkmsAsDisplayDriver(true) &&
                  SetupDisplays(displaysCount, builders) && ToggleVkms(true) &&
                  ToggleHwc3(true);
   if (!mInitialized) {
@@ -123,18 +123,21 @@ void VkmsTester::DisableCleanupOnDestruction() {
   mDisableCleanupOnDestruction = true;
 }
 
-bool VkmsTester::SetVkmsAsDisplayDriver() {
-  // TODO(b/398831713): Setup an official doc for reference.
-
+// static
+bool VkmsTester::ToggleVkmsAsDisplayDriver(bool enable) {
   // Set HWC to use VKMS as the display driver.
-  if (property_set("vendor.hwc.drm.device", "/dev/dri/card1") != 0) {
-    ALOGE("Failed to set vendor.hwc.drm.device property");
+  std::string propertyValue = enable ? "/dev/dri/card1" : "/dev/dri/card0";
+  if (property_set("vendor.hwc.drm.device", propertyValue.c_str()) != 0) {
+    ALOGE("Failed to set vendor.hwc.drm.device property to %s",
+          propertyValue.c_str());
     return false;
-  } else {
-    ALOGI("Successfully set vendor.hwc.drm.device property");
   }
+  ALOGI("Successfully set vendor.hwc.drm.device property");
+  // On Disabling VKMS, we don't need to do anything else.
+  if (!enable)
+    return true;
 
-  // Create VKMS directory
+  // Create VKMS directory if we're enabling VKMS.
   if (mkdir(kVkmsBaseDir, 0777) == 0) {
     ALOGI("Successfully created directory %s", kVkmsBaseDir);
     return true;
@@ -401,6 +404,8 @@ void VkmsTester::ShutdownAndCleanUpVkms() {
   // the directories.
   FindAndCleanupPossibleLinks(kVkmsBaseDir);
   CleanUpDirAndChildren(kVkmsBaseDir);
+
+  ToggleVkmsAsDisplayDriver(false);
 }
 
 // static

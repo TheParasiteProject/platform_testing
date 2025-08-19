@@ -364,6 +364,29 @@ constructor(
     fun layer(predicate: Predicate<Layer>): LayerSubject? =
         subjects.firstOrNull { predicate.test(it.layer) }
 
+    /**
+     * Finds the ancestor layer of the [LayerSubject] with [componentMatcher] by [predicate]. If the
+     * ancestor layer is not found, returns `null`.
+     *
+     * @param componentMatcher the child of the [LayerSubject] that start to find
+     * @param predicate to find the ancestor layer
+     * @return ancestor [LayerSubject] that matches the [predicate] or `null` if not found
+     */
+    fun findAncestorLayer(
+        componentMatcher: IComponentMatcher,
+        predicate: Predicate<Layer>,
+    ): LayerSubject? {
+        val layerSubject = layer(componentMatcher) ?: return null
+        var ancestorLayer = layerSubject.layer.parent
+        while (ancestorLayer != null) {
+            if (predicate.test(ancestorLayer)) {
+                return layer { it == ancestorLayer }
+            }
+            ancestorLayer = ancestorLayer.parent
+        }
+        return null
+    }
+
     override fun toString(): String {
         return "LayerTraceEntrySubject($entry)"
     }

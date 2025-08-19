@@ -173,7 +173,7 @@ private:
   explicit VkmsTester(size_t displaysCount,
                       const std::vector<VkmsConnectorBuilder>& builders = {});
 
-  bool SetVkmsAsDisplayDriver();
+  static bool ToggleVkmsAsDisplayDriver(bool enable);
   bool SetupDisplays(int displaysCount,
                      const std::vector<VkmsConnectorBuilder>& builders);
   static bool ToggleVkms(bool enable);

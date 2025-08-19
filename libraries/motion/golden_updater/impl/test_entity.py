@@ -13,11 +13,17 @@
 # limitations under the License.
 #
 
-import enum
-
-class GoldenWatcherTypes(enum.Enum):
-    ATEST = "atest"
-    ADB = "adb"
-    ROBOLECTRIC = "robolectric"
-    PRESUBMIT = "presubmit"
-    GERRIT = "gerrit"
+'''
+    A test mode can be cached with a combination of three values:
+        1. golden watcher, 2. download client, 3.goldens_list.
+    Not all are required all the time.
+        Presubmit -> 1 and 2.
+        Gerrit -> 3.
+        Rest all -> 1, 3(optional).
+    TestEntity encapsulates these attributes and helps in caching the test mode data.
+'''
+class TestEntity:
+    def __init__(self, golden_watcher=None, download_client=None, goldens_list=None):
+        self.golden_watcher = golden_watcher
+        self.goldens_list = goldens_list
+        self.download_client = download_client

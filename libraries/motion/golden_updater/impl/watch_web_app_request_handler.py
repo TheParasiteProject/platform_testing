@@ -30,16 +30,16 @@ from impl.golden_watchers.golden_watcher_factory import GoldenWatcherFactory
 from impl.golden_watchers.golden_watcher_types import GoldenWatcherTypes
 from impl.adb_serial_finder import ADBSerialFinder
 from impl.adb_client import AdbClient
+from impl.test_entity import TestEntity
 
 class WatchWebAppRequestHandler(http.server.BaseHTTPRequestHandler):
     secret_token = None
-    golden_watcher = None
+    test_entity: TestEntity = None
     temp_dir = None
     android_build_top = None
     this_server_address = None
-    presubmit_fetch_client = None
     adb_serial_finder = ADBSerialFinder()
-    golden_watcher_cache = {}
+    test_entity_cache = {}
 
     def __init__(self, *args, **kwargs):
         self.root_directory = path.abspath(path.dirname(__file__))
@@ -71,14 +71,14 @@ class WatchWebAppRequestHandler(http.server.BaseHTTPRequestHandler):
             requested_file_start_index = parsed.path.find("/", len("/golden/") + 1)
             requested_file = parsed.path[requested_file_start_index + 1 :]
             self.serve_file(
-                WatchWebAppRequestHandler.golden_watcher.temp_dir,
+                WatchWebAppRequestHandler.test_entity.golden_watcher.temp_dir,
                 requested_file
             )
             return
         elif parsed.path.startswith("/expected/"):
             golden_id = parsed.path[len("/expected/") :]
 
-            goldens = WatchWebAppRequestHandler.golden_watcher.cached_goldens.values()
+            goldens = WatchWebAppRequestHandler.test_entity.golden_watcher.cached_goldens.values()
             for golden in goldens:
                 if golden.id != golden_id:
                     continue
@@ -97,6 +97,9 @@ class WatchWebAppRequestHandler(http.server.BaseHTTPRequestHandler):
             rightLink = rightLinkValues[0] if rightLinkValues else None
             gerrit_downloader = GerritDownloader()
             res = gerrit_downloader.download(left=leftLink, right=rightLink)
+            testEntity = TestEntity(goldens_list=res)
+            (WatchWebAppRequestHandler
+            .test_entity_cache[GoldenWatcherTypes.GERRIT.value]) = testEntity
             self.send_json(res)
             return
 
@@ -199,9 +202,11 @@ class WatchWebAppRequestHandler(http.server.BaseHTTPRequestHandler):
 
         goldens_list = []
 
-        for golden in WatchWebAppRequestHandler.golden_watcher.cached_goldens.values():
+        for golden in WatchWebAppRequestHandler.test_entity.golden_watcher.cached_goldens.values():
             goldens_list.append(self.create_golden_data(golden))
 
+        #updating the goldens list
+        WatchWebAppRequestHandler.test_entity.goldens_list = goldens_list
         self.send_json(goldens_list)
 
     def create_golden_data(self, golden):
@@ -219,8 +224,8 @@ class WatchWebAppRequestHandler(http.server.BaseHTTPRequestHandler):
         golden_data["actualUrl"] = (
             f"{WatchWebAppRequestHandler.this_server_address}/golden/"
             f"{golden.checksum}/"
-            f"{golden.local_file[len(WatchWebAppRequestHandler.
-                                     golden_watcher.temp_dir) + 1 :]}"
+            f"{golden.local_file[len(WatchWebAppRequestHandler.test_entity
+                                     .golden_watcher.temp_dir) + 1 :]}"
         )
         expected_file = path.join(
                             WatchWebAppRequestHandler.android_build_top,
@@ -242,21 +247,26 @@ class WatchWebAppRequestHandler(http.server.BaseHTTPRequestHandler):
 
     def service_presubmit_artifact_list(self, invocation_id):
         try:
-            WatchWebAppRequestHandler.golden_watcher = (
+            golden_watcher = (
                 GoldenWatcherFactory.create_watcher(
                     GoldenWatcherTypes.PRESUBMIT,
-                    WatchWebAppRequestHandler.golden_watcher.temp_dir
+                    WatchWebAppRequestHandler.temp_dir
                 )
             )
-            WatchWebAppRequestHandler.presubmit_fetch_client = (
+            presubmit_fetch_client = (
                 FetchPresubmitTestArtifacts(invocation_id,
-                                            WatchWebAppRequestHandler
-                                            .golden_watcher
+                                            golden_watcher
                                             .artifacts_download_dir)
             )
-            artifacts_list = (WatchWebAppRequestHandler.presubmit_fetch_client.
-                              list_presubmit_test_artifacts())
-            self.send_json(artifacts_list)
+            WatchWebAppRequestHandler.test_entity = TestEntity(
+                golden_watcher=golden_watcher,
+                download_client=presubmit_fetch_client
+            )
+            WatchWebAppRequestHandler.test_entity_cache[
+                GoldenWatcherTypes.PRESUBMIT.value] = WatchWebAppRequestHandler.test_entity
+
+            self.serve_presubmit_data(presubmit_fetch_client
+                                                     .list_presubmit_test_artifacts())
         except requests.exceptions.RequestException as exception:
             if exception.response.status_code == 500:
                 self.send_error_with_message(503, str(exception))
@@ -265,14 +275,24 @@ class WatchWebAppRequestHandler(http.server.BaseHTTPRequestHandler):
         except Exception as exception:
             self.send_error_with_message(500, str(exception))
 
+    def serve_presubmit_data(self, test_list):
+        presubmit_data = []
+        for test in test_list:
+            presubmit_data_json = {}
+            presubmit_data_json["testname"] = test
+            presubmit_data.append(presubmit_data_json)
+        #updating the goldens list
+        WatchWebAppRequestHandler.test_entity.goldens_list = presubmit_data
+        self.send_json(presubmit_data)
+
     def service_fetch_artifacts(self, test_name):
         try:
-            artifacts = (WatchWebAppRequestHandler.presubmit_fetch_client
+            artifacts = (WatchWebAppRequestHandler.test_entity.download_client
                             .download_presubmit_test_artifact_for_test_name(test_name))
             if artifacts:
-                (WatchWebAppRequestHandler.golden_watcher
+                (WatchWebAppRequestHandler.test_entity.golden_watcher
                 .refresh_golden_files(artifacts, test_name))
-            for golden in (WatchWebAppRequestHandler.golden_watcher
+            for golden in (WatchWebAppRequestHandler.test_entity.golden_watcher
                            .cached_goldens.values()):
                 if golden.golden_name == test_name:
                     self.send_json(self.create_golden_data(golden))
@@ -307,24 +327,24 @@ class WatchWebAppRequestHandler(http.server.BaseHTTPRequestHandler):
         #If found in cache, served from cache.
         #If files changed then need to run refresh.
 
-        if mode in WatchWebAppRequestHandler.golden_watcher_cache:
+        if mode in WatchWebAppRequestHandler.test_entity_cache:
             (WatchWebAppRequestHandler
-            .golden_watcher) = WatchWebAppRequestHandler.golden_watcher_cache[mode]
+            .test_entity) = WatchWebAppRequestHandler.test_entity_cache[mode]
+            self.send_json(WatchWebAppRequestHandler.test_entity.goldens_list)
 
         else:
             try:
+                golden_watcher = None
                 match(mode):
                     case GoldenWatcherTypes.ROBOLECTRIC.value:
-                        (WatchWebAppRequestHandler
-                        .golden_watcher) = GoldenWatcherFactory.create_watcher(
+                        golden_watcher = GoldenWatcherFactory.create_watcher(
                                             GoldenWatcherTypes.ROBOLECTRIC,
                                             os.path.join(WatchWebAppRequestHandler
                                                          .temp_dir,mode)
                                         )
 
                     case GoldenWatcherTypes.ATEST.value:
-                        (WatchWebAppRequestHandler
-                        .golden_watcher) = GoldenWatcherFactory.create_watcher(
+                        golden_watcher = GoldenWatcherFactory.create_watcher(
                                             GoldenWatcherTypes.ATEST,
                                             os.path.join(WatchWebAppRequestHandler
                                                          .temp_dir,mode)
@@ -347,32 +367,31 @@ class WatchWebAppRequestHandler(http.server.BaseHTTPRequestHandler):
                         if not adb_client.run_as_root():
                             raise Exception("Cannot run ADB as root.")
 
-                        (WatchWebAppRequestHandler
-                        .golden_watcher) = GoldenWatcherFactory.create_watcher(
+                        golden_watcher = GoldenWatcherFactory.create_watcher(
                                             GoldenWatcherTypes.ADB,
                                             os.path.join(WatchWebAppRequestHandler
                                                          .temp_dir,mode),
                                             adb_client
                                         )
-
                 (WatchWebAppRequestHandler
-                .golden_watcher_cache[mode]) = WatchWebAppRequestHandler.golden_watcher
+                .test_entity) = TestEntity(golden_watcher=golden_watcher)
+                (WatchWebAppRequestHandler
+                .test_entity_cache[mode]) = WatchWebAppRequestHandler.test_entity
+                self.service_list_goldens()
             except Exception as ex:
                 print(f"Failure occurred: {ex}")
                 self.send_error_with_message(503, f"Failure occurred: {ex}")
                 return
 
-        self.service_list_goldens()
-
     def service_refresh_goldens(self, clear):
-        if not WatchWebAppRequestHandler.golden_watcher:
+        if not WatchWebAppRequestHandler.test_entity.golden_watcher:
             # no test mode selected
             self.send_error_with_message(400, "No test mode selected !")
             return None
 
         if clear:
-            WatchWebAppRequestHandler.golden_watcher.clean()
-        WatchWebAppRequestHandler.golden_watcher.refresh_golden_files()
+            WatchWebAppRequestHandler.test_entity.golden_watcher.clean()
+        WatchWebAppRequestHandler.test_entity.golden_watcher.refresh_golden_files()
         self.service_list_goldens()
 
     def service_update_golden(self, update_golden_id_set):
@@ -384,7 +403,7 @@ class WatchWebAppRequestHandler(http.server.BaseHTTPRequestHandler):
         result = {}
         success_count = 0
 
-        goldens = WatchWebAppRequestHandler.golden_watcher.cached_goldens.values()
+        goldens = WatchWebAppRequestHandler.test_entity.golden_watcher.cached_goldens.values()
         for golden in goldens:
             if golden.id not in update_golden_id_set:
                 print("skip", golden.id)
