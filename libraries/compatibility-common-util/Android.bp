@@ -36,6 +36,7 @@ java_library {
         "//test/suite_harness/common/util",
         "//platform_testing/libraries/compatibility-common-util/tests",
         "//platform_testing/libraries/sts-common-util/util",
+        "//cts/common/device-side/nativetesthelper",
     ],
     srcs: ["src/**/*.java"],
     host_supported: true,
