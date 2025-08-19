@@ -87,7 +87,9 @@ public class WifiSettingTest {
         Log.i(LOG_TAG, "Assert: Wi-Fi Preferences option is displayed");
         assertTrue(
                 "Wi-Fi Preferences option is not displayed",
-                mSettingsUIHelper.get().hasUIElement(AutomotiveConfigConstants.WIFI_PREFERENCES));
+                mSettingsUIHelper
+                        .get()
+                        .hasSettingsMenu(AutomotiveConfigConstants.WIFI_PREFERENCES));
         Log.i(LOG_TAG, "Act: Open Wifi preferences");
         mSettingHelper.get().openMenuWith("Wi‑Fi preferences");
         Log.i(LOG_TAG, "Assert: Turn on Wi‑Fi automatically is displayed");
