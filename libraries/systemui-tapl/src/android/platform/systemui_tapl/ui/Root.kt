@@ -21,6 +21,7 @@ import android.graphics.PointF
 import android.graphics.Rect
 import android.os.RemoteException
 import android.os.SystemClock
+import android.os.SystemClock.sleep
 import android.platform.helpers.ShadeUtils
 import android.platform.systemui_tapl.controller.LockscreenController
 import android.platform.systemui_tapl.controller.NotificationIdentity
@@ -81,6 +82,52 @@ class Root private constructor(val displayId: Int = DEFAULT_DISPLAY) {
             return NotificationShade(displayId)
         } else {
             return openNotificationShadeViaGlobalAction()
+        }
+    }
+
+    /**
+     * Opens the notification shade with retrying on failure. Use this if there is no need to assert
+     * the way of opening it.
+     *
+     * This function can be used on the desktop environment.
+     *
+     * @return A [NotificationShade] instance representing the opened shade.
+     * @throws IllegalStateException if the shade fails to open after all retry attempts.
+     */
+    fun openNotificationShadeWithRetry(): NotificationShade {
+        for (attempt in 1..MAX_RETRY_ATTEMPTS) {
+            try {
+                val shade = if (Flags.sceneContainer()) {
+                    uiDevice.executeShellCommand("cmd statusbar expand-notifications-instant")
+                    waitForNotificationContainerToShow()
+                    NotificationShade(displayId)
+                } else {
+                    openNotificationShadeViaGlobalAction()
+                }
+                return shade
+            } catch (e: FailedEnsureException) {
+                if (attempt < MAX_RETRY_ATTEMPTS) {
+                    sleep(RETRY_TIME_INTERVAL.toMillis())
+                }
+            }
+        }
+
+        throw IllegalStateException(
+            "Failed to open notification shade on display $displayId after $MAX_RETRY_ATTEMPTS "+
+                    "attempts."
+        )
+    }
+
+    private val notificationContainerSelector =
+        sysuiResSelector("shared_notification_container", displayId)
+
+    private fun waitForNotificationContainerToShow() {
+        assert(Flags.sceneContainer())
+        traceSection("waitForNotificationContainerToShow") {
+            notificationContainerSelector.assertVisible(
+                timeout = NOTIFICATION_CONTAINER_OPEN_TIMEOUT,
+                errorProvider = { "Notification container didn't show on display $displayId" },
+            )
         }
     }
 
@@ -529,6 +576,15 @@ class Root private constructor(val displayId: Int = DEFAULT_DISPLAY) {
             sysuiResSelector("split_shade_status_bar", displayId)
         }
 
+    /**
+     * Verifies that shade is open. The success condition is the visibility of the Quick Settings
+     * (QS) header.
+     *
+     * NOTE: This function should not be used for desktop, as the QS header does not exist.
+     *
+     * @throws FailedEnsureException if the QS header does not become visible within the specified
+     * timeout.
+     */
     fun waitForShadeToOpen() {
         // Note that this duplicates the tracing done by assertVisible, but with a better name.
         traceSection("waitForShadeToOpen") {
@@ -657,6 +713,9 @@ class Root private constructor(val displayId: Int = DEFAULT_DISPLAY) {
 
     companion object {
         private val NOTIFICATION_SHADE_OPEN_TIMEOUT = Duration.ofSeconds(20)
+        private val NOTIFICATION_CONTAINER_OPEN_TIMEOUT = Duration.ofSeconds(5)
+        private const val MAX_RETRY_ATTEMPTS = 3
+        private val RETRY_TIME_INTERVAL = Duration.ofSeconds(1)
         private const val LONG_TIMEOUT: Long = 2000
         private const val SHORT_TIMEOUT: Long = 500
         private const val SCREENSHOT_POST_TIMEOUT_MSEC: Long = 20000
