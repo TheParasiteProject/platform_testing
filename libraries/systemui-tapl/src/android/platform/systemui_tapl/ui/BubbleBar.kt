@@ -34,7 +34,7 @@ import com.google.common.truth.Truth.assertThat
  *
  * @see [ExpandedBubbleBar]
  */
-class BubbleBar : BubbleDragTarget {
+class BubbleBar : BubbleBarDragTarget {
 
     init {
         BUBBLE_BAR_VIEW.assertVisible { "Failed while waiting for bubble bar to become visible" }

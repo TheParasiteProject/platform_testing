@@ -32,7 +32,16 @@ import java.time.temporal.ChronoUnit
 internal interface BubbleBarDragTarget : BubbleDragTarget {
 
     override fun dragToDismiss() {
-        dragTo(waitForObj(BubbleBar.DISMISS_VIEW).visibleCenter)
+        BetterSwipe.swipe(visibleCenter) {
+            // It is necessary to hold a period to trigger the drag gesture for bubble bar.
+            pause()
+            to(
+                // We should wait for dismiss view show up before dragging to it.
+                waitForObj(BubbleBar.DISMISS_VIEW).visibleCenter,
+                Duration.of(500, ChronoUnit.MILLIS),
+                PRECISE_GESTURE_INTERPOLATOR,
+            )
+        }
     }
 
     override fun dragTo(position: Point) {
