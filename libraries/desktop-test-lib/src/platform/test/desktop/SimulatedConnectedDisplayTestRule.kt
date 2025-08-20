@@ -127,7 +127,16 @@ class SimulatedConnectedDisplayTestRule(val initDisplayCount: Int = 0) : TestRul
             } ?: error("Timed out waiting for displays to be added.")
         }
 
-        waitForTopologyUpdate(addedDisplays, /* expectPresent= */ true)
+        val mirroringState =
+            Settings.Secure.getInt(
+                context.contentResolver,
+                Settings.Secure.MIRROR_BUILT_IN_DISPLAY,
+                -1
+            )
+        if (mirroringState == 0) {
+            // Only validate added displays in topology when mirroring is false
+            waitForTopologyUpdate(addedDisplays, /* expectPresent= */ true)
+        }
         addedDisplays
     }
 
@@ -202,11 +211,9 @@ class SimulatedConnectedDisplayTestRule(val initDisplayCount: Int = 0) : TestRul
         WaitUtils.ensureThat(
             errorProvider = {
                 if (expectPresent) {
-                    "Displays $displayIds were added to DisplayManager, but " +
-                        "$mismatchedDisplays are not in DisplayTopology"
+                    "Displays $displayIds were added to DisplayManager, but $mismatchedDisplays are not in DisplayTopology"
                 } else {
-                    "Displays $displayIds were removed from DisplayManager, but " +
-                        "$mismatchedDisplays are in DisplayTopology"
+                    "Displays $displayIds were removed from DisplayManager, but $mismatchedDisplays are in DisplayTopology"
                 }
             }
         ) {
