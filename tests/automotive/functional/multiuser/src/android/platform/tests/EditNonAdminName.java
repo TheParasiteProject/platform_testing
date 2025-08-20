@@ -20,6 +20,7 @@ import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertTrue;
 
 import android.content.pm.UserInfo;
+import android.platform.helpers.AutomotiveConfigConstants;
 import android.platform.helpers.HelperAccessor;
 import android.platform.helpers.IAutoSettingHelper;
 import android.platform.helpers.IAutoUserHelper;
@@ -39,9 +40,14 @@ public class EditNonAdminName {
 
     public String INITIAL_USERNAME;
     public static final String EDIT_USERNAME = "editedName";
+
+    private static final String DRIVER = AutomotiveConfigConstants.HOME_DRIVER_BUTTON;
+
     private final MultiUserHelper mMultiUserHelper = MultiUserHelper.getInstance();
     private HelperAccessor<IAutoUserHelper> mUsersHelper;
     private HelperAccessor<IAutoSettingHelper> mSettingHelper;
+
+    private UserInfo newUser;
 
     private static final String LOG_TAG = EditAdminName.class.getSimpleName();
 
@@ -57,12 +63,14 @@ public class EditNonAdminName {
         INITIAL_USERNAME = initialUser.name;
         Log.i(LOG_TAG, "Act: Add new non admin user");
         mUsersHelper.get().addUserQuickSettings(initialUser.name);
+        mUsersHelper.get().skipSetupWizard();
     }
 
     @After
     public void deleteNonAdminUser() {
         Log.i(LOG_TAG, "Act: Delete non admin user");
-        mUsersHelper.get().deleteCurrentUser();
+        mUsersHelper.get().switchUsingUserIcon(DRIVER);
+        mMultiUserHelper.removeUser(newUser);
         mSettingHelper.get().exit();
     }
 
@@ -78,7 +86,7 @@ public class EditNonAdminName {
         mUsersHelper.get().editUserName(EDIT_USERNAME);
 
         Log.i(LOG_TAG, "Act: Get current userinfo");
-        UserInfo newUser = mMultiUserHelper.getCurrentForegroundUserInfo();
+        newUser = mMultiUserHelper.getCurrentForegroundUserInfo();
 
         Log.i(LOG_TAG, "Assert: Current username is changed ");
         assertTrue("Username is not changed", EDIT_USERNAME.equals(newUser.name));
