@@ -215,7 +215,7 @@ constructor(
         private const val ACKNOWLEDGED_BUTTON_TEXT = "Got it"
 
         private val WAIT_TIME_IN_MILLISECONDS = Duration.ofSeconds(3).toMillis()
-        private const val MIN_WINDOW_WIDTH_FOR_TAB_TEARING_DP = 600
+        private const val MIN_WINDOW_WIDTH_FOR_TAB_TEARING_DP = 475
 
         private fun getBrowserIntent(): Intent {
             val intent = Intent(Intent.ACTION_VIEW, Uri.parse("http://"))

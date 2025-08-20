@@ -685,4 +685,94 @@ public abstract class AbstractStandardAppHelper2 implements IAppHelper {
             mAutomation.dropShellPermissionIdentity();
         }
     }
+
+    /**
+     * Setup expectation: On the home screen.
+     *
+     * <p>Waits for device to connect to Wi-Fi and internet access.
+     *
+     * @param maxWiFiRetries The maximum number of times to retry the wifi connection check.
+     * @param maxInternetRetries The maximum number of times of retry the internet connection check.
+     * @param wifiRetryInterval The wait time in seconds between retries.
+     */
+    public void waitForWiFiAndInternetConnection(
+            int maxWiFiRetries, int maxInternetRetries, int wifiRetryInterval) {
+        waitForWifiConnection(maxWiFiRetries, wifiRetryInterval);
+        waitForInternetConnection(maxInternetRetries);
+    }
+
+    /**
+     * Checks if a device is connected to Wi-Fi.
+     *
+     * @param maxRetries The maximum number of times to retry the connection check.
+     * @param retryInterval The wait time in seconds between retries.
+     * @throws IllegalStateException if Wi-Fi connection fails after all retries.
+     */
+    private void waitForWifiConnection(int maxRetries, int retryInterval) {
+        int attempts = 0;
+        boolean isConnected = false;
+        while (attempts < maxRetries) {
+            try {
+                String wifiStatus = mDevice.executeShellCommand(" cmd wifi status");
+                Log.v(LOG_TAG, "=== WIFI STATUS BELOW ==");
+                Log.v(LOG_TAG, wifiStatus);
+                if (wifiStatus != null && wifiStatus.contains("Wifi is connected")) {
+                    Log.v(LOG_TAG, "Wi-Fi is connected.");
+                    isConnected = true;
+                    break;
+                } else {
+                    Log.v(LOG_TAG, "Wi-Fi not connected. Trying again...");
+                    TimeUnit.MILLISECONDS.sleep(1000 * retryInterval);
+                    attempts++;
+                }
+            } catch (IOException | InterruptedException e) {
+                Log.e(LOG_TAG, "Error checking Wi-Fi connection, retrying.", e);
+                attempts++;
+            }
+        }
+        if (!isConnected) {
+            throw new IllegalStateException(
+                    String.format(
+                            "Failed to establish Wi-Fi connection after %d retries.", maxRetries));
+        }
+    }
+
+    /**
+     * Checks if a device has internet access by pinging Google's DNS.
+     *
+     * @param maxRetries The maximum number of times to retry the connection check.
+     * @throws IllegalStateException if internet connection fails after all retries.
+     */
+    private void waitForInternetConnection(int maxRetries) {
+        int attempts = 0;
+        boolean isInternetAvailable = false;
+        while (attempts < maxRetries) {
+            try {
+                String pingResult = mDevice.executeShellCommand(" ping -c 1 8.8.8.8");
+                Log.v(LOG_TAG, "===== PING Output below =====");
+                Log.v(LOG_TAG, pingResult);
+                if (pingResult != null
+                        && !pingResult.contains("Destination Net Unreachable")
+                        && (!pingResult.contains("100% packet loss")
+                                && pingResult.contains("bytes from"))) {
+                    Log.v(LOG_TAG, "Internet connection is OK.");
+                    isInternetAvailable = true;
+                    break;
+                } else {
+                    Log.v(LOG_TAG, "No internet connection. Trying again...");
+                    TimeUnit.MILLISECONDS.sleep(5000);
+                    attempts++;
+                }
+            } catch (IOException | InterruptedException e) {
+                Log.e(LOG_TAG, "Error checking internet connection, retrying.", e);
+                attempts++;
+            }
+        }
+        if (!isInternetAvailable) {
+            throw new IllegalStateException(
+                    String.format(
+                            "Failed to establish internet connection after %d retries.",
+                            maxRetries));
+        }
+    }
 }

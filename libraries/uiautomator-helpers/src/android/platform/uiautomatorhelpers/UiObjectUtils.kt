@@ -18,6 +18,7 @@ package android.platform.uiautomatorhelpers
 
 import android.graphics.PointF
 import android.graphics.Rect
+import android.os.SystemClock
 import android.platform.uiautomatorhelpers.DeviceHelpers.uiDevice
 import android.platform.uiautomatorhelpers.WaitUtils.waitForValueToSettle
 import androidx.test.uiautomator.BySelector
@@ -123,6 +124,7 @@ val UiObject2.stableBounds: Rect
     get() = waitForValueToSettle("${this.resourceName} bounds") { visibleBounds }
 
 private const val MAX_FIND_ELEMENT_ATTEMPT = 15
+private const val OVERSCROLL_DURATION: Long = 250 // ms, from OverScroller.java
 
 /**
  * Scrolls [this] in [direction] ([Direction.DOWN] by default) until finding [selector]. It returns
@@ -141,7 +143,11 @@ fun UiObject2.scrollUntilFound(
     val (from, to) = getPointsToScroll(direction)
     (0 until MAX_FIND_ELEMENT_ATTEMPT).forEach { _ ->
         val f = findObject(selector)
-        if (f?.let { condition(it) } == true) return f
+        if (f?.let { condition(it) } == true) {
+            // Wait for overscroll to settle, as it may eat taps otherwise (b/339676505)
+            SystemClock.sleep(OVERSCROLL_DURATION)
+            return f
+        }
         BetterSwipe.swipe(from, to)
     }
     return null
