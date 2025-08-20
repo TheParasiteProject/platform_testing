@@ -56,6 +56,7 @@ import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withTimeoutOrNull
+import org.junit.Assume.assumeNotNull
 import org.junit.rules.ExternalResource
 import org.junit.rules.RuleChain
 import org.junit.rules.TestRule
@@ -116,6 +117,7 @@ class DesktopMouseTestRule() : TestRule {
          * [DesktopMouseTestRule.move].
          */
         override fun before() = runBlocking {
+            assumeNotNull(virtualDeviceManager)
             val createdVirtualDevice =
                 virtualDeviceManager.createVirtualDevice(
                     fakeAssociationRule.associationInfo.id,
