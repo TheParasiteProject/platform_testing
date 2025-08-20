@@ -18,12 +18,8 @@ package android.platform.systemui_tapl.ui
 
 import android.platform.systemui_tapl.utils.DeviceUtils.sysuiResSelector
 import android.platform.uiautomatorhelpers.DeviceHelpers.assertInvisible
-import android.platform.uiautomatorhelpers.DeviceHelpers.uiDevice
 import android.platform.uiautomatorhelpers.DeviceHelpers.waitForObj
-import android.platform.uiautomatorhelpers.WaitResult
-import android.platform.uiautomatorhelpers.WaitUtils.waitToBecomeTrue
 import android.platform.uiautomatorhelpers.scrollUntilFound
-import android.util.Log
 import android.view.Display.DEFAULT_DISPLAY
 import androidx.test.uiautomator.UiObject2
 
@@ -41,10 +37,6 @@ class InternetDialog internal constructor(displayId: Int = DEFAULT_DISPLAY) {
     fun clickOnDoneAndClose() {
         val doneButton = scrollView.scrollUntilFound(doneBtn) ?: error("Done button not found")
         doneButton.click()
-        if (waitToBecomeTrue { !uiDevice.hasObject(doneBtn) }.result !is WaitResult.WaitSuccess) {
-            Log.d("QuickSettingsTileBase", "Retrying click due to b/339676505")
-            doneButton.click()
-        }
         doneBtn.assertInvisible(errorProvider = { "Internet dialog is dismissed" })
     }
 
