@@ -26,6 +26,7 @@ android_test {
         "automotive-multiuser-scenarios",
         "automotive-health-test-rules",
         "automotive-settings-app-helper",
+        "automotive-app-grid-helper",
         "app-helpers-common-interfaces",
         "collector-device-lib-platform",
         "common-platform-scenarios",
