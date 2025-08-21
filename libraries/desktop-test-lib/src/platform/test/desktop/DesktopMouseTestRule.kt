@@ -125,7 +125,12 @@ class DesktopMouseTestRule() : TestRule {
                 )
             virtualDevice = createdVirtualDevice
 
+            Log.i(
+                TAG,
+                "Starting with a DisplayTopology state of\n${displayManager.displayTopology}",
+            )
             val startDisplayId = getDisplayIdIncludedInDisplayTopology()
+            Log.i(TAG, "Attaching mouse to display#$startDisplayId")
             val inputDeviceFlow = callbackFlow {
                 val inputDeviceListener =
                     object : InputManager.InputDeviceListener {
