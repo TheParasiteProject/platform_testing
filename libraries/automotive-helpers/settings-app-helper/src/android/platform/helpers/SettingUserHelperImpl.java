@@ -186,6 +186,7 @@ public class SettingUserHelperImpl extends AbstractStandardAppHelper implements 
         int count = 0;
         clickbutton(AutomotiveConfigConstants.HOME_PROFILE_ICON_BUTTON);
         clickbutton(userNameConfigKey);
+        skipSetupWizard();
         BySelector homeSelector =
                 getUiElementFromConfig(AutomotiveConfigConstants.HOME_BOTTOM_CARD);
         getSpectatioUiUtil().waitForUiObject(homeSelector, WAIT_MS);

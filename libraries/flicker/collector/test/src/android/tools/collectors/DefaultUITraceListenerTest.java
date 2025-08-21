@@ -36,7 +36,8 @@ import static org.mockito.Mockito.verify;
 import android.app.Instrumentation;
 import android.device.collectors.DataRecord;
 import android.device.collectors.PerfettoListener;
-import android.device.collectors.PerfettoTracingBeforeAfterTestStrategy;
+import android.device.collectors.PerfettoTracingAfterTestStrategy;
+import android.device.collectors.PerfettoTracingBeforeTestStrategy;
 import android.device.collectors.PerfettoTracingPerClassStrategy;
 import android.device.collectors.PerfettoTracingPerRunStrategy;
 import android.device.collectors.PerfettoTracingPerTestStrategy;
@@ -104,9 +105,12 @@ public class DefaultUITraceListenerTest {
             strategies.add(new PerfettoTracingPerTestStrategy(mPerfettoHelper, mInstrumentation));
         }
 
-        if (Boolean.parseBoolean(b.getString(PerfettoListener.COLLECT_BEFORE_AFTER))) {
-            strategies.add(new PerfettoTracingBeforeAfterTestStrategy(mPerfettoHelper,
-                    mInstrumentation));
+        if (Boolean.parseBoolean(b.getString(PerfettoListener.COLLECT_BEFORE_TEST_RUN))) {
+            strategies.add(
+                    new PerfettoTracingBeforeTestStrategy(mPerfettoHelper, mInstrumentation));
+        }
+        if (Boolean.parseBoolean(b.getString(PerfettoListener.COLLECT_AFTER_TEST_RUN))) {
+            strategies.add(new PerfettoTracingAfterTestStrategy(mPerfettoHelper, mInstrumentation));
         }
 
         return strategies;

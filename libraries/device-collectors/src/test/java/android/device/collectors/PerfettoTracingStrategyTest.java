@@ -148,6 +148,24 @@ public class PerfettoTracingStrategyTest {
     }
 
     @Test
+    public void testAllIterationArgumentPassed_doesNotSkipMetrics() {
+        Bundle b = new Bundle();
+        b.putString(ARGUMENT_ALLOW_ITERATIONS, "all");
+        TestPerfettoTracingStrategy strategy = initStrategy(b);
+
+        assertFalse(strategy.skipMetric(/* iteration= */ 1));
+        assertFalse(strategy.skipMetric(/* iteration= */ 2));
+        assertFalse(strategy.skipMetric(/* iteration= */ 100));
+    }
+
+    @Test
+    public void testInvalidIterationArgumentPassed_throwsException() {
+        Bundle b = new Bundle();
+        b.putString(ARGUMENT_ALLOW_ITERATIONS, "none");
+        assertThrows(IllegalArgumentException.class, () -> initStrategy(b));
+    }
+
+    @Test
     public void testAllowIterationArgumentPassedWithOneIteration_skipMetricForOtherIterations() {
         Bundle b = new Bundle();
         b.putString(ARGUMENT_ALLOW_ITERATIONS, "42");
