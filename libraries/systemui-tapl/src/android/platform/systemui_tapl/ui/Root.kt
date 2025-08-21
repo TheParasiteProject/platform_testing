@@ -99,7 +99,7 @@ class Root private constructor(val displayId: Int = DEFAULT_DISPLAY) {
             try {
                 val shade = if (Flags.sceneContainer()) {
                     uiDevice.executeShellCommand("cmd statusbar expand-notifications-instant")
-                    waitForNotificationContainerToShow()
+                    waitForNotificationStackScroller()
                     NotificationShade(displayId)
                 } else {
                     openNotificationShadeViaGlobalAction()
@@ -118,15 +118,15 @@ class Root private constructor(val displayId: Int = DEFAULT_DISPLAY) {
         )
     }
 
-    private val notificationContainerSelector =
-        sysuiResSelector("shared_notification_container", displayId)
+    private val notificationStackScrollerSelector =
+        sysuiResSelector("notification_stack_scroller", displayId)
 
-    private fun waitForNotificationContainerToShow() {
+    private fun waitForNotificationStackScroller() {
         assert(Flags.sceneContainer())
-        traceSection("waitForNotificationContainerToShow") {
-            notificationContainerSelector.assertVisible(
-                timeout = NOTIFICATION_CONTAINER_OPEN_TIMEOUT,
-                errorProvider = { "Notification container didn't show on display $displayId" },
+        traceSection("waitForNotificationStackScrollerToShow") {
+            notificationStackScrollerSelector.assertVisible(
+                timeout = NOTIFICATION_STACK_SCROLLER_OPEN_TIMEOUT,
+                errorProvider = { "Notification stack scroller didn't show on display $displayId" },
             )
         }
     }
@@ -713,7 +713,7 @@ class Root private constructor(val displayId: Int = DEFAULT_DISPLAY) {
 
     companion object {
         private val NOTIFICATION_SHADE_OPEN_TIMEOUT = Duration.ofSeconds(20)
-        private val NOTIFICATION_CONTAINER_OPEN_TIMEOUT = Duration.ofSeconds(5)
+        private val NOTIFICATION_STACK_SCROLLER_OPEN_TIMEOUT = Duration.ofSeconds(5)
         private const val MAX_RETRY_ATTEMPTS = 3
         private val RETRY_TIME_INTERVAL = Duration.ofSeconds(1)
         private const val LONG_TIMEOUT: Long = 2000
