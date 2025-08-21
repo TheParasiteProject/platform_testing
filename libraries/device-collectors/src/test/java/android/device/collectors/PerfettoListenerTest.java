@@ -127,15 +127,25 @@ public class PerfettoListenerTest {
                     mWakeLockReleaser)
             );
         }
-
-        if (Boolean.parseBoolean(b.getString(PerfettoListener.COLLECT_BEFORE_AFTER))) {
-            strategies.add(new PerfettoTracingBeforeAfterTestStrategy(
-                    mPerfettoHelper,
-                    mInstrumentation,
-                    mWakeLockContext,
-                    () -> null,
-                    mWakelLockAcquirer,
-                    mWakeLockReleaser));
+        if (Boolean.parseBoolean(b.getString(PerfettoListener.COLLECT_BEFORE_TEST_RUN))) {
+            strategies.add(
+                    new PerfettoTracingBeforeTestStrategy(
+                            mPerfettoHelper,
+                            mInstrumentation,
+                            mWakeLockContext,
+                            () -> null,
+                            mWakelLockAcquirer,
+                            mWakeLockReleaser));
+        }
+        if (Boolean.parseBoolean(b.getString(PerfettoListener.COLLECT_AFTER_TEST_RUN))) {
+            strategies.add(
+                    new PerfettoTracingAfterTestStrategy(
+                            mPerfettoHelper,
+                            mInstrumentation,
+                            mWakeLockContext,
+                            () -> null,
+                            mWakelLockAcquirer,
+                            mWakeLockReleaser));
         }
 
         return strategies;

@@ -46,13 +46,13 @@ import org.mockito.MockitoAnnotations;
 import org.mockito.Spy;
 
 /**
- * Android Unit tests for {@link PerfettoTracingBeforeAfterTestStrategy}.
+ * Android Unit tests for {@link PerfettoTracingAfterTestStrategy}.
  *
  * <p>To run: atest
- * CollectorDeviceLibTest:android.device.collectors.PerfettoTracingBeforeAfterStrategyTest.
+ * CollectorDeviceLibTest:android.device.collectors.PerfettoTracingAfterTestStrategyTest.
  */
 @RunWith(AndroidJUnit4.class)
-public class PerfettoTracingBeforeAfterStrategyTest {
+public class PerfettoTracingAfterTestStrategyTest {
     private Description mRunDesc;
     private Description mTest1Desc;
     private Description mTest2Desc;
@@ -87,10 +87,10 @@ public class PerfettoTracingBeforeAfterStrategyTest {
     }
 
     @SuppressLint("VisibleForTests")
-    private PerfettoTracingBeforeAfterTestStrategy initStrategy(Bundle b) {
-        PerfettoTracingBeforeAfterTestStrategy strategy =
+    private PerfettoTracingAfterTestStrategy initStrategy(Bundle b) {
+        PerfettoTracingAfterTestStrategy strategy =
                 spy(
-                        new PerfettoTracingBeforeAfterTestStrategy(
+                        new PerfettoTracingAfterTestStrategy(
                                 mPerfettoHelper,
                                 mInstrumentation,
                                 mWakeLockContext,
@@ -103,24 +103,12 @@ public class PerfettoTracingBeforeAfterStrategyTest {
     }
 
     @Test
-    public void testPerfettoTraceStartAndEndOnTestStart() {
+    public void testPerfettoTraceOnTestEnd() {
         Bundle b = new Bundle();
         PerfettoTracingStrategy strategy = initStrategy(b);
         strategy.testRunStart(mDataRecord, mRunDesc);
         verify(mPerfettoHelper, never()).startCollecting();
 
-        strategy.testStart(mDataRecord, mTest1Desc, /* iteration= */ 1);
-
-        verify(mPerfettoHelper).startCollecting();
-        verify(mPerfettoHelper).stopCollecting(anyLong(), anyString());
-    }
-
-    @Test
-    public void testPerfettoTraceStartAndEndOnTestEnd() {
-        Bundle b = new Bundle();
-        PerfettoTracingStrategy strategy = initStrategy(b);
-        strategy.testRunStart(mDataRecord, mRunDesc);
-        verify(mPerfettoHelper, never()).startCollecting();
         strategy.testStart(mDataRecord, mTest1Desc, /* iteration= */ 1);
         clearInvocations(mPerfettoHelper);
 
@@ -142,12 +130,12 @@ public class PerfettoTracingBeforeAfterStrategyTest {
         strategy.testStart(mDataRecord, mTest2Desc, /* iteration= */ 1);
         strategy.testEnd(mDataRecord, mTest2Desc, /* iteration= */ 1);
 
-        verify(mPerfettoHelper, times(4)).startCollecting();
-        verify(mPerfettoHelper, times(4)).stopCollecting(anyLong(), anyString());
+        verify(mPerfettoHelper, times(2)).startCollecting();
+        verify(mPerfettoHelper, times(2)).stopCollecting(anyLong(), anyString());
     }
 
     @Test
-    public void testTwoIterations_onlySecondIsAllowed_collectsTraceOnlyForTheSecond() {
+    public void testTwoIterations_onlySecondIsAllowed_collectsTraceOnlyAfterTheSecond() {
         Bundle b = new Bundle();
         b.putString(ARGUMENT_ALLOW_ITERATIONS, "2");
         PerfettoTracingStrategy strategy = initStrategy(b);
@@ -160,7 +148,9 @@ public class PerfettoTracingBeforeAfterStrategyTest {
         verify(mPerfettoHelper, never()).startCollecting();
 
         strategy.testStart(mDataRecord, mTest1Desc, /* iteration= */ 2);
+        clearInvocations(mPerfettoHelper);
 
+        strategy.testEnd(mDataRecord, mTest1Desc, /* iteration= */ 2);
         verify(mPerfettoHelper).startCollecting();
         verify(mPerfettoHelper).stopCollecting(anyLong(), anyString());
     }
