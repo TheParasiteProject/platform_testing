@@ -28,6 +28,7 @@ public class AppInfoSettingTest {
     private static final String LOG_TAG = AppInfoSettingTest.class.getSimpleName();
 
     private static final String CONTACTS_APP = "Contacts";
+    private static final String CONTACTS_AND_ACCOUNTS = "Contacts and accounts";
     private static final String CALENDAR_APP = "Calendar";
     private static final String PHONE_PERMISSION = "Phone";
     private static final String CONTACT_PACKAGE = "com.android.contacts";
@@ -122,7 +123,7 @@ public class AppInfoSettingTest {
         // Get one specific Permission UI element (that we have not looked at before).
         // Check whether its displayed allowed apps matches its (internal) listed apps.
         List<Integer> results =
-                mAppInfoSettingsHelper.get().validateAppsPermissionManager(CONTACTS_APP);
+                mAppInfoSettingsHelper.get().validateAppsPermissionManager(CONTACTS_AND_ACCOUNTS);
         int summaryAllowed = results.get(0);
         int summaryTotal = results.get(1);
         int listedAllowed = results.get(2);
