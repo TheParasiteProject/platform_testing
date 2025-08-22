@@ -282,12 +282,13 @@ class DesktopMouseTestRule() : TestRule {
                     "Current pos: display#$displayId ${getCursorPosition(displayId)}"
             }
         ) {
-            val finalPosition = getCursorPosition(targetDisplayId).roundToInt()
-            val delta = finalPosition - Point(targetXPx, targetYPx)
+            val finalPosition = getCursorPosition(targetDisplayId)
+            val delta = finalPosition - PointF(targetXPx.toFloat(), targetYPx.toFloat())
             // As mentioned in the javadoc above, InputManager API doesn't support floating-point
             // movements. Hence, with all the floating-point calculation above, there might be
             // slight difference (within `FLOATING_ROUND_CORRECTION`) in the final cursor position.
-            delta.dx <= FLOATING_ROUNDING_CORRECTION && delta.dy <= FLOATING_ROUNDING_CORRECTION
+            abs(delta.dx) < FLOATING_ROUNDING_CORRECTION &&
+                abs(delta.dy) < FLOATING_ROUNDING_CORRECTION
         }
         Log.i(
             TAG,
