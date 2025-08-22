@@ -271,8 +271,8 @@ class DesktopMouseTestRule() : TestRule {
             Log.i(TAG, "Cursor is already on the same display with $targetDisplayId")
         }
 
-        val currentPosition = getCursorPosition(targetDisplayId).roundToInt()
-        performSteppedMove(Point(targetXPx, targetYPx) - currentPosition)
+        val currentPosition = getCursorPosition(targetDisplayId)
+        performSteppedMove(Point(targetXPx, targetYPx) - currentPosition.roundToInt())
 
         WaitUtils.ensureThat(
             errorProvider = {
@@ -289,7 +289,10 @@ class DesktopMouseTestRule() : TestRule {
             // slight difference (within `FLOATING_ROUND_CORRECTION`) in the final cursor position.
             delta.dx <= FLOATING_ROUNDING_CORRECTION && delta.dy <= FLOATING_ROUNDING_CORRECTION
         }
-        Log.i(TAG, "Successfully moved to display#$targetDisplayId ($targetXPx, $targetYPx)")
+        Log.i(
+            TAG,
+            "Successfully moved to display#$targetDisplayId ${getCursorPosition(targetDisplayId)}",
+        )
     }
 
     /**
