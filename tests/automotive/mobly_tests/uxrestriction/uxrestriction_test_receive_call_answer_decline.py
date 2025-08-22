@@ -38,6 +38,8 @@ class UxRestrictionReceiveAnswerDeclineCallTest(bluetooth_sms_base_test.Bluetoot
 
   def setup_class(self):
     super().setup_class()
+    ro_product_name = str(self.target.adb.shell(constants.GET_PRODUCT_NAME))
+    self.use_dialer_simulator = constants.CF_X86_64_PHONE in ro_product_name
     self.phone_utils = (phone_device_utils.PhoneDeviceUtils(self.phone_notpaired))
     self.common_utils = CommonUtils(self.target, self.discoverer)
 
@@ -55,8 +57,12 @@ class UxRestrictionReceiveAnswerDeclineCallTest(bluetooth_sms_base_test.Bluetoot
   def test_answer_incoming_call(self):
 
     # call from the unpaired phone to the paired phone
-    callee_number = self.target.mbs.getPhoneNumber()
-    self.phone_utils.call_number_from_home_screen(callee_number)
+    if self.use_dialer_simulator:
+      # simulate incoming call
+      self.target.adb.shell(constants.DIALER_SIMULATOR_INCOMING_CALL_COMMAND.format(phone_number="900900900", name="Jane Doe"))
+    else:
+      callee_number = self.target.mbs.getPhoneNumber()
+      self.phone_utils.call_number_from_home_screen(callee_number)
     self.call_utils.wait_with_log(constants.DEFAULT_WAIT_TIME_FIFTEEN_SECS)
 
     # Confirm the 'Answer' call button is onscreen
@@ -74,13 +80,17 @@ class UxRestrictionReceiveAnswerDeclineCallTest(bluetooth_sms_base_test.Bluetoot
         "Expected an ongoing call to be displayed on home, but found none."
     )
     # End call
-    self.call_utils.end_call_using_adb_command(self.phone_notpaired)
+    self.call_utils.end_call_using_adb_command(self.target)
   def test_reject_incoming_call(self):
 
     self.call_utils.press_phone_home_icon_using_adb_command(self.phone_notpaired)
     # call from the unpaired phone to the paired phone
-    callee_number = self.target.mbs.getPhoneNumber()
-    self.phone_utils.call_number_from_home_screen(callee_number)
+    if self.use_dialer_simulator:
+      # simulate incoming call
+      self.target.adb.shell(constants.DIALER_SIMULATOR_INCOMING_CALL_COMMAND.format(phone_number="900900900", name="Jane Doe"))
+    else:
+      callee_number = self.target.mbs.getPhoneNumber()
+      self.phone_utils.call_number_from_home_screen(callee_number)
     self.call_utils.wait_with_log(constants.DEFAULT_WAIT_TIME_FIFTEEN_SECS)
 
     # Confirm the 'Decline' call button is onscreen
@@ -100,7 +110,7 @@ class UxRestrictionReceiveAnswerDeclineCallTest(bluetooth_sms_base_test.Bluetoot
 
   def teardown_test(self):
     # End call if test failed
-    self.call_utils.end_call_using_adb_command(self.phone_notpaired)
+    self.call_utils.end_call_using_adb_command(self.target)
     #Disable driving mode
     self.call_utils.disable_driving_mode()
   def teardown_class(self):

@@ -647,7 +647,6 @@ class CallUtils:
 
     def end_call_using_adb_command(self, device_target):
         self.execute_shell_on_device(device_target, 'input keyevent KEYCODE_ENDCALL')
-        self.execute_shell_on_device(device_target, 'input keyevent KEYCODE_POWER')
 
     def call_most_recent_call_history(self):
         logging.info('Calling most recent call in history')

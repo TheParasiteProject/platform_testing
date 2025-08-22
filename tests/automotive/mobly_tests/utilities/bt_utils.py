@@ -175,3 +175,4 @@ class BTUtils:
         if not self.is_target_device_screen_on():
           logging.info('Target screen is off, waking it up')
           self.media_utils.execute_shell_on_device(constants.KEYCODE_WAKEUP)
+          self.media_utils.execute_shell_on_device(constants.DISMISS_KEYGUARD)
