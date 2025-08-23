@@ -32,6 +32,11 @@ from utilities.main_utils import common_main
 
 class CallingDeclineBtTest(bluetooth_sms_base_test.BluetoothSMSBaseTest):
 
+    def setup_class(self):
+        super().setup_class()
+        ro_product_name = str(self.target.adb.shell(constants.GET_PRODUCT_NAME))
+        self.use_dialer_simulator = constants.CF_X86_64_PHONE in ro_product_name
+
     def setup_test(self):
         # Pair the devices
         self.bt_utils.pair_primary_to_secondary()
@@ -39,16 +44,20 @@ class CallingDeclineBtTest(bluetooth_sms_base_test.BluetoothSMSBaseTest):
 
     def test_basic_call(self):
         # call the callee phone with automotive device
-        phone_notpaired_number = self.phone_notpaired.mbs.getPhoneNumber()
+        if self.use_dialer_simulator:
+            # simulate outgoing call
+            self.target.adb.shell(constants.DIALER_SIMULATOR_OUTGOING_CALL_COMMAND.format(phone_number="900900900", name="Jane Doe"))
+        else:
+            phone_notpaired_number = self.phone_notpaired.mbs.getPhoneNumber()
+            self.call_utils.dial_a_number(phone_notpaired_number)
+            self.call_utils.make_call()
         logging.info(
                 'Calling from %s calling to %s',
                 self.target.serial,
                 self.phone_notpaired.serial,
             )
-        self.call_utils.dial_a_number(phone_notpaired_number)
-        self.call_utils.make_call()
         self.call_utils.wait_with_log(5)
-        self.call_utils.end_call()
+        self.call_utils.end_call_using_adb_command(self.target)
 
 if __name__ == '__main__':
     common_main()

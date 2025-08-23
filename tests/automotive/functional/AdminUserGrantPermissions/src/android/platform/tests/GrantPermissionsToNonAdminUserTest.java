@@ -146,6 +146,8 @@ public class GrantPermissionsToNonAdminUserTest {
         Log.i(LOG_TAG, "Act: Switch user mode to secondary");
         UserInfo targetUser = mMultiUserHelper.getUserByName(USER_NAME);
         mMultiUserHelper.switchToUserId(targetUser.id);
+        Log.i(LOG_TAG, "Act: Skip setup wizard");
+        mUsersHelper.get().skipSetupWizard();
         Log.i(LOG_TAG, "Act: Open Profile & Accounts setting");
         mSettingHelper.get().openSetting(SettingsConstants.PROFILE_ACCOUNT_SETTINGS);
 

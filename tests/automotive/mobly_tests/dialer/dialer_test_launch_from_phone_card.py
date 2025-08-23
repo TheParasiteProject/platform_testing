@@ -30,7 +30,9 @@ class BTDialerPhoneCard(bluetooth_sms_base_test.BluetoothSMSBaseTest):
 
     def setup_class(self):
         super().setup_class()
-        self.phone_utils = (phone_device_utils.PhoneDeviceUtils(self.target))
+        ro_product_name = str(self.target.adb.shell(constants.GET_PRODUCT_NAME))
+        self.use_dialer_simulator = constants.CF_X86_64_PHONE in ro_product_name
+        self.phone_utils = (phone_device_utils.PhoneDeviceUtils(self.phone_notpaired))
 
     def setup_test(self):
         # Pair the devices
@@ -41,12 +43,16 @@ class BTDialerPhoneCard(bluetooth_sms_base_test.BluetoothSMSBaseTest):
     def test_launch_dialer_from_phone_card(self):
         # setup phones
         # call from the unpaired phone to the paired phone
-        callee_number = self.phone_notpaired.mbs.getPhoneNumber()
-        self.phone_utils.call_number_from_home_screen(callee_number)
+        if self.use_dialer_simulator:
+            # simulate incoming call
+            self.target.adb.shell(constants.DIALER_SIMULATOR_INCOMING_CALL_COMMAND.format(phone_number="900900900", name="Jane Doe"))
+        else:
+            callee_number = self.target.mbs.getPhoneNumber()
+            self.phone_utils.call_number_from_home_screen(callee_number)
         self.call_utils.wait_with_log(10)
 
-        # accept the call (on the unpaired phone)
-        self.phone_notpaired.mbs.clickUIElementWithText(constants.ANSWER_CALL_TEXT)
+        # accept the call
+        self.discoverer.mbs.clickUIElementWithText(constants.ANSWER_CALL_TEXT)
         self.call_utils.wait_with_log(10)
         self.call_utils.press_home()
 
