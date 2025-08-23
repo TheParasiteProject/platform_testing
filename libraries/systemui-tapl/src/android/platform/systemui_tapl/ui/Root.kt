@@ -99,7 +99,7 @@ class Root private constructor(val displayId: Int = DEFAULT_DISPLAY) {
             try {
                 val shade = if (Flags.sceneContainer()) {
                     uiDevice.executeShellCommand("cmd statusbar expand-notifications-instant")
-                    waitForNotificationContainerToShow()
+                    waitForNotificationStackScroller()
                     NotificationShade(displayId)
                 } else {
                     openNotificationShadeViaGlobalAction()
@@ -113,20 +113,20 @@ class Root private constructor(val displayId: Int = DEFAULT_DISPLAY) {
         }
 
         throw IllegalStateException(
-            "Failed to open notification shade on display $displayId after $MAX_RETRY_ATTEMPTS "+
+            "Failed to open notification shade on display $displayId after $MAX_RETRY_ATTEMPTS " +
                     "attempts."
         )
     }
 
-    private val notificationContainerSelector =
-        sysuiResSelector("shared_notification_container", displayId)
+    private val notificationStackScrollerSelector =
+        sysuiResSelector("notification_stack_scroller", displayId)
 
-    private fun waitForNotificationContainerToShow() {
+    private fun waitForNotificationStackScroller() {
         assert(Flags.sceneContainer())
-        traceSection("waitForNotificationContainerToShow") {
-            notificationContainerSelector.assertVisible(
-                timeout = NOTIFICATION_CONTAINER_OPEN_TIMEOUT,
-                errorProvider = { "Notification container didn't show on display $displayId" },
+        traceSection("waitForNotificationStackScrollerToShow") {
+            notificationStackScrollerSelector.assertVisible(
+                timeout = NOTIFICATION_STACK_SCROLLER_OPEN_TIMEOUT,
+                errorProvider = { "Notification stack scroller didn't show on display $displayId" },
             )
         }
     }
@@ -558,6 +558,12 @@ class Root private constructor(val displayId: Int = DEFAULT_DISPLAY) {
         By.displayId(displayId).pkg(LAUNCHER_PACKAGE).assertVisible()
     }
 
+    // TODO (b/277105514): Determine whether this is an idiomatic method of determining visibility.
+    /** Asserts that launcher is visible. */
+    fun assertLauncherNotVisible() {
+        By.displayId(displayId).pkg(LAUNCHER_PACKAGE).assertInvisible()
+    }
+
     val keyboardBacklightIndicatorDialog: KeyboardBacklightIndicatorDialog
         get() = KeyboardBacklightIndicatorDialog()
 
@@ -570,11 +576,15 @@ class Root private constructor(val displayId: Int = DEFAULT_DISPLAY) {
     }
 
     private val qsHeaderSelector =
-        if (com.android.systemui.Flags.sceneContainer()) {
+        if (Flags.sceneContainer()) {
             sysuiResSelector("shade_header_root", displayId)
         } else {
             sysuiResSelector("split_shade_status_bar", displayId)
         }
+
+    fun assertQuickSettingsNotVisible() {
+        sysuiResSelector("quick_settings_panel", displayId).assertInvisible()
+    }
 
     /**
      * Verifies that shade is open. The success condition is the visibility of the Quick Settings
@@ -597,6 +607,10 @@ class Root private constructor(val displayId: Int = DEFAULT_DISPLAY) {
 
     private fun waitForQuickSettingsToOpen() {
         waitForObj(sysuiResSelector("quick_settings_panel", displayId))
+    }
+
+    fun assertBouncerNotVisible() {
+        assertThrows(AssertionError::class.java) { primaryBouncer }
     }
 
     fun pressBackOnDisplay() {
@@ -713,7 +727,7 @@ class Root private constructor(val displayId: Int = DEFAULT_DISPLAY) {
 
     companion object {
         private val NOTIFICATION_SHADE_OPEN_TIMEOUT = Duration.ofSeconds(20)
-        private val NOTIFICATION_CONTAINER_OPEN_TIMEOUT = Duration.ofSeconds(5)
+        private val NOTIFICATION_STACK_SCROLLER_OPEN_TIMEOUT = Duration.ofSeconds(5)
         private const val MAX_RETRY_ATTEMPTS = 3
         private val RETRY_TIME_INTERVAL = Duration.ofSeconds(1)
         private const val LONG_TIMEOUT: Long = 2000
