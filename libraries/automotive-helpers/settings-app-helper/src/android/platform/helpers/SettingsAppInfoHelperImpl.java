@@ -23,6 +23,7 @@ import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.platform.helpers.ScrollUtility.ScrollActions;
 import android.platform.helpers.ScrollUtility.ScrollDirection;
+import android.platform.spectatio.utils.SpectatioUiUtil;
 import android.util.Log;
 
 import androidx.test.uiautomator.By;
@@ -41,6 +42,7 @@ public class SettingsAppInfoHelperImpl extends AbstractStandardAppHelper
         implements IAutoAppInfoSettingsHelper {
 
     private static final int MAX_SCROLL_COUNT = 100;
+    private static final int WAIT_MS = 20000;
     private static final String LOGGING_TAG = "SettingsAppInfoHelperImpl";
 
     private static final String PERMISSION_HEADER = "Apps with this permission";
@@ -404,6 +406,8 @@ public class SettingsAppInfoHelperImpl extends AbstractStandardAppHelper
     /** {@inheritDoc} */
     @Override
     public List<Integer> validateAppsPermissionManager(String permissionName) {
+        getSpectatioUiUtil()
+                .waitForText(permissionName, WAIT_MS, SpectatioUiUtil.TextMatchType.CONTAINS);
 
         UiObject2 permissionSummary = getPermissionSummary(permissionName);
 

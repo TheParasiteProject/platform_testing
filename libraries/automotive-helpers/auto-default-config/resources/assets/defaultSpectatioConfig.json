@@ -1152,7 +1152,7 @@
     },
     "SYSTEM_SETTINGS_SCROLL_ELEMENT": {
       "TYPE": "RESOURCE_ID",
-      "VALUE": "fragment_container",
+      "VALUE": "car_ui_recycler_view",
       "PACKAGE": "com.android.car.settings"
     },
     "RECENT_NOTIFICATIONS": {
