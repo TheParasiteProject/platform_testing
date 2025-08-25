@@ -28,6 +28,7 @@ import logging
 from bluetooth_test import bluetooth_base_test
 from utilities import constants
 from utilities.main_utils import common_main
+from utilities.common_utils import CommonUtils
 
 
 class UxRestrictionBluetoothCallFromDialerTest(bluetooth_base_test.BluetoothBaseTest):
@@ -39,6 +40,7 @@ class UxRestrictionBluetoothCallFromDialerTest(bluetooth_base_test.BluetoothBase
     def setup_test(self):
         # Pair the devices
         self.bt_utils.pair_primary_to_secondary()
+        super().enable_recording()
         #set driving mode
         self.call_utils.enable_driving_mode()
 
