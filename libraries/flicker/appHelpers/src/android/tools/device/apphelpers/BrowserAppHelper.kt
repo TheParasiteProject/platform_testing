@@ -28,7 +28,9 @@ import android.tools.traces.wm.WindowingMode
 import android.util.Log
 import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.uiautomator.By
+import androidx.test.uiautomator.BySelector
 import androidx.test.uiautomator.UiDevice
+import androidx.test.uiautomator.UiObject2
 import androidx.test.uiautomator.Until
 import java.time.Duration
 
@@ -84,6 +86,13 @@ constructor(
                 WAIT_TIME_IN_MILLISECONDS,
             )
             .click()
+    }
+
+    /** Clicks add to home screen button in menu and clicks add when the dialog appear. */
+    fun clickAddToHomeScreenInMenu() {
+        findObject(By.text(ADD_TO_HOME_SCREEN_TEXT)).also { it.click() }
+        findObject(By.res(packageName, "positive_button")).also { it.click() }
+        device.waitForIdle()
     }
 
     /** Clears the Chrome application's storage and data. */
@@ -199,6 +208,9 @@ constructor(
 
         return false
     }
+    private fun findObject(selector: BySelector): UiObject2 =
+        uiDevice.wait(Until.findObject(selector), WAIT_TIME_IN_MILLISECONDS)
+        ?: error("Can't find object $selector")
 
     companion object {
         enum class TabDraggingDirection {
@@ -213,6 +225,7 @@ constructor(
         private const val NEGATIVE_BUTTON_ID = "negative_button"
         private const val MORE_BUTTON_ID = "more_button"
         private const val ACKNOWLEDGED_BUTTON_TEXT = "Got it"
+        private const val ADD_TO_HOME_SCREEN_TEXT = "Add to Home screen"
 
         private val WAIT_TIME_IN_MILLISECONDS = Duration.ofSeconds(3).toMillis()
         private const val MIN_WINDOW_WIDTH_FOR_TAB_TEARING_DP = 475
