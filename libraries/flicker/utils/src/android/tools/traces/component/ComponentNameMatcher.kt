@@ -177,6 +177,12 @@ class ComponentNameMatcher(var component: ComponentName) : IComponentNameMatcher
         val IMAGE_WALLPAPER =
             ComponentNameMatcher("", "com.android.systemui.wallpapers.ImageWallpaper")
 
+        @JvmField
+        val ADD_ITEM_ACTIVITY =
+            ComponentNameMatcher(
+                "com.google.android.apps.nexuslauncher",
+                "com.android.launcher3.dragndrop.AddItemActivity",)
+
         /**
          * Creates a component matcher from a window or layer name.
          *
