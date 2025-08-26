@@ -489,6 +489,7 @@ public class AutomotiveConfigConstants {
     // Settings User Constants
     public static final String USER_SETTINGS_PACKAGE = "USER_SETTINGS_PACKAGE";
     public static final String USER_SETTINGS_SCROLL_ACTION = "USER_SETTINGS_SCROLL_ACTION";
+    public static final String USER_SETTINGS_TOGGLE_BUTTON = "USER_SETTINGS_TOGGLE_BUTTON";
     public static final String USER_SETTINGS_SCROLL_DIRECTION = "USER_SETTINGS_SCROLL_DIRECTION";
     public static final String USER_SETTINGS_ADD_PROFILE = "USER_SETTINGS_ADD_PROFILE";
     public static final String USER_SETTINGS_RENAME = "USER_SETTINGS_RENAME";

@@ -97,6 +97,11 @@ public class SettingUserHelperImpl extends AbstractStandardAppHelper implements 
         UiObject2 userObject = getSpectatioUiUtil().findUiObject(userSelector);
         getSpectatioUiUtil().validateUiObject(userObject, String.format("User %s", user));
         getSpectatioUiUtil().clickAndWait(userObject);
+        getSpectatioUiUtil()
+                .waitForUiObject(
+                        getUiElementFromConfig(
+                                AutomotiveConfigConstants.USER_SETTINGS_TOGGLE_BUTTON),
+                        WAIT_MS);
     }
     // delete an existing user
     @Override
