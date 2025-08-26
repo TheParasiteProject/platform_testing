@@ -33,10 +33,6 @@ from utilities.common_utils import CommonUtils
 
 class UxRestrictionBluetoothCallFromDialerTest(bluetooth_base_test.BluetoothBaseTest):
 
-    def setup_class(self):
-        super().setup_class()
-        self.common_utils = CommonUtils(self.target, self.discoverer)
-
     def setup_test(self):
         # Pair the devices
         self.bt_utils.pair_primary_to_secondary()
@@ -47,7 +43,7 @@ class UxRestrictionBluetoothCallFromDialerTest(bluetooth_base_test.BluetoothBase
     def test_call_from_dialer_during_drive_mode(self):
         #Tests the calling ten digits number functionality during drive mode.
         #Variable
-        dialer_test_phone_number = constants.DIALER_THREE_DIGIT_NUMBER;
+        dialer_test_phone_number = constants.INFORMATION_THREE_DIGIT_NUMBER
 
         self.call_utils.dial_a_number(dialer_test_phone_number)
         self.call_utils.make_call()
