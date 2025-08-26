@@ -60,7 +60,7 @@ class CompositionTest : public ::testing::Test {
  protected:
   void SetUp() override {
     mHwcTester = std::make_unique<hcct::HwcTester>();
-    auto displayIds = mHwcTester->GetAllDisplayIds();
+    auto displayIds = mHwcTester->GetDisplayIds();
     ASSERT_FALSE(displayIds.empty()) << "No display.";
     // Use the first display.
     mDisplayId = displayIds.front();

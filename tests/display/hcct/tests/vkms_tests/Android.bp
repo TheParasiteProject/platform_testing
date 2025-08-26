@@ -30,6 +30,7 @@ cc_defaults {
         "libgtest",
         "libgtest_main",
         "hwc_tester",
+        "vkms_tester",
     ],
     cflags: [
         "-Wall",
@@ -41,14 +42,25 @@ cc_defaults {
     ],
 }
 
-
 cc_test {
     name: "VkmsTestHwcHotplugs",
     srcs: [
         "hotplugs.cpp",
     ],
     defaults: ["hcct_vkms_test_defaults"],
+}
+
+cc_test {
+    name: "VkmsTestHwcWriteback",
+    srcs: ["writeback.cpp"],
+    defaults: ["hcct_vkms_test_defaults"],
+    shared_libs: [
+        "libgui",
+        "libui",
+        "libprocessgroup",
+    ],
     static_libs: [
-        "vkms_tester",
+        "libshaders",
+        "libtonemap",
     ],
 }
