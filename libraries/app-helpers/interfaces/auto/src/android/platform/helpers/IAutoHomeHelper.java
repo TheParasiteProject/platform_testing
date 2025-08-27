@@ -121,6 +121,13 @@ public interface IAutoHomeHelper extends IAppHelper {
     void openStatusBarProfiles();
 
     /**
+     * Setup expectations: Open quick controls
+     *
+     * <p>Getting profile names displayin gin quick controls
+     */
+    List<String> getProfileNamesFromQuickControls();
+
+    /**
      * Setup expectations: To get Profiles in a List
      *
      * <p>Getting Profiles in a list and comparing based on position
