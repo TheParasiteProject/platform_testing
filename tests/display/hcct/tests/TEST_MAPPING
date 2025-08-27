@@ -1,0 +1,18 @@
+{
+  "desktop-postsubmit": [
+    {
+      "name": "TestHwcComposition"
+    },
+    {
+      "name": "VkmsTestHwcHotplugs"
+    },
+    {
+      "name": "VkmsTestHwcWriteback"
+    }
+  ],
+  "DtsDisplayPerformance": [
+    {
+      "name": "TestHwcComposition"
+    }
+  ]
+}
