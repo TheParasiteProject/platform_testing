@@ -516,7 +516,7 @@
     },
     "HOME_MAPS_WIDGET": {
       "TYPE": "TEXT",
-      "VALUE": "Open Maps"
+      "VALUE": "Welcome to Google Maps"
     },
     "HOME_PROFILE_ICON_BUTTON": {
       "TYPE": "RESOURCE_ID",
