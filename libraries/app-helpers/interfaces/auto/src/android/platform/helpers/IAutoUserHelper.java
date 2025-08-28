@@ -135,6 +135,13 @@ public interface IAutoUserHelper extends IAppHelper {
     void skipSetupWizard();
 
     /**
+     * Setup expectation: New User is created
+     *
+     * <p>This method is used to check the new user profile name.
+     */
+    boolean checkUserProfileName(String initialUser, String newUser);
+
+    /**
      * Setup expectation: Delete your profile is clicked in User Infotainment System Data.
      *
      * <p>This method is used to choose new user as an admin .
