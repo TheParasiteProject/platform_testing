@@ -194,6 +194,19 @@ public class HomeHelperImpl extends AbstractStandardAppHelper implements IAutoHo
         getSpectatioUiUtil().clickAndWait(profileButtonLink);
     }
 
+    @Override
+    public List<String> getProfileNamesFromQuickControls() {
+        List<String> profileNamesText = new ArrayList<>();
+        BySelector profileNamesSelector =
+                getUiElementFromConfig(AutomotiveConfigConstants.HOME_PROFILE_NAMES);
+        List<UiObject2> profileNames = getSpectatioUiUtil().findUiObjects(profileNamesSelector);
+        for (UiObject2 profileName : profileNames) {
+            String name = profileName.getText();
+            profileNamesText.add(name);
+        }
+        return profileNamesText;
+    }
+
     private String getDriverIconText() {
         BySelector profileDriverIconWidgetSelector =
                 getUiElementFromConfig(AutomotiveConfigConstants.HOME_DRIVER_BUTTON);

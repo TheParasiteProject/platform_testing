@@ -21,6 +21,7 @@ import static junit.framework.Assert.assertTrue;
 
 import android.content.pm.UserInfo;
 import android.platform.helpers.HelperAccessor;
+import android.platform.helpers.IAutoHomeHelper;
 import android.platform.helpers.IAutoSettingHelper;
 import android.platform.helpers.IAutoUserHelper;
 import android.platform.helpers.MultiUserHelper;
@@ -37,6 +38,8 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+import java.util.List;
+
 /**
  * This test will create user through API and delete the same user from UI
  * <p> Set system property to run MU test: adb shell setprop fw.stop_bg_users_on_switch 0
@@ -49,10 +52,12 @@ public class AddUserQuickSettings {
     // private static final String userName = MultiUserConstants.SECONDARY_USER_NAME;
     private HelperAccessor<IAutoUserHelper> mUsersHelper;
     private HelperAccessor<IAutoSettingHelper> mSettingHelper;
+    private HelperAccessor<IAutoHomeHelper> mHomeHelper;
 
     private static final String LOG_TAG = AddUserQuickSettings.class.getSimpleName();
 
     public AddUserQuickSettings() {
+        mHomeHelper = new HelperAccessor<>(IAutoHomeHelper.class);
         mUsersHelper = new HelperAccessor<>(IAutoUserHelper.class);
         mSettingHelper = new HelperAccessor<>(IAutoSettingHelper.class);
     }
@@ -87,6 +92,21 @@ public class AddUserQuickSettings {
 
         Log.i(LOG_TAG, "Assert: New user does not have Admin Access");
         assertFalse("New user has Admin Access", mUsersHelper.get().isNewUserAnAdmin(newUser.name));
+
+        Log.i(LOG_TAG, "Act: Open status bar profiles");
+        mHomeHelper.get().openStatusBarProfiles();
+
+        Log.i(LOG_TAG, "Act: Get profile names frm quick controls");
+        List<String> profileNames = mHomeHelper.get().getProfileNamesFromQuickControls();
+
+        Log.i(LOG_TAG, "Assert: Newly added user name is displaying in quick controls");
+        assertTrue(
+                "Newly added user is not displaying in quick controls",
+                profileNames.contains(newUser.name));
+
+        Log.i(LOG_TAG, "Act: Close status bar profiles");
+        mHomeHelper.get().openStatusBarProfiles();
+
         // remove new user
         Log.i(LOG_TAG, "Act: Remove created new user");
         mMultiUserHelper.removeUser(newUser);

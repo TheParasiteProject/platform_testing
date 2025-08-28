@@ -548,6 +548,11 @@
       "VALUE": "connectivity_panel_button",
       "PACKAGE": "com.android.systemui"
     },
+    "HOME_PROFILE_NAMES": {
+      "TYPE": "RESOURCE_ID",
+      "VALUE": "qc_title",
+      "PACKAGE": "com.android.systemui"
+    },
     "HOME_PROFILE_GUEST_ICON": {
       "TYPE": "RESOURCE_ID",
       "VALUE": "user_name_text",
