@@ -221,12 +221,12 @@ public final class MediaInstrumentation {
     }
 
     /** Assert that the media notification is visible with a 10 second timeout. */
-    public void assertMediaNotificationVisible() {
+    public void assertMediaNotificationVisible(String location) {
         assertVisibility(
                 By.res(PKG, MEDIA_CONTROLLER_RES_ID),
                 true,
                 Duration.ofSeconds(10),
-                () -> "UMO should be visible on lockscreen.");
+                () -> "UMO should be visible on" + location);
     }
 
     public void addMediaSessionStateChangedListeners(Consumer<Integer> listener) {
