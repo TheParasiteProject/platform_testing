@@ -29,7 +29,7 @@ HwcTester::HwcTester() {
   android::ProcessState::self()->setThreadPoolMaxThreadCount(4);
   android::ProcessState::self()->startThreadPool();
 
-  mComposerClient = std::make_unique<libhwc_aidl_test::ComposerClientWrapper>(
+  mComposerClient = std::make_shared<libhwc_aidl_test::ComposerClientWrapper>(
       IComposer::descriptor + std::string("/default"));
   if (!mComposerClient) {
     ALOGE("Failed to create HWC client");
@@ -69,7 +69,15 @@ HwcTester::~HwcTester() {
   mComposerClient.reset();
 }
 
-std::vector<int64_t> HwcTester::GetAllDisplayIds() const {
+std::vector<libhwc_aidl_test::DisplayWrapper> HwcTester::GetDisplays() const {
+  std::vector<libhwc_aidl_test::DisplayWrapper> displays;
+  for (const auto &[_, display] : mDisplays) {
+    displays.push_back(display);
+  }
+  return displays;
+}
+
+std::vector<int64_t> HwcTester::GetDisplayIds() const {
   std::vector<int64_t> displayIds(mDisplays.size());
 
   for (const auto &[id, _] : mDisplays) {
@@ -84,8 +92,36 @@ HwcTester::getAndClearLatestHotplugs() {
   return mComposerClient->getAndClearLatestHotplugs();
 }
 
+std::optional<libhwc_aidl_test::ReadbackBuffer>
+HwcTester::SetReadbackBufferToDisplaySize(
+    const libhwc_aidl_test::DisplayWrapper &display) {
+  auto [status, readbackAttrs] =
+      mComposerClient->getReadbackBufferAttributes(display.getDisplayId());
+  if (!status.isOk()) {
+    ALOGE("Failed to get readback buffer attributes for display %" PRId64,
+          display.getDisplayId());
+    return std::nullopt;
+  }
+
+  common::PixelFormat readbackFormat = readbackAttrs.format;
+  common::Dataspace readbackDataspace = readbackAttrs.dataspace;
+
+  if (!libhwc_aidl_test::ReadbackHelper::readbackSupported(readbackFormat,
+                                                           readbackDataspace)) {
+    ALOGE("Readback buffer format/dataspace not supported for display %" PRId64,
+          display.getDisplayId());
+    return std::nullopt;
+  }
+
+  libhwc_aidl_test::ReadbackBuffer readbackBuffer(
+      display.getDisplayId(), mComposerClient, display.getDisplayWidth(),
+      display.getDisplayHeight(), readbackFormat, readbackDataspace);
+  EXPECT_NO_FATAL_FAILURE(readbackBuffer.setReadbackBuffer());
+  return readbackBuffer;
+}
+
 std::vector<DisplayConfiguration>
-HwcTester::GetDisplayConfigs(int64_t displayId) {
+HwcTester::GetDisplayConfigs(int64_t displayId) const {
   const auto &[configStatus, configs] =
       mComposerClient->getDisplayConfigurations(displayId);
   if (!configStatus.isOk() || configs.empty()) {
@@ -95,7 +131,8 @@ HwcTester::GetDisplayConfigs(int64_t displayId) {
   return configs;
 }
 
-DisplayConfiguration HwcTester::GetDisplayActiveConfigs(int64_t displayId) {
+DisplayConfiguration
+HwcTester::GetDisplayActiveConfigs(int64_t displayId) const {
   auto [activeConfigStatus, activeConfig] =
       mComposerClient->getActiveConfig(displayId);
   if (!activeConfigStatus.isOk()) {
@@ -149,7 +186,7 @@ bool HwcTester::DrawSolidColorToScreen(int64_t displayId, Color color) {
   return executeRes.first.isOk();
 }
 
-std::pair<int, int> HwcTester::GetActiveDisplaySize(int64_t display_id) {
+std::pair<int, int> HwcTester::GetActiveDisplaySize(int64_t display_id) const {
   DisplayConfiguration displayConfig = GetDisplayActiveConfigs(display_id);
   return {displayConfig.width, displayConfig.height};
 }
@@ -204,6 +241,98 @@ std::optional<ComposerClientReader> HwcTester::Present(int64_t displayId) {
   ComposerClientReader reader(displayId);
   reader.parse(std::move(executeRes.second));
   return reader;
+}
+
+std::vector<Color> HwcTester::CreateColorVector(int64_t displayId,
+                                                Color color) const {
+  const libhwc_aidl_test::DisplayWrapper &display = mDisplays.at(displayId);
+
+  // Create and fill a solid color buffer
+  std::vector<Color> colors(static_cast<size_t>(display.getDisplayWidth() *
+                                                display.getDisplayHeight()),
+                            color);
+  return colors;
+}
+
+void HwcTester::DrawColorVectorToDisplay(int64_t displayId,
+                                         const std::vector<Color> &colors) {
+  libhwc_aidl_test::DisplayWrapper &display = mDisplays.at(displayId);
+
+  // Validate that the color vector size matches the expected display dimensions
+  size_t expectedSize = static_cast<size_t>(display.getDisplayWidth() *
+                                            display.getDisplayHeight());
+  if (colors.size() != expectedSize) {
+    ALOGE("Color vector size mismatch for display %" PRId64
+          ": expected %zu, got %zu",
+          displayId, expectedSize, colors.size());
+    return;
+  }
+
+  libhwc_aidl_test::DisplayProperties displayProps =
+      libhwc_aidl_test::ReadbackHelper::setupDisplayProperty(display,
+                                                             mComposerClient);
+
+  // Create a buffer layer with solid color content using DEVICE composition
+  // (compatible with drm_hwcomposer)
+  auto layer = std::make_shared<libhwc_aidl_test::TestBufferLayer>(
+      *mComposerClient, *displayProps.testRenderEngine, display.getDisplayId(),
+      display.getDisplayWidth(), display.getDisplayHeight(),
+      displayProps.pixelFormat, displayProps.writer, Composition::DEVICE);
+  layer->setDisplayFrame(
+      {0, 0, display.getDisplayWidth(), display.getDisplayHeight()});
+  layer->setSourceCrop({0, 0, static_cast<float>(display.getDisplayWidth()),
+                        static_cast<float>(display.getDisplayHeight())});
+  layer->setZOrder(10);
+  layer->setDataspace(displayProps.dataspace);
+
+  EXPECT_NO_FATAL_FAILURE(layer->setBuffer(colors));
+
+  std::vector<std::shared_ptr<libhwc_aidl_test::TestLayer>> layers = {layer};
+  layer->write(displayProps.writer);
+  Execute(displayProps);
+  // Check for errors before validating.
+  auto errors = displayProps.reader.takeErrors();
+  for (const auto &error : errors) {
+    ALOGE("writeLayers error: %s", error.toString().c_str());
+  }
+  EXPECT_TRUE(errors.empty());
+
+  displayProps.writer.validateDisplay(
+      display.getDisplayId(), ComposerClientWriter::kNoTimestamp,
+      libhwc_aidl_test::ComposerClientWrapper::kNoFrameIntervalNs);
+  Execute(displayProps);
+  auto validateErrors = displayProps.reader.takeErrors();
+  for (const auto &error : validateErrors) {
+    ALOGE("validateDisplay error: %s", error.toString().c_str());
+  }
+  EXPECT_TRUE(validateErrors.empty());
+
+  // Verify that the HWC is happy with the composition type
+  auto changedCompositionTypes =
+      displayProps.reader.takeChangedCompositionTypes(display.getDisplayId());
+  EXPECT_TRUE(changedCompositionTypes.empty());
+
+  displayProps.writer.presentDisplay(display.getDisplayId());
+  Execute(displayProps);
+
+  EXPECT_TRUE(displayProps.reader.takeErrors().empty());
+}
+
+bool HwcTester::Execute(libhwc_aidl_test::DisplayProperties &displayProps) {
+  auto commands = displayProps.writer.takePendingCommands();
+  if (commands.empty()) {
+    return true;
+  }
+
+  auto [status, results] = mComposerClient->executeCommands(commands);
+  if (!status.isOk()) {
+    ALOGE("executeCommands failed: %s", status.getDescription().c_str());
+    return false;
+  }
+
+  displayProps.reader.parse(std::move(results));
+
+  return true;
 }
 
 } // namespace hcct
