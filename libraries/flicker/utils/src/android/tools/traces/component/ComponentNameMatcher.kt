@@ -183,6 +183,12 @@ class ComponentNameMatcher(var component: ComponentName) : IComponentNameMatcher
                 "com.google.android.apps.nexuslauncher",
                 "com.android.launcher3.dragndrop.AddItemActivity",)
 
+        @JvmField
+        val SETTINGS_NETWORK_ACTIVITY =
+            ComponentNameMatcher(
+                "com.android.settings",
+                "com.android.settings.Settings\$NetworkDashboardActivity")
+
         /**
          * Creates a component matcher from a window or layer name.
          *
