@@ -55,11 +55,13 @@ class ScreenRecorderTest {
         device.wakeUp()
         SystemClock.sleep(500)
         device.pressHome()
+
         var remainingTime = TIMEOUT
-        do {
-            remainingTime -= 100
+        while (!mScreenRecorder.isFrameRecorded && remainingTime > 0) {
+            remainingTime -= STEP
             SystemClock.sleep(STEP)
-        } while (!mScreenRecorder.isFrameRecorded && remainingTime > 0)
+        }
+
         val writer = newTestResultWriter()
         mScreenRecorder.stop(writer)
         val result = writer.write()
@@ -73,8 +75,8 @@ class ScreenRecorderTest {
             reader.readBytes(TraceType.SCREEN_RECORDING) ?: error("Screen recording not found")
         val (metadataTrack, videoTrack) = parseScreenRecording(outputData)
 
-        Truth.assertThat(metadataTrack.isEmpty()).isFalse()
-        Truth.assertThat(videoTrack.isEmpty()).isFalse()
+        Truth.assertWithMessage("No video data found").that(videoTrack.isEmpty()).isFalse()
+        Truth.assertWithMessage("No metadata found").that(metadataTrack.isEmpty()).isFalse()
 
         val actualMagicString = metadataTrack.copyOfRange(0, WINSCOPE_MAGIC_STRING.size)
         Truth.assertThat(actualMagicString).isEqualTo(WINSCOPE_MAGIC_STRING)
@@ -180,8 +182,7 @@ class ScreenRecorderTest {
 
             if (
                 metadataTrackIndex == -1 &&
-                    trackData.mediaFormat.getString(MediaFormat.KEY_MIME, "") ==
-                        "application/octet-stream"
+                    trackData.mediaFormat.getString(MediaFormat.KEY_MIME, "") == "application/id3"
             ) {
                 metadataTrackIndex = i
             }

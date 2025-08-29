@@ -19,11 +19,11 @@ package {
     default_applicable_licenses: ["Android-Apache-2.0"],
 }
 
-java_test {
+android_library {
     name: "flickerlib",
     platform_apis: true,
     optimize: {
-        enabled: false
+        enabled: false,
     },
     srcs: [
         "src/android/tools/**/*.kt",
@@ -45,4 +45,3 @@ java_test {
         "collector-device-lib",
     ],
 }
-
