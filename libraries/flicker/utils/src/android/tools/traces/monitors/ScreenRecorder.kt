@@ -29,8 +29,6 @@ open class ScreenRecorder
 constructor(
     private val context: Context,
     private val outputFile: File = File.createTempFile("transition", "screen_recording"),
-    private val width: Int = 720,
-    private val height: Int = 1280,
 ) : TraceMonitor() {
     override val traceType = TraceType.SCREEN_RECORDING
 
@@ -38,7 +36,7 @@ constructor(
     private var recordingRunnable: ScreenRecordingRunnable? = null
 
     private fun newRecordingThread(): Thread {
-        val runnable = ScreenRecordingRunnable(outputFile, context, width, height)
+        val runnable = ScreenRecordingRunnable(outputFile, context)
         recordingRunnable = runnable
         return Thread(runnable)
     }
@@ -61,12 +59,13 @@ constructor(
         recordingThread.start()
 
         var remainingTime = WAIT_TIMEOUT_MS
-        do {
+        while (!isFrameRecorded && remainingTime > 0L) {
             SystemClock.sleep(WAIT_INTERVAL_MS)
             remainingTime -= WAIT_INTERVAL_MS
-        } while (recordingRunnable?.isFrameRecorded != true)
+        }
 
-        require(outputFile.exists()) { "Screen recorder didn't start" }
+        require(isFrameRecorded) { "Screen recorder didn't start" }
+        require(outputFile.exists()) { "Output file does not exist" }
     }
 
     override fun doStop(): File {
@@ -79,6 +78,11 @@ constructor(
         } catch (e: Exception) {
             throw IllegalStateException("Unable to stop screen recording", e)
         } finally {
+            var remainingTime = WAIT_TIMEOUT_MS
+            while (recordingRunnable?.isCompleted != true && remainingTime > 0) {
+                remainingTime -= WAIT_INTERVAL_MS
+                SystemClock.sleep(WAIT_INTERVAL_MS)
+            }
             recordingRunnable = null
             recordingThread = null
         }

@@ -180,6 +180,7 @@ private:
   static bool ToggleHwc3(bool enable);
 
   bool CreateResource(DrmResource resource, int index);
+  bool SetCrtcWriteback(int crtcIndex, bool enable);
   bool SetConnectorStatus(int index, bool enable);
   bool SetConnectorType(int index, ConnectorType type);
   bool SetConnectorEdid(int index, edid::MonitorName monitorName);

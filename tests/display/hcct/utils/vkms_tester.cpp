@@ -156,6 +156,7 @@ bool VkmsTester::SetupDisplays(
 
   for (int i = 0; i < displaysCount; ++i) {
     CreateResource(DrmResource::kCrtc, i);
+    SetCrtcWriteback(i, true);
     CreateResource(DrmResource::kEncoder, i);
     LinkToCrtc(DrmResource::kEncoder, i, i);
 
@@ -246,6 +247,23 @@ bool VkmsTester::CreateResource(DrmResource resource, int index) {
     return false;
   }
 
+  return true;
+}
+
+bool VkmsTester::SetCrtcWriteback(int crtcIndex, bool enable) {
+  std::string crtcDir = std::string(kVkmsBaseDir) + "/" +
+                        kDrmResourceBase.at(DrmResource::kCrtc) +
+                        std::to_string(crtcIndex);
+  std::string writebackPath = crtcDir + "/writeback";
+  std::string writebackValue = enable ? "1" : "0";
+  if (!android::base::WriteStringToFile(writebackValue, writebackPath)) {
+    ALOGE("Failed to toggle writeback for CRTC %i: %s", crtcIndex,
+          strerror(errno));
+    return false;
+  }
+
+  ALOGI("Successfully toggled writeback for CRTC %i: %s", crtcIndex,
+        enable ? "enabled" : "disabled");
   return true;
 }
 
