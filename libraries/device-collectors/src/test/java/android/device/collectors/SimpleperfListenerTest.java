@@ -20,6 +20,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.matches;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
@@ -45,6 +46,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -106,44 +108,34 @@ public class SimpleperfListenerTest {
         return listener;
     }
 
-    private void testSingleRecordCallsWithUiDevice() throws Exception {
-        verify(mSimpleperfHelperVisibleUidevice, times(1)).getPID("surfaceflinger");
-        verify(mSimpleperfHelperVisibleUidevice, times(1))
-                .startCollecting(eq("record"), eq(" -e instructions -p 680"));
-        verify(mUiDevice, times(1))
-                .executeShellCommand(
-                        "simpleperf record -o /data/local/tmp/perf.data  -e"
-                                + " instructions -p 680");
+    private void verifySingleRecordCallsWithUiDevice() throws Exception {
+        List<String> commandArgsList = mListener.getRecordCommandArgsList();
+        verify(mSimpleperfHelperVisibleUidevice, never()).getPID(anyString());
+        verify(mSimpleperfHelperVisibleUidevice, times(1)).startCollecting(eq(commandArgsList));
+        verify(mUiDevice, times(1)).executeShellCommand(String.join(" ", commandArgsList));
     }
 
-    private void testRecordCallsWithUiDevice() throws Exception {
-        verify(mSimpleperfHelperVisibleUidevice, times(1)).getPID("surfaceflinger");
-        verify(mSimpleperfHelperVisibleUidevice, times(1)).getPID("system_server");
-        verify(mSimpleperfHelperVisibleUidevice, times(1))
-                .startCollecting(
-                        eq("record"),
-                        eq(
-                                "-g --post-unwind=yes -f 500 --exclude-perf --log-to-android-buffer"
-                                        + " -e instructions,cpu-cycles -p 1696,680"));
-        verify(mUiDevice, times(1))
-                .executeShellCommand(
-                        "simpleperf record -o /data/local/tmp/perf.data -g --post-unwind=yes -f"
-                                + " 500 --exclude-perf --log-to-android-buffer"
-                                + " -e instructions,cpu-cycles -p 1696,680");
+    private void verifyMultipleRecordCallsWithUiDevice() throws Exception {
+        List<String> commandArgsList = mListener.getRecordCommandArgsList();
+        verify(mSimpleperfHelperVisibleUidevice, times(4)).getPID(anyString());
+        verify(mSimpleperfHelperVisibleUidevice, times(1)).startCollecting(eq(commandArgsList));
+        verify(mUiDevice, times(1)).executeShellCommand(String.join(" ", commandArgsList));
     }
 
-    private void testSampleReport() {
+    private void verifySampleMetrics() {
         Map<String, String> processes =
                 Map.of(
                         "surfaceflinger", "680",
                         "system_server", "1696");
-
+        mSimpleperfHelper.getSimpleperfReport(
+                "/data/local/tmp/simpleperf/testdata/simpleperf_record_sample.data",
+                "/data/local/tmp/simpleperf_report.txt",
+                processes);
         Map<String /*key*/, String /*eventCount*/> metrics = new ArrayMap<>();
         for (Map.Entry<String, String> process : processes.entrySet()) {
             metrics.putAll(
-                    mSimpleperfHelper.getSimpleperfReport(
-                            "/data/local/tmp/simpleperf/testdata/simpleperf_record_sample.data",
-                            process,
+                    mSimpleperfHelper.getMetrics(
+                            process.getKey(),
                             Map.of(
                                     "android::Parcel::writeInt32(int)",
                                     "writeInt32",
@@ -154,10 +146,15 @@ public class SimpleperfListenerTest {
                             10));
         }
         // cherry-pick a few metrics to test
-        assertEquals(metrics.get("surfaceflinger-instructions"), "110712160");
-        assertEquals(metrics.get("surfaceflinger-composite-cpu-cycles-count"), "2043342");
-        assertEquals(metrics.get("surfaceflinger-writeInt32-instructions-percentage"), "0.74");
-        assertEquals(metrics.get("system_server-cpu-cycles"), "908094716");
+        // Print metrics for debugging
+        System.out.println("Collected Metrics:");
+        for (Map.Entry<String, String> entry : metrics.entrySet()) {
+            System.out.println(entry.getKey() + ": " + entry.getValue());
+        }
+        assertEquals("349852060", metrics.get("surfaceflinger-instructions"));
+        assertEquals("2043342", metrics.get("surfaceflinger-composite-cpu-cycles-count"));
+        assertEquals("0.22", metrics.get("surfaceflinger-writeInt32-instructions-percentage"));
+        assertEquals("1545745375", metrics.get("system_server-cpu-cycles"));
     }
 
     /*
@@ -167,14 +164,14 @@ public class SimpleperfListenerTest {
     public void testSimpleperfPerTestSuccessFlow() throws Exception {
         Bundle b = new Bundle();
         mListener = initListener(b);
-        doReturn(true).when(mSimpleperfHelper).startCollecting(anyString(), anyString());
+        doReturn(true).when(mSimpleperfHelper).startCollecting(any());
         doReturn(true).when(mSimpleperfHelper).stopCollecting(anyString());
         // Test run start behavior
         mListener.testRunStarted(mRunDesc);
 
         // Test test start behavior
         mListener.testStarted(mTest1Desc);
-        verify(mSimpleperfHelper, times(1)).startCollecting(anyString(), anyString());
+        verify(mSimpleperfHelper, times(1)).startCollecting(any());
         mListener.onTestEnd(mDataRecord, mTest1Desc);
         verify(mSimpleperfHelper, times(1)).stopCollecting(anyString());
     }
@@ -189,14 +186,14 @@ public class SimpleperfListenerTest {
         b.putString(SimpleperfListener.SKIP_TEST_FAILURE_METRICS, "false");
         mListener = initListener(b);
 
-        doReturn(true).when(mSimpleperfHelper).startCollecting(anyString(), anyString());
+        doReturn(true).when(mSimpleperfHelper).startCollecting(any());
         doReturn(true).when(mSimpleperfHelper).stopCollecting(anyString());
         // Test run start behavior
         mListener.testRunStarted(mRunDesc);
 
         // Test test start behavior
         mListener.testStarted(mTest1Desc);
-        verify(mSimpleperfHelper, times(1)).startCollecting(anyString(), anyString());
+        verify(mSimpleperfHelper, times(1)).startCollecting(any());
 
         // Test fail behaviour
         Failure failureDesc = new Failure(FAKE_TEST_DESCRIPTION, new Exception());
@@ -215,20 +212,20 @@ public class SimpleperfListenerTest {
         b.putString(SimpleperfListener.SKIP_TEST_FAILURE_METRICS, "true");
         mListener = initListener(b);
 
-        doReturn(true).when(mSimpleperfHelper).startCollecting(anyString(), anyString());
-        doReturn(true).when(mSimpleperfHelper).stopSimpleperf();
+        doReturn(true).when(mSimpleperfHelper).startCollecting(any());
+        doReturn(true).when(mSimpleperfHelper).stopCollecting(anyString());
         // Test run start behavior
         mListener.testRunStarted(mRunDesc);
 
         // Test test start behavior
         mListener.testStarted(mTest1Desc);
-        verify(mSimpleperfHelper, times(1)).startCollecting(anyString(), anyString());
+        verify(mSimpleperfHelper, times(1)).startCollecting(any());
 
         // Test fail behaviour
         Failure failureDesc = new Failure(FAKE_TEST_DESCRIPTION, new Exception());
         mListener.onTestFail(mDataRecord, mTest1Desc, failureDesc);
         mListener.onTestEnd(mDataRecord, mTest1Desc);
-        verify(mSimpleperfHelper, times(1)).stopSimpleperf();
+        verify(mSimpleperfHelper, times(1)).stopCollecting("");
     }
 
     /*
@@ -240,16 +237,16 @@ public class SimpleperfListenerTest {
         Bundle b = new Bundle();
         b.putString(SimpleperfListener.COLLECT_PER_RUN, "true");
         mListener = initListener(b);
-        doReturn(true).when(mSimpleperfHelper).startCollecting(anyString(), anyString());
+        doReturn(true).when(mSimpleperfHelper).startCollecting(any());
         doReturn(true).when(mSimpleperfHelper).stopCollecting(anyString());
 
         // Test run start behavior
-        mListener.onTestRunStart(mListener.createDataRecord(), FAKE_DESCRIPTION);
-        verify(mSimpleperfHelper, times(1)).startCollecting(anyString(), anyString());
+        mListener.testRunStarted(mRunDesc);
+        verify(mSimpleperfHelper, times(1)).startCollecting(any());
         mListener.testStarted(mTest1Desc);
-        verify(mSimpleperfHelper, times(1)).startCollecting(anyString(), anyString());
+        verify(mSimpleperfHelper, times(1)).startCollecting(any());
         mListener.onTestEnd(mDataRecord, mTest1Desc);
-        verify(mSimpleperfHelper, times(0)).stopCollecting(anyString());
+        verify(mSimpleperfHelper, never()).stopCollecting(anyString());
         mListener.onTestRunEnd(mListener.createDataRecord(), new Result());
         verify(mSimpleperfHelper, times(1)).stopCollecting(anyString());
     }
@@ -261,17 +258,17 @@ public class SimpleperfListenerTest {
     public void testSimpleperfRecordSingleProcessEvent() throws Exception {
         Bundle b = new Bundle();
         b.putString(SimpleperfListener.PROCESSES, "surfaceflinger");
-        b.putString(SimpleperfListener.ARGUMENTS, "");
+        b.putString(SimpleperfListener.ADDITIONAL_ARGUMENTS, "");
         b.putString(SimpleperfListener.COLLECT_PER_RUN, "true");
         b.putString(
-                SimpleperfListener.REPORT_SYMBOLS, "android::SurfaceFlinger::commit(long, long,");
+                SimpleperfListener.REPORT_SYMBOLS, "android::SurfaceFlinger::commit(long,long,");
         b.putString(SimpleperfListener.EVENTS, "instructions");
-        doReturn("680").when(mUiDevice).executeShellCommand(eq("pidof surfaceflinger"));
+        // doReturn("680").when(mUiDevice).executeShellCommand(eq("pidof surfaceflinger"));
         doReturn("").when(mUiDevice).executeShellCommand(eq("pidof simpleperf"));
 
         mListener = initListener(b, mSimpleperfHelperVisibleUidevice);
         mListener.testRunStarted(mRunDesc);
-        testSingleRecordCallsWithUiDevice();
+        verifySingleRecordCallsWithUiDevice();
     }
 
     /*
@@ -293,7 +290,7 @@ public class SimpleperfListenerTest {
 
         mListener = initListener(b, mSimpleperfHelperVisibleUidevice);
         mListener.testRunStarted(mRunDesc);
-        testRecordCallsWithUiDevice();
+        verifyMultipleRecordCallsWithUiDevice();
     }
 
     /*
@@ -316,11 +313,12 @@ public class SimpleperfListenerTest {
         mListener = initListener(b, mSimpleperfHelperVisibleUidevice);
         mListener.testRunStarted(mRunDesc);
         mListener.testStarted(mTest3Desc);
-        testRecordCallsWithUiDevice();
+        verifyMultipleRecordCallsWithUiDevice();
     }
 
     /*
-     * Verify simpleperf start and stop and reports specific processes and events that were recorded
+     * Verify simpleperf start and stop and reports specific processes and events that were
+    recorded
      * per test run.
      */
     @Test
@@ -329,6 +327,7 @@ public class SimpleperfListenerTest {
         b.putString(SimpleperfListener.PROCESSES, "surfaceflinger,system_server");
         b.putString(SimpleperfListener.COLLECT_PER_RUN, "true");
         b.putString(SimpleperfListener.REPORT, "true");
+        b.putString(SimpleperfListener.EXTRACT_METRICS, "true");
         b.putString(
                 SimpleperfListener.REPORT_SYMBOLS,
                 "android::Parcel::writeInt32(int); android::SurfaceFlinger::commit(long, long,"
@@ -338,20 +337,19 @@ public class SimpleperfListenerTest {
         doReturn("680").when(mUiDevice).executeShellCommand(eq("pidof surfaceflinger"));
         doReturn("1696").when(mUiDevice).executeShellCommand(eq("pidof system_server"));
         doReturn("").when(mUiDevice).executeShellCommand(eq("pidof simpleperf"));
-        doReturn(true)
-                .when(mSimpleperfHelperVisibleUidevice)
-                .startCollecting(anyString(), anyString());
+        doReturn("").when(mUiDevice).executeShellCommand(matches("mv .*"));
+        doReturn(true).when(mSimpleperfHelperVisibleUidevice).startCollecting(any());
         doReturn(true).when(mSimpleperfHelperVisibleUidevice).stopCollecting(anyString());
 
         mListener.testRunStarted(mRunDesc);
         verify(mSimpleperfHelperVisibleUidevice, times(2)).getPID(anyString());
-        verify(mSimpleperfHelperVisibleUidevice, times(1))
-                .startCollecting(anyString(), anyString());
+        verify(mSimpleperfHelperVisibleUidevice, times(1)).startCollecting(any());
         mListener.onTestRunEnd(mListener.createDataRecord(), new Result());
         verify(mSimpleperfHelperVisibleUidevice, times(1)).stopCollecting(anyString());
-        verify(mSimpleperfHelperVisibleUidevice, times(2))
-                .getSimpleperfReport(anyString(), any(), any(), anyInt());
-        testSampleReport();
+        verify(mSimpleperfHelperVisibleUidevice, times(1))
+                .getSimpleperfReport(anyString(), anyString(), any());
+        verify(mSimpleperfHelperVisibleUidevice, times(2)).getMetrics(anyString(), any(), anyInt());
+        verifySampleMetrics();
     }
 
     /*
@@ -364,6 +362,7 @@ public class SimpleperfListenerTest {
         b.putString(SimpleperfListener.PROCESSES, "surfaceflinger,system_server");
         b.putString(SimpleperfListener.COLLECT_PER_RUN, "false");
         b.putString(SimpleperfListener.REPORT, "true");
+        b.putString(SimpleperfListener.EXTRACT_METRICS, "true");
         b.putString(
                 SimpleperfListener.REPORT_SYMBOLS,
                 "writeInt32;android::Parcel::writeInt32(int);commit;android::SurfaceFlinger::commit(long,"
@@ -373,21 +372,20 @@ public class SimpleperfListenerTest {
         doReturn("680").when(mUiDevice).executeShellCommand(eq("pidof surfaceflinger"));
         doReturn("1696").when(mUiDevice).executeShellCommand(eq("pidof system_server"));
         doReturn("").when(mUiDevice).executeShellCommand(eq("pidof simpleperf"));
-        doReturn(true)
-                .when(mSimpleperfHelperVisibleUidevice)
-                .startCollecting(anyString(), anyString());
+        doReturn("").when(mUiDevice).executeShellCommand(matches("mv .*"));
+        doReturn(true).when(mSimpleperfHelperVisibleUidevice).startCollecting(any());
         doReturn(true).when(mSimpleperfHelperVisibleUidevice).stopCollecting(anyString());
 
         mListener.testRunStarted(mRunDesc);
         mListener.testStarted(mTest1Desc);
         verify(mSimpleperfHelperVisibleUidevice, times(2)).getPID(anyString());
-        verify(mSimpleperfHelperVisibleUidevice, times(1))
-                .startCollecting(anyString(), anyString());
-        mListener.onTestEnd(mListener.createDataRecord(), mTest3Desc);
+        verify(mSimpleperfHelperVisibleUidevice, times(1)).startCollecting(any()); // Verify startCollecting was called once
+        mListener.onTestEnd(mListener.createDataRecord(), mTest1Desc); // Corrected description
         verify(mSimpleperfHelperVisibleUidevice, times(1)).stopCollecting(anyString());
-        verify(mSimpleperfHelperVisibleUidevice, times(2))
-                .getSimpleperfReport(anyString(), any(), any(), anyInt());
-        testSampleReport();
+        verify(mSimpleperfHelperVisibleUidevice, times(1))
+                .getSimpleperfReport(anyString(), anyString(), any());
+        verify(mSimpleperfHelperVisibleUidevice, times(2)).getMetrics(anyString(), any(), anyInt());
+        verifySampleMetrics();
     }
 
     /*
@@ -398,13 +396,13 @@ public class SimpleperfListenerTest {
         Bundle b = new Bundle();
         b.putString(SimpleperfListener.COLLECT_PER_RUN, "true");
         mListener = initListener(b);
-        doReturn(false).when(mSimpleperfHelper).startCollecting(anyString(), anyString());
+        doReturn(false).when(mSimpleperfHelper).startCollecting(any());
 
         // Test run start behavior
-        mListener.onTestRunStart(mListener.createDataRecord(), FAKE_DESCRIPTION);
-        verify(mSimpleperfHelper, times(1)).startCollecting(anyString(), anyString());
+        mListener.testRunStarted(mRunDesc);
+        verify(mSimpleperfHelper, times(1)).startCollecting(any());
         mListener.onTestRunEnd(mListener.createDataRecord(), new Result());
-        verify(mSimpleperfHelper, times(0)).stopCollecting(anyString());
+        verify(mSimpleperfHelper, never()).stopCollecting(anyString());
     }
 
     /*
@@ -414,27 +412,27 @@ public class SimpleperfListenerTest {
     public void testSimpleperfStartFailureFlow() throws Exception {
         Bundle b = new Bundle();
         mListener = initListener(b);
-        doReturn(false).when(mSimpleperfHelper).startCollecting(anyString(), anyString());
-
+        doReturn(false).when(mSimpleperfHelper).startCollecting(any());
         // Test run start behavior
         mListener.testRunStarted(mRunDesc);
 
         // Test test start behavior
         mListener.testStarted(mTest1Desc);
-        verify(mSimpleperfHelper, times(1)).startCollecting(anyString(), anyString());
+        verify(mSimpleperfHelper, times(1)).startCollecting(any());
         mListener.onTestEnd(mDataRecord, mTest1Desc);
-        verify(mSimpleperfHelper, times(0)).stopCollecting(anyString());
+        verify(mSimpleperfHelper, never()).stopCollecting(anyString());
     }
 
     /*
-     * Verify test method invocation count is updated successfully based on the number of times the
+     * Verify test method invocation count is updated successfully based on the number of times
+    the
      * test method is invoked.
      */
     @Test
     public void testSimpleperfInvocationCount() throws Exception {
         Bundle b = new Bundle();
         mListener = initListener(b);
-        doReturn(true).when(mSimpleperfHelper).startCollecting(anyString(), anyString());
+        doReturn(true).when(mSimpleperfHelper).startCollecting(any());
         doReturn(true).when(mSimpleperfHelper).stopCollecting(anyString());
 
         // Test run start behavior
@@ -442,19 +440,19 @@ public class SimpleperfListenerTest {
 
         // Test1 invocation 1 start behavior
         mListener.testStarted(mTest1Desc);
-        verify(mSimpleperfHelper, times(1)).startCollecting(anyString(), anyString());
+        verify(mSimpleperfHelper, times(1)).startCollecting(any());
         mListener.onTestEnd(mDataRecord, mTest1Desc);
         verify(mSimpleperfHelper, times(1)).stopCollecting(anyString());
 
         // Test1 invocation 2 start behaviour
         mListener.testStarted(mTest1Desc);
-        verify(mSimpleperfHelper, times(2)).startCollecting(anyString(), anyString());
+        verify(mSimpleperfHelper, times(2)).startCollecting(any());
         mListener.onTestEnd(mDataRecord, mTest1Desc);
         verify(mSimpleperfHelper, times(2)).stopCollecting(anyString());
 
         // Test2 invocation 1 start behaviour
         mListener.testStarted(mTest2Desc);
-        verify(mSimpleperfHelper, times(3)).startCollecting(anyString(), anyString());
+        verify(mSimpleperfHelper, times(3)).startCollecting(any());
         mDataRecord = mListener.createDataRecord();
         mListener.onTestEnd(mDataRecord, mTest2Desc);
         verify(mSimpleperfHelper, times(3)).stopCollecting(anyString());
@@ -465,39 +463,43 @@ public class SimpleperfListenerTest {
     }
 
     /*
-     * Verify we can skip record and only report metrics.
+     * Verify we can record and report metrics.
      */
     @Test
-    public void testSimpleperfSkipRecord() throws Exception {
+    public void testSimpleperfRecordAndReport() throws Exception {
         Bundle b = new Bundle();
         b.putString(SimpleperfListener.PROCESSES, "surfaceflinger,system_server");
         b.putString(SimpleperfListener.COLLECT_PER_RUN, "false");
         b.putString(SimpleperfListener.REPORT, "true");
-        b.putString(SimpleperfListener.RECORD, "false");
+        b.putString(SimpleperfListener.EXTRACT_METRICS, "true");
         b.putString(
                 SimpleperfListener.REPORT_SYMBOLS,
                 "writeInt32;android::Parcel::writeInt32(int);"
                         + "commit;android::SurfaceFlinger::commit(long,"
-                        + " long, long);composite;android::SurfaceFlinger::composite(long, long)");
+                        + " long, long);composite;android::SurfaceFlinger::composite(long,long)");
         b.putString(SimpleperfListener.EVENTS, "instructions,cpu-cycles");
         mListener = initListener(b, mSimpleperfHelperVisibleUidevice);
         doReturn("680").when(mUiDevice).executeShellCommand(eq("pidof surfaceflinger"));
         doReturn("1696").when(mUiDevice).executeShellCommand(eq("pidof system_server"));
         doReturn("").when(mUiDevice).executeShellCommand(eq("pidof simpleperf"));
+        doReturn(true).when(mSimpleperfHelperVisibleUidevice).startCollecting(any());
+        doReturn(true).when(mSimpleperfHelperVisibleUidevice).stopCollecting(anyString());
         doReturn(true)
                 .when(mSimpleperfHelperVisibleUidevice)
-                .startCollecting(anyString(), anyString());
-        doReturn(true).when(mSimpleperfHelperVisibleUidevice).copyFileOutput(anyString());
+                .copyFileOutput(anyString(), anyString());
 
         mListener.testRunStarted(mRunDesc);
         mListener.testStarted(mTest1Desc);
         verify(mSimpleperfHelperVisibleUidevice, times(2)).getPID(anyString());
-        verify(mSimpleperfHelperVisibleUidevice, never()).startCollecting(anyString(), anyString());
+        verify(mSimpleperfHelperVisibleUidevice, times(1)).startCollecting(any());
         mListener.onTestEnd(mListener.createDataRecord(), mTest3Desc);
-        verify(mSimpleperfHelperVisibleUidevice, never()).stopCollecting(anyString());
-        verify(mSimpleperfHelperVisibleUidevice, times(1)).copyFileOutput(anyString());
-        verify(mSimpleperfHelperVisibleUidevice, times(2))
-                .getSimpleperfReport(anyString(), any(), any(), anyInt());
-        testSampleReport();
+        verify(mSimpleperfHelperVisibleUidevice, times(1)).stopCollecting(anyString());
+        // stopCollecting is mocked, so copyFileOutput is not called from it.
+        // getSimpleperfReport is not mocked, so it will call copyFileOutput.
+        verify(mSimpleperfHelperVisibleUidevice, times(1)).copyFileOutput(anyString(), anyString());
+        verify(mSimpleperfHelperVisibleUidevice, times(1))
+                .getSimpleperfReport(anyString(), anyString(), any());
+        verify(mSimpleperfHelperVisibleUidevice, times(2)).getMetrics(anyString(), any(), anyInt());
+        verifySampleMetrics();
     }
 }

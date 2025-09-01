@@ -20,7 +20,7 @@ import android.os.SystemClock;
 import android.util.Log;
 
 import androidx.annotation.VisibleForTesting;
-import androidx.test.InstrumentationRegistry;
+import androidx.test.platform.app.InstrumentationRegistry;
 import androidx.test.uiautomator.UiDevice;
 
 import java.io.BufferedReader;
@@ -29,8 +29,10 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.List;
 
 /**
  * SimpleperfHelper is used to start and stop simpleperf sample collection and move the output
@@ -39,21 +41,19 @@ import java.util.Map;
 public class SimpleperfHelper {
 
     private static final String LOG_TAG = SimpleperfHelper.class.getSimpleName();
-    private static final String SIMPLEPERF_TMP_FILE_PATH = "/data/local/tmp/perf.data";
-    private static final String SIMPLEPERF_REPORT_TMP_FILE_PATH = "/data/local/tmp/perf_report.txt";
-
-    private static final String SIMPLEPERF_START_CMD = "simpleperf %s -o %s %s";
     private static final String SIMPLEPERF_STOP_CMD = "pkill -INT simpleperf";
     private static final String SIMPLEPERF_PROC_ID_CMD = "pidof simpleperf";
-    private static final String REMOVE_CMD = "rm %s";
     private static final String MOVE_CMD = "mv %s %s";
-
     private static final int SIMPLEPERF_START_WAIT_COUNT = 3;
     private static final int SIMPLEPERF_START_WAIT_TIME = 1000;
     private static final int SIMPLEPERF_STOP_WAIT_COUNT = 60;
     private static final long SIMPLEPERF_STOP_WAIT_TIME = 15000;
-
     private final UiDevice mUiDevice;
+
+    public static final String SIMPLEPERF_PROFILING_TMP_FILE_PATH =
+            "/data/local/tmp/simpleperf_profiling.data";
+    public static final String SIMPLEPERF_REPORT_TMP_FILE_PATH =
+            "/data/local/tmp/simpleperf_report.txt";
 
     /** Constructor to receive visible UiDevice. Should not be used except for testing. */
     @VisibleForTesting
@@ -65,51 +65,40 @@ public class SimpleperfHelper {
         mUiDevice = UiDevice.getInstance(InstrumentationRegistry.getInstrumentation());
     }
 
-    public boolean startCollecting(String subcommand, String arguments) {
-        try {
-            // Cleanup any running simpleperf sessions.
-            Log.i(LOG_TAG, "Cleanup simpleperf before starting.");
-            if (isSimpleperfRunning()) {
-                Log.i(LOG_TAG, "Simpleperf is already running. Stopping simpleperf.");
-                if (!stopSimpleperf()) {
-                    return false;
-                }
-            }
-
-            Log.i(LOG_TAG, String.format("Starting simpleperf"));
-            new Thread() {
-                @Override
-                public void run() {
-                    String startCommand =
-                            String.format(
-                                    SIMPLEPERF_START_CMD,
-                                    subcommand,
-                                    SIMPLEPERF_TMP_FILE_PATH,
-                                    arguments);
-                    Log.i(LOG_TAG, String.format("Start command: %s", startCommand));
-                    try {
-                        String startOutput = mUiDevice.executeShellCommand(startCommand);
-                        Log.i(
-                                LOG_TAG,
-                                String.format("Simpleperf start command output - %s", startOutput));
-                    } catch (IOException e) {
-                        Log.e(LOG_TAG, "Failed to start simpleperf.");
-                    }
-                }
-            }.start();
-
-            int waitCount = 0;
-            while (!isSimpleperfRunning()) {
-                if (waitCount < SIMPLEPERF_START_WAIT_COUNT) {
-                    SystemClock.sleep(SIMPLEPERF_START_WAIT_TIME);
-                    waitCount++;
-                    continue;
-                }
-                Log.e(LOG_TAG, "Simpleperf sampling failed to start.");
+    public boolean startCollecting(List<String> commandArgsList) {
+        Log.i(LOG_TAG, "startCollecting");
+        // Cleanup any running simpleperf sessions.
+        Log.i(LOG_TAG, "Cleanup simpleperf before starting.");
+        if (isSimpleperfRunning()) {
+            Log.i(LOG_TAG, "Simpleperf is already running. Stopping simpleperf.");
+            if (!stopCollecting("")) {
                 return false;
             }
-        } catch (IOException e) {
-            Log.e(LOG_TAG, "Unable to start simpleperf sampling due to :" + e.getMessage());
+        }
+
+        Log.i(LOG_TAG, String.format("Starting simpleperf"));
+        new Thread() {
+            @Override
+            public void run() {
+                String recordCommand = String.join(" ", commandArgsList);
+                Log.i(LOG_TAG, String.format("Simpleperf record command: %s", recordCommand));
+                try {
+                    String output = mUiDevice.executeShellCommand(recordCommand);
+                    Log.i(LOG_TAG, String.format("Simpleperf record command output - %s", output));
+                } catch (IOException e) {
+                    Log.e(LOG_TAG, "Failed to start simpleperf: " + e.getMessage());
+                }
+            }
+        }.start();
+
+        int waitCount = 0;
+        while (!isSimpleperfRunning()) {
+            if (waitCount < SIMPLEPERF_START_WAIT_COUNT) {
+                SystemClock.sleep(SIMPLEPERF_START_WAIT_TIME);
+                waitCount++;
+                continue;
+            }
+            Log.e(LOG_TAG, "Simpleperf sampling failed to start.");
             return false;
         }
         Log.i(LOG_TAG, "Simpleperf sampling started successfully.");
@@ -117,43 +106,25 @@ public class SimpleperfHelper {
     }
 
     /**
-     * Stop the simpleperf sample collection under /data/local/tmp/perf.data and copy the output to
-     * the destination file.
+     * Utility method for sending the signal to stop collecting simpleperf.
      *
-     * @param destinationFile file to copy the simpleperf sample file to.
-     * @return true if the trace collection is successful otherwise false.
-     */
-    public boolean stopCollecting(String destinationFile) {
-        Log.i(LOG_TAG, "Stopping simpleperf.");
-        try {
-            if (stopSimpleperf()) {
-                if (!copyFileOutput(destinationFile)) {
-                    return false;
-                }
-            } else {
-                Log.e(LOG_TAG, "Simpleperf failed to stop");
-                return false;
-            }
-        } catch (IOException e) {
-            Log.e(LOG_TAG, "Unable to stop the simpleperf samping due to " + e.getMessage());
-            return false;
-        }
-        return true;
-    }
-
-    /**
-     * Utility method for sending the signal to stop simpleperf.
-     *
+     * @param destinationFile Path to write the collected file to. If null, the collected file will
+     *     not be copied.
      * @return true if simpleperf is successfully stopped.
      */
-    public boolean stopSimpleperf() throws IOException {
+    public boolean stopCollecting(String destinationFile) {
+        Log.i(LOG_TAG, "stopCollecting");
         if (!isSimpleperfRunning()) {
             Log.i(LOG_TAG, "Simpleperf stop called, but simpleperf is not running.");
-            return true;
+            return copyFileOutput(SIMPLEPERF_PROFILING_TMP_FILE_PATH, destinationFile);
         }
-
-        String stopOutput = mUiDevice.executeShellCommand(SIMPLEPERF_STOP_CMD);
         Log.i(LOG_TAG, String.format("Simpleperf stop command ran: %s", SIMPLEPERF_STOP_CMD));
+        try {
+            mUiDevice.executeShellCommand(SIMPLEPERF_STOP_CMD);
+        } catch (IOException e) {
+            Log.e(LOG_TAG, "Unable to stop simpleperf sampling due to :" + e.getMessage());
+            return false;
+        }
         int waitCount = 0;
         while (isSimpleperfRunning()) {
             if (waitCount < SIMPLEPERF_STOP_WAIT_COUNT) {
@@ -165,36 +136,50 @@ public class SimpleperfHelper {
             return false;
         }
         Log.i(LOG_TAG, "Simpleperf stopped successfully.");
-        return true;
+        return copyFileOutput(SIMPLEPERF_PROFILING_TMP_FILE_PATH, destinationFile);
     }
 
     /**
      * Method for generating simpleperf report and getting report metrics.
      *
-     * @param path Path to read binary record from.
+     * @param profilePath Path to read binary record from.
+     * @param reportPath Path to write report to.
      * @param processToPid Map with process names and PIDs to look for in record file.
-     * @param symbols Symbols to report events from the processes recorded
-     * @return Map containing recorded processes and nested map of symbols and event count for each
-     *     symbol.
+     * @return true if report was generated successfully, otherwise false.
      */
-    public Map<String /*event-process-symbol*/, String /*eventCount*/> getSimpleperfReport(
-            String path,
-            Map.Entry<String, String> processToPid,
-            Map<String, String> symbols,
-            int testIterations) {
+    public boolean getSimpleperfReport(
+            String profilePath, String reportPath, Map<String, String> processToPid) {
+        if (profilePath.isEmpty() || !profilePath.endsWith(".data")) {
+            Log.e(LOG_TAG, "Invalid profiling data path: " + profilePath);
+            return false;
+        }
+
+        List<String> commandArgsList = new ArrayList<String>();
+        commandArgsList.add("simpleperf report");
+        commandArgsList.add("-i");
+        commandArgsList.add(profilePath);
+        if (!processToPid.isEmpty()) {
+            commandArgsList.add("--pids");
+            commandArgsList.add(String.join(",", processToPid.values()));
+        }
+        // -o report_file_name   Set report file name, default is stdout.
+        commandArgsList.add("-o");
+        commandArgsList.add(SIMPLEPERF_REPORT_TMP_FILE_PATH);
+        // --children    Print the overhead accumulated by appearing in the call chain.
+        // In the report, Children column shows overhead for a symbol and functions called
+        // by the symbol, while Self column shows overhead for the symbol itself.
+        commandArgsList.add("--children");
+        // --print-event-count   Print event counts for each item. Additional events can be added by
+        // --add-counter in record cmd.
+        commandArgsList.add(" --print-event-count ");
+        String reportCommand = String.join(" ", commandArgsList);
+        Log.i(LOG_TAG, String.format("Simpleperf report command: %s", reportCommand));
         try {
-            String reportCommand =
-                    String.format(
-                            "simpleperf report -i %s --pids %s --sort pid,symbol -o %s"
-                                    + " --print-event-count --children",
-                            path, processToPid.getValue(), SIMPLEPERF_REPORT_TMP_FILE_PATH);
-            Log.i(LOG_TAG, String.format("Report command: %s", reportCommand));
             mUiDevice.executeShellCommand(reportCommand);
-            return getMetrics(processToPid.getKey(), symbols, testIterations);
         } catch (IOException e) {
             Log.e(LOG_TAG, "Could not generate report: " + e.getMessage());
         }
-        return new HashMap<>();
+        return copyFileOutput(SIMPLEPERF_REPORT_TMP_FILE_PATH, reportPath);
     }
 
     /**
@@ -202,10 +187,13 @@ public class SimpleperfHelper {
      *
      * @param process Individually extracted processes recorded in binary record file.
      * @param symbols Symbols to report events from the processes recorded.
-     * @return Map containing recorded event counts from symbols within process
+     * @param testIterations Number of test iterations to divide event counts by.
+     * @return Map containing recorded processes and nested map of symbols and event count for each
+     *     symbol.
      */
-    private Map<String, String> getMetrics(
+    public Map<String, String> getMetrics(
             String process, Map<String, String> symbols, int testIterations) {
+        Log.i(LOG_TAG, "getMetrics for process: " + process);
         Map<String, String> results = new HashMap<>();
         try {
             String eventName = "";
@@ -302,10 +290,22 @@ public class SimpleperfHelper {
     /**
      * Copy the temporary simpleperf output file to the given destinationFile.
      *
+     * @param sourceFile file to copy simpleperf output from.
      * @param destinationFile file to copy simpleperf output into.
      * @return true if the simpleperf file copied successfully, otherwise false.
      */
-    public boolean copyFileOutput(String destinationFile) {
+    public boolean copyFileOutput(String sourceFile, String destinationFile) {
+        if (sourceFile.isEmpty() || destinationFile.isEmpty()) {
+            Log.e(
+                    LOG_TAG,
+                    "Invalid source or destination file path: \n"
+                            + "sourceFile: "
+                            + sourceFile
+                            + "\n"
+                            + "destinationFile: "
+                            + destinationFile);
+            return false;
+        }
         Path path = Paths.get(destinationFile);
         String destDirectory = path.getParent().toString();
         // Check if directory already exists
@@ -322,23 +322,26 @@ public class SimpleperfHelper {
             }
         }
 
-        // Copy the collected trace from /data/local/tmp to the destinationFile.
+        // Move the collected trace from /data/local/tmp to the destinationFile.
         try {
             String moveResult =
                     mUiDevice.executeShellCommand(
-                            String.format(MOVE_CMD, SIMPLEPERF_TMP_FILE_PATH, destinationFile));
+                            String.format(MOVE_CMD, sourceFile, destinationFile));
             if (!moveResult.isEmpty()) {
                 Log.e(
                         LOG_TAG,
                         String.format(
-                                "Unable to move simpleperf output file from %s to %s due to %s",
-                                SIMPLEPERF_TMP_FILE_PATH, destinationFile, moveResult));
+                                "Unable to move the simpleperf file from %s to %s due to %s",
+                                sourceFile, destinationFile, moveResult));
                 return false;
             }
         } catch (IOException e) {
             Log.e(
                     LOG_TAG,
-                    "Unable to move the simpleperf sample file to destination file."
+                    String.format(
+                                    "Unable to move the simpleperf file: %sto destination file:"
+                                            + " %s.",
+                                    sourceFile, destinationFile)
                             + e.getMessage());
             return false;
         }
