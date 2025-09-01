@@ -19,9 +19,7 @@
 
     <target_preparer class="com.android.tradefed.targetprep.RunCommandTargetPreparer">
         <option name="run-command" value="stop" />
-        <!-- Reboot the DUT because we don't cleanup VKMS due to Writeback issue. -->
-        <!-- TODO(b/412666164): replace by "start" when the fix makes its way to the prebuilts. -->
-        <option name="teardown-command" value="reboot" />
+        <option name="teardown-command" value="start" />
     </target_preparer>
 
     <target_preparer class="com.android.tradefed.targetprep.PushFilePreparer">
@@ -33,11 +31,4 @@
         <option name="native-test-device-path" value="/data/local/tmp" />
         <option name="module-name" value="{MODULE}" />
     </test>
-
-    <metrics_collector class="com.android.tradefed.device.metric.FilePullerLogCollector">
-        <option name="directory-keys" value="/data/local/tmp" />
-        <option name="collect-on-run-ended-only" value="true" />
-        <option name="pull-pattern-keys" value="readback*" />
-    </metrics_collector>
-
 </configuration>
