@@ -100,6 +100,7 @@ class WatchWebAppRequestHandler(http.server.BaseHTTPRequestHandler):
             testEntity = TestEntity(goldens_list=res)
             (WatchWebAppRequestHandler
             .test_entity_cache[GoldenWatcherTypes.GERRIT.value]) = testEntity
+            print("All done. Sending data to UI")
             self.send_json(res)
             return
 
@@ -128,6 +129,8 @@ class WatchWebAppRequestHandler(http.server.BaseHTTPRequestHandler):
             self.service_fetch_artifacts(message["resource_id"])
         elif parsed.path == "/service/mode":
             self.switch_mode(message["mode"])
+        elif parsed.path == "/getMultipleGoldensFromGerrit":
+            self.fetch_gerrit_artifacts(message["linkPairs"])
         else:
             self.send_error_with_message(404, message=f"Invalid POST API: {parsed.path}")
 
@@ -195,6 +198,11 @@ class WatchWebAppRequestHandler(http.server.BaseHTTPRequestHandler):
         self.end_headers()
         payload = {"message": message}
         self.wfile.write(json.dumps(payload).encode("utf-8"))
+
+    def fetch_gerrit_artifacts(self, linkPairs):
+        gerrit_downloader = GerritDownloader()
+        golden_list = gerrit_downloader.downloadMultipleJsons(linkPairs)
+        self.send_json(golden_list)
 
     def service_list_goldens(self):
         if not self.verify_access_token():

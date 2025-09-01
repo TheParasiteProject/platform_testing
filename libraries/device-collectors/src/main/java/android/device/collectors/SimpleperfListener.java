@@ -27,10 +27,11 @@ import org.junit.runner.Description;
 import org.junit.runner.Result;
 import org.junit.runner.notification.Failure;
 
-import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
@@ -44,24 +45,23 @@ public class SimpleperfListener extends BaseMetricListener {
 
     // Default output folder to store the simpleperf sample files.
     private static final String DEFAULT_OUTPUT_ROOT = "/sdcard/test_results";
-    // Default subcommand passed to simpleperf
-    private static final String DEFAULT_SUBCOMMAND = "record";
     // Default arguments passed to simpleperf command
     private static final String DEFAULT_ARGUMENTS =
             "-g --post-unwind=yes -f 500 --exclude-perf --log-to-android-buffer";
     // Destination directory to save the trace results.
     private static final String TEST_OUTPUT_ROOT = "test_output_root";
-    // Simpleperf file path key.
-    private static final String SIMPLEPERF_FILE_PATH = "simpleperf_file_path";
+    // Simpleperf profiling file path key from simpleperf record.
+    private static final String SIMPLEPERF_PROFILING_FILE_PATH_KEY =
+            "simpleperf_profiling_file_path";
+    // Simpleperf report file path key from simpleperf report.
+    private static final String SIMPLEPERF_REPORT_FILE_PATH_KEY = "simpleperf_report_file_path";
     // Argument determining whether we collect for the entire run, or per test.
     public static final String COLLECT_PER_RUN = "per_run";
     public static final String SIMPLEPERF_PREFIX = "simpleperf_";
     // Skip failure metrics collection if set to true.
     public static final String SKIP_TEST_FAILURE_METRICS = "skip_test_failure_metrics";
-    // Subcommand to pass to simpleperf on start.
-    public static final String SUBCOMMAND = "subcommand";
     // Arguments to pass to simpleperf on start.
-    public static final String ARGUMENTS = "arguments";
+    public static final String ADDITIONAL_ARGUMENTS = "additional_arguments";
     // Arguments to record specific processes separated by commas and spaces are ignored.
     // Ex. "surfaceflinger,system_server"
     public static final String PROCESSES = "processes_to_record";
@@ -69,7 +69,9 @@ public class SimpleperfListener extends BaseMetricListener {
     // Ex. "instructions,cpu-cycles"
     public static final String EVENTS = "events_to_record";
     // Argument to determine if report is generated after recording.
-    public static final String REPORT = "report";
+    public static final String REPORT = "generate_simpleperf_report";
+    // Argument to determine if report is generated after recording.
+    public static final String EXTRACT_METRICS = "extract_simpleperf_metrics";
     // Report events per symbol. Symbols are separated by the key to identify the symbol and the
     // substring used to search for the symbol.
     // Ex. "writeInt32;android::Parcel::writeInt32(;commit;android::SurfaceFlinger::commit("
@@ -79,26 +81,23 @@ public class SimpleperfListener extends BaseMetricListener {
     public static final String REPORT_SYMBOLS = "symbols_to_report";
     // Test iterations used to divide any reported event counts.
     public static final String TEST_ITERATIONS = "test_iterations";
-
-    // Skips recording simpleperf. If this is set, then the test is responsible for starting and
-    // stopping simpleperf. The listener can still be used for reporting metrics.
-    public static final String RECORD = "record";
-
     // Simpleperf samples collected during the test will be saved under this root folder.
+
     private String mTestOutputRoot;
     // Store the method name and invocation count to create a unique filename for each trace.
     private Map<String, Integer> mTestIdInvocationCount = new HashMap<>();
-    private boolean mSimpleperfStartSuccess = false;
-    private boolean mIsCollectPerRun;
-    private boolean mIsTestFailed = false;
-    private boolean mSkipTestFailureMetrics;
-    private String mSubcommand;
-    private String mArguments;
-    private Map<String, String> mProcessToPid = new HashMap<>();
-    private boolean mReport;
     private Map<String, String> mSymbolToMetricKey = new HashMap<>();
+    private Map<String, String> mProcessToPid = new HashMap<>();
+    private boolean mIsTestFailed = false;
+    private boolean mSimpleperfStartSuccess = false;
+    private boolean mSkipTestFailureMetrics;
+    private boolean mIsCollectPerRun;
+    private boolean mExtractMetrics;
+    private boolean mReport;
+    private String mArguments;
+    private String mEvents;
+    private String mProcessesToRecord;
     private int mTestIterations;
-    private boolean mRecord;
 
     private SimpleperfHelper mSimpleperfHelper = new SimpleperfHelper();
 
@@ -117,86 +116,60 @@ public class SimpleperfListener extends BaseMetricListener {
         mTestIdInvocationCount = invocationMap;
     }
 
+    /** Process the test arguments */
     @Override
-    public void onTestRunStart(DataRecord runData, Description description) {
+    public void setupAdditionalArgs() {
         Bundle args = getArgsBundle();
-
-        // Whether to collect for the entire run, or per test.
-        mIsCollectPerRun = Boolean.parseBoolean(args.getString(COLLECT_PER_RUN));
-
+        // Whether to collect for the entire run, or per test. By default, collect per test.
+        mIsCollectPerRun =
+                Boolean.parseBoolean(args.getString(COLLECT_PER_RUN, String.valueOf(false)));
         // Destination folder in the device to save all simpleperf sample files.
         // Defaulted to /sdcard/test_results if test_output_root is not passed.
         mTestOutputRoot = args.getString(TEST_OUTPUT_ROOT, DEFAULT_OUTPUT_ROOT);
-
         // By default this flag is set to false to collect metrics on test failure.
-        mSkipTestFailureMetrics = "true".equals(args.getString(SKIP_TEST_FAILURE_METRICS));
-
-        // Subcommand passed to simpleperf. Defaults to record.
-        mSubcommand = args.getString(SUBCOMMAND, DEFAULT_SUBCOMMAND);
-
+        mSkipTestFailureMetrics =
+                Boolean.parseBoolean(
+                        args.getString(SKIP_TEST_FAILURE_METRICS, String.valueOf(false)));
+        // Whether to generate report after recording or not, by default set to true.
+        mReport = Boolean.parseBoolean(args.getString(REPORT, String.valueOf(true)));
+        // Whether to extract metrics from the report after recording or not, by default set to
+        // false.
+        mExtractMetrics =
+                Boolean.parseBoolean(args.getString(EXTRACT_METRICS, String.valueOf(false)));
         // Command arguments passed to simpleperf.
-        mArguments = args.getString(ARGUMENTS, DEFAULT_ARGUMENTS);
-
-        // Processes passed into recording arguments for simpleperf.
-        String processes = args.getString(PROCESSES, "");
-        String[] individualProcesses = processes.trim().split("\\s*,\\s*");
-
-        // Events passed into recording arguments for simpleperf.
-        String events = args.getString(EVENTS, "");
-        String[] individualEvents = events.trim().split("\\s*,\\s*");
-
-        // Whether to generate report after recording or not, by default set to false.
-        mReport = "true".equals(args.getString(REPORT));
-
+        mArguments = args.getString(ADDITIONAL_ARGUMENTS, DEFAULT_ARGUMENTS);
+        mTestIterations = Integer.parseInt(args.getString(TEST_ITERATIONS, "1"));
         // Symbols to look for when reporting events for processes.
         String[] symbolAndMetricKey = args.getString(REPORT_SYMBOLS, "").trim().split("\\s*;\\s*");
         for (int i = 0; i < symbolAndMetricKey.length - 1; i += 2) {
             mSymbolToMetricKey.put(symbolAndMetricKey[i + 1], symbolAndMetricKey[i]);
         }
+        mEvents = args.getString(EVENTS, "");
+        mProcessesToRecord = args.getString(PROCESSES, "");
+    }
 
-        // Appending recording argument for recording specified events if given.
-        if (!events.isEmpty()) {
-            mArguments += " -e ";
-            mArguments += String.join(",", individualEvents);
+    @Override
+    public void onTestRunStart(DataRecord runData, Description description) {
+        if (mIsCollectPerRun) {
+            Log.i(getTag(), "onTestRunStart");
+            startSimpleperf(getRecordCommandArgsList());
         }
-        // Appending recording argument for recording specified processes if given.
-        if (!processes.isEmpty()) {
-            for (String process : individualProcesses) {
-                mProcessToPid.put(process, mSimpleperfHelper.getPID(process));
-            }
-            mArguments += " -p " + String.join(",", mProcessToPid.values());
-        } else {
-            // Record system wide.
-            mArguments += " -a";
-        }
-
-        mTestIterations = Integer.parseInt(args.getString(TEST_ITERATIONS, "1"));
-        Log.i(getTag(), "onTestRunStart arguments mTestIterations=" + mTestIterations);
-        mRecord = Boolean.parseBoolean(args.getString(RECORD, "true"));
-
-        if (!mIsCollectPerRun) {
-            return;
-        }
-
-        Log.i(getTag(), "Starting simpleperf before test run started.");
-        startSimpleperf(mSubcommand, mArguments);
     }
 
     @Override
     public void onTestStart(DataRecord testData, Description description) {
-        mIsTestFailed = false;
         if (mIsCollectPerRun) {
             return;
         }
-
+        Log.i(getTag(), "onTestStart");
         mTestIdInvocationCount.compute(
                 getTestFileName(description), (key, value) -> (value == null) ? 1 : value + 1);
-        Log.i(getTag(), "Starting simpleperf before test started.");
-        startSimpleperf(mSubcommand, mArguments);
+        startSimpleperf(getRecordCommandArgsList());
     }
 
     @Override
     public void onTestFail(DataRecord testData, Description description, Failure failure) {
+        Log.i(getTag(), "onTestFail");
         mIsTestFailed = true;
     }
 
@@ -205,7 +178,7 @@ public class SimpleperfListener extends BaseMetricListener {
         if (mIsCollectPerRun) {
             return;
         }
-
+        Log.i(getTag(), "onTestEnd");
         if (!mSimpleperfStartSuccess) {
             Log.i(
                     getTag(),
@@ -213,34 +186,53 @@ public class SimpleperfListener extends BaseMetricListener {
                             + " successfully");
             return;
         }
-
         if (mSkipTestFailureMetrics && mIsTestFailed) {
+            // Stop the existing simpleperf session and don't log the file path.
             Log.i(getTag(), "Skipping metric collection due to test failure");
-            // Stop the existing simpleperf session.
-            try {
-                if (!mSimpleperfHelper.stopSimpleperf()) {
-                    Log.e(getTag(), "Failed to stop the simpleperf process.");
-                }
-            } catch (IOException e) {
-                Log.e(getTag(), "Failed to stop simpleperf", e);
-            }
-        } else {
-            Log.i(getTag(), "Stopping simpleperf after test ended.");
-            // Construct test output directory in the below format
-            // <root_folder>/<test_name>/SimpleperfListener/<test_name>-<count>.data
-            Path path =
+            stopSimpleperf(null);
+            return;
+        }
+
+        Log.i(getTag(), "Stopping simpleperf after test ended.");
+        // Construct simpleperf record output directory in the below format
+        // <root_folder>/<test_name>/SimpleperfListener/simplerperf_profiling_<test_name>-<count>.data
+        Path profilingPath =
+                Paths.get(
+                        mTestOutputRoot,
+                        getTestFileName(description),
+                        this.getClass().getSimpleName(),
+                        String.format(
+                                "%s%s%s-%d.data",
+                                SIMPLEPERF_PREFIX,
+                                "profiling_",
+                                getTestFileName(description),
+                                mTestIdInvocationCount.get(getTestFileName(description))));
+        if (stopSimpleperf(profilingPath)) {
+            logSimpleperfFilePath(SIMPLEPERF_PROFILING_FILE_PATH_KEY, profilingPath, testData);
+        }
+        if (mReport) {
+            // Construct simpleperf report output directory in the below format
+            // <root_folder>/<test_name>/SimpleperfListener/simplerperf_report_<test_name>-<count>.txt
+            Path reportPath =
                     Paths.get(
                             mTestOutputRoot,
                             getTestFileName(description),
                             this.getClass().getSimpleName(),
                             String.format(
-                                    "%s%s-%d.data",
+                                    "%s%s%s-%d.txt",
                                     SIMPLEPERF_PREFIX,
+                                    "report_",
                                     getTestFileName(description),
                                     mTestIdInvocationCount.get(getTestFileName(description))));
-            stopSimpleperf(path, testData);
-            if (mReport) {
-                getSimpleperfReport(path, testData);
+            if (getSimpleperfReport(profilingPath, reportPath)) {
+                logSimpleperfFilePath(SIMPLEPERF_REPORT_FILE_PATH_KEY, reportPath, testData);
+                if (mExtractMetrics) {
+                    Map<String, String> metrics = extractReportToMetrics();
+                    for (Map.Entry<String /*event-process-symbol*/, String /*eventCount*/> metric :
+                            metrics.entrySet()) {
+                        testData.addStringMetric(metric.getKey(), metric.getValue());
+                    }
+                }
             }
         }
     }
@@ -250,74 +242,135 @@ public class SimpleperfListener extends BaseMetricListener {
         if (!mIsCollectPerRun) {
             return;
         }
-
         if (!mSimpleperfStartSuccess) {
             Log.i(getTag(), "Skipping simpleperf stop attempt as simpleperf failed to start.");
             return;
         }
 
-        Log.i(getTag(), "Stopping simpleperf after test run ended");
+        Log.i(getTag(), "onTestRunEnd");
         String uniqueId = Integer.toString(UUID.randomUUID().hashCode());
-        Path path =
+        Path profilingPath =
                 Paths.get(
                         mTestOutputRoot,
                         this.getClass().getSimpleName(),
-                        String.format("%s%s.data", SIMPLEPERF_PREFIX, uniqueId));
-        stopSimpleperf(path, runData);
+                        String.format("%s%s%s.data", SIMPLEPERF_PREFIX, "profiling_", uniqueId));
+        if (stopSimpleperf(profilingPath)) {
+            logSimpleperfFilePath(SIMPLEPERF_PROFILING_FILE_PATH_KEY, profilingPath, runData);
+        }
         if (mReport) {
-            getSimpleperfReport(path, runData);
+            Path reportPath =
+                    Paths.get(
+                            mTestOutputRoot,
+                            this.getClass().getSimpleName(),
+                            String.format("%s%s%s.txt", SIMPLEPERF_PREFIX, "report_", uniqueId));
+            if (getSimpleperfReport(profilingPath, reportPath)) {
+                logSimpleperfFilePath(SIMPLEPERF_REPORT_FILE_PATH_KEY, reportPath, runData);
+                if (mExtractMetrics) {
+                    Map<String, String> metrics = extractReportToMetrics();
+                    for (Map.Entry<String /*event-process-symbol*/, String /*eventCount*/> metric :
+                            metrics.entrySet()) {
+                        runData.addStringMetric(metric.getKey(), metric.getValue());
+                    }
+                }
+            }
         }
     }
 
     /** Start simpleperf sampling. */
-    public void startSimpleperf(String subcommand, String arguments) {
-        mSimpleperfStartSuccess =
-                !mRecord || mSimpleperfHelper.startCollecting(subcommand, arguments);
+    public void startSimpleperf(List<String> commandArgsList) {
+        Log.i(getTag(), "startSimpleperf");
+        mSimpleperfStartSuccess = mSimpleperfHelper.startCollecting(commandArgsList);
         if (!mSimpleperfStartSuccess) {
             Log.e(getTag(), "Simpleperf did not start successfully.");
         }
     }
 
-    /** Stop simpleperf sampling and dump the collected file into the given path. */
-    private void stopSimpleperf(Path path, DataRecord record) {
-        boolean status = false;
-        if (mRecord) {
-            status = mSimpleperfHelper.stopCollecting(path.toString());
-        } else {
-            status = mSimpleperfHelper.copyFileOutput(path.toString());
-        }
-        if (!status) {
-            Log.e(getTag(), "Failed to collect the simpleperf output.");
-        } else {
-            record.addStringMetric(SIMPLEPERF_FILE_PATH, path.toString());
-        }
+    /** Stop simpleperf sampling. */
+    public boolean stopSimpleperf(Path profilingPath) {
+        Log.i(getTag(), "stopSimpleperf");
+        return mSimpleperfHelper.stopCollecting(
+                profilingPath == null ? "" : profilingPath.toString());
+    }
+
+    /** Dump the collected file into the given path. */
+    private void logSimpleperfFilePath(
+            String hostPathKey, Path devicePathValue, DataRecord record) {
+        record.addStringMetric(hostPathKey, devicePathValue.toString());
     }
 
     /**
      * Generate simpleperf report from an existing record file then add parsed metrics to
      * DataRecord.
      *
-     * @param path Path to read binary record from.
+     * @param profilingPath Path to read binary record from.
+     * @param reportPath Path to write report to.
      * @param data DataRecord to store metrics parsed from report
+     * @return String containing the simpleperf report file name.
      */
-    private void getSimpleperfReport(Path path, DataRecord data) {
-        for (Map.Entry<String, String> entry : mProcessToPid.entrySet()) {
-            Map<String, String> metricPerProcess =
-                    mSimpleperfHelper.getSimpleperfReport(
-                            path.toString(), entry, mSymbolToMetricKey, mTestIterations);
-            Log.i(getTag(), "Simpleperf Metrics report collected. " + metricPerProcess);
-            for (Map.Entry<String /*event-process-symbol*/, String /*eventCount*/> metric :
-                    metricPerProcess.entrySet()) {
-                data.addStringMetric(metric.getKey(), metric.getValue());
-            }
+    private boolean getSimpleperfReport(Path profilingPath, Path reportPath) {
+        if (profilingPath == null || reportPath == null) {
+            Log.e(
+                    getTag(),
+                    "Invalid source or destination file path: " + profilingPath + " " + reportPath);
+            return false;
         }
+        return mSimpleperfHelper.getSimpleperfReport(
+                profilingPath.toString(), reportPath.toString(), mProcessToPid);
+    }
+
+    private Map<String, String> extractReportToMetrics() {
+        Map<String, String> metrics = new HashMap<>();
+        for (String process : mProcessToPid.keySet()) {
+            metrics.putAll(
+                    mSimpleperfHelper.getMetrics(process, mSymbolToMetricKey, mTestIterations));
+        }
+        return metrics;
     }
 
     /**
      * Returns the packagename.classname_methodname which has no special characters and is used to
      * create file names.
      */
-    public static String getTestFileName(Description description) {
+    public String getTestFileName(Description description) {
         return String.format("%s_%s", description.getClassName(), description.getMethodName());
+    }
+
+    public List<String> getRecordCommandArgsList() {
+        List<String> commandArgsList = new ArrayList<String>();
+        commandArgsList.add("simpleperf record");
+        commandArgsList.add("-o");
+        commandArgsList.add(mSimpleperfHelper.SIMPLEPERF_PROFILING_TMP_FILE_PATH);
+        commandArgsList.add(mArguments);
+
+        // Appending recording argument for recording specified events if given.
+        String[] individualEvents = mEvents.trim().split("\\s*,\\s*");
+        if (!mEvents.isEmpty()) {
+            commandArgsList.add("-e");
+            commandArgsList.add(String.join(",", individualEvents));
+        }
+
+        // Processes passed into recording arguments for simpleperf.
+        // Appending recording argument for recording specified processes if given.
+        String[] individualProcesses = mProcessesToRecord.trim().split("\\s*,\\s*");
+        if (mProcessesToRecord.trim().isEmpty()) {
+            // Record system wide.
+            commandArgsList.add("-a");
+        } else {
+            commandArgsList.add("-p");
+            if (individualProcesses.length == 1) {
+                commandArgsList.add(individualProcesses[0]);
+            } else {
+                for (String process : individualProcesses) {
+                    String pid = mSimpleperfHelper.getPID(process);
+                    if (pid != null && !pid.isEmpty()) {
+                        mProcessToPid.put(process, pid);
+                    }
+                }
+                if (!mProcessToPid.isEmpty()) {
+                    commandArgsList.add(String.join(",", mProcessToPid.values()));
+                }
+            }
+        }
+        return commandArgsList;
     }
 }

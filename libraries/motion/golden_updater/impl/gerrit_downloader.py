@@ -21,11 +21,48 @@ import json
 from enum import Enum
 import datetime
 from impl.enums import DataSource
+import concurrent.futures
 
 class GerritDownloader:
     def __init__(self, subprocess_run_func = subprocess.run):
         self.subprocess_run = subprocess_run_func
         pass
+
+    def downloadMultipleJsons(self, linkPairs):
+        motionGoldens = []
+        MAX_WORKERS = 5
+
+        with concurrent.futures.ThreadPoolExecutor(max_workers=MAX_WORKERS) as executor:
+            future_to_pair = {}
+            for pair in linkPairs:
+                future = executor.submit(self.download, pair["linkLeft"], pair["linkRight"])
+                future_to_pair[future] = pair
+
+            # As each future completes, get its result and append it to the list of goldens.
+            for future in concurrent.futures.as_completed(future_to_pair):
+                try:
+                    result = future.result()
+                    if result:
+                        motionGoldens.extend(result)
+                except Exception as e:
+                    pair_that_failed = future_to_pair[future]
+                    print(f"A job for pair {pair_that_failed} generated an exception: {e}")
+
+        print("Finished downloading multiple JSONs.")
+        return motionGoldens
+
+    def parseDataToJson(self, left_data, left_json_obj, right_data, right_json_obj):
+        if left_data:
+            try:
+                left_json_obj = json.loads(left_data)
+            except json.JSONDecodeError as e:
+                print(f"Warning: Could not parse left_data string as JSON. Error: {e}")
+        if right_data:
+            try:
+                right_json_obj = json.loads(right_data)
+            except json.JSONDecodeError as e:
+                print(f"Warning: Could not parse right_data string as JSON. Error: {e}")
+        return left_json_obj, right_json_obj
 
     def download(self, left, right):
         print("Attempting downloads")
@@ -35,18 +72,8 @@ class GerritDownloader:
         left_json_obj = {}
         right_json_obj = {}
 
-        if left_data:
-            try:
-                left_json_obj = json.loads(left_data)
-            except json.JSONDecodeError as e:
-                print(f"Warning: Could not parse left_data string as JSON. Error: {e}")
-
-        if right_data:
-            try:
-                right_json_obj = json.loads(right_data)
-            except json.JSONDecodeError as e:
-                print(f"Warning: Could not parse right_data string as JSON. Error: {e}")
-        print("All done. Sending data to UI")
+        left_json_obj, right_json_obj = self.parseDataToJson(left_data, left_json_obj,
+                                                             right_data, right_json_obj)
         return self.__createMotionGolden(name, left_json_obj, right_json_obj)
 
 
