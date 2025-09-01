@@ -22,6 +22,7 @@ import static junit.framework.Assert.assertTrue;
 import android.content.pm.UserInfo;
 import android.platform.helpers.AutomotiveConfigConstants;
 import android.platform.helpers.HelperAccessor;
+import android.platform.helpers.IAutoHomeHelper;
 import android.platform.helpers.IAutoSettingHelper;
 import android.platform.helpers.IAutoUserHelper;
 import android.platform.helpers.MultiUserHelper;
@@ -35,6 +36,8 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+import java.util.List;
+
 @RunWith(AndroidJUnit4.class)
 public class EditNonAdminName {
 
@@ -46,6 +49,7 @@ public class EditNonAdminName {
     private final MultiUserHelper mMultiUserHelper = MultiUserHelper.getInstance();
     private HelperAccessor<IAutoUserHelper> mUsersHelper;
     private HelperAccessor<IAutoSettingHelper> mSettingHelper;
+    private HelperAccessor<IAutoHomeHelper> mHomeHelper;
 
     private UserInfo newUser;
 
@@ -54,6 +58,7 @@ public class EditNonAdminName {
     public EditNonAdminName() {
         mUsersHelper = new HelperAccessor<>(IAutoUserHelper.class);
         mSettingHelper = new HelperAccessor<>(IAutoSettingHelper.class);
+        mHomeHelper = new HelperAccessor<>(IAutoHomeHelper.class);
     }
 
     @Before
@@ -90,5 +95,19 @@ public class EditNonAdminName {
 
         Log.i(LOG_TAG, "Assert: Current username is changed ");
         assertTrue("Username is not changed", EDIT_USERNAME.equals(newUser.name));
+
+        Log.i(LOG_TAG, "Act: Open status bar profiles");
+        mHomeHelper.get().openStatusBarProfiles();
+
+        Log.i(LOG_TAG, "Act: Get profile names frm quick controls");
+        List<String> profileNames = mHomeHelper.get().getProfileNamesFromQuickControls();
+
+        Log.i(LOG_TAG, "Assert: Newly added user name is displaying in quick controls");
+        assertTrue(
+                "Newly added user is not displaying in quick controls",
+                profileNames.contains(newUser.name));
+
+        Log.i(LOG_TAG, "Act: Close status bar profiles");
+        mHomeHelper.get().openStatusBarProfiles();
     }
 }
