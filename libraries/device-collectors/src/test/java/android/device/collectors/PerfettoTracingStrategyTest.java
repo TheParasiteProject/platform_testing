@@ -20,6 +20,7 @@ import static android.device.collectors.PerfettoTracingStrategy.ARGUMENT_ALLOW_I
 import static android.device.collectors.PerfettoTracingStrategy.ARGUMENT_FILE_PATH_KEY_PREFIX;
 import static android.device.collectors.PerfettoTracingStrategy.PERFETTO_CONFIG_CONTENT;
 import static android.device.collectors.PerfettoTracingStrategy.PERFETTO_CONFIG_TEXT_PROTO;
+import static android.device.collectors.PerfettoTracingStrategy.SKIP_EMPTY_METRICS;
 import static android.device.collectors.PerfettoTracingStrategy.STRATEGY_ARGUMENT_NAMESPACE_SEPARATOR;
 
 import static org.junit.Assert.assertEquals;
@@ -256,6 +257,40 @@ public class PerfettoTracingStrategyTest {
         verify(mPerfettoHelper).setConfigFileName("my_config.textproto");
         verify(mPerfettoHelper).setIsTextProtoConfig(true);
         verify(mPerfettoHelper).startCollecting();
+    }
+
+    @Test
+    public void testSetup_skipEmptyMetricsDefault() {
+        // Verifies that skip empty metrics is disabled by default.
+        Bundle b = new Bundle();
+        initStrategy(b);
+
+        // Asserts that the PerfettoHelper is configured to not check for empty metrics by default.
+        verify(mPerfettoHelper).setCheckEmptyMetrics(false);
+    }
+
+    @Test
+    public void testSetup_skipEmptyMetricsTrue() {
+        // Verifies that skip empty metrics can be enabled via arguments.
+        Bundle b = new Bundle();
+        b.putString(SKIP_EMPTY_METRICS, "true");
+        initStrategy(b);
+
+        // Asserts that the PerfettoHelper is configured to check for empty metrics when the
+        // corresponding argument is true.
+        verify(mPerfettoHelper).setCheckEmptyMetrics(true);
+    }
+
+    @Test
+    public void testSetup_skipEmptyMetricsFalse() {
+        // Verifies that skip empty metrics can be explicitly disabled via arguments.
+        Bundle b = new Bundle();
+        b.putString(SKIP_EMPTY_METRICS, "false");
+        initStrategy(b);
+
+        // Asserts that the PerfettoHelper is configured to not check for empty metrics when the
+        // corresponding argument is false.
+        verify(mPerfettoHelper).setCheckEmptyMetrics(false);
     }
 
     private static class TestPerfettoTracingStrategy extends PerfettoTracingStrategy {
