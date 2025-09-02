@@ -45,29 +45,12 @@ public:
   HwcTester();
   ~HwcTester();
 
-  std::vector<int64_t> GetDisplayIds() const;
-  std::vector<libhwc_aidl_test::DisplayWrapper> GetDisplays() const;
+  std::vector<int64_t> GetAllDisplayIds() const;
   std::vector<std::pair<int64_t, common::DisplayHotplugEvent>>
   getAndClearLatestHotplugs();
-  // TODO(markyacoub): Deprecate this function and use the one below.
   bool DrawSolidColorToScreen(int64_t display_id, Color color);
 
-  // Creates a color vector filled with the specified color for the display
-  // dimensions. The color vector is a 1D array of colors that represents the
-  // pixels on the display. The size of the color vector is equal to the width *
-  // height of the display.
-  std::vector<Color> CreateColorVector(int64_t displayId, Color color) const;
-
-  // Draws the provided color vector to the display.
-  void DrawColorVectorToDisplay(int64_t displayId,
-                                const std::vector<Color> &colors);
-  // Sets the readback buffer for the display and returns the readback buffer
-  // object. Returns nullopt if readback is not supported or setup fails.
-  std::optional<libhwc_aidl_test::ReadbackBuffer>
-  SetReadbackBufferToDisplaySize(
-      const libhwc_aidl_test::DisplayWrapper &display);
-
-  std::pair<int, int> GetActiveDisplaySize(int64_t displayId) const;
+  std::pair<int, int> GetActiveDisplaySize(int64_t displayId);
 
   libhwc_aidl_test::ComposerClientWrapper& GetClientWrapper() {
     return *mComposerClient;
@@ -82,13 +65,12 @@ public:
 
   std::optional<ComposerClientReader> Present(int64_t displayId);
 
-private:
-  std::vector<DisplayConfiguration> GetDisplayConfigs(int64_t display_id) const;
-  DisplayConfiguration GetDisplayActiveConfigs(int64_t display_id) const;
+ private:
+  std::vector<DisplayConfiguration> GetDisplayConfigs(int64_t display_id);
+  DisplayConfiguration GetDisplayActiveConfigs(int64_t display_id);
   ComposerClientWriter &GetWriter(int64_t display_id);
-  bool Execute(libhwc_aidl_test::DisplayProperties &displayProps);
 
-  std::shared_ptr<libhwc_aidl_test::ComposerClientWrapper> mComposerClient;
+  std::unique_ptr<libhwc_aidl_test::ComposerClientWrapper> mComposerClient;
   std::unordered_map<int64_t, libhwc_aidl_test::DisplayWrapper> mDisplays;
   std::unordered_map<int64_t, ComposerClientWriter> mWriters;
   std::unique_ptr<libhwc_aidl_test::TestRenderEngine> mRenderEngine;

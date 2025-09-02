@@ -21,6 +21,7 @@ import static junit.framework.Assert.assertTrue;
 
 import android.platform.helpers.AutomotiveConfigConstants;
 import android.platform.helpers.HelperAccessor;
+import android.platform.helpers.IAutoAppGridHelper;
 import android.platform.helpers.IAutoSettingHelper;
 import android.platform.helpers.IAutoUISettingsHelper;
 import android.platform.helpers.IAutoUserHelper;
@@ -43,11 +44,13 @@ public class GuestUserSettings {
     private HelperAccessor<IAutoUserHelper> mUsersHelper;
     private HelperAccessor<IAutoSettingHelper> mSettingHelper;
     private HelperAccessor<IAutoUISettingsHelper> mSettingsUIHelper;
+    private HelperAccessor<IAutoAppGridHelper> mAppGridHelper;
 
     public GuestUserSettings() {
         mUsersHelper = new HelperAccessor<>(IAutoUserHelper.class);
         mSettingHelper = new HelperAccessor<>(IAutoSettingHelper.class);
         mSettingsUIHelper = new HelperAccessor<>(IAutoUISettingsHelper.class);
+        mAppGridHelper = new HelperAccessor<>(IAutoAppGridHelper.class);
     }
 
     @Before
@@ -62,9 +65,37 @@ public class GuestUserSettings {
     }
 
     @Test
+    public void testDockAndAllAppsOnGuest() {
+        Log.i(LOG_TAG, "Assert: Google Maps App is Present on DOCK");
+        assertTrue(
+                "Google Maps App is NOT Present on Dock",
+                mAppGridHelper.get().verifyAppOnDock(AutomotiveConfigConstants.MAPS_APP_ON_DOCK));
+
+        Log.i(LOG_TAG, "Assert: Play Store App is Present on DOCK");
+        assertTrue(
+                "Playstore App is NOT Present on Dock",
+                mAppGridHelper
+                        .get()
+                        .verifyAppOnDock(AutomotiveConfigConstants.PLAY_STORE_APP_ON_DOCK));
+
+        Log.i(LOG_TAG, "Act: Open Appgrid");
+        mAppGridHelper.get().open();
+
+        Log.i(LOG_TAG, "Assert: Appgrid is open");
+        assertTrue("App Grid is not open.", mAppGridHelper.get().isAppInForeground());
+
+        Log.i(LOG_TAG, "Act: Exit Appgrid");
+        mAppGridHelper.get().exit();
+
+        Log.i(LOG_TAG, "Assert: Appgrid is exit");
+        assertFalse("App Grid is open even after exit.", mAppGridHelper.get().isAppInForeground());
+    }
+
+    @Test
     public void testSecuritySettingsNotDisplayed() {
         Log.i(LOG_TAG, "Act: Open settings");
         mSettingHelper.get().openFullSettings();
+
         Log.i(LOG_TAG, "Assert: Security settings menu is not displayed");
         assertFalse(
                 "Security settings is displayed",
@@ -77,18 +108,21 @@ public class GuestUserSettings {
     public void testAccountForGuestNotDisplayed() {
         Log.i(LOG_TAG, "Act: Open Profile & Account settings");
         mSettingHelper.get().openSetting(SettingsConstants.PROFILE_ACCOUNT_SETTINGS);
+
         Log.i(LOG_TAG, "Assert: Rename option is displayed");
         assertTrue(
                 "Rename option is not displayed",
                 mSettingsUIHelper
                         .get()
                         .hasUIElement(AutomotiveConfigConstants.USER_SETTINGS_RENAME));
+
         Log.i(LOG_TAG, "Assert: Adda a profile option is displayed");
         assertTrue(
                 "Add a profile option is not displayed",
                 mSettingsUIHelper
                         .get()
                         .hasUIElement(AutomotiveConfigConstants.USER_SETTINGS_ADD_PROFILE));
+
         Log.i(LOG_TAG, "Assert: Accounts for Geust option is not displayed");
         assertFalse(
                 "Accounts for Guest is displayed",

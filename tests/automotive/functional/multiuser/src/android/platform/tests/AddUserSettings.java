@@ -48,6 +48,7 @@ public class AddUserSettings {
     @Rule public ConditionalIgnoreRule rule = new ConditionalIgnoreRule();
 
     private static final String DRIVER = AutomotiveConfigConstants.HOME_DRIVER_BUTTON;
+    private UserInfo mNewUser;
 
     private final MultiUserHelper mMultiUserHelper = MultiUserHelper.getInstance();
     private HelperAccessor<IAutoUserHelper> mUsersHelper;
@@ -66,6 +67,9 @@ public class AddUserSettings {
 
     @After
     public void goBackToHomeScreen() {
+        Log.i(LOG_TAG, "Act: New user is deleted");
+        mMultiUserHelper.removeUser(mNewUser);
+
         Log.i(LOG_TAG, "Act: Go back to Home Screen");
         mSettingHelper.get().exit();
     }
@@ -73,29 +77,26 @@ public class AddUserSettings {
     @Test
     @ConditionalIgnore(condition = IgnoreOnPortrait.class)
     public void testAddNonAdminUser() throws Exception {
-        // create new user
         Log.i(LOG_TAG, "Act: Get current userinfo");
         UserInfo initialUser = mMultiUserHelper.getCurrentForegroundUserInfo();
+
         Log.i(LOG_TAG, "Act: Create a non-admin user");
         mUsersHelper.get().addUser();
-        // switched to new user
+
         Log.i(LOG_TAG, "Act: Get current userinfo");
-        UserInfo newUser = mMultiUserHelper.getCurrentForegroundUserInfo();
-        // switch from new user to initial user
+        mNewUser = mMultiUserHelper.getCurrentForegroundUserInfo();
 
         Log.i(LOG_TAG, "Act: Switch to Initial user");
         mUsersHelper.get().switchUsingUserIcon(DRIVER);
 
-        // verify new user is seen in list of users
         Log.i(LOG_TAG, "Assert: Newly created user in user ist");
-        assertTrue(mMultiUserHelper.getUserByName(newUser.name) != null);
-        // Verify new user is non-Admin
+        assertTrue(mMultiUserHelper.getUserByName(mNewUser.name) != null);
+
         Log.i(LOG_TAG, "Act: Open Profile & Accounts setting");
         mSettingHelper.get().openSetting(SettingsConstants.PROFILE_ACCOUNT_SETTINGS);
+
         Log.i(LOG_TAG, "Assert: Newly  created user does not have admin access");
-        assertFalse("New user has Admin Access", mUsersHelper.get().isNewUserAnAdmin(newUser.name));
-        // remove new user
-        Log.i(LOG_TAG, "Act: New user is deleted");
-        mMultiUserHelper.removeUser(newUser);
+        assertFalse(
+                "New user has Admin Access", mUsersHelper.get().isNewUserAnAdmin(mNewUser.name));
     }
 }
