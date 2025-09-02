@@ -57,8 +57,8 @@ import com.android.launcher3.tapl.Workspace
 import com.android.systemui.Flags
 import com.google.common.truth.Truth.assertThat
 import com.google.common.truth.Truth.assertWithMessage
-import org.junit.Assert.assertThrows
 import java.time.Duration
+import org.junit.Assert.assertThrows
 
 /**
  * The root class for System UI test automation objects. All System UI test automation objects are
@@ -97,13 +97,14 @@ class Root private constructor(val displayId: Int = DEFAULT_DISPLAY) {
     fun openNotificationShadeWithRetry(): NotificationShade {
         for (attempt in 1..MAX_RETRY_ATTEMPTS) {
             try {
-                val shade = if (Flags.sceneContainer()) {
-                    uiDevice.executeShellCommand("cmd statusbar expand-notifications-instant")
-                    waitForNotificationStackScroller()
-                    NotificationShade(displayId)
-                } else {
-                    openNotificationShadeViaGlobalAction()
-                }
+                val shade =
+                    if (Flags.sceneContainer()) {
+                        uiDevice.executeShellCommand("cmd statusbar expand-notifications-instant")
+                        waitForNotificationStackScroller()
+                        NotificationShade(displayId)
+                    } else {
+                        openNotificationShadeViaGlobalAction()
+                    }
                 return shade
             } catch (e: FailedEnsureException) {
                 if (attempt < MAX_RETRY_ATTEMPTS) {
@@ -114,7 +115,7 @@ class Root private constructor(val displayId: Int = DEFAULT_DISPLAY) {
 
         throw IllegalStateException(
             "Failed to open notification shade on display $displayId after $MAX_RETRY_ATTEMPTS " +
-                    "attempts."
+                "attempts."
         )
     }
 
@@ -593,7 +594,7 @@ class Root private constructor(val displayId: Int = DEFAULT_DISPLAY) {
      * NOTE: This function should not be used for desktop, as the QS header does not exist.
      *
      * @throws FailedEnsureException if the QS header does not become visible within the specified
-     * timeout.
+     *   timeout.
      */
     fun waitForShadeToOpen() {
         // Note that this duplicates the tracing done by assertVisible, but with a better name.
@@ -610,7 +611,7 @@ class Root private constructor(val displayId: Int = DEFAULT_DISPLAY) {
     }
 
     fun assertBouncerNotVisible() {
-        assertThrows(AssertionError::class.java) { primaryBouncer }
+        assertThrows(IllegalStateException::class.java) { primaryBouncer }
     }
 
     fun pressBackOnDisplay() {
