@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 The Android Open Source Project
+ * Copyright (C) 2025 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,12 +20,12 @@ import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertTrue;
 
 import android.content.pm.UserInfo;
+import android.platform.helpers.AutomotiveConfigConstants;
 import android.platform.helpers.HelperAccessor;
-import android.platform.helpers.IAutoHomeHelper;
+import android.platform.helpers.IAutoAppGridHelper;
 import android.platform.helpers.IAutoSettingHelper;
 import android.platform.helpers.IAutoUserHelper;
 import android.platform.helpers.MultiUserHelper;
-import android.platform.helpers.SettingsConstants;
 import android.platform.test.rules.ConditionalIgnore;
 import android.platform.test.rules.ConditionalIgnoreRule;
 import android.platform.test.rules.IgnoreOnPortrait;
@@ -38,73 +38,70 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
-import java.util.List;
-
 /**
- * This test will create user through API and delete the same user from UI
- * <p> Set system property to run MU test: adb shell setprop fw.stop_bg_users_on_switch 0
+ * This test will create user through API and delete the same user from API
+ *
+ * <p>Set system property to run MU test: adb shell setprop fw.stop_bg_users_on_switch 0
  */
 @RunWith(AndroidJUnit4.class)
-public class AddUserQuickSettings {
+public class VerifyDockOnNewUser {
     @Rule public ConditionalIgnoreRule rule = new ConditionalIgnoreRule();
 
     private final MultiUserHelper mMultiUserHelper = MultiUserHelper.getInstance();
-    private UserInfo mNewUser;
     private HelperAccessor<IAutoUserHelper> mUsersHelper;
     private HelperAccessor<IAutoSettingHelper> mSettingHelper;
-    private HelperAccessor<IAutoHomeHelper> mHomeHelper;
+
+    private HelperAccessor<IAutoAppGridHelper> mAppGridHelper;
 
     private static final String LOG_TAG = AddUserQuickSettings.class.getSimpleName();
 
-    public AddUserQuickSettings() {
-        mHomeHelper = new HelperAccessor<>(IAutoHomeHelper.class);
+    public VerifyDockOnNewUser() {
         mUsersHelper = new HelperAccessor<>(IAutoUserHelper.class);
         mSettingHelper = new HelperAccessor<>(IAutoSettingHelper.class);
+        mAppGridHelper = new HelperAccessor<>(IAutoAppGridHelper.class);
     }
 
     @After
     public void goBackToHomeScreen() {
-        Log.i(LOG_TAG, "Act: Remove created new user");
-        mMultiUserHelper.removeUser(mNewUser);
-
         Log.i(LOG_TAG, "Act: Go back to Home Screen");
         mSettingHelper.get().exit();
     }
 
     @Test
     @ConditionalIgnore(condition = IgnoreOnPortrait.class)
-    public void testAddNonAdminUser() throws Exception {
+    public void testDockAndAllAppsOnNewUser() throws Exception {
         Log.i(LOG_TAG, "Act: Create new user");
         UserInfo initialUser = mMultiUserHelper.getCurrentForegroundUserInfo();
         mUsersHelper.get().addUserQuickSettings(initialUser.name);
 
         Log.i(LOG_TAG, "Act: Switch to new user");
-        mNewUser = mMultiUserHelper.getCurrentForegroundUserInfo();
+        UserInfo newUser = mMultiUserHelper.getCurrentForegroundUserInfo();
 
-        Log.i(LOG_TAG, "Act: Switch back to initial user");
-        mMultiUserHelper.switchToUserId(initialUser.id);
-
-        Log.i(LOG_TAG, "Assert: New user is listed in users list");
-        assertTrue(mMultiUserHelper.getUserByName(mNewUser.name) != null);
-
-        Log.i(LOG_TAG, "Act: Open Profile & Accounts setting");
-        mSettingHelper.get().openSetting(SettingsConstants.PROFILE_ACCOUNT_SETTINGS);
-
-        Log.i(LOG_TAG, "Assert: New user does not have Admin Access");
-        assertFalse("New user has Admin Access", mUsersHelper.get().isNewUserAnAdmin(mNewUser.name));
-
-        Log.i(LOG_TAG, "Act: Open status bar profiles");
-        mHomeHelper.get().openStatusBarProfiles();
-
-        Log.i(LOG_TAG, "Act: Get profile names frm quick controls");
-        List<String> profileNames = mHomeHelper.get().getProfileNamesFromQuickControls();
-
-        Log.i(LOG_TAG, "Assert: Newly added user name is displaying in quick controls");
+        Log.i(LOG_TAG, "Assert: Google Maps App is Present on DOCK");
         assertTrue(
-                "Newly added user is not displaying in quick controls",
-                profileNames.contains(mNewUser.name));
+                "Google Maps App is NOT Present on Dock",
+                mAppGridHelper.get().verifyAppOnDock(AutomotiveConfigConstants.MAPS_APP_ON_DOCK));
 
-        Log.i(LOG_TAG, "Act: Close status bar profiles");
-        mHomeHelper.get().openStatusBarProfiles();
+        Log.i(LOG_TAG, "Assert: Play Store App is Present on DOCK");
+        assertTrue(
+                "Playstore App is NOT Present on Dock",
+                mAppGridHelper
+                        .get()
+                        .verifyAppOnDock(AutomotiveConfigConstants.PLAY_STORE_APP_ON_DOCK));
+
+        Log.i(LOG_TAG, "Act: Open Appgrid");
+        mAppGridHelper.get().open();
+
+        Log.i(LOG_TAG, "Assert: Appgrid is open");
+        assertTrue("App Grid is not open.", mAppGridHelper.get().isAppInForeground());
+
+        Log.i(LOG_TAG, "Act: Exit Appgrid");
+        mAppGridHelper.get().exit();
+
+        Log.i(LOG_TAG, "Assert: Appgrid is exit");
+        assertFalse("App Grid is open even after exit.", mAppGridHelper.get().isAppInForeground());
+
+        Log.i(LOG_TAG, "Act: Remove User");
+        mMultiUserHelper.removeUser(newUser);
     }
 }
