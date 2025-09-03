@@ -1553,6 +1553,62 @@
       "VALUE": "album_title",
       "PACKAGE": "com.android.car.media"
     },
+    "BASIC_SONGS_CATEGORY": {
+      "TYPE": "MULTIPLE",
+      "SPECIFIERS": [
+        {
+          "TYPE": "TEXT",
+          "VALUE": "Basic songs"
+        },
+        {
+          "TYPE": "RESOURCE_ID",
+          "VALUE": "car_ui_toolbar_tab_item_text",
+          "PACKAGE": "com.android.car.media"
+        }
+      ]
+    },
+    "ADVANCED_CATEGORY": {
+      "TYPE": "MULTIPLE",
+      "SPECIFIERS": [
+        {
+          "TYPE": "TEXT",
+          "VALUE": "Advanced"
+        },
+        {
+          "TYPE": "RESOURCE_ID",
+          "VALUE": "car_ui_toolbar_tab_item_text",
+          "PACKAGE": "com.android.car.media"
+        }
+      ]
+    },
+    "RABBIT_HOLE_CATEGORY": {
+      "TYPE": "MULTIPLE",
+      "SPECIFIERS": [
+        {
+          "TYPE": "TEXT",
+          "VALUE": "Rabbit hole 2"
+        },
+        {
+          "TYPE": "RESOURCE_ID",
+          "VALUE": "car_ui_toolbar_tab_item_text",
+          "PACKAGE": "com.android.car.media"
+        }
+      ]
+    },
+    "EMPTY_CATEGORY": {
+      "TYPE": "MULTIPLE",
+      "SPECIFIERS": [
+        {
+          "TYPE": "TEXT",
+          "VALUE": "Empty"
+        },
+        {
+          "TYPE": "RESOURCE_ID",
+          "VALUE": "car_ui_toolbar_tab_item_text",
+          "PACKAGE": "com.android.car.media"
+        }
+      ]
+    },
     "CURRENT_SONG_TIME": {
       "TYPE": "RESOURCE_ID",
       "VALUE": "current_time",
