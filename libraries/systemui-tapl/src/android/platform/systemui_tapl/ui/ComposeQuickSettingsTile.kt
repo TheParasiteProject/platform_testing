@@ -160,12 +160,17 @@ abstract class ComposeQuickSettingsTile private constructor(val displayId: Int =
             }
         }
 
-        /** See https://hsv.googleplex.com/4910828112314368?node=37 */
+        // These two selectors use `hasDescendant` as starting in compose 1.9.0, extra intermediate
+        // nodes are added to the unmerged tree when using background modifier. See
+        // https://developer.android.com/jetpack/androidx/releases/compose-ui#1.9.0
+
+        /** See https://hsv.googleplex.com/5510000284794880?node=66 */
         fun smallTileSelector(description: String, displayId: Int = DEFAULT_DISPLAY): BySelector {
-            return sysuiResSelector(SMALL_TILE_TAG, displayId).descStartsWith(description)
+            return sysuiResSelector(SMALL_TILE_TAG, displayId)
+                .hasDescendant(By.displayId(displayId).descStartsWith(description))
         }
 
-        /** See https://hsv.googleplex.com/4910828112314368?node=28 */
+        /** See https://hsv.googleplex.com/5510000284794880?node=30 */
         fun largeTileSelector(description: String, displayId: Int = DEFAULT_DISPLAY): BySelector {
             return sysuiResSelector(LARGE_TILE_TAG, displayId)
                 .hasDescendant(By.displayId(displayId).textStartsWith(description))
