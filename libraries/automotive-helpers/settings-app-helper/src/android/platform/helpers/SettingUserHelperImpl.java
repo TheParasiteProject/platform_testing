@@ -331,6 +331,11 @@ public class SettingUserHelperImpl extends AbstractStandardAppHelper implements 
     }
 
     @Override
+    public boolean checkUserProfileName(String initialUser, String newUser) {
+        return initialUser.equals(newUser);
+    }
+
+    @Override
     public void chooseNewAdmin() {
         int count = 0;
         clickbutton(AutomotiveConfigConstants.USER_SETTINGS_CHOOSE_ADMIN);

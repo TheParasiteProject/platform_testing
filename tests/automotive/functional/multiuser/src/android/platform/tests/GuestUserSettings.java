@@ -19,12 +19,15 @@ package android.platform.tests;
 import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertTrue;
 
+import android.content.pm.UserInfo;
+import android.os.SystemClock;
 import android.platform.helpers.AutomotiveConfigConstants;
 import android.platform.helpers.HelperAccessor;
 import android.platform.helpers.IAutoAppGridHelper;
 import android.platform.helpers.IAutoSettingHelper;
 import android.platform.helpers.IAutoUISettingsHelper;
 import android.platform.helpers.IAutoUserHelper;
+import android.platform.helpers.MultiUserHelper;
 import android.platform.helpers.SettingsConstants;
 import android.util.Log;
 
@@ -41,10 +44,16 @@ public class GuestUserSettings {
     private static final String GUEST = AutomotiveConfigConstants.HOME_GUEST_BUTTON;
     private static final String DRIVER = AutomotiveConfigConstants.HOME_DRIVER_BUTTON;
     private static final String LOG_TAG = GuestUserSettings.class.getSimpleName();
+
+    private static final int WAIT_TIME = 20000;
+    private static HelperAccessor<IAutoUserHelper> sUsersHelper =
+            new HelperAccessor<>(IAutoUserHelper.class);
     private HelperAccessor<IAutoUserHelper> mUsersHelper;
     private HelperAccessor<IAutoSettingHelper> mSettingHelper;
     private HelperAccessor<IAutoUISettingsHelper> mSettingsUIHelper;
     private HelperAccessor<IAutoAppGridHelper> mAppGridHelper;
+
+    private final MultiUserHelper mMultiUserHelper = MultiUserHelper.getInstance();
 
     public GuestUserSettings() {
         mUsersHelper = new HelperAccessor<>(IAutoUserHelper.class);
@@ -55,13 +64,20 @@ public class GuestUserSettings {
 
     @Before
     public void switchToGuestUser() {
+        Log.i(LOG_TAG, "Act: Switch to Guest user");
         mUsersHelper.get().switchUsingUserIcon(GUEST);
+
+        Log.i(LOG_TAG, "Act: Skip setup wizard");
         mUsersHelper.get().skipSetupWizard();
     }
 
     @After
     public void switchToDriver() {
+        Log.i(LOG_TAG, "Act: Switch to Driver user");
         mUsersHelper.get().switchUsingUserIcon(DRIVER);
+
+        Log.i(LOG_TAG, "Act: Skip setup wizard");
+        mUsersHelper.get().skipSetupWizard();
     }
 
     @Test
@@ -127,5 +143,36 @@ public class GuestUserSettings {
         assertFalse(
                 "Accounts for Guest is displayed",
                 mSettingHelper.get().checkMenuExists("Accounts for Guest"));
+    }
+
+    @Test
+    public void testNewUserQuickSettings() {
+        UserInfo initialUser = mMultiUserHelper.getCurrentForegroundUserInfo();
+        Log.i(LOG_TAG, "Act: Add new user using quick setting");
+        sUsersHelper.get().addUserQuickSettings(initialUser.name);
+        SystemClock.sleep(WAIT_TIME);
+
+        Log.i(LOG_TAG, "Act: Skip setup wixard");
+        sUsersHelper.get().skipSetupWizard();
+
+        Log.i(LOG_TAG, "Act: Open Profile & Account settings");
+        mSettingHelper.get().openSetting(SettingsConstants.PROFILE_ACCOUNT_SETTINGS);
+
+        Log.i(LOG_TAG, "Assert: New user is created");
+        UserInfo newUser = mMultiUserHelper.getCurrentForegroundUserInfo();
+        assertFalse(
+                "New user is not created",
+                sUsersHelper.get().checkUserProfileName(initialUser.name, newUser.name));
+
+        Log.i(LOG_TAG, "Act: Non admin user is created");
+        assertFalse(
+                "New user is an admin", mSettingHelper.get().checkMenuExists("Signed in as admin"));
+
+        Log.i(LOG_TAG, "Act: Delete Current user");
+        sUsersHelper.get().deleteCurrentUser();
+        SystemClock.sleep(WAIT_TIME);
+
+        Log.i(LOG_TAG, "Act: Skip setup wizard");
+        mUsersHelper.get().skipSetupWizard();
     }
 }
