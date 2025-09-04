@@ -20,6 +20,7 @@ import android.graphics.PointF
 import android.platform.helpers.CommonUtils.executeShellCommand
 import android.platform.systemui_tapl.controller.LockscreenController
 import android.platform.systemui_tapl.ui.CommunalHub.Companion.COMMUNAL_SELECTOR
+import android.platform.systemui_tapl.ui.quicksettings.QuickSettings
 import android.platform.systemui_tapl.utils.DeviceUtils.sysuiResSelector
 import android.platform.uiautomatorhelpers.BetterSwipe
 import android.platform.uiautomatorhelpers.DeviceHelpers.assertInvisible
@@ -88,8 +89,8 @@ class LockScreen internal constructor(val displayId: Int = DEFAULT_DISPLAY) {
     /**
      * Dismisses the keyguard to unlock the device via a shell command.
      *
-     * This method provides a non-interactive way to unlock the screen, which is essential
-     * for automated environments like test setup or teardown.
+     * This method provides a non-interactive way to unlock the screen, which is essential for
+     * automated environments like test setup or teardown.
      */
     fun unlockWithShellCommand(): Workspace {
         return unlock(useSwipeUp = false)
@@ -177,9 +178,9 @@ class LockScreen internal constructor(val displayId: Int = DEFAULT_DISPLAY) {
 
     private fun unlock(useSwipeUp: Boolean): Workspace {
         if (useSwipeUp) {
-            swipeUp();
+            swipeUp()
         } else {
-            executeShellCommand("wm dismiss-keyguard");
+            executeShellCommand("wm dismiss-keyguard")
         }
 
         lockScreenSelector.assertInvisible { "Lockscreen still visible after swiping up." }

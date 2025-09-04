@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 The Android Open Source Project
+ * Copyright (C) 2025 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,10 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package android.platform.systemui_tapl.ui
+package android.platform.systemui_tapl.ui.quicksettings
 
 import android.graphics.PointF
 import android.platform.helpers.ShadeUtils
+import android.platform.systemui_tapl.ui.QSHeader
+import android.platform.systemui_tapl.ui.UniversalMediaObject
+import android.platform.systemui_tapl.ui.UserSelectionPanel
 import android.platform.systemui_tapl.utils.DeviceUtils
 import android.platform.systemui_tapl.utils.DeviceUtils.sysuiResSelector
 import android.platform.systemui_tapl.utils.SETTINGS_PACKAGE
