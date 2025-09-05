@@ -16,7 +16,6 @@
 package android.support.test.launcherhelper;
 
 import android.graphics.Rect;
-import android.os.RemoteException;
 import android.os.SystemClock;
 import android.support.test.uiautomator.By;
 import android.support.test.uiautomator.BySelector;
@@ -242,16 +241,9 @@ public class CommonLauncherHelper {
             if (!mDevice.isScreenOn()) {
                 mDevice.wakeUp();
             }
-        } catch (RemoteException e) {
+            mDevice.executeShellCommand("wm dismiss-keyguard");
+        } catch (Exception e) {
             Log.e(LOG_TAG, "Failed to unlock the screen-off device.", e);
-        }
-
-        BySelector screenLock;
-        screenLock = KEYGUARD_ROOT_VIEW;
-
-        // Check for lock screen element
-        if (mDevice.hasObject(screenLock)) {
-            mDevice.pressMenu();
         }
     }
 }
