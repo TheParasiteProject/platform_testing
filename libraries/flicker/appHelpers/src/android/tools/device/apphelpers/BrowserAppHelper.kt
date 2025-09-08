@@ -208,6 +208,27 @@ constructor(
 
         return false
     }
+
+    /**
+     * Clicks share button in toolbar.
+     *
+     * This will trigger the app dialog when the share button is clicked.
+     */
+    fun clickShareButtonInToolbar() {
+        findObject(By.descContains(SHARE_BUTTON_DESC)).also { it.click() }
+        device.waitForIdle()
+    }
+
+    /**
+     * Clicks voice search button in search box.
+     *
+     * This will trigger the permissions dialog if microphone permissions are not yet granted.
+     */
+    fun clickVoiceButtonInSearchBox() {
+        findObject(By.res(packageName, VOICE_SEARCH_BUTTON_ID)).also { it.click() }
+        device.waitForIdle()
+    }
+
     private fun findObject(selector: BySelector): UiObject2 =
         uiDevice.wait(Until.findObject(selector), WAIT_TIME_IN_MILLISECONDS)
         ?: error("Can't find object $selector")
@@ -226,9 +247,18 @@ constructor(
         private const val MORE_BUTTON_ID = "more_button"
         private const val ACKNOWLEDGED_BUTTON_TEXT = "Got it"
         private const val ADD_TO_HOME_SCREEN_TEXT = "Add to Home screen"
+        private const val SHARE_BUTTON_DESC = "Share"
+        private const val VOICE_SEARCH_BUTTON_ID = "voice_search_button"
 
         private val WAIT_TIME_IN_MILLISECONDS = Duration.ofSeconds(3).toMillis()
         private const val MIN_WINDOW_WIDTH_FOR_TAB_TEARING_DP = 475
+
+        /**  Opens a specified web page in the Chrome browser. */
+        fun getSpecialBrowserIntent(intentString: String): Intent {
+            val intent = Intent(Intent.ACTION_VIEW, Uri.parse("http://$intentString"))
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            return intent
+        }
 
         private fun getBrowserIntent(): Intent {
             val intent = Intent(Intent.ACTION_VIEW, Uri.parse("http://"))
