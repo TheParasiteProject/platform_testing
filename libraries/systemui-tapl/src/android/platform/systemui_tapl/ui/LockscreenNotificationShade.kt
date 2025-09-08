@@ -16,6 +16,8 @@
 
 package android.platform.systemui_tapl.ui
 
+import android.platform.systemui_tapl.ui.quicksettings.QuickQuickSettings
+
 /** Shade visible from the lockscreen. Its construction is expected to fail if not visible. */
 class LockscreenNotificationShade internal constructor() :
     NotificationStack(fromLockscreen = true) {

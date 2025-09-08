@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package android.platform.systemui_tapl.ui
+package android.platform.systemui_tapl.ui.quicksettings
 
 import android.platform.uiautomatorhelpers.DeviceHelpers.assertInvisible
 import android.platform.uiautomatorhelpers.DeviceHelpers.assertVisible

@@ -1,0 +1,6 @@
+set noparent
+
+# Bug component: 78930
+
+include platform/frameworks/base:/packages/SystemUI/src/com/android/systemui/qs/OWNERS
+include platform/frameworks/base:/packages/SystemUI/TEST_OWNERS

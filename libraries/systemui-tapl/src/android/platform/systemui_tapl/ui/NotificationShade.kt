@@ -19,6 +19,8 @@ package android.platform.systemui_tapl.ui
 import android.hardware.display.DisplayManager
 import android.os.SystemClock
 import android.platform.helpers.ShadeUtils
+import android.platform.systemui_tapl.ui.quicksettings.QuickQuickSettings
+import android.platform.systemui_tapl.ui.quicksettings.QuickSettings
 import android.platform.systemui_tapl.utils.DeviceUtils.LONG_WAIT
 import android.platform.systemui_tapl.utils.DeviceUtils.settingsResSelector
 import android.platform.systemui_tapl.utils.DeviceUtils.sysuiResSelector

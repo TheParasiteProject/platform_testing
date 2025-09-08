@@ -27,6 +27,9 @@ import android.platform.systemui_tapl.controller.LockscreenController
 import android.platform.systemui_tapl.controller.NotificationIdentity
 import android.platform.systemui_tapl.ui.ExpandedBubbleStack.Companion.BUBBLE_EXPANDED_VIEW
 import android.platform.systemui_tapl.ui.NotificationShade.Companion.waitForShadeToClose
+import android.platform.systemui_tapl.ui.quicksettings.BrightnessSlider
+import android.platform.systemui_tapl.ui.quicksettings.PowerPanel
+import android.platform.systemui_tapl.ui.quicksettings.QuickSettings
 import android.platform.systemui_tapl.utils.DeviceUtils.LONG_WAIT
 import android.platform.systemui_tapl.utils.DeviceUtils.sysuiResSelector
 import android.platform.systemui_tapl.utils.LAUNCHER_PACKAGE
