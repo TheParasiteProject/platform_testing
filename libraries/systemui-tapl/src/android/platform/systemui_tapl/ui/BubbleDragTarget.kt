@@ -23,6 +23,7 @@ import android.platform.uiautomatorhelpers.DeviceHelpers.context
 import android.platform.uiautomatorhelpers.DeviceHelpers.uiDevice
 import android.platform.uiautomatorhelpers.DeviceHelpers.waitForNullableObj
 import android.platform.uiautomatorhelpers.PRECISE_GESTURE_INTERPOLATOR
+import android.platform.uiautomatorhelpers.WaitUtils.waitForValueToSettle
 import android.view.WindowInsets
 import android.view.WindowManager
 import java.time.Duration
@@ -67,6 +68,12 @@ internal interface BubbleDragTarget {
             // We will do a second swipe to actually dismiss.
             val dismissView = waitForNullableObj(DISMISS_VIEW)
             if (dismissView != null) {
+                waitForValueToSettle(
+                    description = "Wait for dismiss view to complete animation",
+                    minimumSettleTime = DISMISS_VIEW_SETTLE_TIME,
+                    timeout = DISMISS_VIEW_SETTLE_TIMEOUT,
+                    supplier = { dismissView.visibleCenter },
+                )
                 to(dismissView.visibleCenter, interpolator = PRECISE_GESTURE_INTERPOLATOR)
             }
         }
@@ -77,5 +84,10 @@ internal interface BubbleDragTarget {
         BetterSwipe.swipe(visibleCenter) {
             to(position, Duration.of(500, ChronoUnit.MILLIS), PRECISE_GESTURE_INTERPOLATOR)
         }
+    }
+
+    companion object {
+        private val DISMISS_VIEW_SETTLE_TIME: Duration = Duration.ofMillis(500)
+        private val DISMISS_VIEW_SETTLE_TIMEOUT: Duration = Duration.ofSeconds(2)
     }
 }
