@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2024 The Android Open Source Project
+ * Copyright (C) 2025 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,8 +14,13 @@
  * limitations under the License.
  */
 
-package android.platform.systemui_tapl.ui
+package android.platform.systemui_tapl.ui.quicksettings
 
+import android.platform.systemui_tapl.ui.AlertDialog
+import android.platform.systemui_tapl.ui.BluetoothDialog
+import android.platform.systemui_tapl.ui.HearingDevicesDialog
+import android.platform.systemui_tapl.ui.InternetDialog
+import android.platform.systemui_tapl.ui.ModesDialog
 import android.platform.systemui_tapl.utils.DeviceUtils.sysuiResSelector
 import android.platform.systemui_tapl.utils.SETTINGS_PACKAGE
 import android.platform.test.scenario.tapl_common.Gestures
@@ -99,7 +104,7 @@ sealed class QuickSettingsTileBase(val displayId: Int = DEFAULT_DISPLAY) {
     fun openHearingDevicesTile(): HearingDevicesDialog {
         clickWithoutAssertions()
 
-        return  HearingDevicesDialog(displayId)
+        return HearingDevicesDialog(displayId)
     }
 
     /** Clicks the Bluetooth tile and opens dialog. */

@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package android.platform.systemui_tapl.ui
+package android.platform.systemui_tapl.ui.quicksettings
 
 import android.platform.systemui_tapl.utils.DeviceUtils.sysuiResSelector
 import android.platform.uiautomatorhelpers.DeviceHelpers.assertInvisible

@@ -189,6 +189,18 @@ class ComponentNameMatcher(var component: ComponentName) : IComponentNameMatcher
                 "com.android.settings",
                 "com.android.settings.Settings\$NetworkDashboardActivity")
 
+        @JvmField
+        val SHARE_CHOOSER_ACTIVITY =
+            ComponentNameMatcher(
+                "com.android.intentresolver",
+                "com.android.intentresolver.ChooserActivityLauncher")
+
+        @JvmField
+        val PERMISSION_DIALOG_ACTIVITY =
+            ComponentNameMatcher(
+                "com.google.android.permissioncontroller",
+                "com.android.permissioncontroller.permission.ui.GrantPermissionsActivity")
+
         /**
          * Creates a component matcher from a window or layer name.
          *
