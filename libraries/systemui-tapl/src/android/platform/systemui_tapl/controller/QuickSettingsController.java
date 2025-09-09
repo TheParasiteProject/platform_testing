@@ -20,6 +20,10 @@ import static android.platform.uiautomatorhelpers.DeviceHelpers.getUiDevice;
 
 import static androidx.test.platform.app.InstrumentationRegistry.getInstrumentation;
 
+import static com.google.common.truth.Truth.assertThat;
+
+import static org.junit.Assert.assertEquals;
+
 import android.system.helpers.QuickSettingsHelper;
 
 import java.util.List;
@@ -57,6 +61,14 @@ public class QuickSettingsController {
         return mHelper.getCurrentTilesList();
     }
 
+    public void assertCurrentTilePosition(String tile, int position) {
+        assertEquals(tile, getCurrentTiles().get(position));
+    }
+
+    public void assertTileIsRemoved(String tile) {
+        assertThat(getCurrentTiles()).doesNotContain(tile);
+    }
+
     /**
      * Sets the list of tiles to a given list.
      *
@@ -64,5 +76,10 @@ public class QuickSettingsController {
      */
     public void setTiles(List<String> tiles) {
         mHelper.modifyQSTileList(tiles);
+    }
+
+    /** Restore the default large tiles set. */
+    public void restoreDefaultLargeTiles() {
+        mHelper.setQuickSettingsDefaultTiles();
     }
 }
