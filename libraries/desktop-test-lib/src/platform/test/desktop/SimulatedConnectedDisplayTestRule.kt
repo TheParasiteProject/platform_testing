@@ -110,7 +110,11 @@ class SimulatedConnectedDisplayTestRule(val initDisplayCount: Int = 0) : TestRul
                 }
 
             // Add the overlay displays
-            setOverlaysSettings(displaySettings)
+            Settings.Global.putString(
+                context.contentResolver,
+                Settings.Global.OVERLAY_DISPLAY_DEVICES,
+                displaySettings,
+            )
 
             awaitClose { displayManager.unregisterDisplayListener(listener) }
         }
@@ -127,7 +131,7 @@ class SimulatedConnectedDisplayTestRule(val initDisplayCount: Int = 0) : TestRul
             Settings.Secure.getInt(
                 context.contentResolver,
                 Settings.Secure.MIRROR_BUILT_IN_DISPLAY,
-                -1,
+                -1
             )
         if (mirroringState == 0) {
             // Only validate added displays in topology when mirroring is false
@@ -160,7 +164,6 @@ class SimulatedConnectedDisplayTestRule(val initDisplayCount: Int = 0) : TestRul
         val existingDisplays =
             displayManager.displays.filter { it.type == TYPE_OVERLAY }.map { it.displayId }
         if (existingDisplays.isEmpty()) {
-            clearOverlaysSettings()
             return@runBlocking
         }
 
@@ -183,7 +186,11 @@ class SimulatedConnectedDisplayTestRule(val initDisplayCount: Int = 0) : TestRul
             // Note: If we want to restore the original overlay display added before this test (and
             // its topology), it will be complicated as re-adding overlay display would lead to
             // different displayId and topology could not be restored easily.
-            clearOverlaysSettings()
+            Settings.Global.putString(
+                context.contentResolver,
+                Settings.Global.OVERLAY_DISPLAY_DEVICES,
+                null,
+            )
             awaitClose { displayManager.unregisterDisplayListener(listener) }
         }
 
@@ -197,20 +204,6 @@ class SimulatedConnectedDisplayTestRule(val initDisplayCount: Int = 0) : TestRul
 
         waitForTopologyUpdate(removedDisplays, /* expectPresent= */ false)
         addedDisplays = existingDisplays - removedDisplays
-    }
-
-    /** Clears the [Settings.Global] defining the display overlays in use. */
-    private fun clearOverlaysSettings() {
-        setOverlaysSettings(null)
-    }
-
-    /** Sets the [Settings.Global] defining the specifications for the display overlays. */
-    private fun setOverlaysSettings(overlays: String?) {
-        Settings.Global.putString(
-            context.contentResolver,
-            Settings.Global.OVERLAY_DISPLAY_DEVICES,
-            overlays,
-        )
     }
 
     private fun waitForTopologyUpdate(displayIds: List<Int>, expectPresent: Boolean) {
