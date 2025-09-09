@@ -24,6 +24,7 @@ import java.util.concurrent.locks.ReentrantLock
 import perfetto.protos.PerfettoConfig
 import perfetto.protos.PerfettoConfig.DataSourceConfig
 import perfetto.protos.PerfettoConfig.FtraceConfig
+import perfetto.protos.PerfettoConfig.PriorityBoostConfig
 import perfetto.protos.PerfettoConfig.ProcessStatsConfig
 import perfetto.protos.PerfettoConfig.SurfaceFlingerLayersConfig
 import perfetto.protos.PerfettoConfig.SurfaceFlingerTransactionsConfig
@@ -212,6 +213,12 @@ open class PerfettoTraceMonitor(val config: TraceConfig) : TraceMonitor() {
                     .addBuffers(
                         TraceConfig.BufferConfig.newBuilder()
                             .setSizeKb(TRACE_BUFFER_SIZE_KB)
+                            .build()
+                    )
+                    .setPriorityBoost(
+                        PriorityBoostConfig.newBuilder()
+                            .setPolicy(PriorityBoostConfig.BoostPolicy.POLICY_SCHED_FIFO)
+                            .setPriority(99)
                             .build()
                     )
 

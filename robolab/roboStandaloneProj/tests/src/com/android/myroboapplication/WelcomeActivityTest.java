@@ -18,8 +18,12 @@ package com.android.myroboapplication;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
+import static org.robolectric.Shadows.shadowOf;
 
+import android.app.Application;
 import android.content.Intent;
+
+import androidx.test.core.app.ApplicationProvider;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -27,7 +31,6 @@ import org.junit.runner.RunWith;
 import org.robolectric.Robolectric;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.android.controller.ActivityController;
-import org.robolectric.shadows.ShadowApplication;
 
 @RunWith(RobolectricTestRunner.class)
 public class WelcomeActivityTest {
@@ -47,7 +50,8 @@ public class WelcomeActivityTest {
         WelcomeActivity activity = controller.get();
         activity.findViewById(R.id.login).performClick();
         Intent expectedIntent = new Intent(activity, LoginActivity.class);
-        Intent actual = ShadowApplication.getInstance().getNextStartedActivity();
+        Application application = ApplicationProvider.getApplicationContext();
+        Intent actual = shadowOf(application).getNextStartedActivity();
         assertEquals(expectedIntent.getComponent(), actual.getComponent());
     }
 }
