@@ -799,4 +799,26 @@ public class MediaCenterHelperImpl extends AbstractStandardAppHelper implements 
         }
         mUiAutomation.adoptShellPermissionIdentity(permission);
     }
+
+    /** {@inheritDoc} */
+    @Override
+    public void navigateMediaAppCategories(String automotiveconfig) {
+        BySelector mediaAppCategSelector = getUiElementFromConfig(automotiveconfig);
+        UiObject2 mediaAppCategField = getSpectatioUiUtil().findUiObject(mediaAppCategSelector);
+
+        getSpectatioUiUtil()
+                .validateUiObject(
+                        mediaAppCategField, String.format("Media Category: %s", automotiveconfig));
+        getSpectatioUiUtil().clickAndWait(mediaAppCategField);
+        getSpectatioUiUtil().waitForIdle();
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    public boolean checkPlayingTrackFromMediaAppCategories(String automotiveconfig, String track) {
+        minimizeNowPlaying();
+        navigateMediaAppCategories(automotiveconfig);
+        selectMediaTrack(track);
+        return getMediaTrackName().equals(track);
+    }
 }
