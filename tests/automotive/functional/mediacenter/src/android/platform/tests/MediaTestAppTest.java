@@ -19,8 +19,10 @@ package android.platform.tests;
 import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertTrue;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
 
+import android.platform.helpers.AutomotiveConfigConstants;
 import android.platform.helpers.HelperAccessor;
 import android.platform.helpers.IAutoAppGridHelper;
 import android.platform.helpers.IAutoHomeHelper;
@@ -43,6 +45,8 @@ public class MediaTestAppTest {
     private static final String MEDIA_APP = "media-app";
     private static final String TEST_MEDIA_APP = "Test Media App";
     private static final String DEFAULT_SONG_NAME = "A normal 1H song";
+    private static final String ADVANCE_SONG_NAME = "Standard Custom Actions";
+    private static final String RABITHOLE_SONG_NAME = "A normal 15s song";
     private static final String LOG_TAG = MediaTestAppTest.class.getSimpleName();
 
     @ClassRule
@@ -163,5 +167,53 @@ public class MediaTestAppTest {
         sAutoHomeHelper.get().openMediaWidget();
         Log.i(LOG_TAG, "Assert: Media song is paused");
         assertTrue("Song is playing, it should be paused", sMediaCenterHelper.get().isPaused());
+    }
+
+    @Test
+    public void testMediaAppCategories() {
+
+        Log.i(LOG_TAG, "Assert: Media Song playing has changed according to Basic Category");
+        assertTrue(
+                "Media Song playing has not changed according to Basic Category",
+                sMediaCenterHelper
+                        .get()
+                        .checkPlayingTrackFromMediaAppCategories(
+                                AutomotiveConfigConstants.BASIC_SONGS_CATEGORY, mDefaultSongName));
+
+        Log.i(LOG_TAG, "Assert: Media Song playing has  changed according to Advance Category");
+        assertTrue(
+                "Media Song playing has not changed according to Advance Category",
+                sMediaCenterHelper
+                        .get()
+                        .checkPlayingTrackFromMediaAppCategories(
+                                AutomotiveConfigConstants.ADVANCED_CATEGORY, ADVANCE_SONG_NAME));
+
+        Log.i(LOG_TAG, "Assert: Media Song playing has changed according to RABBIT Category");
+        assertTrue(
+                "Media Song playing has not changed according to RABIT Category",
+                sMediaCenterHelper
+                        .get()
+                        .checkPlayingTrackFromMediaAppCategories(
+                                AutomotiveConfigConstants.RABBIT_HOLE_CATEGORY,
+                                RABITHOLE_SONG_NAME));
+
+        Log.i(LOG_TAG, "Act: Minimize playing song");
+        sMediaCenterHelper.get().minimizeNowPlaying();
+
+        Log.i(LOG_TAG, "Act: Select Media Category as Empty");
+        sMediaCenterHelper
+                .get()
+                .navigateMediaAppCategories(AutomotiveConfigConstants.EMPTY_CATEGORY);
+
+        Log.i(LOG_TAG, "Assert: Media Song playing has not changed for Empty Category");
+        assertEquals(
+                "Song playing has been changed for Empty category",
+                RABITHOLE_SONG_NAME,
+                sMediaCenterHelper.get().getMediaTrackName());
+
+        Log.i(LOG_TAG, "Act: Select Media Category back to Basic");
+        sMediaCenterHelper
+                .get()
+                .navigateMediaAppCategories(AutomotiveConfigConstants.BASIC_SONGS_CATEGORY);
     }
 }
