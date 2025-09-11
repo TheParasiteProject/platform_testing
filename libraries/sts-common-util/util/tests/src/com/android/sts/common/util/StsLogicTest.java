@@ -36,14 +36,20 @@ public class StsLogicTest extends BaseHostJUnit4Test {
     private static final long[] PLATFORM_BUG = {1_000_000_000L};
     private static final long[] KERNEL_BUG = {2_000_000_000L};
     private static final long[] MAINLINE_BUG = {3_000_000_000L};
+    private static final long[] MULTI_SPL_BUGS = {4_000_000_000L, 5_000_000_000L};
 
     static {
         new BusinessLogicSetStore()
                 .putSet(
                         "kernel_bugs",
                         Arrays.stream(KERNEL_BUG).mapToObj(Long::toString).toArray(String[]::new));
-        new BusinessLogicMapStore().putMap("security_bulletins", null);
-        new BusinessLogicMapStore().putMap("sts_modification_times", null);
+        new BusinessLogicMapStore()
+            .putMap(
+                "security_bulletins",
+                "#",
+                Long.toString(MULTI_SPL_BUGS[0]) + "#2022-03-01",
+                Long.toString(MULTI_SPL_BUGS[1]) + "#2022-02-01");
+        new BusinessLogicMapStore().putMap("sts_modification_times", "#");
         new BusinessLogicMapStore()
                 .putMap(
                         "bugid_mainline_modules",
@@ -165,6 +171,18 @@ public class StsLogicTest extends BaseHostJUnit4Test {
                 "shouldn't Mainline skip because this test is not a Mainline CVE.",
                 logic.shouldSkipMainline());
     }
+
+       @Test
+       public final void testGetTestEnforcingSplOrder() throws Exception {
+         StsLogic logic = new StsLogicMock().setCveBugIds(MULTI_SPL_BUGS);
+         LocalDate expectedSpl = SplUtils.localDateFromSplString("2022-03-01");
+         assertEquals(
+             "Should return the latest SPL when a test has multiple bug IDs with different"
+                 + " SPLs.",
+             expectedSpl,
+             logic.getTestEnforcingSpl());
+       }
+
 
     private static class StsLogicMock implements StsLogic {
 
