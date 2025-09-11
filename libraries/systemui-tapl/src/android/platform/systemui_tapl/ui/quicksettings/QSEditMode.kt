@@ -69,15 +69,19 @@ class QSEditMode(val displayId: Int = DEFAULT_DISPLAY) {
      */
     fun longPressAndDrag(source: QSEditTile, target: QSEditTile) {
         val targetUiObject = waitForObj(target.selector)
-        val startPoint = source.getClickTarget()
-        BetterSwipe.swipe(
-            startPoint,
-            targetUiObject.visibleCenter,
-            Duration.ofSeconds(1),
-            DecelerateInterpolator(),
-        ) {
+        BetterSwipe.swipe(source.getClickTarget()) {
             // Pause before the swipe to simulate a long press
-            to(end = startPoint, duration = Duration.ofMillis(300))
+            pause()
+
+            // Drag to the target's center
+            to(
+                end = targetUiObject.visibleCenter,
+                duration = Duration.ofMillis(1000),
+                interpolator = DecelerateInterpolator(),
+            )
+
+            // Pause at the end of the gesture before releasing to make sure the list is updated
+            pause()
         }
     }
 

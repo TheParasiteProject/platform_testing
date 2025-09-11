@@ -19,11 +19,15 @@ package android.platform.systemui_tapl.ui.quicksettings
 import android.graphics.Point
 import android.platform.systemui_tapl.utils.DeviceUtils.sysuiResSelector
 import android.platform.uiautomatorhelpers.BetterSwipe
+import android.platform.uiautomatorhelpers.DeviceHelpers.assertInvisible
 import android.platform.uiautomatorhelpers.DeviceHelpers.assertVisible
+import android.platform.uiautomatorhelpers.DeviceHelpers.doubleTapAt
+import android.platform.uiautomatorhelpers.DeviceHelpers.uiDevice
 import android.platform.uiautomatorhelpers.DeviceHelpers.waitForObj
 import android.view.animation.DecelerateInterpolator
 import androidx.test.uiautomator.By
 import androidx.test.uiautomator.BySelector
+import kotlinx.coroutines.android.awaitFrame
 
 class QSEditTile(val tile: QSEditTileSpec, val format: Format, val selected: Boolean = false) {
 
@@ -54,6 +58,11 @@ class QSEditTile(val tile: QSEditTileSpec, val format: Format, val selected: Boo
         selector.assertVisible()
     }
 
+    /** Asserts that the tile is currently invisible. */
+    fun assertInvisible() {
+        selector.assertInvisible()
+    }
+
     /**
      * Clicks on the tile.
      *
@@ -72,11 +81,8 @@ class QSEditTile(val tile: QSEditTileSpec, val format: Format, val selected: Boo
     fun doubleClick() {
         check(format != Format.AVAILABLE) { "Double click not supported for available tiles" }
 
-        waitForObj(selector).apply {
-            val centerLeft = Point(visibleBounds.left, visibleCenter.y)
-            click(centerLeft)
-            click(centerLeft)
-        }
+        val target = getClickTarget()
+        uiDevice.doubleTapAt(target.x, target.y)
     }
 
     /** Clicks on the tile's badge, whether it's selected or not. */
