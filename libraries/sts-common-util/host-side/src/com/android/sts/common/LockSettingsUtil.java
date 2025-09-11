@@ -28,6 +28,7 @@ import java.util.Locale;
 /** Util to manage lock settings */
 public class LockSettingsUtil {
     ITestDevice mDevice = null;
+    int mUserId = -1;
 
     public static final String DEFAULT_LOCKSCREEN_CODE = "1234";
     public static final long DEFAULT_TIMEOUT_MS = 10_000L;
@@ -39,12 +40,27 @@ public class LockSettingsUtil {
      * @param device the {@link ITestDevice} test device.
      * @throws IllegalArgumentException when {@code context} is null.
      */
-    public LockSettingsUtil(ITestDevice device) throws IllegalArgumentException {
+    public LockSettingsUtil(ITestDevice device)
+            throws IllegalArgumentException, DeviceNotAvailableException {
+        // Overloaded constructor with default userId = -1
+        this(device, -1);
+    }
+
+    /**
+     * Create an instance of LockSettingsUtil.
+     *
+     * @param device the {@link ITestDevice} test device.
+     * @param userId the {@link int} the user id
+     * @throws IllegalArgumentException when {@code context} is null.
+     */
+    public LockSettingsUtil(ITestDevice device, int userId)
+            throws IllegalArgumentException, DeviceNotAvailableException {
         // Device should not be null
         if (device == null) {
             throw new IllegalArgumentException("Device should not be null");
         }
         mDevice = device;
+        mUserId = (userId == -1) ? mDevice.getCurrentUser() : userId;
     }
 
     /** Different options for setting the lock screen */
@@ -144,18 +160,20 @@ public class LockSettingsUtil {
         // Enable the lock using the adb shell command corresponding to the lock type
         switch (lockScreenType) {
             case PIN:
-                mDevice.executeShellV2Command(format("locksettings set-pin %s", lockScreenCode));
+                mDevice.executeShellV2Command(
+                        format("locksettings set-pin --user %d %s", mUserId, lockScreenCode));
                 break;
             case PASSWORD:
                 mDevice.executeShellV2Command(
-                        format("locksettings set-password %s", lockScreenCode));
+                        format("locksettings set-password --user %d %s", mUserId, lockScreenCode));
                 break;
             case PATTERN:
                 mDevice.executeShellV2Command(
-                        format("locksettings set-pattern %s", lockScreenCode));
+                        format("locksettings set-pattern --user %d %s", mUserId, lockScreenCode));
                 break;
             case SWIPE:
-                mDevice.executeShellV2Command("locksettings set-disabled false");
+                mDevice.executeShellV2Command(
+                        format("locksettings set-disabled --user %d false", mUserId));
                 break;
             default:
                 throw new IllegalArgumentException(
@@ -166,7 +184,8 @@ public class LockSettingsUtil {
         // the lock to be enabled
         if (lockScreenType == LockScreenType.SWIPE) {
             CommandResult commandResult =
-                    mDevice.executeShellV2Command("locksettings get-disabled");
+                    mDevice.executeShellV2Command(
+                            format("locksettings get-disabled --user %d", mUserId));
             String disabled = commandResult.getStdout().trim();
             if (!disabled.equals("false")) {
                 throw new IllegalStateException("Failed to enable the swipe lockscreen");
@@ -177,7 +196,9 @@ public class LockSettingsUtil {
             while (true) {
                 checkKeyguardSecure =
                         mDevice.executeShellV2Command(
-                                "locksettings verify --old " + lockScreenCode);
+                                format(
+                                        "locksettings verify --old %s --user %d",
+                                        lockScreenCode, mUserId));
                 if (checkKeyguardSecure
                         .getStdout()
                         .toLowerCase(Locale.getDefault())
@@ -203,10 +224,13 @@ public class LockSettingsUtil {
             public void close() throws DeviceNotAvailableException {
                 // Clear the lock screen code
                 if (lockScreenType == LockScreenType.SWIPE) {
-                    mDevice.executeShellV2Command("locksettings set-disabled true");
+                    mDevice.executeShellV2Command(
+                            format("locksettings set-disabled --user %d true", mUserId));
                 } else {
                     mDevice.executeShellV2Command(
-                            format("locksettings clear --old %s", lockScreenCode));
+                            format(
+                                    "locksettings clear --old %s --user %d",
+                                    lockScreenCode, mUserId));
                 }
             }
         };
