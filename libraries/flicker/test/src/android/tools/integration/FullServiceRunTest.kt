@@ -45,6 +45,7 @@ import androidx.test.platform.app.InstrumentationRegistry
 import com.google.common.truth.Truth
 import org.junit.After
 import org.junit.Before
+import org.junit.ClassRule
 import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.TestRule
@@ -70,6 +71,7 @@ class FullServiceRunTest {
             @Throws(Throwable::class)
             override fun evaluate() {
                 functionalTestRuleCalled = true
+                callOrder.add("myRule")
                 base.evaluate()
             }
         }
@@ -82,6 +84,7 @@ class FullServiceRunTest {
             @Throws(Throwable::class)
             override fun evaluate() {
                 fieldTestRuleCalled = true
+                callOrder.add("cleanUp")
                 base.evaluate()
             }
         }
@@ -101,6 +104,10 @@ class FullServiceRunTest {
         Truth.assertWithMessage("Field test rule should have been called")
             .that(fieldTestRuleCalled)
             .isTrue()
+        Truth.assertWithMessage("Class rule should have been called").that(classRuleCalled).isTrue()
+        Truth.assertWithMessage("Class rule should be called before other rules")
+            .that(callOrder.indexOf("classRule"))
+            .isEqualTo(0)
         testApp.launchViaIntent(wmHelper)
     }
 
@@ -112,6 +119,21 @@ class FullServiceRunTest {
     companion object {
         private var functionalTestRuleCalled = false
         private var fieldTestRuleCalled = false
+        private var classRuleCalled = false
+        private val callOrder = mutableListOf<String>()
+
+        @JvmField
+        @ClassRule
+        val CLASS_RULE = TestRule { base, _ ->
+            object : Statement() {
+                @Throws(Throwable::class)
+                override fun evaluate() {
+                    classRuleCalled = true
+                    callOrder.add("classRule")
+                    base.evaluate()
+                }
+            }
+        }
 
         @JvmStatic
         @FlickerConfigProvider
