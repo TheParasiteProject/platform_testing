@@ -37,6 +37,7 @@ import androidx.annotation.VisibleForTesting
 import androidx.test.uiautomator.By
 import androidx.test.uiautomator.BySelector
 import androidx.test.uiautomator.Configurator
+import androidx.test.uiautomator.StaleObjectException
 import androidx.test.uiautomator.UiDevice
 import androidx.test.uiautomator.Until
 import org.junit.Assert
@@ -137,6 +138,20 @@ fun UiDevice.openQuickstep(wmHelper: WindowManagerStateHelper) {
         .withStatusBarVisible()
         .withAppTransitionIdle()
         .waitForAndVerify()
+}
+
+fun <T> retryIfStaleObject(times: Int = 3, block: () -> T): T {
+    var lastException: StaleObjectException? = null
+    repeat(times) { attempt ->
+        try {
+            return block()
+        } catch (e: StaleObjectException) {
+            Log.w("RetryHelper", "Caught StaleObjectException on attempt ${attempt + 1}")
+            lastException = e
+            Thread.sleep(500)
+        }
+    }
+    throw lastException ?: IllegalStateException("Retry failed but no exception was caught.")
 }
 
 private fun getLauncherOverviewSelector(device: UiDevice): BySelector {

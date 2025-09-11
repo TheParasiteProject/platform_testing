@@ -70,6 +70,10 @@ constructor(val trace: LayersTrace, override val reader: Reader? = null) :
     /** {@inheritDoc} */
     override fun then(): LayersTraceSubject = apply { super.then() }
 
+    override fun skipUntilFirstAssertion(): LayersTraceSubject = apply {
+        super.skipUntilFirstAssertion()
+    }
+
     /** {@inheritDoc} */
     override fun isEmpty(): LayersTraceSubject = apply {
         check { "Trace is empty" }.that(trace.entries.isEmpty()).isEqual(true)

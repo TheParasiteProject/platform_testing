@@ -39,6 +39,7 @@ import com.google.common.truth.Truth
 import java.lang.reflect.Method
 import org.junit.After
 import org.junit.Before
+import org.junit.ClassRule
 import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.TestRule
@@ -92,6 +93,23 @@ class FlickerServiceDecorator(
         return collector.result
     }
 
+    private fun getClassRules(): List<TestRule> {
+        val collector = RuleCollector<TestRule>()
+        testClass.collectAnnotatedMethodValues<TestRule>(
+            null,
+            ClassRule::class.java,
+            TestRule::class.java,
+            collector,
+        )
+        testClass.collectAnnotatedFieldValues<TestRule>(
+            null,
+            ClassRule::class.java,
+            TestRule::class.java,
+            collector,
+        )
+        return collector.result
+    }
+
     class RuleCollector<T> internal constructor() : MemberValueConsumer<T> {
         val result: MutableList<T> = ArrayList()
 
@@ -107,9 +125,13 @@ class FlickerServiceDecorator(
         val testMethods = innerMethods.toMutableList()
 
         val testRules = getTestRules()
+        val classRules = getClassRules()
 
         val ruleContainer = RuleContainer()
         for (rule in testRules) {
+            ruleContainer.add(rule)
+        }
+        for (rule in classRules) {
             ruleContainer.add(rule)
         }
 
