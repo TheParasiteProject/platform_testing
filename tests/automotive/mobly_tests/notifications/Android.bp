@@ -37,11 +37,6 @@ python_test_host {
         ":PhoneSnippet",
         "bt_notifications_config.yaml",
     ],
-    version: {
-        py3: {
-            embedded_launcher: true,
-        },
-    },
 }
 
 python_test_host {
@@ -65,11 +60,6 @@ python_test_host {
         ":PhoneSnippet",
         "bt_notifications_config.yaml",
     ],
-    version: {
-        py3: {
-            embedded_launcher: true,
-        },
-    },
 }
 
 python_test_host {
@@ -93,11 +83,6 @@ python_test_host {
         ":PhoneSnippet",
         "bt_notifications_config.yaml",
     ],
-    version: {
-        py3: {
-            embedded_launcher: true,
-        },
-    },
 }
 
 python_test_host {
@@ -121,11 +106,6 @@ python_test_host {
         ":PhoneSnippet",
         "bt_notifications_config.yaml",
     ],
-    version: {
-        py3: {
-            embedded_launcher: true,
-        },
-    },
 }
 
 python_test_host {
@@ -149,11 +129,6 @@ python_test_host {
         ":PhoneSnippet",
         "bt_notifications_config.yaml",
     ],
-    version: {
-        py3: {
-            embedded_launcher: true,
-        },
-    },
 }
 
 python_test_host {
@@ -177,11 +152,6 @@ python_test_host {
         ":PhoneSnippet",
         "bt_notifications_config.yaml",
     ],
-    version: {
-        py3: {
-            embedded_launcher: true,
-        },
-    },
 }
 
 python_test_host {
@@ -205,11 +175,6 @@ python_test_host {
         ":PhoneSnippet",
         "bt_notifications_config.yaml",
     ],
-    version: {
-        py3: {
-            embedded_launcher: true,
-        },
-    },
 }
 
 python_test_host {
@@ -233,9 +198,4 @@ python_test_host {
         ":PhoneSnippet",
         "bt_notifications_config.yaml",
     ],
-    version: {
-        py3: {
-            embedded_launcher: true,
-        },
-    },
 }
