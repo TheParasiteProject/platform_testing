@@ -161,12 +161,12 @@ public interface StsLogic {
         return platformSpl;
     }
 
-    default LocalDate getMinTestSpl() {
+    default LocalDate getTestEnforcingSpl() {
         Map<String, String> map = BusinessLogicMapStore.getMap("security_bulletins");
         if (map == null) {
             throw new IllegalArgumentException("Could not find the security bulletin map");
         }
-        LocalDate minSpl = null;
+        LocalDate maxSpl = null;
         for (long cveBugId : getCveBugIds()) {
             String splString = map.get(Long.toString(cveBugId));
             if (splString == null) {
@@ -179,13 +179,13 @@ public interface StsLogic {
                 continue;
             }
             LocalDate spl = SplUtils.localDateFromSplString(splString);
-            if (minSpl == null) {
-                minSpl = spl;
-            } else if (spl.isBefore(minSpl)) {
-                minSpl = spl;
+            if (maxSpl == null) {
+                maxSpl = spl;
+            } else if (spl.isAfter(maxSpl)) {
+                maxSpl = spl;
             }
         }
-        return minSpl;
+        return maxSpl;
     }
 
     default LocalDate getMinModificationDate() {
@@ -242,13 +242,13 @@ public interface StsLogic {
             return false;
         }
 
-        LocalDate minTestSpl = getMinTestSpl();
-        if (minTestSpl == null) {
+        LocalDate maxTestSpl = getTestEnforcingSpl();
+        if (maxTestSpl == null) {
             // could not get the test spl - run the test
             logWarn(LOG_TAG, "could not get the test SPL");
             return false;
         }
-        if (minTestSpl.isAfter(incrementalCutoffSpl)) {
+        if (maxTestSpl.isAfter(incrementalCutoffSpl)) {
             logDebug(LOG_TAG, "the test has a recent SPL");
             return false;
         }
@@ -264,36 +264,36 @@ public interface StsLogic {
             return false;
         }
 
-        LocalDate minTestSpl = getMinTestSpl();
+        LocalDate maxTestSpl = getTestEnforcingSpl();
         if (!isBugSplDataKnownMissing()) {
             LocalDate releaseBulletinSpl = getReleaseBulletinSpl();
             if (releaseBulletinSpl != null) {
                 // this is a QA environment
 
                 // assert that the test has a known SPL when we expect the data to be fresh
-                assertNotNull("Unknown SPL for new CVE", minTestSpl);
+                assertNotNull("Unknown SPL for new CVE", maxTestSpl);
 
                 // set the days to be the same so we only compare year-month
-                releaseBulletinSpl = releaseBulletinSpl.withDayOfMonth(minTestSpl.getDayOfMonth());
+                releaseBulletinSpl = releaseBulletinSpl.withDayOfMonth(maxTestSpl.getDayOfMonth());
                 // the test SPL can't be equal to or after the release bulletin SPL
                 assertFalse(
-                        "Newer SPL than release bulletin", releaseBulletinSpl.isBefore(minTestSpl));
+                        "Newer SPL than release bulletin", releaseBulletinSpl.isBefore(maxTestSpl));
             } else {
                 // we are in a live environment; don't run tests that have their SPL deferred
-                if (minTestSpl == null) {
+                if (maxTestSpl == null) {
                     // can't find the test SPL for this ASB test; skip
                     return true;
                 }
             }
         }
-        if (minTestSpl == null) {
+        if (maxTestSpl == null) {
             // no SPL for this test; run normally
             return false;
         }
 
         // skip if the test is newer than the device SPL
         LocalDate deviceSpl = getDeviceSpl();
-        return minTestSpl.isAfter(deviceSpl);
+        return maxTestSpl.isAfter(deviceSpl);
     }
 
     default boolean shouldSkipMainline() {

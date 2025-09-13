@@ -866,3 +866,16 @@ test_package {
         dest: "continuous_instrumentation_metric_tests-FILE_NAME_TAG_PLACEHOLDER.zip",
     },
 }
+
+test_package {
+    name: "cw_continuous_native_tests",
+    tests: [
+        "PermissionUtils",
+    ],
+
+    dist: {
+        targets: ["cw_continuous_native_tests"],
+        prepend_artifact_with_product: true,
+        dest: "cw_continuous_native_tests-FILE_NAME_TAG_PLACEHOLDER.zip",
+    },
+}
