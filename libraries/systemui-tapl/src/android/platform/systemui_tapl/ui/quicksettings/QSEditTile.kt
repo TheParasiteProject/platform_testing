@@ -27,7 +27,6 @@ import android.platform.uiautomatorhelpers.DeviceHelpers.waitForObj
 import android.view.animation.DecelerateInterpolator
 import androidx.test.uiautomator.By
 import androidx.test.uiautomator.BySelector
-import kotlinx.coroutines.android.awaitFrame
 
 class QSEditTile(val tile: QSEditTileSpec, val format: Format, val selected: Boolean = false) {
 
@@ -124,7 +123,8 @@ class QSEditTile(val tile: QSEditTileSpec, val format: Format, val selected: Boo
      */
     fun getClickTarget(): Point {
         with(waitForObj(selector)) {
-            return Point(visibleBounds.left, visibleCenter.y)
+            val quarterRight = visibleBounds.left + visibleBounds.width() * .25f
+            return Point(quarterRight.toInt(), visibleCenter.y)
         }
     }
 
